@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FmStudios - Minecraft Modpacks</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3rem 0;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #888888;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        .modpack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 5rem;
+        }
+
+        .modpack-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modpack-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .modpack-card:hover::before {
+            left: 100%;
+        }
+
+        .modpack-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modpack-logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .modpack-card:hover .modpack-logo {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .modpack-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.85) translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 300;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .screenshots-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .screenshot {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .info-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .info-section p {
+            color: #cccccc;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .info-label {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #333333 0%, #555555 100%);
+            color: #ffffff;
+            border: none;
+            padding: 1.25rem 2.5rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.01em;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(135deg, #555555 0%, #777777 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+        }
+
+        /* Lightbox Styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            animation: lightboxZoomIn 0.3s ease;
+        }
+
+        @keyframes lightboxZoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #888888;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .modpack-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .modal-content {
+                padding: 2rem;
+                max-width: 95%;
+            }
+            
+            .modal-title {
+                font-size: 1.75rem;
+            }
+            
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 2rem 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .modpack-card {
+                padding: 1.5rem;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FmStudios</h1>
+            <p>Minecraft Modpack Collection</p>
+        </div>
+
+        <div class="modpack-grid" id="modpackGrid">
+            <!-- Modpacks werden hier dynamisch eingefügt -->
+        </div>
+
+        <div class="footer">
+            © 2025 FmStudios
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div class="screenshots-section">
+                <h3 class="section-title">Screenshots</h3>
+                <div class="screenshots-grid" id="screenshotsGrid">
+                    <!-- Screenshots werden hier eingefügt -->
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h3 class="section-title">Modpack Information</h3>
+                <div id="modpackInfo">
+                    <!-- Modpack Info wird hier eingefügt -->
+                </div>
+            </div>
+            
+            <a href="#" class="download-btn" id="downloadBtn" target="_blank">Download Modpack</a>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <img class="lightbox-image" id="lightboxImage" src="" alt="Screenshot">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // Beispiel-Daten für Modpacks (hier kannst du deine eigenen Daten einfügen)
+        const modpacks = [
+            {
+                name: "Create F&M 3",
+                logo: "https://media.forgecdn.net/avatars/thumbnails/1226/511/64/64/638804151671337374.png",
+                screenshots: [
+                    "https://media.forgecdn.net/attachments/1116/125/2025-03-04_21-22-27-png.png",
+                    "https://media.forgecdn.net/attachments/1143/130/2025-03-18_17-46-55-png.png"
+                ],
+                description: "Ein technologieorientiertes Modpack mit fortschrittlichen Maschinen, komplexer Automatisierung und innovativen Energiesystemen. Perfekt für Spieler, die gerne komplexe Fabriken bauen und technische Herausforderungen meistern möchten.",
+                version: "1.19.2",
+                features: [
+                    "Thermal Expansion",
+                    "Applied Energistics 2",
+                    "Industrial Foregoing",
+                    "Mekanism",
+                    "Refined Storage",
+                    "Immersive Engineering"
+                ],
+                downloadUrl: "https://example.com/download/tech-adventures"
+            },
+            {
+                name: "Magic & Mystery",
+                logo: "https://via.placeholder.com/90x90/444444/ffffff?text=MM",
+                screenshots: [
+                    "https://via.placeholder.com/800x600/333333/ffffff?text=Magic+Screenshot+1",
+                    "https://via.placeholder.com/800x600/444444/ffffff?text=Magic+Screenshot+2",
+                    "https://via.placeholder.com/800x600/555555/ffffff?text=Magic+Screenshot+3",
+                    "https://via.placeholder.com/800x600/666666/ffffff?text=Magic+Screenshot+4"
+                ],
+                description: "Tauche ein in eine Welt voller Magie, Zaubersprüche und mysteriöser Kreaturen. Dieses Modpack bietet eine völlig neue Spielerfahrung mit mächtigen Zaubersystemen und geheimnisvollen Dimensionen zum Erkunden.",
+                version: "1.18.2",
+                features: [
+                    "Thaumcraft",
+                    "Botania",
+                    "Astral Sorcery",
+                    "Blood Magic",
+                    "Ars Nouveau",
+                    "Occultism"
+                ],
+                downloadUrl: "https://example.com/download/magic-mystery"
+            },
+            {
+                name: "Survival Plus",
+                logo: "https://via.placeholder.com/90x90/555555/ffffff?text=SP",
+                screenshots: [
+                    "https://via.placeholder.com/800x600/222222/ffffff?text=Survival+Screenshot+1",
+                    "https://via.placeholder.com/800x600/333333/ffffff?text=Survival+Screenshot+2",
+                    "https://via.placeholder.com/800x600/444444/ffffff?text=Survival+Screenshot+3"
+                ],
+                description: "Ein verbessertes Survival-Erlebnis mit realistischeren Herausforderungen, erweiterten Kampfmechaniken und einem ausgewogenen Fortschrittssystem. Ideal für Spieler, die das klassische Minecraft-Gefühl mit modernen Verbesserungen erleben möchten.",
+                version: "1.20.1",
+                features: [
+                    "Harder Wildlife",
+                    "Seasons & Weather",
+                    "Better Dungeons",
+                    "Epic Fight Mod",
+                    "Farmer's Delight",
+                    "Create Mod"
+                ],
+                downloadUrl: "https://example.com/download/survival-plus"
+            },
+            {
+                name: "Space Exploration",
+                logo: "https://via.placeholder.com/90x90/666666/ffffff?text=SE",
+                screenshots: [
+                    "https://via.placeholder.com/800x600/111111/ffffff?text=Space+Screenshot+1",
+                    "https://via.placeholder.com/800x600/222222/ffffff?text=Space+Screenshot+2",
+                    "https://via.placeholder.com/800x600/333333/ffffff?text=Space+Screenshot+3",
+                    "https://via.placeholder.com/800x600/444444/ffffff?text=Space+Screenshot+4"
+                ],
+                description: "Erkunde das Weltall, baue Raumstationen und kolonisiere fremde Planeten. Dieses Modpack erweitert Minecraft um eine komplette Weltraum-Dimension mit realistischer Physik und interplanetaren Reisen.",
+                version: "1.19.4",
+                features: [
+                    "Galacticraft",
+                    "Ad Astra",
+                    "Applied Energistics",
+                    "Tech Reborn",
+                    "Space Dimensions",
+                    "Advanced Rocketry"
+                ],
+                downloadUrl: "https://example.com/download/space-exploration"
+            }
+        ];
+
+        // Modpacks in der Galerie anzeigen
+        function displayModpacks() {
+            const grid = document.getElementById('modpackGrid');
+            grid.innerHTML = '';
+
+            modpacks.forEach((modpack, index) => {
+                const card = document.createElement('div');
+                card.className = 'modpack-card';
+                card.onclick = () => openModal(index);
+                
+                card.innerHTML = `
+                    <img src="${modpack.logo}" alt="${modpack.name}" class="modpack-logo" loading="lazy">
+                    <h3 class="modpack-name">${modpack.name}</h3>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Modal öffnen
+        function openModal(index) {
+            const modpack = modpacks[index];
+            const modal = document.getElementById('modal');
+            
+            // Titel setzen
+            document.getElementById('modalTitle').textContent = modpack.name;
+            
+            // Screenshots anzeigen
+            const screenshotsGrid = document.getElementById('screenshotsGrid');
+            screenshotsGrid.innerHTML = '';
+            modpack.screenshots.forEach((screenshot, imgIndex) => {
+                const img = document.createElement('img');
+                img.src = screenshot;
+                img.alt = `${modpack.name} Screenshot ${imgIndex + 1}`;
+                img.className = 'screenshot';
+                img.loading = 'lazy';
+                img.onclick = () => openLightbox(screenshot);
+                screenshotsGrid.appendChild(img);
+            });
+            
+            // Modpack-Info anzeigen
+            const infoDiv = document.getElementById('modpackInfo');
+            infoDiv.innerHTML = `
+                <div class="info-label">Beschreibung:</div>
+                <p>${modpack.description}</p>
+                
+                <div class="info-label">Empfohlene Minecraft-Version:</div>
+                <p>${modpack.version}</p>
+                
+                <div class="info-label">Wichtige Features:</div>
+                <div class="features-list">
+                    ${modpack.features.map(feature => `<div class="feature-item">${feature}</div>`).join('')}
+                </div>
+            `;
+            
+            // Download-Button setzen
+            document.getElementById('downloadBtn').href = modpack.downloadUrl;
+            
+            // Modal anzeigen
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Modal schließen
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Lightbox öffnen
+        function openLightbox(imageSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            
+            lightboxImage.src = imageSrc;
+            lightbox.classList.add('active');
+        }
+
+        // Lightbox schließen
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        }
+
+        // Event Listeners
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('lightbox').classList.contains('active')) {
+                    closeLightbox();
+                } else if (document.getElementById('modal').classList.contains('active')) {
+                    closeModal();
+                }
+            }
+        });
+
+        // Modpacks beim Laden der Seite anzeigen
+        window.addEventListener('load', displayModpacks);
+    </script>
+</body>
+</html>
