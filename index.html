@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,8 +27,8 @@
 
         .header {
             text-align: center;
-            margin-bottom: 4rem;
-            padding: 3rem 0;
+            margin-bottom: 3rem;
+            padding: 3rem 0 2rem 0;
         }
 
         .header h1 {
@@ -47,6 +47,71 @@
             color: #888888;
             font-weight: 400;
             letter-spacing: 0.01em;
+            margin-bottom: 2rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .social-btn.discord:hover {
+            background: rgba(114, 137, 218, 0.2);
+            border-color: rgba(114, 137, 218, 0.4);
+        }
+
+        .donation-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .donation-btn {
+            background: linear-gradient(135deg, #0070ba 0%, #003087 100%);
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(0, 112, 186, 0.3);
+            letter-spacing: 0.01em;
+        }
+
+        .donation-btn:hover {
+            background: linear-gradient(135deg, #0074cc 0%, #003d9a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 112, 186, 0.4);
         }
 
         .modpack-grid {
@@ -376,6 +441,26 @@
                 font-size: 2.5rem;
             }
             
+            .social-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+            
+            .social-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.3rem;
+            }
+            
+            .donation-section {
+                margin-bottom: 1.5rem;
+            }
+            
+            .donation-btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
             .modpack-grid {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
@@ -412,6 +497,22 @@
                 font-size: 2rem;
             }
             
+            .social-links {
+                justify-content: center;
+                gap: 0.75rem;
+            }
+            
+            .social-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .donation-btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.875rem;
+            }
+            
             .modpack-card {
                 padding: 1.5rem;
             }
@@ -420,17 +521,54 @@
                 padding: 1.5rem;
             }
         }
+
+        /* Social Media Icons */
+        .social-btn {
+            background-image: none;
+            background-size: 24px 24px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .icon-twitter {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E");
+        }
+        
+        .icon-youtube {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'/%3E%3C/svg%3E");
+        }
+        
+        .icon-bluesky {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.81 9.498 7.823 4.308 4.557-5.073 1.082-6.498-2.83-7.078-.139-.016-.277-.034-.415-.056.14.017.279.036.415.056 2.67.296 5.568-.628 6.383-3.364.246-.829.624-5.789.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.747 13.087 8.686 12 10.8z'/%3E%3C/svg%3E");
+        }
+
+        .icon-discord {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z'/%3E%3C/svg%3E");
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>FmStudios</h1>
-            <p>Minecraft Modpack Collection</p>
+            <p>Minecraft Projects</p>
+            
+            <div class="social-links">
+                <a href="https://x.com/fmstudiosmc" class="social-btn icon-twitter" target="_blank" title="Follow on X/Twitter"></a>
+                <a href="https://www.youtube.com/@fm-studios-mc" class="social-btn icon-youtube" target="_blank" title="Subscribe on YouTube"></a>
+                <a href="https://bsky.app/profile/fmstudios.bsky.social" class="social-btn icon-bluesky" target="_blank" title="Follow on Bluesky"></a>
+                <a href="https://discord.gg/x9jsed8qyR" class="social-btn icon-discord discord" target="_blank" title="Join our Discord Server"></a>
+            </div>
+
+            <div class="donation-section">
+                <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" class="donation-btn" target="_blank" title="Support us on PayPal">
+                    💙 Support Us on PayPal
+                </a>
+            </div>
         </div>
 
         <div class="modpack-grid" id="modpackGrid">
-            <!-- Modpacks werden hier dynamisch eingefügt -->
+            <!-- Modpacks will be dynamically inserted here -->
         </div>
 
         <div class="footer">
@@ -449,14 +587,14 @@
             <div class="screenshots-section">
                 <h3 class="section-title">Screenshots</h3>
                 <div class="screenshots-grid" id="screenshotsGrid">
-                    <!-- Screenshots werden hier eingefügt -->
+                    <!-- Screenshots will be inserted here -->
                 </div>
             </div>
             
             <div class="info-section">
                 <h3 class="section-title">Modpack Information</h3>
                 <div id="modpackInfo">
-                    <!-- Modpack Info wird hier eingefügt -->
+                    <!-- Modpack info will be inserted here -->
                 </div>
             </div>
             
@@ -473,92 +611,35 @@
     </div>
 
     <script>
-        // Beispiel-Daten für Modpacks (hier kannst du deine eigenen Daten einfügen)
+        // Sample modpack data (replace with your actual data)
         const modpacks = [
             {
                 name: "Create F&M 3",
-                logo: "https://media.forgecdn.net/avatars/thumbnails/1226/511/64/64/638804151671337374.png",
+                logo: "https://media.forgecdn.net/attachments/1203/147/fm3logonew-png.png",
                 screenshots: [
-                    "https://media.forgecdn.net/attachments/1116/125/2025-03-04_21-22-27-png.png",
-                    "https://media.forgecdn.net/attachments/1143/130/2025-03-18_17-46-55-png.png"
+                    "https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png",
+                    "https://media.forgecdn.net/attachments/1124/55/2025-03-12_16-39-32-png.png",
+                    "https://media.forgecdn.net/attachments/1143/129/2025-03-18_17-47-27-png.png",
+                    "https://media.forgecdn.net/attachments/1112/169/2025-03-01_11-45-57-1-png.png"
                 ],
-                description: "Ein technologieorientiertes Modpack mit fortschrittlichen Maschinen, komplexer Automatisierung und innovativen Energiesystemen. Perfekt für Spieler, die gerne komplexe Fabriken bauen und technische Herausforderungen meistern möchten.",
-                version: "1.19.2",
+                description: "Create F&M 3 is the latest evolution of the Create: F&M series, bringing unparalleled mechanical automation and engineering creativity to Minecraft. Built around the Create mod and its powerful add-ons, this modpack lets you design intricate contraptions, optimize production lines, and build sprawling industrial systems with endless possibilities.",
+                version: "1.21.1",
                 features: [
-                    "Thermal Expansion",
-                    "Applied Energistics 2",
-                    "Industrial Foregoing",
-                    "Mekanism",
-                    "Refined Storage",
-                    "Immersive Engineering"
+                    "Community Server Hosted by FmStudios",
+                    "Create Mod",
+                    "Create Addons",
+                    "Custom Quests",
+                    "New World Generation",
+                    "Custom Resourcepack",
+                    "New Tools",
+                    "New Decoration Blocks and more ",
+                    
                 ],
-                downloadUrl: "https://example.com/download/tech-adventures"
-            },
-            {
-                name: "Magic & Mystery",
-                logo: "https://via.placeholder.com/90x90/444444/ffffff?text=MM",
-                screenshots: [
-                    "https://via.placeholder.com/800x600/333333/ffffff?text=Magic+Screenshot+1",
-                    "https://via.placeholder.com/800x600/444444/ffffff?text=Magic+Screenshot+2",
-                    "https://via.placeholder.com/800x600/555555/ffffff?text=Magic+Screenshot+3",
-                    "https://via.placeholder.com/800x600/666666/ffffff?text=Magic+Screenshot+4"
-                ],
-                description: "Tauche ein in eine Welt voller Magie, Zaubersprüche und mysteriöser Kreaturen. Dieses Modpack bietet eine völlig neue Spielerfahrung mit mächtigen Zaubersystemen und geheimnisvollen Dimensionen zum Erkunden.",
-                version: "1.18.2",
-                features: [
-                    "Thaumcraft",
-                    "Botania",
-                    "Astral Sorcery",
-                    "Blood Magic",
-                    "Ars Nouveau",
-                    "Occultism"
-                ],
-                downloadUrl: "https://example.com/download/magic-mystery"
-            },
-            {
-                name: "Survival Plus",
-                logo: "https://via.placeholder.com/90x90/555555/ffffff?text=SP",
-                screenshots: [
-                    "https://via.placeholder.com/800x600/222222/ffffff?text=Survival+Screenshot+1",
-                    "https://via.placeholder.com/800x600/333333/ffffff?text=Survival+Screenshot+2",
-                    "https://via.placeholder.com/800x600/444444/ffffff?text=Survival+Screenshot+3"
-                ],
-                description: "Ein verbessertes Survival-Erlebnis mit realistischeren Herausforderungen, erweiterten Kampfmechaniken und einem ausgewogenen Fortschrittssystem. Ideal für Spieler, die das klassische Minecraft-Gefühl mit modernen Verbesserungen erleben möchten.",
-                version: "1.20.1",
-                features: [
-                    "Harder Wildlife",
-                    "Seasons & Weather",
-                    "Better Dungeons",
-                    "Epic Fight Mod",
-                    "Farmer's Delight",
-                    "Create Mod"
-                ],
-                downloadUrl: "https://example.com/download/survival-plus"
-            },
-            {
-                name: "Space Exploration",
-                logo: "https://via.placeholder.com/90x90/666666/ffffff?text=SE",
-                screenshots: [
-                    "https://via.placeholder.com/800x600/111111/ffffff?text=Space+Screenshot+1",
-                    "https://via.placeholder.com/800x600/222222/ffffff?text=Space+Screenshot+2",
-                    "https://via.placeholder.com/800x600/333333/ffffff?text=Space+Screenshot+3",
-                    "https://via.placeholder.com/800x600/444444/ffffff?text=Space+Screenshot+4"
-                ],
-                description: "Erkunde das Weltall, baue Raumstationen und kolonisiere fremde Planeten. Dieses Modpack erweitert Minecraft um eine komplette Weltraum-Dimension mit realistischer Physik und interplanetaren Reisen.",
-                version: "1.19.4",
-                features: [
-                    "Galacticraft",
-                    "Ad Astra",
-                    "Applied Energistics",
-                    "Tech Reborn",
-                    "Space Dimensions",
-                    "Advanced Rocketry"
-                ],
-                downloadUrl: "https://example.com/download/space-exploration"
+                downloadUrl: "https://example.com/download/tech-revolution"
             }
         ];
 
-        // Modpacks in der Galerie anzeigen
+        // Display modpacks in the grid
         function displayModpacks() {
             const grid = document.getElementById('modpackGrid');
             grid.innerHTML = '';
@@ -577,15 +658,15 @@
             });
         }
 
-        // Modal öffnen
+        // Open modal
         function openModal(index) {
             const modpack = modpacks[index];
             const modal = document.getElementById('modal');
             
-            // Titel setzen
+            // Set title
             document.getElementById('modalTitle').textContent = modpack.name;
             
-            // Screenshots anzeigen
+            // Display screenshots
             const screenshotsGrid = document.getElementById('screenshotsGrid');
             screenshotsGrid.innerHTML = '';
             modpack.screenshots.forEach((screenshot, imgIndex) => {
@@ -598,37 +679,37 @@
                 screenshotsGrid.appendChild(img);
             });
             
-            // Modpack-Info anzeigen
+            // Display modpack info
             const infoDiv = document.getElementById('modpackInfo');
             infoDiv.innerHTML = `
-                <div class="info-label">Beschreibung:</div>
+                <div class="info-label">Description:</div>
                 <p>${modpack.description}</p>
                 
-                <div class="info-label">Empfohlene Minecraft-Version:</div>
+                <div class="info-label">Minecraft Version:</div>
                 <p>${modpack.version}</p>
                 
-                <div class="info-label">Wichtige Features:</div>
+                <div class="info-label">Key Features:</div>
                 <div class="features-list">
                     ${modpack.features.map(feature => `<div class="feature-item">${feature}</div>`).join('')}
                 </div>
             `;
             
-            // Download-Button setzen
+            // Set download button
             document.getElementById('downloadBtn').href = modpack.downloadUrl;
             
-            // Modal anzeigen
+            // Show modal
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        // Modal schließen
+        // Close modal
         function closeModal() {
             const modal = document.getElementById('modal');
             modal.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
-        // Lightbox öffnen
+        // Open lightbox
         function openLightbox(imageSrc) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImage = document.getElementById('lightboxImage');
@@ -637,13 +718,13 @@
             lightbox.classList.add('active');
         }
 
-        // Lightbox schließen
+        // Close lightbox
         function closeLightbox() {
             const lightbox = document.getElementById('lightbox');
             lightbox.classList.remove('active');
         }
 
-        // Event Listeners
+        // Event listeners
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
@@ -666,7 +747,7 @@
             }
         });
 
-        // Modpacks beim Laden der Seite anzeigen
+        // Display modpacks when page loads
         window.addEventListener('load', displayModpacks);
     </script>
 </body>
