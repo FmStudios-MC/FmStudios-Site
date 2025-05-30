@@ -4,705 +4,410 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FmStudios - Minecraft Modpacks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        body {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            color: #ffffff;
-            line-height: 1.6;
+        * {
+            font-family: 'Inter', sans-serif;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 3rem 0 2rem 0;
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin: 0 0 1rem 0;
-            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .header p {
-            font-size: 1.25rem;
-            color: #888888;
-            font-weight: 400;
-            letter-spacing: 0.01em;
-            margin-bottom: 2rem;
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .gradient-bg {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #0a0a0a 100%);
+            background-attachment: fixed;
+        }
+
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .social-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            color: #ffffff;
-            text-decoration: none;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.3s ease;
-            font-size: 1.5rem;
         }
 
         .social-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        .social-btn.discord:hover {
-            background: rgba(114, 137, 218, 0.2);
-            border-color: rgba(114, 137, 218, 0.4);
-        }
-
-        .donation-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .donation-btn {
-            background: linear-gradient(135deg, #0070ba 0%, #003087 100%);
-            color: #ffffff;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid rgba(0, 112, 186, 0.3);
-            letter-spacing: 0.01em;
-        }
-
-        .donation-btn:hover {
-            background: linear-gradient(135deg, #0074cc 0%, #003d9a 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(0, 112, 186, 0.4);
-        }
-
-        .modpack-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-bottom: 5rem;
-        }
-
-        .modpack-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .modpack-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .modpack-card:hover::before {
-            left: 100%;
-        }
-
-        .modpack-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            border-color: rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .modpack-logo {
-            width: 90px;
-            height: 90px;
-            border-radius: 16px;
-            margin-bottom: 1.5rem;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
-        }
-
-        .modpack-card:hover .modpack-logo {
-            transform: scale(1.05);
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-
-        .modpack-name {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0;
-            color: #ffffff;
-            letter-spacing: -0.01em;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            border-radius: 24px;
-            padding: 2.5rem;
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: scale(0.85) translateY(-30px);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-title {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin: 0;
-            letter-spacing: -0.02em;
-        }
-
-        .close-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: none;
-            color: #ffffff;
-            font-size: 1.5rem;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 300;
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.05);
-        }
-
-        .screenshots-section {
-            margin-bottom: 2.5rem;
-        }
-
-        .section-title {
-            color: #ffffff;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .screenshots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .screenshot {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .screenshot:hover {
-            transform: scale(1.02);
-            border-color: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .info-section {
-            margin-bottom: 2.5rem;
-        }
-
-        .info-section p {
-            color: #cccccc;
-            line-height: 1.7;
-            margin-bottom: 1.5rem;
-            font-size: 1.05rem;
-        }
-
-        .info-label {
-            color: #ffffff;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .features-list {
+        .screenshot-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: 1rem;
         }
 
-        .feature-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            color: #e0e0e0;
-            font-size: 0.95rem;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
+        @media (max-width: 768px) {
+            .screenshot-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        .feature-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-
-        .download-btn {
-            background: linear-gradient(135deg, #333333 0%, #555555 100%);
-            color: #ffffff;
-            border: none;
-            padding: 1.25rem 2.5rem;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            letter-spacing: 0.01em;
-        }
-
-        .download-btn:hover {
-            background: linear-gradient(135deg, #555555 0%, #777777 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
-        }
-
-        /* Lightbox Styles */
         .lightbox {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
         .lightbox.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             opacity: 1;
+            visibility: visible;
         }
 
-        .lightbox-content {
-            position: relative;
+        .lightbox img {
             max-width: 90%;
             max-height: 90%;
-            animation: lightboxZoomIn 0.3s ease;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
 
-        @keyframes lightboxZoomIn {
-            from {
-                transform: scale(0.8);
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
                 opacity: 0;
             }
-            to {
-                transform: scale(1);
+            10% {
                 opacity: 1;
             }
-        }
-
-        .lightbox-image {
-            max-width: 100%;
-            max-height: 90vh;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-        }
-
-        .lightbox-close {
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lightbox-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 3rem 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            color: #888888;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.5rem;
+            90% {
+                opacity: 1;
             }
-            
-            .social-links {
-                gap: 1rem;
-                flex-wrap: wrap;
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
             }
-            
-            .social-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 1.3rem;
-            }
-            
-            .donation-section {
-                margin-bottom: 1.5rem;
-            }
-            
-            .donation-btn {
-                padding: 0.875rem 1.5rem;
-                font-size: 0.9rem;
-            }
-            
-            .modpack-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .modal-content {
-                padding: 2rem;
-                max-width: 95%;
-            }
-            
-            .modal-title {
-                font-size: 1.75rem;
-            }
-            
-            .screenshots-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .features-list {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .header {
-                padding: 2rem 0;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .social-links {
-                justify-content: center;
-                gap: 0.75rem;
-            }
-            
-            .social-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-            
-            .donation-btn {
-                padding: 0.75rem 1.25rem;
-                font-size: 0.875rem;
-            }
-            
-            .modpack-card {
-                padding: 1.5rem;
-            }
-            
-            .modal-content {
-                padding: 1.5rem;
-            }
-        }
-
-        /* Social Media Icons */
-        .social-btn {
-            background-image: none;
-            background-size: 24px 24px;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
-        .icon-twitter {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E");
-        }
-        
-        .icon-youtube {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'/%3E%3C/svg%3E");
-        }
-        
-        .icon-bluesky {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.81 9.498 7.823 4.308 4.557-5.073 1.082-6.498-2.83-7.078-.139-.016-.277-.034-.415-.056.14.017.279.036.415.056 2.67.296 5.568-.628 6.383-3.364.246-.829.624-5.789.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.747 13.087 8.686 12 10.8z'/%3E%3C/svg%3E");
-        }
-
-        .icon-discord {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z'/%3E%3C/svg%3E");
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>FmStudios</h1>
-            <p>All the Projects</p>
-            
-            <div class="social-links">
-                <a href="https://x.com/fmstudiosmc" class="social-btn icon-twitter" target="_blank" title="Follow on X/Twitter"></a>
-                <a href="https://www.youtube.com/@fm-studios-mc" class="social-btn icon-youtube" target="_blank" title="Subscribe on YouTube"></a>
-                <a href="https://bsky.app/profile/fmstudios.bsky.social" class="social-btn icon-bluesky" target="_blank" title="Follow on Bluesky"></a>
-                <a href="https://discord.gg/x9jsed8qyR" class="social-btn icon-discord discord" target="_blank" title="Join our Discord Server"></a>
+<body class="gradient-bg text-white min-h-screen relative overflow-x-hidden">
+    <!-- Floating Particles -->
+    <div class="floating-particles"></div>
+
+    <!-- Header -->
+    <header class="glass-strong sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="https://static-cdn.jtvnw.net/jtv_user_pictures/774b412f-9bbd-41c5-91d6-c6d1e442f927-profile_image-150x150.png" alt="FmStudios Logo" class="w-12 h-12 rounded-lg">
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">FmStudios</h1>
+                </div>
+                
+                <!-- Social Media Buttons -->
+                <div class="flex items-center space-x-3">
+                    <!-- Twitter/X -->
+                    <a href="https://x.com/fmstudiosmc" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- YouTube -->
+                    <a href="https://www.youtube.com/@fm-studios-mc" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
+                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- Bluesky -->
+                    <a href="https://bsky.app/profile/fmstudios.bsky.social" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
+                        <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 2.104.139 3.25.139 5.233.902 6.379c.763 1.146 2.852 3.618 5.07 5.802.526.518 1.097 1.024 1.698 1.49C8.566 14.247 9.5 14.7 12 14.7s3.434-.453 4.33-.029c.601-.466 1.172-.972 1.698-1.49 2.218-2.184 4.307-4.656 5.07-5.802C23.861 5.233 23.861 3.25 23.098 2.104c-.659-.838-1.664-1.16-4.3.001C16.046 4.747 13.087 8.686 12 10.8z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- Discord -->
+                    <a href="https://discord.gg/x9jsed8qyR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
+                        <svg class="w-5 h-5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0002 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9554 2.4189-2.1568 2.4189Z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- PayPal Donation -->
+                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all bg-blue-600 hover:bg-blue-500">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.057 0 3.627.422 4.661 1.258.906.73 1.35 1.750 1.35 3.107 0 1.356-.357 2.645-1.071 3.867-.357.611-.819 1.145-1.384 1.601-.565.456-1.233.834-2.005 1.134-.771.3-1.644.45-2.618.45H8.618l-1.542 9.92zm5.364-13.331c.806 0 1.533-.106 2.18-.319a4.4 4.4 0 0 0 1.605-.861c.422-.37.75-.817.984-1.343.234-.526.351-1.107.351-1.746 0-.844-.211-1.456-.633-1.836-.422-.38-1.087-.569-1.996-.569H9.808l-1.155 6.674h3.787z"/>
+                        </svg>
+                    </a>
+                </div>
             </div>
+        </div>
+    </header>
 
-            <div class="donation-section">
-                <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" class="donation-btn" target="_blank" title="Support us on PayPal">
-                    💙 Support Us on PayPal
-                </a>
-            </div>
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                Minecraft Projects
+            </h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Our lovely Minecraft Projects :3</p>
         </div>
 
-        <div class="modpack-grid" id="modpackGrid">
-            <!-- Modpacks will be dynamically inserted here -->
+        <!-- Modpacks Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16" id="modpacksGrid">
+            <!-- Modpacks will be loaded here -->
         </div>
+    </main>
 
-        <div class="footer">
-            © 2025 FmStudios
+    <!-- Footer -->
+    <footer class="glass border-t border-white/10 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p class="text-gray-400">© 2025 FmStudios</p>
         </div>
-    </div>
+    </footer>
 
     <!-- Modal -->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle"></h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
-            </div>
-            
-            <div class="screenshots-section">
-                <h3 class="section-title">Screenshots</h3>
-                <div class="screenshots-grid" id="screenshotsGrid">
-                    <!-- Screenshots will be inserted here -->
+    <div id="modpackModal" class="fixed inset-0 modal-backdrop z-50 hidden items-center justify-center p-4">
+        <div class="glass-strong rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center space-x-4">
+                        <img id="modalLogo" src="" alt="" class="w-16 h-16 rounded-xl">
+                        <h3 id="modalTitle" class="text-3xl font-bold"></h3>
+                    </div>
+                    <button id="closeModal" class="text-gray-400 hover:text-white text-3xl font-light">&times;</button>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4">Screenshots</h4>
+                        <div id="screenshotsContainer" class="screenshot-grid mb-6">
+                            <!-- Screenshots will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">Description</h4>
+                                <p id="modalDescription" class="text-gray-300 leading-relaxed"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">Minecraft Version</h4>
+                                <span id="modalVersion" class="inline-block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium"></span>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">Key Features</h4>
+                                <ul id="modalFeatures" class="text-gray-300 space-y-2">
+                                    <!-- Features will be loaded here -->
+                                </ul>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <a id="downloadLink" href="" target="_blank" class="btn-glass inline-flex items-center px-8 py-4 rounded-xl text-white font-semibold hover:shadow-lg transition-all">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m5-8H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2z"></path>
+                                    </svg>
+                                    Download Project
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="info-section">
-                <h3 class="section-title">Modpack Information</h3>
-                <div id="modpackInfo">
-                    <!-- Modpack info will be inserted here -->
-                </div>
-            </div>
-            
-            <a href="#" class="download-btn" id="downloadBtn" target="_blank">Download Modpack</a>
         </div>
     </div>
 
     <!-- Lightbox -->
-    <div class="lightbox" id="lightbox">
-        <div class="lightbox-content">
-            <img class="lightbox-image" id="lightboxImage" src="" alt="Screenshot">
-            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-        </div>
+    <div id="lightbox" class="lightbox">
+        <img id="lightboxImage" src="" alt="">
+        <button id="closeLightbox" class="absolute top-8 right-8 text-white text-4xl font-light hover:opacity-75">&times;</button>
     </div>
 
     <script>
-        // Sample modpack data
+        // Sample modpack data - replace with your actual data
         const modpacks = [
             {
+                id: 1,
                 name: "Create F&M 3",
                 logo: "https://media.forgecdn.net/attachments/1203/147/fm3logonew-png.png",
-                screenshots: [
-                    "https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png",
-                    "https://media.forgecdn.net/attachments/1124/55/2025-03-12_16-39-32-png.png",
-                    "https://media.forgecdn.net/attachments/1143/129/2025-03-18_17-47-27-png.png",
-                    "https://media.forgecdn.net/attachments/1112/169/2025-03-01_11-45-57-1-png.png"
-                ],
                 description: "Create F&M 3 is the latest evolution of the Create: F&M series, bringing unparalleled mechanical automation and engineering creativity to Minecraft. Built around the Create mod and its powerful add-ons, this modpack lets you design intricate contraptions, optimize production lines, and build sprawling industrial systems with endless possibilities.",
                 version: "1.21.1",
                 features: [
-                    "Community Server Hosted by FmStudios",
                     "Create Mod",
-                    "Create Addons",
+                    "Create Mod Addons",
+                    "Community Server",
                     "Custom Quests",
-                    "New World Generation",
-                    "Custom Resourcepack",
-                    "New Tools",
-                    "New Decoration Blocks and more ",
-                    
+                    "New Terrain Generation",
+                    "New Biomes",
+                    "Weekly Updates"
+                ],
+                screenshots: [
+                    "https://media.forgecdn.net/attachments/1116/125/2025-03-04_21-22-27-png.png",
+                    "https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png",
+                    "https://media.forgecdn.net/attachments/1143/131/2025-03-18_17-06-22-png.png",
+                    "https://media.forgecdn.net/attachments/1143/129/2025-03-18_17-47-27-png.png"
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-fm3"
             },
-                        {
+            {
+                id: 2,
                 name: "Create F&M 2 [Discontinued]",
                 logo: "https://media.forgecdn.net/avatars/thumbnails/1132/43/64/64/638691888215133405.png",
-                screenshots: [
-                    "https://media.forgecdn.net/attachments/907/43/2024-07-03_16.png",
-                    "https://media.forgecdn.net/attachments/880/398/2024-06-01_21.png",
-                    "https://media.forgecdn.net/attachments/881/20/2024-06-02_15.png",
-                    "https://media.forgecdn.net/attachments/880/400/2024-06-01_21.png"
-                ],
                 description: "Create F&M2 is perfect for the Create mod experience. It adds the create mod and many other addons for the Create mod. The terrain will be generated diffrently wich adds new beutiful landscapes. You can fly across these landscapes with the new planes from Immersive Aircraft´s. If you want to farm and eat, then the Farmers Delight mod is perfect for you! You can harvest new crops and make many new diffrent types of food. ",
                 version: "1.20.1",
                 features: [
                     "Create Mod",
                     "Create Mod Addons",
-                    "And much more"
-                    
+                    "New Terrain Generation",
+                    "And More..."
+                ],
+                screenshots: [
+                    "https://media.forgecdn.net/attachments/907/43/2024-07-03_16.png",
+                    "https://media.forgecdn.net/attachments/880/398/2024-06-01_21.png",
+                    "https://media.forgecdn.net/attachments/880/405/2024-06-01_22.png",
+                    "https://media.forgecdn.net/attachments/880/400/2024-06-01_21.png"
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-f-m-2"
             },
-                        {
+            {
+                id: 3,
                 name: "{Additions}",
-                logo: "https://media.forgecdn.net/attachments/1203/180/addipalelogo-png.png",
+                logo: "https://media.forgecdn.net/avatars/thumbnails/1135/655/64/64/638697063456233291.png",
+                description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END,Over 150+ New Food and Crops, New Mobs and more...",
+                version: "1.21 - 1.21.4 (except 1.21.2)",
+                features: [
+                    "Many QOL Mods",
+                    "Overhauled Terrain",
+                    "And More..."
+                ],
                 screenshots: [
                     "https://media.forgecdn.net/attachments/912/951/2024-07-10_15.png",
-                    "https://media.forgecdn.net/attachments/912/952/2024-07-10_15.png",
-                    "https://media.forgecdn.net/attachments/912/955/2024-07-10_15.png"
-                ],
-                description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END,Over 150+ New Food and Crops, New Mobs and more...",
-                version: "1.21, 1.21.1, 1.21.3, 1.21.4",
-                features: [
-                    "Biome Overhaul",
-                    "Many Vanilla+ Additions"
+                    "https://media.forgecdn.net/attachments/912/955/2024-07-10_15.png",
+                    "https://media.forgecdn.net/attachments/912/952/2024-07-10_15.png"
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/fabis-additions"
             },
                         {
+                id: 4,
                 name: "Fabi´s Lootr",
                 logo: "https://media.forgecdn.net/avatars/thumbnails/1113/816/64/64/638666823345314024.png",
+                description: "Fabi´s Lootr is a resourcepack wich adds new textures for the Lootr mod.",
+                version: "1.21.5, 1.21.4, 1.21.1, 1.21, 1.20.1",
+                features: [
+                    "New Textures for the Lootr Mod"
+                ],
                 screenshots: [
                     "https://cdn.modrinth.com/data/cached_images/49a06ad5bbbff69935e092dee42189c5a47ee27b.png",
                     "https://cdn.modrinth.com/data/cached_images/ae32144429b2759c1bf64613fa9d20e2d8f655c0.png"
                 ],
-                description: "Fabi´s Lootr is a Resourcepack that changes the Textures of the Lootr Mod",
-                version: "1.20.1, 1.21-1.21.5 (except 1.21.2)",
-                features: [
-                    "Reworked Textures of the Lootr Mod"
-                ],
                 downloadUrl: "https://www.curseforge.com/minecraft/texture-packs/fabi-s-lootr"
-            },
-            
-            
+            }
         ];
 
-        // Display modpacks in the grid
-        function displayModpacks() {
-            const grid = document.getElementById('modpackGrid');
-            grid.innerHTML = '';
+        // Create floating particles
+        function createParticles() {
+            const container = document.querySelector('.floating-particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                container.appendChild(particle);
+            }
+        }
 
-            modpacks.forEach((modpack, index) => {
+        // Load modpacks
+        function loadModpacks() {
+            const grid = document.getElementById('modpacksGrid');
+            
+            modpacks.forEach(modpack => {
                 const card = document.createElement('div');
-                card.className = 'modpack-card';
-                card.onclick = () => openModal(index);
+                card.className = 'glass-card rounded-2xl p-6 cursor-pointer group';
+                card.onclick = () => openModal(modpack);
                 
                 card.innerHTML = `
-                    <img src="${modpack.logo}" alt="${modpack.name}" class="modpack-logo" loading="lazy">
-                    <h3 class="modpack-name">${modpack.name}</h3>
+                    <div class="text-center">
+                        <img src="${modpack.logo}" alt="${modpack.name}" class="w-32 h-32 mx-auto rounded-xl mb-6 group-hover:scale-105 transition-transform duration-300">
+                        <h3 class="text-2xl font-bold mb-3 group-hover:text-gray-200 transition-colors">${modpack.name}</h3>
+                        <p class="text-gray-400 mb-4 line-clamp-3">${modpack.description}</p>
+                        <span class="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            ${modpack.version}
+                        </span>
+                    </div>
                 `;
                 
                 grid.appendChild(card);
@@ -710,54 +415,56 @@
         }
 
         // Open modal
-        function openModal(index) {
-            const modpack = modpacks[index];
-            const modal = document.getElementById('modal');
+        function openModal(modpack) {
+            const modal = document.getElementById('modpackModal');
             
-            // Set title
+            // Populate modal content
+            document.getElementById('modalLogo').src = modpack.logo;
+            document.getElementById('modalLogo').alt = modpack.name;
             document.getElementById('modalTitle').textContent = modpack.name;
+            document.getElementById('modalDescription').textContent = modpack.description;
+            document.getElementById('modalVersion').textContent = modpack.version;
+            document.getElementById('downloadLink').href = modpack.downloadUrl;
             
-            // Display screenshots
-            const screenshotsGrid = document.getElementById('screenshotsGrid');
-            screenshotsGrid.innerHTML = '';
-            modpack.screenshots.forEach((screenshot, imgIndex) => {
-                const img = document.createElement('img');
-                img.src = screenshot;
-                img.alt = `${modpack.name} Screenshot ${imgIndex + 1}`;
-                img.className = 'screenshot';
-                img.loading = 'lazy';
-                img.onclick = () => openLightbox(screenshot);
-                screenshotsGrid.appendChild(img);
+            // Load features
+            const featuresList = document.getElementById('modalFeatures');
+            featuresList.innerHTML = '';
+            modpack.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center';
+                li.innerHTML = `
+                    <svg class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    ${feature}
+                `;
+                featuresList.appendChild(li);
             });
             
-            // Display modpack info
-            const infoDiv = document.getElementById('modpackInfo');
-            infoDiv.innerHTML = `
-                <div class="info-label">Description:</div>
-                <p>${modpack.description}</p>
-                
-                <div class="info-label">Minecraft Version:</div>
-                <p>${modpack.version}</p>
-                
-                <div class="info-label">Key Features:</div>
-                <div class="features-list">
-                    ${modpack.features.map(feature => `<div class="feature-item">${feature}</div>`).join('')}
-                </div>
-            `;
-            
-            // Set download button
-            document.getElementById('downloadBtn').href = modpack.downloadUrl;
+            // Load screenshots
+            const screenshotsContainer = document.getElementById('screenshotsContainer');
+            screenshotsContainer.innerHTML = '';
+            modpack.screenshots.forEach((screenshot, index) => {
+                const img = document.createElement('img');
+                img.src = screenshot;
+                img.alt = `${modpack.name} Screenshot ${index + 1}`;
+                img.className = 'w-full h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300';
+                img.onclick = () => openLightbox(screenshot);
+                screenshotsContainer.appendChild(img);
+            });
             
             // Show modal
-            modal.classList.add('active');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
 
         // Close modal
         function closeModal() {
-            const modal = document.getElementById('modal');
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
+            const modal = document.getElementById('modpackModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
         // Open lightbox
@@ -767,39 +474,45 @@
             
             lightboxImage.src = imageSrc;
             lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
         // Close lightbox
         function closeLightbox() {
             const lightbox = document.getElementById('lightbox');
             lightbox.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // Event listeners
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
+        
+        // Close modal/lightbox when clicking outside
+        document.getElementById('modpackModal').addEventListener('click', (e) => {
+            if (e.target.id === 'modpackModal') closeModal();
         });
-
-        document.getElementById('lightbox').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeLightbox();
-            }
+        
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') closeLightbox();
         });
-
-        document.addEventListener('keydown', function(e) {
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (document.getElementById('lightbox').classList.contains('active')) {
                     closeLightbox();
-                } else if (document.getElementById('modal').classList.contains('active')) {
+                } else if (!document.getElementById('modpackModal').classList.contains('hidden')) {
                     closeModal();
                 }
             }
         });
 
-        // Display modpacks when page loads
-        window.addEventListener('load', displayModpacks);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            loadModpacks();
+        });
     </script>
 </body>
 </html>
