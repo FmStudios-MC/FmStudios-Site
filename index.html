@@ -24,6 +24,19 @@
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .glass-strong::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, rgba(220, 38, 38, 0.05) 0%, transparent 50%, rgba(239, 68, 68, 0.03) 100%);
+            pointer-events: none;
+            border-radius: inherit;
         }
 
         .glass-card {
@@ -85,9 +98,10 @@
         }
 
         .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.4);
             transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.2);
         }
 
         .social-btn {
@@ -100,8 +114,9 @@
 
         .social-btn:hover {
             background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(239, 68, 68, 0.25);
             transform: translateY(-3px);
+            box-shadow: 0 8px 20px -5px rgba(220, 38, 38, 0.15);
         }
 
         .screenshot-grid {
@@ -233,7 +248,7 @@
                     <!-- Bluesky -->
                     <a href="https://bsky.app/profile/fmstudios.bsky.social" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
                         <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 2.104.139 3.25.139 5.233.902 6.379c.763 1.146 2.852 3.618 5.07 5.802.526.518 1.097 1.024 1.698 1.49C8.566 14.247 9.5 14.7 12 14.7s3.434-.453 4.33-.029c.601-.466 1.172-.972 1.698-1.49 2.218-2.184 4.307-4.656 5.07-5.802C23.861 5.233 23.861 3.25 23.098 2.104c-.659-.838-1.664-1.16-4.3.001C16.046 4.747 13.087 8.686 12 10.8z"/>
+                            <path d="M12 10.2c-1.1-2.1-4.1-6.1-6.9-8C2.4.9 1.3 1.2.6 2.1-.2 3.3-.2 5.3.6 6.5c.8 1.2 2.9 3.7 5.1 5.9.5.5 1.1 1 1.7 1.5 1 .6 1.9 1 4.6 1s3.6-.4 4.6-1c.6-.5 1.2-1 1.7-1.5 2.2-2.2 4.3-4.7 5.1-5.9.8-1.2.8-3.2 0-4.4-.7-.9-1.7-1.2-4.4 0-2.8 1.9-5.8 5.9-6.9 8z"/>
                         </svg>
                     </a>
                     
@@ -245,9 +260,9 @@
                     </a>
                     
                     <!-- PayPal Donation -->
-                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all bg-blue-600 hover:bg-blue-500" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all bg-blue-600 hover:bg-blue-500">
+                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all bg-blue-600 hover:bg-blue-500">
                         <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.057 0 3.627.422 4.661 1.258.906.73 1.35 1.750 1.35 3.107 0 1.356-.357 2.645-1.071 3.867-.357.611-.819 1.145-1.384 1.601-.565.456-1.233.834-2.005 1.134-.771.3-1.644.45-2.618.45H8.618l-1.542 9.92zm5.364-13.331c.806 0 1.533-.106 2.18-.319a4.4 4.4 0 0 0 1.605-.861c.422-.37.75-.817.984-1.343.234-.526.351-1.107.351-1.746 0-.844-.211-1.456-.633-1.836-.422-.38-1.087-.569-1.996-.569H9.808l-1.155 6.674h3.787z"/>
+                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.057 0 3.627.422 4.661 1.258.906.73 1.35 1.75 1.35 3.107 0 1.356-.357 2.645-1.071 3.867-.357.611-.819 1.145-1.384 1.601-.565.456-1.233.834-2.005 1.134-.771.3-1.644.45-2.618.45H8.618l-1.542 9.92zm5.364-13.331c.806 0 1.533-.106 2.18-.319a4.4 4.4 0 0 0 1.605-.861c.422-.37.75-.817.984-1.343.234-.526.351-1.107.351-1.746 0-.844-.211-1.456-.633-1.836-.422-.38-1.087-.569-1.996-.569H9.808l-1.155 6.674h3.787z"/>
                         </svg>
                     </a>
                 </div>
@@ -261,7 +276,7 @@
             <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-red-100 to-gray-400 bg-clip-text text-transparent">
                 Minecraft Projects
             </h2>
-            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Discover our Minecraft Projects</p>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Discover our <span class="text-red-300">Minecraft Projects.</span></p>
         </div>
 
         <!-- Modpacks Grid -->
@@ -271,9 +286,10 @@
     </main>
 
     <!-- Footer -->
-    <footer class="glass border-t border-white/10 mt-20">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p class="text-gray-400">© 2025 FmStudios</p>
+    <footer class="glass border-t border-red-500/20 mt-20 relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/5 to-transparent"></div>
+        <div class="container mx-auto px-6 py-8 text-center relative z-10">
+            <p class="text-gray-400">© 2025 <span class="text-red-300">FmStudios</span></p>
         </div>
     </footer>
 
@@ -340,7 +356,7 @@
     <script>
         // Sample modpack data - replace with your actual data
         const modpacks = [
-            {
+           {
                 id: 1,
                 name: "Create F&M 3",
                 logo: "https://media.forgecdn.net/attachments/1203/147/fm3logonew-png.png",
@@ -445,7 +461,7 @@
                 card.innerHTML = `
                     <div class="text-center">
                         <img src="${modpack.logo}" alt="${modpack.name}" class="w-32 h-32 mx-auto rounded-xl mb-6 group-hover:scale-105 transition-transform duration-300">
-                        <h3 class="text-2xl font-bold mb-3 group-hover:text-gray-200 transition-colors">${modpack.name}</h3>
+                        <h3 class="text-2xl font-bold mb-3 group-hover:text-red-200 transition-colors">${modpack.name}</h3>
                         <p class="text-gray-400 mb-4 line-clamp-3">${modpack.description}</p>
                         <span class="inline-block bg-gradient-to-r from-red-500 via-red-400 to-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
                             ${modpack.version}
