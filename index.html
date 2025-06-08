@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FmStudios - Minecraft Modpacks</title>
+    <title>FmStudios - Minecraft Projects</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -11,335 +11,232 @@
         * {
             font-family: 'Inter', sans-serif;
         }
-
+        
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+        }
+        
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-
+        
         .glass-strong {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-        }
-
-        .glass-strong::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, rgba(220, 38, 38, 0.05) 0%, transparent 50%, rgba(239, 68, 68, 0.03) 100%);
-            pointer-events: none;
-            border-radius: inherit;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px -12px rgba(220, 38, 38, 0.2);
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #0a0a0a 100%);
-            background-attachment: fixed;
-            position: relative;
-        }
-
-        .gradient-bg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(220, 38, 38, 0.03) 0%, transparent 30%, transparent 70%, rgba(239, 68, 68, 0.05) 100%);
-            pointer-events: none;
-        }
-
-        .modal-backdrop {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            position: relative;
-        }
-
-        .modal-backdrop::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .btn-glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .red-accent {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .red-accent:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        
+        .blue-gradient {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .blue-gradient:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+        
+        .project-card {
             transition: all 0.3s ease;
+            cursor: pointer;
         }
-
-        .btn-glass:hover {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(220, 38, 38, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.2);
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.2);
         }
-
-        .social-btn {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
+        
+        .modal {
+            backdrop-filter: blur(30px);
         }
-
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px -5px rgba(220, 38, 38, 0.15);
-        }
-
-        .screenshot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .screenshot-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
+        
         .lightbox {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
+            backdrop-filter: blur(40px);
+        }
+        
+        .social-btn {
             transition: all 0.3s ease;
         }
-
-        .lightbox::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, rgba(239, 68, 68, 0.06) 0%, transparent 80%);
-            pointer-events: none;
+        
+        .social-btn:hover {
+            transform: scale(1.1);
         }
-
-        .lightbox.active {
-            opacity: 1;
-            visibility: visible;
+        
+        .changelog-item {
+            transition: all 0.3s ease;
         }
-
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        
+        .changelog-item:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
-
-        .floating-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: float 8s infinite linear;
-        }
-
-        .particle:nth-child(3n) {
-            background: rgba(239, 68, 68, 0.4);
-        }
-
-        .particle:nth-child(5n) {
-            background: rgba(220, 38, 38, 0.3);
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) translateX(100px);
-                opacity: 0;
+        
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: blur(20px);
             }
         }
     </style>
 </head>
-<body class="gradient-bg text-white min-h-screen relative overflow-x-hidden">
-    <!-- Floating Particles -->
-    <div class="floating-particles"></div>
-
+<body class="text-white">
     <!-- Header -->
-    <header class="glass-strong sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <img src="https://static-cdn.jtvnw.net/jtv_user_pictures/774b412f-9bbd-41c5-91d6-c6d1e442f927-profile_image-150x150.png" alt="FmStudios Logo" class="w-12 h-12 rounded-lg">
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-white via-red-200 to-gray-300 bg-clip-text text-transparent">FmStudios</h1>
+    <header class="glass-header sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <img src="https://static-cdn.jtvnw.net/jtv_user_pictures/774b412f-9bbd-41c5-91d6-c6d1e442f927-profile_image-150x150.png" alt="FmStudios Logo" class="w-12 h-12 rounded-lg">
+                <h1 class="text-2xl font-bold">FmStudios</h1>
+            </div>
+            
+            <nav class="hidden md:flex space-x-6">
+                <button onclick="showPage('home')" class="text-white hover:text-red-400 transition-colors">Home</button>
+                <button onclick="showPage('changelog')" class="text-white hover:text-red-400 transition-colors">Changelog</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Home Page -->
+    <div id="home-page" class="page">
+        <!-- Latest Trailer Section -->
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="glass rounded-2xl p-6 mb-8">
+                <div class="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6">
+                    <div class="w-full lg:w-96">
+                        <div class="aspect-video rounded-lg overflow-hidden">
+                            <iframe 
+                                src="https://www.youtube.com/embed/KWAExkIxZPo?si=pw86kxVQmoO8-N-k" 
+                                class="w-full h-full" 
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold mb-4 text-red-400">Latest Trailer</h2>
+                        <p class="text-gray-300">Check out our latest project trailer!</p>
+                    </div>
                 </div>
-                
-                <!-- Social Media Buttons -->
-                <div class="flex items-center space-x-3">
-                    <!-- Twitter/X -->
-                    <a href="https://x.com/fmstudiosmc" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
+            </div>
+        </div>
+
+        <!-- Social Media & Buttons -->
+        <div class="max-w-7xl mx-auto px-6 mb-8">
+            <div class="glass rounded-2xl p-6">
+                <div class="flex flex-wrap justify-center gap-4">
+                    <!-- Social Media Buttons -->
+                    <a href="https://x.com/fmstudiosmc" class="social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-[#1DA1F2] transition-all">
+                        <svg class="w-5 h-5" fill="#1DA1F2" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        <span class="text-white">Twitter</span>
                     </a>
                     
-                    <!-- YouTube -->
-                    <a href="https://www.youtube.com/@fm-studios-mc" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
-                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
+                    <a href="https://www.youtube.com/@fm-studios-mc" class="social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-[#FF0000] transition-all">
+                        <svg class="w-5 h-5" fill="#FF0000" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span class="text-white">YouTube</span>
                     </a>
                     
-                    <!-- Bluesky -->
-                    <a href="https://bsky.app/profile/fmstudios.bsky.social" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
-                        <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 10.2c-1.1-2.1-4.1-6.1-6.9-8C2.4.9 1.3 1.2.6 2.1-.2 3.3-.2 5.3.6 6.5c.8 1.2 2.9 3.7 5.1 5.9.5.5 1.1 1 1.7 1.5 1 .6 1.9 1 4.6 1s3.6-.4 4.6-1c.6-.5 1.2-1 1.7-1.5 2.2-2.2 4.3-4.7 5.1-5.9.8-1.2.8-3.2 0-4.4-.7-.9-1.7-1.2-4.4 0-2.8 1.9-5.8 5.9-6.9 8z"/>
-                        </svg>
+                    <a href="https://bsky.app/profile/fmstudios.bsky.social" class="social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-[#00A8E8] transition-all">
+                        <svg class="w-5 h-5" fill="#00A8E8" viewBox="0 0 24 24"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.019-.275.039-.415.058-2.670-.297-5.568.628-6.383 3.364C.378 17.805 0 22.247 0 22.935c0 .688.139 1.861.902 2.204.659.299 1.664.621 4.3-1.239 2.752-1.942 5.711-5.881 6.798-7.995 1.087 2.114 4.046 6.053 6.798 7.995 2.636 1.86 3.641 1.538 4.3 1.239.763-.343.902-1.516.902-2.204 0-.688-.378-5.13-.624-5.958-.815-2.736-3.713-3.661-6.383-3.364-.14-.019-.277-.039-.415-.058.14.017.279.036.415.056 2.67.296 5.568-.628 6.383-3.364.246-.829.624-5.789.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.238C16.046 4.747 13.087 8.686 12 10.8z"/></svg>
+                        <span class="text-white">Bluesky</span>
                     </a>
                     
-                    <!-- Discord -->
-                    <a href="https://discord.gg/x9jsed8qyR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all">
-                        <svg class="w-5 h-5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0002 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9554 2.4189-2.1568 2.4189Z"/>
-                        </svg>
+                    <a href="https://discord.gg/x9jsed8qyR" class="social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-[#5865F2] transition-all">
+                        <svg class="w-5 h-5" fill="#5865F2" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/></svg>
+                        <span class="text-white">Discord</span>
                     </a>
                     
-                    <!-- PayPal Donation -->
-                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" target="_blank" class="social-btn p-3 rounded-xl hover:scale-105 transition-all bg-blue-600 hover:bg-blue-500">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.057 0 3.627.422 4.661 1.258.906.73 1.35 1.75 1.35 3.107 0 1.356-.357 2.645-1.071 3.867-.357.611-.819 1.145-1.384 1.601-.565.456-1.233.834-2.005 1.134-.771.3-1.644.45-2.618.45H8.618l-1.542 9.92zm5.364-13.331c.806 0 1.533-.106 2.18-.319a4.4 4.4 0 0 0 1.605-.861c.422-.37.75-.817.984-1.343.234-.526.351-1.107.351-1.746 0-.844-.211-1.456-.633-1.836-.422-.38-1.087-.569-1.996-.569H9.808l-1.155 6.674h3.787z"/>
-                        </svg>
+                    <!-- Donate Button -->
+                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" class="social-btn blue-gradient rounded-lg px-6 py-2 text-white font-medium transition-all">
+                        Donate
+                    </a>
+                    
+                    <!-- Kinetic Hosting Button -->
+                    <a href="https://billing.kinetichosting.net/aff.php?aff=855" class="social-btn glass rounded-lg px-6 py-2 text-white font-medium border-2 border-red-500 hover:bg-red-500 transition-all">
+                        Kinetic Hosting Partner (Code: fmstudios for 25% off)
                     </a>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-12">
-        <div class="text-center mb-16">
-            <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-red-100 to-gray-400 bg-clip-text text-transparent">
-                Minecraft Projects
-            </h2>
-            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Discover our <span class="text-red-300">Minecraft Projects.</span></p>
-        </div>
-
-        <!-- Modpacks Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16" id="modpacksGrid">
-            <!-- Modpacks will be loaded here -->
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="glass border-t border-red-500/20 mt-20 relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/5 to-transparent"></div>
-        <div class="container mx-auto px-6 py-8 text-center relative z-10">
-            <p class="text-gray-400">© 2025 <span class="text-red-300">FmStudios</span></p>
-        </div>
-    </footer>
-
-    <!-- Modal -->
-    <div id="modpackModal" class="fixed inset-0 modal-backdrop z-50 hidden items-center justify-center p-4">
-        <div class="glass-strong rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-8">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="flex items-center space-x-4">
-                        <img id="modalLogo" src="" alt="" class="w-16 h-16 rounded-xl">
-                        <h3 id="modalTitle" class="text-3xl font-bold"></h3>
-                    </div>
-                    <button id="closeModal" class="text-gray-400 hover:text-white text-3xl font-light">&times;</button>
+        <!-- Project Categories -->
+        <div class="max-w-7xl mx-auto px-6 pb-12">
+            <!-- Category Filter -->
+            <div class="glass rounded-2xl p-6 mb-8">
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="filterProjects('all')" class="category-btn active red-accent rounded-lg px-6 py-2 font-medium transition-all">All Projects</button>
+                    <button onclick="filterProjects('modpacks')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-red-500 transition-all">Modpacks</button>
+                    <button onclick="filterProjects('mods')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-red-500 transition-all">Mods</button>
+                    <button onclick="filterProjects('resourcepacks')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-red-500 transition-all">Resource Packs</button>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-8">
+                <!-- Modpack Subcategory Filter -->
+                <div id="modpack-filter" class="mt-4 flex flex-wrap gap-2 justify-center hidden">
+                    <button onclick="filterModpacks('all')" class="modpack-btn active text-sm glass rounded-lg px-4 py-1 transition-all">All Modpacks</button>
+                    <button onclick="filterModpacks('vanilla+')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-red-400 transition-all">Vanilla+</button>
+                    <button onclick="filterModpacks('tech')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-red-400 transition-all">Tech</button>
+                    <button onclick="filterModpacks('magic')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-red-400 transition-all">Magic</button>
+                    <button onclick="filterModpacks('adventure')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-red-400 transition-all">Adventure</button>
+                </div>
+            </div>
+
+            <!-- Projects Grid -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Projects will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Changelog Page -->
+    <div id="changelog-page" class="page hidden">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <h1 class="text-4xl font-bold text-center mb-8 text-red-400">Project Changelogs</h1>
+            <div id="changelog-content" class="space-y-6">
+                <!-- Changelog content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-strong rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 id="modal-title" class="text-3xl font-bold text-red-400"></h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
-                        <h4 class="text-xl font-semibold mb-4">Screenshots</h4>
-                        <div id="screenshotsContainer" class="screenshot-grid mb-6">
-                            <!-- Screenshots will be loaded here -->
+                        <h3 class="text-xl font-semibold mb-4">Screenshots</h3>
+                        <div id="modal-screenshots" class="grid grid-cols-2 gap-2">
+                            <!-- Screenshots will be populated -->
                         </div>
                     </div>
                     
                     <div>
-                        <div class="space-y-6">
-                            <div>
-                                <h4 class="text-xl font-semibold mb-2">Description</h4>
-                                <p id="modalDescription" class="text-gray-300 leading-relaxed"></p>
-                            </div>
-                            
-                            <div>
-                                <h4 class="text-xl font-semibold mb-2">Minecraft Version</h4>
-                                <span id="modalVersion" class="inline-block bg-gradient-to-r from-red-500 to-red-400 text-white px-4 py-2 rounded-lg font-medium"></span>
-                            </div>
-                            
-                            <div>
-                                <h4 class="text-xl font-semibold mb-2">Key Features</h4>
-                                <ul id="modalFeatures" class="text-gray-300 space-y-2">
-                                    <!-- Features will be loaded here -->
-                                </ul>
-                            </div>
-                            
-                            <div class="pt-4">
-                                <a id="downloadLink" href="" target="_blank" class="btn-glass inline-flex items-center px-8 py-4 rounded-xl text-white font-semibold hover:shadow-lg transition-all">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m5-8H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2z"></path>
-                                    </svg>
-                                    Download
-                                </a>
-                            </div>
+                        <div id="modal-content" class="space-y-4">
+                            <!-- Project details will be populated -->
+                        </div>
+                        
+                        <div class="mt-6">
+                            <a id="modal-download" href="#" class="red-accent rounded-lg px-6 py-3 font-medium inline-block transition-all hover:scale-105">
+                                Download Project
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -348,29 +245,32 @@
     </div>
 
     <!-- Lightbox -->
-    <div id="lightbox" class="lightbox">
-        <img id="lightboxImage" src="" alt="">
-        <button id="closeLightbox" class="absolute top-8 right-8 text-white text-4xl font-light hover:opacity-75">&times;</button>
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-80 lightbox hidden z-[70] flex items-center justify-center p-4">
+        <div class="relative max-w-5xl max-h-[90vh]">
+            <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white text-2xl hover:text-red-400">&times;</button>
+            <img id="lightbox-image" src="" alt="" class="max-w-full max-h-full rounded-lg">
+        </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="glass-header mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-400">© 2025 FmStudios</p>
+        </div>
+    </footer>
+
     <script>
-        // Sample modpack data - replace with your actual data
-        const modpacks = [
-           {
+        // Sample project data
+        const projects = [
+            {
                 id: 1,
                 name: "Create F&M 3",
+                category: "modpacks",
+                subcategory: "tech",
                 logo: "https://media.forgecdn.net/attachments/1203/147/fm3logonew-png.png",
                 description: "Create F&M 3 is the latest evolution of the Create: F&M series, bringing unparalleled mechanical automation and engineering creativity to Minecraft. Built around the Create mod and its powerful add-ons, this modpack lets you design intricate contraptions, optimize production lines, and build sprawling industrial systems with endless possibilities.",
-                version: "1.21.1",
-                features: [
-                    "Create Mod",
-                    "Create Mod Addons",
-                    "Community Server",
-                    "Custom Quests",
-                    "New Terrain Generation",
-                    "New Biomes",
-                    "Weekly Updates"
-                ],
+                version: "Neoforge 1.21.1",
+                features: ["Community Server", "Create Mod", "Create Addons", "Quests", "New Terrain", "New Mobs", "New Armor", "New Tools", "And Much More"],
                 screenshots: [
                     "https://media.forgecdn.net/attachments/1116/125/2025-03-04_21-22-27-png.png",
                     "https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png",
@@ -382,34 +282,28 @@
             {
                 id: 2,
                 name: "Create F&M 2 [Discontinued]",
+                category: "modpacks",
+                subcategory: "tech",
                 logo: "https://media.forgecdn.net/avatars/thumbnails/1132/43/64/64/638691888215133405.png",
-                description: "Create F&M2 is perfect for the Create mod experience. It adds the create mod and many other addons for the Create mod. The terrain will be generated diffrently wich adds new beutiful landscapes. You can fly across these landscapes with the new planes from Immersive Aircraft´s. If you want to farm and eat, then the Farmers Delight mod is perfect for you! You can harvest new crops and make many new diffrent types of food. ",
-                version: "1.20.1",
-                features: [
-                    "Create Mod",
-                    "Create Mod Addons",
-                    "New Terrain Generation",
-                    "And More..."
-                ],
+                description: "Create F&M2 is perfect for the Create mod experience. It adds the create mod and many other addons for the Create mod. The terrain will be generated diffrently wich adds new beutiful landscapes. You can fly across these landscapes with the new planes from Immersive Aircraft´s. If you want to farm and eat, then the Farmers Delight mod is perfect for you! You can harvest new crops and make many new diffrent types of food.",
+                version: "Forge 1.20.1",
+                features: ["Create Mod", "Create Addons", "New Terrain Generation", "And More"],
                 screenshots: [
                     "https://media.forgecdn.net/attachments/907/43/2024-07-03_16.png",
                     "https://media.forgecdn.net/attachments/880/398/2024-06-01_21.png",
-                    "https://media.forgecdn.net/attachments/880/405/2024-06-01_22.png",
-                    "https://media.forgecdn.net/attachments/880/400/2024-06-01_21.png"
+                    "https://media.forgecdn.net/attachments/880/405/2024-06-01_22.png"
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-f-m-2"
             },
             {
                 id: 3,
                 name: "{Additions}",
-                logo: "https://media.forgecdn.net/attachments/1203/180/addipalelogo-png.png",
+                category: "modpacks",
+                subcategory: "vanilla+",
+                logo: "https://media.forgecdn.net/avatars/thumbnails/1135/655/64/64/638697063456233291.png",
                 description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END,Over 150+ New Food and Crops, New Mobs and more...",
-                version: "1.21 - 1.21.4 (except 1.21.2)",
-                features: [
-                    "Many QOL Mods",
-                    "Overhauled Terrain",
-                    "And More..."
-                ],
+                version: "Fabric 1.21-1.21.4",
+                features: ["Many QOL Mods", "New Terrain Generartion", "New Building Blocks", "New Mobs", "And More!!"],
                 screenshots: [
                     "https://media.forgecdn.net/attachments/912/951/2024-07-10_15.png",
                     "https://media.forgecdn.net/attachments/912/955/2024-07-10_15.png",
@@ -417,161 +311,262 @@
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/fabis-additions"
             },
-                        {
-                id: 4,
+            {
+                id: 5,
                 name: "Fabi´s Lootr",
+                category: "resourcepacks",
                 logo: "https://media.forgecdn.net/attachments/1206/422/lootr-png.png",
-                description: "Fabi´s Lootr is a resourcepack wich adds new textures for the Lootr mod.",
-                version: "1.21.5, 1.21.4, 1.21.1, 1.21, 1.20.1",
-                features: [
-                    "New Textures for the Lootr Mod"
-                ],
+                description: "High-resolution realistic textures that transform your Minecraft world.",
+                version: "1.20.1",
+                features: ["New Lootr Chest Texture", "New Lootr Barrel Texture"],
                 screenshots: [
                     "https://cdn.modrinth.com/data/cached_images/49a06ad5bbbff69935e092dee42189c5a47ee27b.png",
                     "https://cdn.modrinth.com/data/cached_images/ae32144429b2759c1bf64613fa9d20e2d8f655c0.png"
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/texture-packs/fabi-s-lootr"
-            }
+            },
         ];
 
-        // Create floating particles
-        function createParticles() {
-            const container = document.querySelector('.floating-particles');
-            const particleCount = 50;
+        // Changelog data
+        const changelogs = {
+            "Create F&M 3": [
+                {
+                    version: "2.7 Hotfix",
+                    date: "2025-06-07",
+                    changes: [
+                        "Removed Create: Delivery Director"
+                    ]
+                },
+                {
+                    version: "2.7",
+                    date: "2025-06-06",
+                    changes: [
+                    "New Colored Cardboards",
+                    "New Delivery Director",
+                    "New Copycats",
+                    "New Quests",
+                    "You can now feed Blaze Burners with Lava trough Pipes"
+                    ]
+                }
+            ]
+        };
+
+        let currentFilter = 'all';
+        let currentModpackFilter = 'all';
+
+        // Initialize the page
+        function init() {
+            renderProjects();
+            renderChangelog();
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+        }
+
+        // Filter projects by category
+        function filterProjects(category) {
+            currentFilter = category;
             
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 8 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
-                container.appendChild(particle);
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'red-accent');
+                btn.classList.add('glass');
+            });
+            event.target.classList.add('active', 'red-accent');
+            event.target.classList.remove('glass');
+            
+            // Show/hide modpack subcategory filter
+            const modpackFilter = document.getElementById('modpack-filter');
+            if (category === 'modpacks') {
+                modpackFilter.classList.remove('hidden');
+            } else {
+                modpackFilter.classList.add('hidden');
+                currentModpackFilter = 'all';
             }
+            
+            renderProjects();
         }
 
-        // Load modpacks
-        function loadModpacks() {
-            const grid = document.getElementById('modpacksGrid');
+        // Filter modpacks by subcategory
+        function filterModpacks(subcategory) {
+            currentModpackFilter = subcategory;
             
-            modpacks.forEach(modpack => {
-                const card = document.createElement('div');
-                card.className = 'glass-card rounded-2xl p-6 cursor-pointer group';
-                card.onclick = () => openModal(modpack);
-                
-                card.innerHTML = `
-                    <div class="text-center">
-                        <img src="${modpack.logo}" alt="${modpack.name}" class="w-32 h-32 mx-auto rounded-xl mb-6 group-hover:scale-105 transition-transform duration-300">
-                        <h3 class="text-2xl font-bold mb-3 group-hover:text-red-200 transition-colors">${modpack.name}</h3>
-                        <p class="text-gray-400 mb-4 line-clamp-3">${modpack.description}</p>
-                        <span class="inline-block bg-gradient-to-r from-red-500 via-red-400 to-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                            ${modpack.version}
-                        </span>
+            // Update active button
+            document.querySelectorAll('.modpack-btn').forEach(btn => {
+                btn.classList.remove('active', 'red-accent');
+                btn.classList.add('glass');
+            });
+            event.target.classList.add('active', 'red-accent');
+            event.target.classList.remove('glass');
+            
+            renderProjects();
+        }
+
+        // Render projects grid
+        function renderProjects() {
+            const grid = document.getElementById('projects-grid');
+            let filteredProjects = projects;
+            
+            // Filter by category
+            if (currentFilter !== 'all') {
+                filteredProjects = filteredProjects.filter(project => project.category === currentFilter);
+            }
+            
+            // Filter modpacks by subcategory
+            if (currentFilter === 'modpacks' && currentModpackFilter !== 'all') {
+                filteredProjects = filteredProjects.filter(project => project.subcategory === currentModpackFilter);
+            }
+            
+            grid.innerHTML = filteredProjects.map(project => `
+                <div class="project-card glass rounded-2xl p-6" onclick="openModal(${project.id})">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img src="${project.logo}" alt="${project.name}" class="w-16 h-16 rounded-lg">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${project.name}</h3>
+                            <p class="text-sm text-gray-400 capitalize">${project.category}</p>
+                        </div>
                     </div>
-                `;
-                
-                grid.appendChild(card);
-            });
+                    <p class="text-gray-300 text-sm mb-4">${project.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-red-400">MC ${project.version}</span>
+                        <span class="text-xs text-gray-400">Click to view</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Open modal
-        function openModal(modpack) {
-            const modal = document.getElementById('modpackModal');
+        // Open project modal
+        function openModal(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
             
-            // Populate modal content
-            document.getElementById('modalLogo').src = modpack.logo;
-            document.getElementById('modalLogo').alt = modpack.name;
-            document.getElementById('modalTitle').textContent = modpack.name;
-            document.getElementById('modalDescription').textContent = modpack.description;
-            document.getElementById('modalVersion').textContent = modpack.version;
-            document.getElementById('downloadLink').href = modpack.downloadUrl;
+            document.getElementById('modal-title').textContent = project.name;
+            document.getElementById('modal-download').href = project.downloadUrl;
             
-            // Load features
-            const featuresList = document.getElementById('modalFeatures');
-            featuresList.innerHTML = '';
-            modpack.features.forEach(feature => {
-                const li = document.createElement('li');
-                li.className = 'flex items-center';
-                li.innerHTML = `
-                    <svg class="w-5 h-5 text-red-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                    ${feature}
-                `;
-                featuresList.appendChild(li);
-            });
+            // Populate screenshots
+            const screenshotsContainer = document.getElementById('modal-screenshots');
+            screenshotsContainer.innerHTML = project.screenshots.map(screenshot => `
+                <img src="${screenshot}" alt="Screenshot" class="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onclick="openLightbox('${screenshot}')">
+            `).join('');
             
-            // Load screenshots
-            const screenshotsContainer = document.getElementById('screenshotsContainer');
-            screenshotsContainer.innerHTML = '';
-            modpack.screenshots.forEach((screenshot, index) => {
-                const img = document.createElement('img');
-                img.src = screenshot;
-                img.alt = `${modpack.name} Screenshot ${index + 1}`;
-                img.className = 'w-full h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300';
-                img.onclick = () => openLightbox(screenshot);
-                screenshotsContainer.appendChild(img);
-            });
+            // Populate content
+            const contentContainer = document.getElementById('modal-content');
+            contentContainer.innerHTML = `
+                <div>
+                    <h4 class="text-lg font-semibold mb-2 text-red-400">Description</h4>
+                    <p class="text-gray-300 mb-4">${project.description}</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-2 text-red-400">Recommended Version</h4>
+                    <p class="text-gray-300 mb-4">Minecraft ${project.version}</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-2 text-red-400">Key Features</h4>
+                    <ul class="text-gray-300 space-y-1">
+                        ${project.features.map(feature => `<li>• ${feature}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
             
-            // Show modal
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('project-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
         // Close modal
         function closeModal() {
-            const modal = document.getElementById('modpackModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = '';
+            document.getElementById('project-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
         // Open lightbox
         function openLightbox(imageSrc) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImage = document.getElementById('lightboxImage');
-            
-            lightboxImage.src = imageSrc;
-            lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            document.getElementById('lightbox-image').src = imageSrc;
+            document.getElementById('lightbox').classList.remove('hidden');
         }
 
         // Close lightbox
         function closeLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            lightbox.classList.remove('active');
-            document.body.style.overflow = '';
+            document.getElementById('lightbox').classList.add('hidden');
         }
 
-        // Event listeners
-        document.getElementById('closeModal').addEventListener('click', closeModal);
-        document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
-        
-        // Close modal/lightbox when clicking outside
-        document.getElementById('modpackModal').addEventListener('click', (e) => {
-            if (e.target.id === 'modpackModal') closeModal();
+        // Render changelog
+        function renderChangelog() {
+            const container = document.getElementById('changelog-content');
+            const changelogEntries = Object.entries(changelogs);
+            
+            container.innerHTML = changelogEntries.map(([projectName, entries]) => `
+                <div class="glass rounded-2xl overflow-hidden">
+                    <button onclick="toggleChangelog('${projectName.replace(/\s+/g, '-')}')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white hover:bg-opacity-5 transition-all">
+                        <h3 class="text-xl font-bold text-red-400">${projectName}</h3>
+                        <svg class="w-5 h-5 transform transition-transform" id="icon-${projectName.replace(/\s+/g, '-')}">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="changelog-${projectName.replace(/\s+/g, '-')}" class="hidden border-t border-white border-opacity-10">
+                        ${entries.map(entry => `
+                            <div class="p-6 border-b border-white border-opacity-5 last:border-b-0">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h4 class="text-lg font-semibold text-white">Version ${entry.version}</h4>
+                                    <span class="text-sm text-gray-400">${entry.date}</span>
+                                </div>
+                                <ul class="text-gray-300 space-y-1">
+                                    ${entry.changes.map(change => `<li>• ${change}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle changelog expansion
+        function toggleChangelog(projectId) {
+            const content = document.getElementById(`changelog-${projectId}`);
+            const icon = document.getElementById(`icon-${projectId}`);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('project-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
         });
-        
-        document.getElementById('lightbox').addEventListener('click', (e) => {
-            if (e.target.id === 'lightbox') closeLightbox();
+
+        // Close lightbox when clicking outside
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
         });
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
+
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.getElementById('lightbox').classList.contains('active')) {
+                if (!document.getElementById('lightbox').classList.contains('hidden')) {
                     closeLightbox();
-                } else if (!document.getElementById('modpackModal').classList.contains('hidden')) {
+                } else if (!document.getElementById('project-modal').classList.contains('hidden')) {
                     closeModal();
                 }
             }
         });
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            createParticles();
-            loadModpacks();
-        });
+        // Initialize the application
+        init();
     </script>
 </body>
 </html>
