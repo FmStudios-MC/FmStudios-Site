@@ -104,7 +104,7 @@
             </div>
             
             <nav class="hidden md:flex space-x-6">
-                <button onclick="showPage('home')" class="text-white hover:text-red-400 transition-colors">Home</button>
+                <button onclick="showPage('home')" class="text-white hover:text-red-400 transition-colors">Projects</button>
                 <button onclick="showPage('changelog')" class="text-white hover:text-red-400 transition-colors">Changelog</button>
             </nav>
         </div>
@@ -255,7 +255,7 @@
     <!-- Footer -->
     <footer class="glass-header mt-12 py-6">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-gray-400">© 2025 FmStudios</p>
+            <p class="text-gray-400">© 2024-2025 FmStudios</p>
         </div>
     </footer>
 
@@ -264,6 +264,18 @@
         const projects = [
             {
                 id: 1,
+                name: "Coming Soon",
+                category: "modpacks",
+                subcategory: "tech",
+                logo: "",
+                description: "Coming Soon!",
+                version: "Neoforge 1.21.1",
+                features: ["Create", "And more..."],
+                screenshots: [],
+                downloadUrl: ""
+            },
+            {
+                id: 2,
                 name: "Create F&M 3",
                 category: "modpacks",
                 subcategory: "tech",
@@ -280,7 +292,7 @@
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-fm3"
             },
             {
-                id: 2,
+                id: 3,
                 name: "Create F&M 2 [Discontinued]",
                 category: "modpacks",
                 subcategory: "tech",
@@ -296,7 +308,7 @@
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-f-m-2"
             },
             {
-                id: 3,
+                id: 4,
                 name: "{Additions}",
                 category: "modpacks",
                 subcategory: "vanilla+",
@@ -330,6 +342,15 @@
         // Changelog data
         const changelogs = {
             "Create F&M 3": [
+                   {
+                    version: "3.2",
+                    date: "2025-07-11",
+                    changes: [
+                        "New Community Server Hoster",
+                        "You can now see train tracks on the mini/worldmap",
+                        "Removed Create Sifting"
+                    ]
+                },      
                    {
                     version: "3.1",
                     date: "2025-07-04",
