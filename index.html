@@ -283,6 +283,23 @@
             },
             {
                 id: 2,
+                name: "{Additions}",
+                category: "modpacks",
+                subcategory: "vanilla+",
+                logo: "https://cdn.modrinth.com/data/62BJPui0/b9c7d20546212d230ce6dbc228d87abe1f5d5247_96.webp",
+                description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END,Over 150+ New Food and Crops, New Mobs and more...",
+                version: "Fabric 1.21.1-1.21.8",
+                features: ["Many QOL Mods", "New Terrain Generartion", "New Building Blocks", "New Mobs", "And More!!"],
+                screenshots: [
+                    "https://media.forgecdn.net/attachments/912/951/2024-07-10_15.png",
+                    "https://media.forgecdn.net/attachments/912/955/2024-07-10_15.png",
+                    "https://media.forgecdn.net/attachments/912/952/2024-07-10_15.png"
+                ],
+                modrinthUrl: "https://modrinth.com/modpack/additions-fabric",
+                downloadUrl: "https://www.curseforge.com/minecraft/modpacks/fabis-additions"
+            },
+            {
+                id: 3,
                 name: "Create F&M 3",
                 category: "modpacks",
                 subcategory: "tech",
@@ -299,7 +316,7 @@
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-fm3"
             },
             {
-                id: 3,
+                id: 4,
                 name: "Create F&M 2 [Discontinued]",
                 category: "modpacks",
                 subcategory: "tech",
@@ -314,23 +331,6 @@
                 ],
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-f-m-2",
                 modrinthUrl: "https://modrinth.com/modpack/create-fm-2"
-            },
-            {
-                id: 4,
-                name: "{Additions}",
-                category: "modpacks",
-                subcategory: "vanilla+",
-                logo: "https://cdn.modrinth.com/data/62BJPui0/b9c7d20546212d230ce6dbc228d87abe1f5d5247_96.webp",
-                description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END,Over 150+ New Food and Crops, New Mobs and more...",
-                version: "Fabric 1.21.1-1.21.8",
-                features: ["Many QOL Mods", "New Terrain Generartion", "New Building Blocks", "New Mobs", "And More!!"],
-                screenshots: [
-                    "https://media.forgecdn.net/attachments/912/951/2024-07-10_15.png",
-                    "https://media.forgecdn.net/attachments/912/955/2024-07-10_15.png",
-                    "https://media.forgecdn.net/attachments/912/952/2024-07-10_15.png"
-                ],
-                modrinthUrl: "https://modrinth.com/modpack/additions-fabric",
-                downloadUrl: "https://www.curseforge.com/minecraft/modpacks/fabis-additions"
             },
             {
                 id: 5,
@@ -351,7 +351,39 @@
 
         // Changelog data
         const changelogs = {
-            "Create F&M 3": [
+                "{Additions}": [
+                   {
+                    version: "21.8.2",
+                    date: "2025-07-31",
+                    changes: [
+                    "New Particles",
+                    "New Food and Crops",
+                    "New Biomes and Mobs",
+                    "Item Frame Optimisation"
+                    ]
+                },
+                   {
+                    version: "21.8.1",
+                    date: "2025-07-24",
+                    changes: [
+                        "1.21.8 Release"
+                    ]
+                }
+            ],
+                    "Create F&M 3": [
+                {
+                    version: "[Deep Production] 3.3",
+                    date: "2025-07-21",
+                    changes: [
+                        "New Deep Dark Dimension",
+                        "New Recipes",
+                        "New 'Blaze Cake' variant",
+                        "New Tools and Armor",
+                        "New Mobs",
+                        "New Calcite, Ochrum, Crimsite, Dripstone recipes",
+                        "New Quests"
+                    ]
+                },                             
                    {
                     version: "3.2",
                     date: "2025-07-11",
@@ -419,6 +451,7 @@
                     ]
                 }
             ]
+
         };
 
         let currentFilter = 'all';
