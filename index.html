@@ -7,97 +7,102 @@
     <meta name="description" content="Discover amazing Minecraft modpacks, mods, and resource packs by FmStudios. Create F&M series, Additions, and more!">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
         
         * {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         :root {
-            --primary-gradient: linear-gradient(135deg, #ef4444 0%, #8b5cf6 50%, #a855f7 100%);
-            --primary-gradient-hover: linear-gradient(135deg, #dc2626 0%, #7c3aed 50%, #9333ea 100%);
-            --accent-red: #ef4444;
-            --accent-purple: #8b5cf6;
-            --accent-red-hover: #dc2626;
-            --accent-purple-hover: #7c3aed;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #ff6b35;
+            --secondary: #9b59b6;
+            --accent: #ff8c42;
+            --dark: #0a0a0f;
+            --darker: #050508;
+            --card-bg: rgba(20, 20, 30, 0.6);
+            --card-border: rgba(255, 107, 53, 0.15);
         }
         
         body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a0f1a 25%, #2d1a2d 50%, #1a0f1a 75%, #0f0f0f 100%);
+            background: var(--darker);
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(155, 89, 182, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 140, 66, 0.1) 0%, transparent 50%);
             background-attachment: fixed;
             min-height: 100vh;
             scroll-behavior: smooth;
+            color: #fff;
+        }
+        
+        /* Animated Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 107, 53, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(155, 89, 182, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
         }
         
         .glass {
-            background: var(--glass-bg);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .glass:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(30, 30, 45, 0.7);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
         }
         
         .glass-strong {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(15, 15, 25, 0.9);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
         }
         
         .glass-header {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(10, 10, 15, 0.8);
             backdrop-filter: blur(30px);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .gradient-accent {
-            background: var(--primary-gradient);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3), 0 4px 15px rgba(139, 92, 246, 0.2);
+            background: linear-gradient(135deg, #ff6b35, #9b59b6);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5), 0 4px 20px rgba(155, 89, 182, 0.4);
+            transition: all 0.3s ease;
         }
         
         .gradient-accent:hover {
-            background: var(--primary-gradient-hover);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4), 0 6px 20px rgba(139, 92, 246, 0.3);
-            transform: translateY(-1px);
-        }
-        
-        .red-accent {
-            background: linear-gradient(135deg, var(--accent-red), var(--accent-red-hover));
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        
-        .red-accent:hover {
-            background: linear-gradient(135deg, var(--accent-red-hover), #b91c1c);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-            transform: translateY(-1px);
-        }
-        
-        .purple-accent {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-hover));
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-        }
-        
-        .purple-accent:hover {
-            background: linear-gradient(135deg, var(--accent-purple-hover), #6d28d9);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-            transform: translateY(-1px);
-        }
-        
-        .blue-gradient {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-        
-        .blue-gradient:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #ff8c42, #8e44ad);
+            box-shadow: 0 6px 30px rgba(255, 107, 53, 0.6), 0 6px 30px rgba(155, 89, 182, 0.5);
+            transform: translateY(-2px);
         }
         
         .project-card {
@@ -114,8 +119,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), rgba(139, 92, 246, 0.1), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.15), rgba(155, 89, 182, 0.15), transparent);
+            transition: left 0.6s;
         }
         
         .project-card:hover::before {
@@ -124,15 +129,62 @@
         
         .project-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 60px rgba(239, 68, 68, 0.15), 0 25px 60px rgba(139, 92, 246, 0.15);
+            box-shadow: 0 25px 60px rgba(255, 107, 53, 0.3), 0 25px 60px rgba(155, 89, 182, 0.2);
         }
         
         .project-card img {
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
         }
         
         .project-card:hover img {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(2deg);
+        }
+        
+        /* Status Badges */
+        .status-discontinued {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+        }
+        
+        .status-beta {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+        
+        .status-soon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .status-active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+        
+        .status-updated {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::before {
+            width: 100%;
         }
         
         .modal {
@@ -165,26 +217,7 @@
         }
         
         .social-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-        }
-        
-        .changelog-item {
-            transition: all 0.3s ease;
-        }
-        
-        .changelog-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        .loading-skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            transform: translateY(-3px) scale(1.05);
         }
         
         .fade-in {
@@ -204,21 +237,12 @@
         
         .search-bar {
             transition: all 0.3s ease;
+            background: rgba(20, 20, 30, 0.6);
         }
         
         .search-bar:focus {
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3), 0 0 0 6px rgba(139, 92, 246, 0.2);
-        }
-        
-        .tag {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(139, 92, 246, 0.2));
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(139, 92, 246, 0.1));
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            background: rgba(30, 30, 45, 0.8);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.4), 0 0 0 6px rgba(155, 89, 182, 0.3);
         }
         
         .floating-action {
@@ -234,92 +258,79 @@
             50% { transform: translateY(-10px); }
         }
         
-        .tooltip {
+        .hero-section {
             position: relative;
+            overflow: hidden;
         }
         
-        .tooltip:hover::after {
-            content: attr(data-tooltip);
+        .hero-section::before {
+            content: '';
             position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            z-index: 50;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(155, 89, 182, 0.15));
+            border-radius: 1rem;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
         
         @media (max-width: 768px) {
-            .glass-header {
-                backdrop-filter: blur(20px);
-            }
-            
             .floating-action {
                 bottom: 1rem;
                 right: 1rem;
             }
         }
         
-        .version-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
         
-        .category-badge {
-            background: var(--primary-gradient);
-            box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         
-        /* Navigation link hover effects */
-        .nav-link:hover {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(139, 92, 246, 0.1));
-            border-radius: 0.5rem;
-            padding: 0.25rem 0.75rem;
+        /* Neon glow effects */
+        .neon-orange {
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.6), 0 0 40px rgba(255, 107, 53, 0.4);
         }
         
-        /* Enhanced gradient text */
-        .gradient-text {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .neon-purple {
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.6), 0 0 40px rgba(155, 89, 182, 0.4);
         }
         
-        /* Purple accent for secondary elements */
-        .purple-glow {
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-        }
-        
-        .red-glow {
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Enhanced hero section background */
-        .hero-bg {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
-<body class="text-white">
+<body>
+    <!-- Animated Grid Background -->
+    <div class="grid-bg"></div>
+
     <!-- Header -->
     <header class="glass-header sticky top-0 z-40 px-6 py-4 transition-all duration-300">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="max-w-7xl mx-auto flex items-center justify-between content-wrapper">
             <div class="flex items-center space-x-4">
-                <img src="https://media.forgecdn.net/avatars/1384/191/638897687073122783.jpeg" alt="FmStudios Logo" class="w-12 h-12 rounded-lg transition-transform duration-300 hover:scale-110">
+                <img src="https://i.imgur.com/5qvCJ1F.jpeg" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-orange">
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">FabiMvurice Interactive</h1>
-                    <p class="text-xs text-gray-400">Minecraft Creations</p>
+                    <p class="text-xs text-gray-400">✨ Crafting Minecraft Excellence</p>
                 </div>
             </div>
             
-            <nav class="hidden md:flex space-x-6">
-                <button onclick="showPage('home')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all font-medium">Projects</button>
-                <button onclick="showPage('changelog')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all font-medium">Changelog</button>
-                <button onclick="showPage('stats')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all font-medium">Stats</button>
+            <nav class="hidden md:flex space-x-8">
+                <button onclick="showPage('home')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all font-medium px-2 py-1">Projects</button>
+                <button onclick="showPage('changelog')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all font-medium px-2 py-1">Changelog</button>
             </nav>
             
             <!-- Mobile menu button -->
@@ -331,24 +342,28 @@
         </div>
         
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 content-wrapper">
             <div class="flex flex-col space-y-2">
-                <button onclick="showPage('home')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all py-2">Projects</button>
-                <button onclick="showPage('changelog')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all py-2">Changelog</button>
-                <button onclick="showPage('stats')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all py-2">Stats</button>
+                <button onclick="showPage('home')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all py-2">Projects</button>
+                <button onclick="showPage('changelog')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all py-2">Changelog</button>
             </div>
         </div>
     </header>
 
     <!-- Home Page -->
-    <div id="home-page" class="page fade-in">
+    <div id="home-page" class="page fade-in content-wrapper">
         <!-- Hero Section with Latest Trailer -->
-        <div class="max-w-7xl mx-auto px-6 py-8">
-            <div class="glass rounded-2xl p-6 mb-8 overflow-hidden relative hero-bg">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-500/20 via-purple-500/20 to-transparent rounded-full"></div>
-                <div class="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6 relative z-10">
-                    <div class="w-full lg:w-96">
-                        <div class="aspect-video rounded-lg overflow-hidden shadow-2xl purple-glow">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="hero-section glass rounded-3xl p-8 mb-10 overflow-hidden relative">
+                <div class="relative z-10">
+                    <div class="text-center mb-8">
+                        <span class="inline-block gradient-accent text-xs font-bold px-4 py-2 rounded-full mb-4 animate-pulse">🎬 LATEST RELEASE</span>
+                        <h2 class="text-5xl font-black mb-4 gradient-text leading-tight">Discover Our Latest Creation</h2>
+                        <p class="text-gray-300 text-lg max-w-2xl mx-auto">Experience the pinnacle of Minecraft modding with our newest project featuring cutting-edge content and innovations</p>
+                    </div>
+                    
+                    <div class="max-w-4xl mx-auto">
+                        <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl neon-purple">
                             <iframe 
                                 src="https://www.youtube.com/embed/KWAExkIxZPo?si=pw86kxVQmoO8-N-k" 
                                 class="w-full h-full" 
@@ -359,200 +374,129 @@
                             </iframe>
                         </div>
                     </div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <span class="text-xs gradient-accent px-2 py-1 rounded-full">Latest</span>
-                            <span class="text-xs text-gray-400">Featured Content</span>
-                        </div>
-                        <h2 class="text-3xl font-bold mb-4 gradient-text">Latest Project Trailer</h2>
-                        <p class="text-gray-300 text-lg leading-relaxed">Discover our newest creation! Watch the trailer to see what amazing features and content await you in our latest Minecraft project.</p>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <span class="tag text-xs px-3 py-1 rounded-full">Featured</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Search and Filter Section -->
-        <div class="max-w-7xl mx-auto px-6 mb-8">
-            <div class="glass rounded-2xl p-6">
+        <div class="max-w-7xl mx-auto px-6 mb-10">
+            <div class="glass rounded-3xl p-8">
                 <!-- Search Bar -->
-                <div class="mb-6">
-                    <div class="relative max-w-md mx-auto">
+                <div class="mb-8">
+                    <div class="relative max-w-2xl mx-auto">
                         <input 
                             type="text" 
                             id="search-input" 
-                            placeholder="Search projects..." 
-                            class="search-bar w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                            placeholder="🔍 Search for projects, features, or versions..." 
+                            class="search-bar w-full border border-white/20 rounded-2xl px-6 py-4 pl-14 text-white placeholder-gray-400 focus:outline-none transition-all"
                             oninput="searchProjects()"
                         >
-                        <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-5 top-5 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
                 </div>
                 
                 <!-- Category Filters -->
-                <div class="flex flex-wrap gap-4 justify-center">
-                    <button onclick="filterProjects('all')" class="category-btn active gradient-accent rounded-lg px-6 py-2 font-medium transition-all">All Projects</button>
-                    <button onclick="filterProjects('modpacks')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-gradient-to-r hover:from-red-500 hover:to-purple-500 transition-all">Modpacks</button>
-                    <button onclick="filterProjects('mods')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-gradient-to-r hover:from-red-500 hover:to-purple-500 transition-all">Mods</button>
-                    <button onclick="filterProjects('resourcepacks')" class="category-btn glass rounded-lg px-6 py-2 font-medium hover:bg-gradient-to-r hover:from-red-500 hover:to-purple-500 transition-all">Resource Packs</button>
+                <div class="flex flex-wrap gap-4 justify-center mb-6">
+                    <button onclick="filterProjects('all')" class="category-btn active gradient-accent rounded-xl px-8 py-3 font-semibold transition-all text-white">All Projects</button>
+                    <button onclick="filterProjects('modpacks')" class="category-btn glass rounded-xl px-8 py-3 font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-purple-500 transition-all text-white">Modpacks</button>
+                    <button onclick="filterProjects('mods')" class="category-btn glass rounded-xl px-8 py-3 font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-purple-500 transition-all text-white">Mods</button>
+                    <button onclick="filterProjects('resourcepacks')" class="category-btn glass rounded-xl px-8 py-3 font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-purple-500 transition-all text-white">Resource Packs</button>
                 </div>
                 
                 <!-- Modpack Subcategory Filter -->
-                <div id="modpack-filter" class="mt-4 flex flex-wrap gap-2 justify-center hidden">
-                    <button onclick="filterModpacks('all')" class="modpack-btn active text-sm gradient-accent rounded-lg px-4 py-1 transition-all">All Modpacks</button>
-                    <button onclick="filterModpacks('vanilla+')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all">Vanilla+</button>
-                    <button onclick="filterModpacks('tech')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all">Tech</button>
-                    <button onclick="filterModpacks('magic')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all">Magic</button>
-                    <button onclick="filterModpacks('adventure')" class="modpack-btn text-sm glass rounded-lg px-4 py-1 hover:bg-gradient-to-r hover:from-red-400 hover:to-purple-400 transition-all">Adventure</button>
+                <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden">
+                    <button onclick="filterModpacks('all')" class="modpack-btn active text-sm gradient-accent rounded-xl px-6 py-2 transition-all text-white font-medium">All Types</button>
+                    <button onclick="filterModpacks('vanilla+')" class="modpack-btn text-sm glass rounded-xl px-6 py-2 hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all text-white font-medium">Vanilla+</button>
+                    <button onclick="filterModpacks('tech')" class="modpack-btn text-sm glass rounded-xl px-6 py-2 hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all text-white font-medium">Tech</button>
+                    <button onclick="filterModpacks('magic')" class="modpack-btn text-sm glass rounded-xl px-6 py-2 hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all text-white font-medium">Magic</button>
+                    <button onclick="filterModpacks('adventure')" class="modpack-btn text-sm glass rounded-xl px-6 py-2 hover:bg-gradient-to-r hover:from-orange-400 hover:to-purple-400 transition-all text-white font-medium">Adventure</button>
                 </div>
                 
                 <!-- Results count -->
-                <div class="mt-4 text-center">
-                    <span id="results-count" class="text-sm text-gray-400"></span>
+                <div class="mt-6 text-center">
+                    <span id="results-count" class="text-sm text-gray-400 font-medium"></span>
                 </div>
             </div>
         </div>
 
         <!-- Social Media & Buttons -->
-        <div class="max-w-7xl mx-auto px-6 mb-8">
-            <div class="glass rounded-2xl p-6">
-                <h3 class="text-xl font-semibold text-center mb-4 gradient-text">Connect With Us</h3>
-                <div class="flex flex-wrap justify-center gap-4">
+        <div class="max-w-7xl mx-auto px-6 mb-10">
+            <div class="glass rounded-3xl p-8">
+                <h3 class="text-2xl font-bold text-center mb-6 gradient-text">🌟 Connect With Our Community</h3>
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
                     <!-- Social Media Buttons -->
-                    <a href="https://x.com/fmstudiosmc" class="tooltip social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 transition-all" data-tooltip="Follow us on Twitter">
+                    <a href="https://x.com/fmstudiosmc" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 transition-all">
                         <svg class="w-5 h-5" fill="#1DA1F2" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
-                        <span class="text-white">Twitter</span>
+                        <span class="text-white font-medium">Twitter</span>
                     </a>
                     
-                    <a href="https://www.youtube.com/@fm-studios-mc" class="tooltip social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gradient-to-r hover:from-red-500 hover:to-red-700 transition-all" data-tooltip="Subscribe to our YouTube">
+                    <a href="https://www.youtube.com/@fm-studios-mc" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 hover:bg-gradient-to-r hover:from-red-500 hover:to-red-700 transition-all">
                         <svg class="w-5 h-5" fill="#FF0000" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                        <span class="text-white">YouTube</span>
+                        <span class="text-white font-medium">YouTube</span>
                     </a>
                     
-                    <a href="https://bsky.app/profile/fmstudios.bsky.social" class="tooltip social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gradient-to-r hover:from-sky-400 hover:to-blue-500 transition-all" data-tooltip="Follow us on Bluesky">
+                    <a href="https://bsky.app/profile/fmstudios.bsky.social" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 hover:bg-gradient-to-r hover:from-sky-400 hover:to-blue-500 transition-all">
                         <svg class="w-5 h-5" fill="#00A8E8" viewBox="0 0 24 24"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.019-.275.039-.415.058-2.670-.297-5.568.628-6.383 3.364C.378 17.805 0 22.247 0 22.935c0 .688.139 1.861.902 2.204.659.299 1.664.621 4.3-1.239 2.752-1.942 5.711-5.881 6.798-7.995 1.087 2.114 4.046 6.053 6.798 7.995 2.636 1.86 3.641 1.538 4.3 1.239.763-.343.902-1.516.902-2.204 0-.688-.378-5.13-.624-5.958-.815-2.736-3.713-3.661-6.383-3.364-.14-.019-.277-.039-.415-.058.14.017.279.036.415.056 2.67.296 5.568-.628 6.383-3.364.246-.829.624-5.789.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.238C16.046 4.747 13.087 8.686 12 10.8z"/></svg>
-                        <span class="text-white">Bluesky</span>
+                        <span class="text-white font-medium">Bluesky</span>
                     </a>
                     
-                    <a href="https://discord.gg/x9jsed8qyR" class="tooltip social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-600 transition-all" data-tooltip="Join our Discord server">
+                    <a href="https://discord.gg/x9jsed8qyR" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-600 transition-all">
                         <svg class="w-5 h-5" fill="#5865F2" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/></svg>
-                        <span class="text-white">Discord</span>
+                        <span class="text-white font-medium">Discord</span>
                     </a>
                     
-                    <a href="https://modrinth.com/user/FabiMvurice_Interactive" class="tooltip social-btn glass rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 transition-all" data-tooltip="Visit our Modrinth profile">
-                        <span class="text-white">Modrinth</span>
+                    <a href="https://modrinth.com/user/FabiMvurice_Interactive" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-700 transition-all">
+                        <span class="text-white font-medium">🟢 Modrinth</span>
                     </a>
                 </div>
                 
                 <!-- Support Buttons -->
-                <div class="mt-6 flex flex-wrap justify-center gap-4">
-                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" class="tooltip social-btn blue-gradient rounded-lg px-6 py-3 text-white font-medium transition-all" data-tooltip="Support our work with a donation">
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="https://www.paypal.com/cgi-bin/webscr?return=https://www.curseforge.com/minecraft/modpacks/create-fm3&cn=Add+special+instructions+to+the+addon+author()&business=fabiankreissler%40outlook.de&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted&cancel_return=https://www.curseforge.com/minecraft/modpacks/create-fm3&lc=US&item_name=Create+F%26M+3+(from+www.curseforge.com)&cmd=_donations&rm=1&no_shipping=1&currency_code=EUR" class="social-btn rounded-xl px-8 py-4 text-white font-semibold transition-all bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800">
                         <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
-                        Donate
+                        Support Us
                     </a>
                     
-                    <a href="https://billing.kinetichosting.net/aff.php?aff=855" class="tooltip social-btn glass rounded-lg px-6 py-3 text-white font-medium border-2 border-transparent bg-gradient-to-r from-red-500 to-purple-500 hover:from-red-600 hover:to-purple-600 transition-all" data-tooltip="Get hosting with 25% off using code: fmstudios">
+                    <a href="https://billing.kinetichosting.net/aff.php?aff=855" class="social-btn rounded-xl px-8 py-4 text-white font-semibold transition-all bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600">
                         <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                         </svg>
-                        Kinetic Hosting Partner
+                        Kinetic Hosting (25% OFF)
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Projects Grid -->
-        <div class="max-w-7xl mx-auto px-6 pb-12">
-            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="max-w-7xl mx-auto px-6 pb-16">
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Projects will be populated by JavaScript -->
             </div>
             
             <!-- No results message -->
-            <div id="no-results" class="hidden text-center py-12">
-                <div class="glass rounded-2xl p-8">
-                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div id="no-results" class="hidden text-center py-16">
+                <div class="glass rounded-3xl p-12">
+                    <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.441-.935-5.99-2.448m0 0A7.962 7.962 0 014 9c0-1.657.416-3.22 1.15-4.512M6.01 6.512A7.962 7.962 0 0112 3c2.34 0 4.441.935 5.99 2.448m0 0A7.962 7.962 0 0120 9c0-1.657-.416-3.22-1.15-4.512"/>
                     </svg>
-                    <h3 class="text-xl font-semibold text-gray-300 mb-2">No projects found</h3>
-                    <p class="text-gray-400">Try adjusting your search or filter criteria</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Page -->
-    <div id="stats-page" class="page hidden fade-in">
-        <div class="max-w-6xl mx-auto px-6 py-8">
-            <h1 class="text-4xl font-bold text-center mb-8 gradient-text">Project Statistics</h1>
-            
-            <!-- Overall Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stats-card rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold gradient-text mb-2">5</div>
-                    <div class="text-gray-300">Total Projects</div>
-                </div>
-                <div class="stats-card rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-blue-400 mb-2">4</div>
-                    <div class="text-gray-300">Modpacks</div>
-                </div>
-                <div class="stats-card rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-green-400 mb-2">1</div>
-                    <div class="text-gray-300">Resource Packs</div>
-                </div>
-                <div class="stats-card rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-purple-400 mb-2">3</div>
-                    <div class="text-gray-300">MC Versions</div>
-                </div>
-            </div>
-            
-            <!-- Version Distribution -->
-            <div class="glass rounded-2xl p-6 mb-8">
-                <h3 class="text-xl font-semibold mb-4 gradient-text">Minecraft Version Distribution</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300">1.21.1-1.21.8</span>
-                        <div class="flex-1 mx-4 bg-gray-700 rounded-full h-2">
-                            <div class="bg-gradient-to-r from-red-400 to-purple-600 h-2 rounded-full" style="width: 60%"></div>
-                        </div>
-                        <span class="text-sm text-gray-400">3 projects</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300">1.20.1</span>
-                        <div class="flex-1 mx-4 bg-gray-700 rounded-full h-2">
-                            <div class="bg-gradient-to-r from-purple-400 to-red-600 h-2 rounded-full" style="width: 40%"></div>
-                        </div>
-                        <span class="text-sm text-gray-400">2 projects</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Platform Distribution -->
-            <div class="glass rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-4 gradient-text">Platform Availability</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-orange-400 mb-2">5</div>
-                        <div class="text-gray-300">CurseForge</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-green-400 mb-2">3</div>
-                        <div class="text-gray-300">Modrinth</div>
-                    </div>
+                    <h3 class="text-2xl font-bold text-gray-300 mb-3">No projects found</h3>
+                    <p class="text-gray-400 text-lg">Try adjusting your search or filter criteria</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Changelog Page -->
-    <div id="changelog-page" class="page hidden fade-in">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <h1 class="text-4xl font-bold text-center mb-8 gradient-text">Project Changelogs</h1>
+    <div id="changelog-page" class="page hidden fade-in content-wrapper">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-black mb-4 gradient-text">📋 Project Changelogs</h1>
+                <p class="text-gray-300 text-lg">Track all updates and improvements across our projects</p>
+            </div>
             <div id="changelog-content" class="space-y-6">
                 <!-- Changelog content will be populated by JavaScript -->
             </div>
@@ -560,27 +504,27 @@
     </div>
 
     <!-- Project Modal -->
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden z-50 flex items-center justify-center p-4">
-        <div class="modal-content glass-strong rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h2 id="modal-title" class="text-3xl font-bold gradient-text mb-2"></h2>
-                        <div class="flex flex-wrap gap-2" id="modal-badges">
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 modal hidden z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-strong rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="flex-1">
+                        <h2 id="modal-title" class="text-4xl font-black gradient-text mb-4"></h2>
+                        <div class="flex flex-wrap gap-3" id="modal-badges">
                             <!-- Badges will be populated -->
                         </div>
                     </div>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-white text-3xl transition-colors">&times;</button>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white text-4xl transition-colors ml-4">&times;</button>
                 </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2">
-                        <h3 class="text-xl font-semibold mb-4 text-white">Screenshots & Media</h3>
-                        <div id="modal-screenshots" class="grid grid-cols-2 gap-3 mb-6">
+                        <h3 class="text-2xl font-bold mb-4 gradient-text">📸 Screenshots & Media</h3>
+                        <div id="modal-screenshots" class="grid grid-cols-2 gap-4 mb-8">
                             <!-- Screenshots will be populated -->
                         </div>
                         
-                        <div id="modal-description" class="glass rounded-lg p-4">
+                        <div id="modal-description" class="glass rounded-2xl p-6">
                             <!-- Description will be populated -->
                         </div>
                     </div>
@@ -590,18 +534,18 @@
                             <!-- Project details will be populated -->
                         </div>
                         
-                        <div class="mt-6 space-y-3">
-                            <a id="modal-download" href="#" class="block w-full gradient-accent rounded-lg px-6 py-3 font-medium text-center transition-all hover:scale-105">
-                                <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="mt-8 space-y-4">
+                            <a id="modal-download" href="#" class="block w-full gradient-accent rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 text-white text-lg">
+                                <svg class="w-6 h-6 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                                 </svg>
-                                Download on CurseForge
+                                CurseForge
                             </a>
-                            <a id="modal-modrinth" href="#" class="block w-full bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 rounded-lg px-6 py-3 font-medium text-center transition-all hover:scale-105 hidden">
-                                <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <a id="modal-modrinth" href="#" class="block w-full bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 hidden text-white text-lg">
+                                <svg class="w-6 h-6 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                                 </svg>
-                                Download on Modrinth
+                                Modrinth
                             </a>
                         </div>
                     </div>
@@ -611,19 +555,19 @@
     </div>
 
     <!-- Lightbox -->
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 lightbox hidden z-[70] flex items-center justify-center p-4">
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4">
         <div class="relative max-w-6xl max-h-[90vh]">
-            <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white text-3xl hover:text-red-400 transition-colors z-10">&times;</button>
-            <img id="lightbox-image" src="" alt="" class="max-w-full max-h-full rounded-lg shadow-2xl">
-            <div class="absolute bottom-4 left-4 right-4 text-center">
-                <p id="lightbox-caption" class="text-white bg-black bg-opacity-50 rounded-lg px-4 py-2 inline-block"></p>
+            <button onclick="closeLightbox()" class="absolute -top-16 right-0 text-white text-4xl hover:text-pink-400 transition-colors z-10">&times;</button>
+            <img id="lightbox-image" src="" alt="" class="max-w-full max-h-full rounded-2xl shadow-2xl">
+            <div class="absolute bottom-6 left-6 right-6 text-center">
+                <p id="lightbox-caption" class="text-white bg-black bg-opacity-70 rounded-xl px-6 py-3 inline-block font-medium"></p>
             </div>
         </div>
     </div>
 
     <!-- Floating Action Button -->
     <div class="floating-action">
-        <button onclick="scrollToTop()" class="tooltip glass rounded-full p-3 text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-purple-500 transition-all" data-tooltip="Back to top">
+        <button onclick="scrollToTop()" class="glass rounded-full p-4 text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-purple-500 transition-all neon-orange">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
             </svg>
@@ -631,33 +575,32 @@
     </div>
 
     <!-- Footer -->
-    <footer class="glass-header mt-12 py-8">
+    <footer class="glass-header mt-16 py-12 content-wrapper">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-6">
-                <h3 class="text-2xl font-bold gradient-text mb-2">FabiMvurice Interactive</h3>
-                <p class="text-gray-400 mb-4">Creating amazing Minecraft experiences since 2023</p>
-                <div class="flex justify-center space-x-6 text-sm">
-                </div>
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-black gradient-text mb-3">FabiMvurice Interactive</h3>
+                <p class="text-gray-400 text-lg mb-6">Creating amazing Minecraft experiences since 2023</p>
             </div>
-            <div class="border-t border-white border-opacity-10 pt-6 text-center">
-                <p class="text-gray-400 text-sm">2023-2025 FabiMvurice Interactive</p>
-                <p class="text-gray-500 text-xs mt-2">Made with ❤️ for the Minecraft community</p>
+            <div class="border-t border-white border-opacity-10 pt-8 text-center">
+                <p class="text-gray-400">© 2023-2025 FabiMvurice Interactive</p>
+                <p class="text-gray-500 text-sm mt-2">Made with ❤️ for the Minecraft community</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Enhanced project data with more details
+        // Enhanced project data with status badges
         const projects = [
             {
                 id: 1,
                 name: "Create Unbound",
                 category: "modpacks",
                 subcategory: "tech",
+                status: "soon", // soon, active, discontinued, beta, updated
                 logo: "https://media.forgecdn.net/avatars/1459/645/638947343050937463.png",
-                description: "COMING SOON",
+                description: "COMING SOON - An exciting new Create-focused modpack that will revolutionize your automation experience!",
                 version: "Neoforge 1.21.1",
-                features: ["Create", "Coming Soon"],
+                features: ["Create", "Coming Soon", "Revolutionary Automation"],
                 screenshots: [
                     "https://media.forgecdn.net/avatars/1459/645/638947343050937463.png"
                 ],
@@ -670,6 +613,7 @@
                 name: "{Additions}",
                 category: "modpacks",
                 subcategory: "vanilla+",
+                status: "active",
                 logo: "https://cdn.modrinth.com/data/62BJPui0/b9c7d20546212d230ce6dbc228d87abe1f5d5247_96.webp",
                 description: "Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END, Over 150+ New Food and Crops, New Mobs and more...",
                 version: "Fabric 1.21.1-1.21.8",
@@ -689,6 +633,7 @@
                 name: "Create F&M 3",
                 category: "modpacks",
                 subcategory: "tech",
+                status: "updated",
                 logo: "https://media.forgecdn.net/attachments/1203/147/fm3logonew-png.png",
                 description: "Create F&M 3 is the latest evolution of the Create: F&M series, bringing unparalleled mechanical automation and engineering creativity to Minecraft. Built around the Create mod and its powerful add-ons, this modpack lets you design intricate contraptions, optimize production lines, and build sprawling industrial systems with endless possibilities.",
                 version: "Neoforge 1.21.1",
@@ -705,9 +650,10 @@
             },
             {
                 id: 4,
-                name: "Create F&M 2 [Discontinued]",
+                name: "Create F&M 2",
                 category: "modpacks",
                 subcategory: "tech",
+                status: "discontinued",
                 logo: "https://media.forgecdn.net/avatars/thumbnails/1132/43/64/64/638691888215133405.png",
                 description: "Create F&M2 is perfect for the Create mod experience. It adds the create mod and many other addons for the Create mod. The terrain will be generated differently which adds new beautiful landscapes. You can fly across these landscapes with the new planes from Immersive Aircraft's. If you want to farm and eat, then the Farmers Delight mod is perfect for you! You can harvest new crops and make many new different types of food.",
                 version: "Forge 1.20.1",
@@ -720,13 +666,13 @@
                 downloadUrl: "https://www.curseforge.com/minecraft/modpacks/create-f-m-2",
                 modrinthUrl: "https://modrinth.com/modpack/create-fm-2",
                 downloads: "2K+",
-                lastUpdate: "2024-07-03",
-                discontinued: true
+                lastUpdate: "2024-07-03"
             },
             {
                 id: 5,
                 name: "Fabi´s Lootr",
                 category: "resourcepacks",
+                status: "active",
                 logo: "https://media.forgecdn.net/attachments/1206/422/lootr-png.png",
                 description: "Transform your Lootr chests and barrels with these high-quality, realistic textures. This resource pack provides a fresh visual upgrade to your loot containers, making treasure hunting even more exciting with enhanced visual appeal.",
                 version: "1.20.1+",
@@ -741,6 +687,30 @@
                 lastUpdate: "2025-07-15"
             }
         ];
+
+        // Status badge configuration
+        const statusConfig = {
+            discontinued: {
+                label: "🚫 Discontinued",
+                class: "status-discontinued"
+            },
+            beta: {
+                label: "⚠️ Beta",
+                class: "status-beta"
+            },
+            soon: {
+                label: "🔜 Coming Soon",
+                class: "status-soon"
+            },
+            active: {
+                label: "✅ Active",
+                class: "status-active"
+            },
+            updated: {
+                label: "🆕 Recently Updated",
+                class: "status-updated"
+            }
+        };
 
         // Enhanced changelog data
         const changelogs = {
@@ -818,7 +788,6 @@
             renderChangelog();
             updateResultsCount();
             
-            // Add loading animation
             setTimeout(() => {
                 document.querySelector('.fade-in').style.opacity = '1';
             }, 100);
@@ -844,26 +813,22 @@
                 targetPage.style.opacity = '1';
             }
             
-            // Update active nav link
             document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-red-400', 'to-purple-400');
+                link.classList.remove('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-orange-400', 'to-purple-400');
                 link.classList.add('text-white');
             });
             event.target.classList.remove('text-white');
-            event.target.classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-red-400', 'to-purple-400');
+            event.target.classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-orange-400', 'to-purple-400');
         }
 
-        // Enhanced search functionality
         function searchProjects() {
             searchQuery = document.getElementById('search-input').value.toLowerCase();
             applyFilters();
         }
 
-        // Enhanced filter system
         function filterProjects(category) {
             currentFilter = category;
             
-            // Update active button with enhanced animations
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active', 'gradient-accent');
                 btn.classList.add('glass');
@@ -871,7 +836,6 @@
             event.target.classList.add('active', 'gradient-accent');
             event.target.classList.remove('glass');
             
-            // Show/hide modpack subcategory filter with animation
             const modpackFilter = document.getElementById('modpack-filter');
             if (category === 'modpacks') {
                 modpackFilter.classList.remove('hidden');
@@ -886,11 +850,9 @@
             applyFilters();
         }
 
-        // Enhanced modpack filtering
         function filterModpacks(subcategory) {
             currentModpackFilter = subcategory;
             
-            // Update active button
             document.querySelectorAll('.modpack-btn').forEach(btn => {
                 btn.classList.remove('active', 'gradient-accent');
                 btn.classList.add('glass');
@@ -901,20 +863,16 @@
             applyFilters();
         }
 
-        // Apply all filters and search
         function applyFilters() {
             filteredProjects = projects.filter(project => {
-                // Category filter
                 if (currentFilter !== 'all' && project.category !== currentFilter) {
                     return false;
                 }
                 
-                // Subcategory filter
                 if (currentFilter === 'modpacks' && currentModpackFilter !== 'all' && project.subcategory !== currentModpackFilter) {
                     return false;
                 }
                 
-                // Search filter
                 if (searchQuery && !project.name.toLowerCase().includes(searchQuery) && 
                     !project.description.toLowerCase().includes(searchQuery) &&
                     !project.features.some(feature => feature.toLowerCase().includes(searchQuery))) {
@@ -928,7 +886,12 @@
             updateResultsCount();
         }
 
-        // Enhanced project rendering with animations
+        function getStatusBadge(status) {
+            const config = statusConfig[status];
+            if (!config) return '';
+            return `<span class="${config.class} text-xs font-bold px-3 py-1 rounded-full text-white">${config.label}</span>`;
+        }
+
         function renderProjects() {
             const grid = document.getElementById('projects-grid');
             const noResults = document.getElementById('no-results');
@@ -941,44 +904,52 @@
             
             noResults.classList.add('hidden');
             
-            // Add loading skeleton
             grid.innerHTML = Array(filteredProjects.length).fill().map(() => `
-                <div class="loading-skeleton glass rounded-2xl p-6 h-64"></div>
+                <div class="loading-skeleton glass rounded-3xl p-6 h-80"></div>
             `).join('');
             
-            // Render actual projects after short delay for smooth transition
             setTimeout(() => {
                 grid.innerHTML = filteredProjects.map((project, index) => `
-                    <div class="project-card glass rounded-2xl p-6 fade-in" onclick="openModal(${project.id})" style="animation-delay: ${index * 0.1}s">
-                        <div class="flex items-center space-x-4 mb-4">
+                    <div class="project-card glass rounded-3xl p-6 fade-in" onclick="openModal(${project.id})" style="animation-delay: ${index * 0.1}s">
+                        <div class="flex items-start space-x-4 mb-4">
                             <div class="relative">
-                                <img src="${project.logo}" alt="${project.name}" class="w-16 h-16 rounded-lg object-cover">
-                                ${project.discontinued ? '<div class="absolute -top-1 -right-1 bg-red-500 text-xs px-1 rounded">EOL</div>' : ''}
+                                <img src="${project.logo}" alt="${project.name}" class="w-20 h-20 rounded-2xl object-cover shadow-lg">
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-white mb-1">${project.name}</h3>
-                                <div class="flex flex-wrap gap-2 mb-2">
-                                    <span class="category-badge text-xs px-2 py-1 rounded-full text-white capitalize">${project.category}</span>
-                                    <span class="version-badge text-xs px-2 py-1 rounded-full text-white">${project.version}</span>
+                                <h3 class="text-xl font-bold text-white mb-2">${project.name}</h3>
+                                <div class="flex flex-wrap gap-2">
+                                    ${getStatusBadge(project.status)}
                                 </div>
                             </div>
                         </div>
                         
-                        <p class="text-gray-300 text-sm mb-4 line-clamp-3">${project.description}</p>
-                        
-                        <div class="flex justify-between items-center text-xs">
-                            <div class="flex items-center space-x-4 text-gray-400">
-                                <span title="Downloads">📥 ${project.downloads}</span>
-                                <span title="Last Update">🕒 ${project.lastUpdate}</span>
+                                                    <div class="mb-4">
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gradient-to-r from-orange-500 to-purple-500 text-xs font-semibold px-3 py-1 rounded-full text-white capitalize">${project.category}</span>
+                                <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-xs font-semibold px-3 py-1 rounded-full text-white">${project.version}</span>
                             </div>
-                            <span class="gradient-text font-medium">View Details →</span>
+                        </div>
+                        
+                        <p class="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">${project.description}</p>
+                        
+                        <div class="flex justify-between items-center text-xs pt-4 border-t border-white border-opacity-10">
+                            <div class="flex items-center space-x-4 text-gray-400">
+                                <span class="flex items-center space-x-1">
+                                    <span>📥</span>
+                                    <span class="font-medium">${project.downloads}</span>
+                                </span>
+                                <span class="flex items-center space-x-1">
+                                    <span>🕒</span>
+                                    <span class="font-medium">${project.lastUpdate}</span>
+                                </span>
+                            </div>
+                            <span class="gradient-text font-bold text-sm">View Details →</span>
                         </div>
                     </div>
                 `).join('');
             }, 200);
         }
 
-        // Update results count
         function updateResultsCount() {
             const count = filteredProjects.length;
             const total = projects.length;
@@ -991,23 +962,20 @@
             }
         }
 
-        // Enhanced modal with better content organization
         function openModal(projectId) {
             const project = projects.find(p => p.id === projectId);
             if (!project) return;
             
-            // Set title and badges
             document.getElementById('modal-title').textContent = project.name;
             
             const badgesContainer = document.getElementById('modal-badges');
             badgesContainer.innerHTML = `
-                <span class="category-badge text-xs px-3 py-1 rounded-full text-white capitalize">${project.category}</span>
-                <span class="version-badge text-xs px-3 py-1 rounded-full text-white">${project.version}</span>
-                ${project.discontinued ? '<span class="bg-red-500 text-xs px-3 py-1 rounded-full text-white">Discontinued</span>' : ''}
-                <span class="bg-gray-600 text-xs px-3 py-1 rounded-full text-white">📥 ${project.downloads}</span>
+                ${getStatusBadge(project.status)}
+                <span class="bg-gradient-to-r from-orange-500 to-purple-500 text-xs font-bold px-4 py-2 rounded-full text-white capitalize">${project.category}</span>
+                <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-xs font-bold px-4 py-2 rounded-full text-white">${project.version}</span>
+                <span class="bg-gray-600 text-xs font-bold px-4 py-2 rounded-full text-white">📥 ${project.downloads}</span>
             `;
             
-            // Set download links
             document.getElementById('modal-download').href = project.downloadUrl;
             
             const modrinthButton = document.getElementById('modal-modrinth');
@@ -1018,66 +986,82 @@
                 modrinthButton.classList.add('hidden');
             }
             
-            // Populate screenshots
             const screenshotsContainer = document.getElementById('modal-screenshots');
             if (project.screenshots.length > 0) {
                 screenshotsContainer.innerHTML = project.screenshots.map((screenshot, index) => `
-                    <img src="${screenshot}" alt="Screenshot ${index + 1}" class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onclick="openLightbox('${screenshot}', 'Screenshot ${index + 1}')">
+                    <img src="${screenshot}" alt="Screenshot ${index + 1}" class="w-full h-40 object-cover rounded-xl cursor-pointer hover:opacity-80 transition-all hover:scale-105" onclick="openLightbox('${screenshot}', 'Screenshot ${index + 1}')">
                 `).join('');
             } else {
                 screenshotsContainer.innerHTML = `
-                    <div class="col-span-2 text-center text-gray-400 py-8">
-                        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="col-span-2 text-center text-gray-400 py-12">
+                        <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <p>No screenshots available</p>
+                        <p class="font-medium">No screenshots available</p>
                     </div>
                 `;
             }
             
-            // Populate description
             const descriptionContainer = document.getElementById('modal-description');
             descriptionContainer.innerHTML = `
-                <h4 class="text-lg font-semibold mb-3 gradient-text">About This Project</h4>
+                <h4 class="text-xl font-bold mb-4 gradient-text">📖 About This Project</h4>
                 <p class="text-gray-300 leading-relaxed">${project.description}</p>
             `;
             
-            // Populate project details
             const contentContainer = document.getElementById('modal-content');
             contentContainer.innerHTML = `
-                <div class="glass rounded-lg p-4">
-                    <h4 class="text-lg font-semibold mb-3 gradient-text">Project Details</h4>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Version:</span>
-                            <span class="text-white font-medium">${project.version}</span>
+                <div class="glass rounded-2xl p-6">
+                    <h4 class="text-xl font-bold mb-4 gradient-text">📊 Project Details</h4>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-10">
+                            <span class="text-gray-400 font-medium">Version:</span>
+                            <span class="text-white font-bold">${project.version}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Downloads:</span>
-                            <span class="text-white font-medium">${project.downloads}</span>
+                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-10">
+                            <span class="text-gray-400 font-medium">Downloads:</span>
+                            <span class="text-white font-bold">${project.downloads}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Last Update:</span>
-                            <span class="text-white font-medium">${project.lastUpdate}</span>
+                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-10">
+                            <span class="text-gray-400 font-medium">Last Update:</span>
+                            <span class="text-white font-bold">${project.lastUpdate}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Category:</span>
-                            <span class="text-white font-medium capitalize">${project.category}</span>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-400 font-medium">Category:</span>
+                            <span class="text-white font-bold capitalize">${project.category}</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="glass rounded-lg p-4">
-                    <h4 class="text-lg font-semibold mb-3 gradient-text">Key Features</h4>
-                    <ul class="text-gray-300 space-y-2 text-sm">
-                        ${project.features.map(feature => `<li class="flex items-start space-x-2"><span class="gradient-text mt-1">•</span><span>${feature}</span></li>`).join('')}
+                <div class="glass rounded-2xl p-6">
+                    <h4 class="text-xl font-bold mb-4 gradient-text">✨ Key Features</h4>
+                    <ul class="text-gray-300 space-y-3 text-sm">
+                        ${project.features.map(feature => `
+                            <li class="flex items-start space-x-3 p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-colors">
+                                <span class="gradient-text text-lg">•</span>
+                                <span>${feature}</span>
+                            </li>
+                        `).join('')}
                     </ul>
                 </div>
                 
-                ${project.discontinued ? `
-                <div class="glass rounded-lg p-4 border-2 border-red-500/30 bg-red-500/10">
-                    <h4 class="text-lg font-semibold mb-2 text-red-400">⚠️ Project Status</h4>
-                    <p class="text-gray-300 text-sm">This project has been discontinued and is no longer receiving updates. Downloads are still available for legacy use.</p>
+                ${project.status === 'discontinued' ? `
+                <div class="glass rounded-2xl p-6 border-2 border-red-500/30 bg-red-500/10">
+                    <h4 class="text-xl font-bold mb-3 text-red-400">⚠️ Project Status</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">This project has been discontinued and is no longer receiving updates. Downloads are still available for legacy use.</p>
+                </div>
+                ` : ''}
+                
+                ${project.status === 'soon' ? `
+                <div class="glass rounded-2xl p-6 border-2 border-purple-500/30 bg-purple-500/10">
+                    <h4 class="text-xl font-bold mb-3 text-purple-400">🔜 Coming Soon</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">This project is currently in development. Stay tuned for the official release!</p>
+                </div>
+                ` : ''}
+                
+                ${project.status === 'beta' ? `
+                <div class="glass rounded-2xl p-6 border-2 border-orange-500/30 bg-orange-500/10">
+                    <h4 class="text-xl font-bold mb-3 text-orange-400">⚠️ Beta Version</h4>
+                    <p class="text-gray-300 text-sm leading-relaxed">This project is currently in beta. Some features may be incomplete or unstable.</p>
                 </div>
                 ` : ''}
             `;
@@ -1086,7 +1070,6 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // Enhanced modal closing
         function closeModal() {
             const modal = document.getElementById('project-modal');
             modal.style.opacity = '0';
@@ -1097,14 +1080,12 @@
             }, 200);
         }
 
-        // Enhanced lightbox with caption support
         function openLightbox(imageSrc, caption = '') {
             document.getElementById('lightbox-image').src = imageSrc;
             document.getElementById('lightbox-caption').textContent = caption;
             document.getElementById('lightbox').classList.remove('hidden');
         }
 
-        // Enhanced lightbox closing
         function closeLightbox() {
             const lightbox = document.getElementById('lightbox');
             lightbox.style.opacity = '0';
@@ -1114,39 +1095,38 @@
             }, 200);
         }
 
-        // Enhanced changelog rendering with better styling
         function renderChangelog() {
             const container = document.getElementById('changelog-content');
             const changelogEntries = Object.entries(changelogs);
             
             container.innerHTML = changelogEntries.map(([projectName, entries]) => `
-                <div class="glass rounded-2xl overflow-hidden">
+                <div class="glass rounded-3xl overflow-hidden">
                     <button onclick="toggleChangelog('${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white hover:bg-opacity-5 transition-all">
                         <div>
-                            <h3 class="text-xl font-bold gradient-text mb-1">${projectName}</h3>
-                            <p class="text-sm text-gray-400">${entries.length} version${entries.length > 1 ? 's' : ''}</p>
+                            <h3 class="text-2xl font-bold gradient-text mb-2">${projectName}</h3>
+                            <p class="text-sm text-gray-400 font-medium">${entries.length} version${entries.length > 1 ? 's' : ''} • Click to expand</p>
                         </div>
-                        <svg class="w-6 h-6 transform transition-transform duration-300" id="icon-${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-8 h-8 transform transition-transform duration-300" id="icon-${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
                     <div id="changelog-${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}" class="hidden border-t border-white border-opacity-10">
                         ${entries.map((entry, index) => `
                             <div class="p-6 ${index < entries.length - 1 ? 'border-b border-white border-opacity-5' : ''}">
-                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
                                     <div>
-                                        <h4 class="text-lg font-semibold text-white mb-1">Version ${entry.version}</h4>
-                                        <span class="text-sm text-gray-400">${entry.date}</span>
+                                        <h4 class="text-xl font-bold text-white mb-2">Version ${entry.version}</h4>
+                                        <span class="text-sm text-gray-400 font-medium">📅 ${entry.date}</span>
                                     </div>
-                                    <span class="text-xs bg-gradient-to-r from-blue-500 to-purple-500 px-2 py-1 rounded-full text-white mt-2 sm:mt-0 self-start">
+                                    <span class="text-xs bg-gradient-to-r from-blue-500 to-purple-500 px-3 py-1 rounded-full text-white mt-3 sm:mt-0 self-start font-bold">
                                         ${entry.changes.length} change${entry.changes.length > 1 ? 's' : ''}
                                     </span>
                                 </div>
-                                <ul class="text-gray-300 space-y-2">
+                                <ul class="text-gray-300 space-y-3">
                                     ${entry.changes.map(change => `
-                                        <li class="flex items-start space-x-3 p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-colors">
-                                            <span class="text-green-400 mt-1 flex-shrink-0">✓</span>
-                                            <span class="text-sm">${change}</span>
+                                        <li class="flex items-start space-x-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-5 transition-colors">
+                                            <span class="text-green-400 mt-1 flex-shrink-0 text-lg">✓</span>
+                                            <span class="text-sm leading-relaxed">${change}</span>
                                         </li>
                                     `).join('')}
                                 </ul>
@@ -1157,7 +1137,6 @@
             `).join('');
         }
 
-        // Enhanced changelog toggle with smooth animations
         function toggleChangelog(projectId) {
             const content = document.getElementById(`changelog-${projectId}`);
             const icon = document.getElementById(`icon-${projectId}`);
@@ -1183,13 +1162,11 @@
             }
         }
 
-        // Mobile menu toggle
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         }
 
-        // Scroll to top functionality
         function scrollToTop() {
             window.scrollTo({
                 top: 0,
@@ -1197,7 +1174,6 @@
             });
         }
 
-        // Show/hide floating action button based on scroll
         function handleScroll() {
             const fab = document.querySelector('.floating-action');
             if (window.scrollY > 300) {
@@ -1209,26 +1185,21 @@
             }
         }
 
-        // Enhanced event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Add scroll listener for floating action button
             window.addEventListener('scroll', handleScroll);
             
-            // Close modal when clicking outside
             document.getElementById('project-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
                 }
             });
 
-            // Close lightbox when clicking outside
             document.getElementById('lightbox').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeLightbox();
                 }
             });
 
-            // Handle escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     if (!document.getElementById('lightbox').classList.contains('hidden')) {
@@ -1239,7 +1210,6 @@
                 }
             });
 
-            // Add search shortcut (Ctrl/Cmd + K)
             document.addEventListener('keydown', function(e) {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
@@ -1247,14 +1217,12 @@
                 }
             });
 
-            // Initialize floating action button
             const fab = document.querySelector('.floating-action');
             fab.style.opacity = '0';
             fab.style.transform = 'scale(0.8)';
             fab.style.transition = 'all 0.3s ease';
         });
 
-        // Initialize the application
         init();
     </script>
 </body>
