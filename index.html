@@ -6,16 +6,59 @@
     <title>FabiMvurice Interactive - Minecraft Projects</title>
     <meta name="description" content="Discover amazing Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive. Create F&M series, Additions, and more!">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- OPTIMIERT: Preconnect für externe Ressourcen -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- OPTIMIERT: Kritisches CSS inline -->
+    <style>
+        /* Kritisches CSS für First Paint */
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0113;
+            color: #fff;
+            min-height: 100vh;
+        }
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #0a0113;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(233, 30, 99, 0.3);
+            border-top-color: #e91e63;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- OPTIMIERT: Async Font Loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <!-- Custom CSS wird am Ende geladen -->
+    <link rel="stylesheet" href="css/styles.css" media="print" onload="this.media='all'">
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Floating Particles -->
     <div class="particles" aria-hidden="true" id="particles"></div>
 
@@ -26,7 +69,7 @@
     <header class="glass-header sticky top-0 z-40 px-6 py-4 transition-all duration-300">
         <div class="max-w-7xl mx-auto flex items-center justify-between content-wrapper">
             <div class="flex items-center space-x-4">
-                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover">
+                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover" loading="lazy">
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">FabiMvurice Interactive</h1>
                     <p class="text-xs text-gray-400">✨ Crafting Minecraft Modpacks</p>
@@ -69,16 +112,17 @@
                         <p class="text-gray-300 text-lg max-w-2xl mx-auto">Experience our Minecraft Modpacks 💎</p>
                     </div>
                     
+                    <!-- OPTIMIERT: Lazy Loading für YouTube -->
                     <div class="max-w-4xl mx-auto">
-                        <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl neon-purple">
-                            <iframe 
-                                src="https://www.youtube.com/embed/KWAExkIxZPo?si=pw86kxVQmoO8-N-k" 
-                                class="w-full h-full" 
-                                frameborder="0" 
-                                allow="autoplay; encrypted-media"
-                                allowfullscreen
-                                loading="lazy">
-                            </iframe>
+                        <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl neon-purple relative" id="video-container">
+                            <div class="video-placeholder" onclick="loadVideo()">
+                                <img src="https://img.youtube.com/vi/KWAExkIxZPo/maxresdefault.jpg" alt="Video Thumbnail" class="w-full h-full object-cover">
+                                <div class="play-button">
+                                    <svg class="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -89,21 +133,14 @@
         <div class="max-w-7xl mx-auto px-6 mb-10">
             <div class="glass rounded-3xl p-8">
                 <h3 class="text-2xl font-bold text-center mb-6 gradient-text">✨ Connect With Our Community</h3>
-                <div class="flex flex-wrap justify-center gap-4 mb-8" id="social-links">
-                    <!-- Social links will be loaded by JS -->
-                </div>
-                
-                <!-- Support Buttons -->
-                <div class="flex flex-wrap justify-center gap-4" id="support-links">
-                    <!-- Support links will be loaded by JS -->
-                </div>
+                <div class="flex flex-wrap justify-center gap-4 mb-8" id="social-links"></div>
+                <div class="flex flex-wrap justify-center gap-4" id="support-links"></div>
             </div>
         </div>
 
         <!-- Search and Filter Section -->
         <div class="max-w-7xl mx-auto px-6 mb-10">
             <div class="glass rounded-3xl p-8 glow-on-scroll">
-                <!-- Search Bar -->
                 <div class="mb-8">
                     <div class="relative max-w-2xl mx-auto">
                         <input 
@@ -119,17 +156,9 @@
                     </div>
                 </div>
                 
-                <!-- Category Filters -->
-                <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters">
-                    <!-- Category filters will be loaded by JS -->
-                </div>
+                <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters"></div>
+                <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden"></div>
                 
-                <!-- Modpack Subcategory Filter -->
-                <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden">
-                    <!-- Modpack filters will be loaded by JS -->
-                </div>
-                
-                <!-- Results count -->
                 <div class="mt-6 text-center">
                     <span id="results-count" class="text-sm text-gray-400 font-medium"></span>
                 </div>
@@ -138,11 +167,8 @@
 
         <!-- Projects Grid -->
         <div class="max-w-7xl mx-auto px-6 pb-16">
-            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Projects will be populated by JavaScript -->
-            </div>
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             
-            <!-- No results message -->
             <div id="no-results" class="hidden text-center py-16">
                 <div class="glass rounded-3xl p-12">
                     <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,9 +188,7 @@
                 <h1 class="text-5xl font-black mb-4 gradient-text">📋 Project Changelogs</h1>
                 <p class="text-gray-300 text-lg">Track all updates and improvements across our projects</p>
             </div>
-            <div id="changelog-content" class="space-y-6">
-                <!-- Changelog content will be populated by JavaScript -->
-            </div>
+            <div id="changelog-content" class="space-y-6"></div>
         </div>
     </div>
 
@@ -175,25 +199,14 @@
                 <h1 class="text-5xl font-black mb-4 gradient-text">👥 Meet Our Team</h1>
                 <p class="text-gray-300 text-lg">The talented people behind FabiMvurice Interactive</p>
             </div>
-
-            <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Team members will be populated by JavaScript -->
-            </div>
+            <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </div>
 
-    <!-- Modals and other components -->
-    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
-        <!-- Team modal content will be loaded by JS -->
-    </div>
-
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
-        <!-- Project modal content will be loaded by JS -->
-    </div>
-
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4">
-        <!-- Lightbox content will be loaded by JS -->
-    </div>
+    <!-- Modals -->
+    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4"></div>
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4"></div>
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4"></div>
 
     <!-- Floating Action Button -->
     <div class="floating-action">
@@ -210,11 +223,7 @@
             <div class="text-center mb-8">
                 <h3 class="text-3xl font-black gradient-text mb-3">FabiMvurice Interactive</h3>
                 <p class="text-gray-400 text-lg mb-6">Creating amazing Minecraft experiences since 2023</p>
-                
-                <!-- Social Media Links -->
-                <div class="flex flex-wrap justify-center gap-4 mb-8" id="footer-social">
-                    <!-- Footer social links will be loaded by JS -->
-                </div>
+                <div class="flex flex-wrap justify-center gap-4 mb-8" id="footer-social"></div>
             </div>
             <div class="border-t border-white border-opacity-10 pt-8 text-center">
                 <p class="text-gray-400">2023-2025 FabiMvurice Interactive</p>
@@ -223,9 +232,63 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <!-- OPTIMIERT: Scripts am Ende mit defer -->
+    <script src="js/data.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/main.js" defer></script>
+    
+    <!-- OPTIMIERT: Inline kritisches JS -->
+    <script>
+        // Lazy Load Video
+        function loadVideo() {
+            const container = document.getElementById('video-container');
+            container.innerHTML = `
+                <iframe 
+                    src="https://www.youtube.com/embed/KWAExkIxZPo?autoplay=1&si=pw86kxVQmoO8-N-k" 
+                    class="w-full h-full" 
+                    frameborder="0" 
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen>
+                </iframe>
+            `;
+        }
+        
+        // Remove loading screen when page is ready
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 300);
+            }, 500);
+        });
+    </script>
+    
+    <style>
+        /* Video Placeholder Styles */
+        .video-placeholder {
+            position: relative;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .video-placeholder:hover img {
+            opacity: 0.8;
+        }
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(233, 30, 99, 0.9);
+            border-radius: 50%;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .video-placeholder:hover .play-button {
+            background: rgba(233, 30, 99, 1);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+    </style>
 </body>
 </html>
