@@ -4,16 +4,16 @@ let currentModpackFilter = 'all';
 let searchQuery = '';
 let filteredProjects = [...projects];
 
-// Create floating particles
+// OPTIMIERT: Reduzierte Partikel-Anzahl (von 15 auf 6)
 function createParticles() {
     const particlesContainer = document.getElementById('particles');
-    const particleCount = 15;
+    const particleCount = window.innerWidth < 768 ? 0 : 6; // Keine Partikel auf Mobile!
     
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         particle.style.left = Math.random() * 100 + '%';
-        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        particle.style.animationDuration = (Math.random() * 15 + 15) + 's'; // Längere Dauer = weniger Rechenaufwand
         particle.style.animationDelay = Math.random() * 5 + 's';
         particle.style.width = particle.style.height = (Math.random() * 3 + 2) + 'px';
         particlesContainer.appendChild(particle);
@@ -158,7 +158,7 @@ function renderProjects() {
                 <div class="flex justify-between items-center text-xs pt-4 border-t border-white border-opacity-10">
                     <div class="flex items-center space-x-4 text-gray-400">
                         <span>🔥 ${project.downloads}</span>
-                        <span>🕒 ${project.lastUpdate}</span>
+                        <span>🕐 ${project.lastUpdate}</span>
                     </div>
                     <span class="gradient-text font-bold text-sm">View Details →</span>
                 </div>
@@ -185,24 +185,31 @@ function handleScroll() {
     }
 }
 
+// OPTIMIERT: Effizienterer IntersectionObserver
 function setupScrollEffects() {
+    // Bestehenden Observer entfernen falls vorhanden
+    if (window.scrollObserver) {
+        window.scrollObserver.disconnect();
+    }
+    
     const observerOptions = {
         threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
+        rootMargin: '0px 0px -50px 0px'
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    window.scrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                // Unobserve nach dem ersten Anzeigen (Performance!)
-                observer.unobserve(entry.target);
+                // Unobserve nach dem ersten Anzeigen für bessere Performance
+                window.scrollObserver.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
+    // Alle Elemente beobachten
     document.querySelectorAll('.glow-on-scroll').forEach(el => {
-        observer.observe(el);
+        window.scrollObserver.observe(el);
     });
 }
 
