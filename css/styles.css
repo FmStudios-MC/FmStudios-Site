@@ -425,4 +425,18 @@ body {
         bottom: 1rem;
         right: 1rem;
     }
+    
+    /* Animationen auf Mobile reduzieren */
+    .particle {
+        display: none;  /* Keine Partikel auf Mobile */
+    }
+    
+    .project-card::before {
+        display: none;  /* Kein Hover-Effekt auf Mobile */
+    }
+    
+    .glass {
+        backdrop-filter: none;  /* Kein Blur auf Mobile */
+        background: rgba(58, 12, 78, 0.9);
+    }
 }
