@@ -63,48 +63,53 @@ const supportLinks = [
     }
 ];
 
-// Render social links
+// OPTIMIERT: Render functions mit besserer DOM-Effizienz
 function renderSocialLinks() {
     const container = document.getElementById('social-links');
-    container.innerHTML = socialLinks.map(link => `
-        <a href="${link.url}" target="_blank" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 transition-all relative z-10">
-            ${link.icon}
-            <span class="text-white font-medium">${link.name}</span>
-        </a>
-    `).join('');
+    if (!container) return;
     
-    // Add platform links
-    container.innerHTML += platformLinks.map(link => `
-        <a href="${link.url}" target="_blank" class="social-btn rounded-xl px-8 py-4 flex items-center space-x-3 bg-gradient-to-r ${link.gradient} transition-all shadow-lg ${link.shadow} relative z-10">
-            ${link.icon || ''}
-            <span class="text-white font-bold text-lg">${link.name}</span>
-        </a>
-    `).join('');
+    const html = [
+        ...socialLinks.map(link => `
+            <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 transition-all relative z-10" aria-label="Visit ${link.name}">
+                ${link.icon}
+                <span class="text-white font-medium">${link.name}</span>
+            </a>
+        `),
+        ...platformLinks.map(link => `
+            <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="social-btn rounded-xl px-8 py-4 flex items-center space-x-3 bg-gradient-to-r ${link.gradient} transition-all shadow-lg ${link.shadow} relative z-10" aria-label="Visit ${link.name}">
+                ${link.icon || ''}
+                <span class="text-white font-bold text-lg">${link.name}</span>
+            </a>
+        `)
+    ];
+    
+    container.innerHTML = html.join('');
 }
 
-// Render support links
 function renderSupportLinks() {
     const container = document.getElementById('support-links');
+    if (!container) return;
+    
     container.innerHTML = supportLinks.map(link => `
-        <a href="${link.url}" class="social-btn rounded-xl px-8 py-4 text-white font-semibold transition-all bg-gradient-to-r ${link.gradient} relative z-10">
+        <a href="${link.url}" ${link.url ? 'target="_blank" rel="noopener noreferrer"' : 'onclick="return false;"'} class="social-btn rounded-xl px-8 py-4 text-white font-semibold transition-all bg-gradient-to-r ${link.gradient} relative z-10" aria-label="${link.name}">
             ${link.icon}
             ${link.name}
         </a>
     `).join('');
 }
 
-// Render footer social links
 function renderFooterSocial() {
     const container = document.getElementById('footer-social');
+    if (!container) return;
+    
     container.innerHTML = socialLinks.map(link => `
-        <a href="${link.url}" target="_blank" class="social-btn glass rounded-xl px-5 py-3 flex items-center space-x-2 transition-all relative z-10">
+        <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="social-btn glass rounded-xl px-5 py-3 flex items-center space-x-2 transition-all relative z-10" aria-label="Visit ${link.name}">
             ${link.icon}
             <span class="text-white text-sm font-medium">${link.name}</span>
         </a>
     `).join('');
 }
 
-// Render category filters
 function renderCategoryFilters() {
     const categories = [
         { id: 'all', label: 'All Projects' },
@@ -114,15 +119,17 @@ function renderCategoryFilters() {
     ];
     
     const container = document.getElementById('category-filters');
+    if (!container) return;
+    
     container.innerHTML = categories.map(cat => `
         <button onclick="filterProjects('${cat.id}')" 
-                class="category-btn ${cat.id === 'all' ? 'active gradient-accent' : 'glass'} rounded-xl px-8 py-3 font-semibold transition-all text-white">
+                class="category-btn ${cat.id === 'all' ? 'active gradient-accent' : 'glass'} rounded-xl px-8 py-3 font-semibold transition-all text-white"
+                aria-pressed="${cat.id === 'all' ? 'true' : 'false'}">
             ${cat.label}
         </button>
     `).join('');
 }
 
-// Render modpack filters
 function renderModpackFilters() {
     const modpackTypes = [
         { id: 'all', label: 'All Types' },
@@ -133,15 +140,18 @@ function renderModpackFilters() {
     ];
     
     const container = document.getElementById('modpack-filter');
+    if (!container) return;
+    
     container.innerHTML = modpackTypes.map(type => `
         <button onclick="filterModpacks('${type.id}')" 
-                class="modpack-btn ${type.id === 'all' ? 'active gradient-accent' : 'glass'} text-sm rounded-xl px-6 py-2 transition-all text-white font-medium">
+                class="modpack-btn ${type.id === 'all' ? 'active gradient-accent' : 'glass'} text-sm rounded-xl px-6 py-2 transition-all text-white font-medium"
+                aria-pressed="${type.id === 'all' ? 'true' : 'false'}">
             ${type.label}
         </button>
     `).join('');
 }
 
-// OPTIMIERT: Throttle-Funktion für Scroll-Events
+// OPTIMIERT: Throttle-Funktion für bessere Performance
 function throttle(func, limit) {
     let inThrottle;
     return function() {
@@ -155,9 +165,51 @@ function throttle(func, limit) {
     }
 }
 
+// OPTIMIERT: Debounce für Search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    }
+}
+
+const debouncedSearch = debounce(searchProjects, 300);
+
+// OPTIMIERT: Lazy Loading für Partikel mit RequestAnimationFrame
+let particlesCreated = false;
+function createParticles() {
+    if (particlesCreated || window.innerWidth < 768) return; // Skip on mobile
+    
+    particlesCreated = true;
+    const container = document.getElementById('particles');
+    if (!container) return;
+    
+    const particleCount = window.innerWidth < 1024 ? 15 : 25; // Weniger auf kleineren Screens
+    const fragment = document.createDocumentFragment();
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        particle.style.opacity = Math.random() * 0.5 + 0.3;
+        fragment.appendChild(particle);
+    }
+    
+    container.appendChild(fragment);
+}
+
 // Initialize everything
 function init() {
-    createParticles(); // Jetzt optimiert mit weniger Partikeln
+    // OPTIMIERT: Lazy load particles
+    requestAnimationFrame(() => createParticles());
+    
     renderSocialLinks();
     renderSupportLinks();
     renderFooterSocial();
@@ -169,41 +221,73 @@ function init() {
     updateResultsCount();
     setupScrollEffects();
     
-    // OPTIMIERT: Throttled Scroll-Handler
-    window.addEventListener('scroll', throttle(handleScroll, 100));
+    // OPTIMIERT: Throttled Scroll-Handler mit 100ms delay
+    window.addEventListener('scroll', throttle(handleScroll, 100), { passive: true });
     
-    // Modal close on click outside
-    document.getElementById('project-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-
-    document.getElementById('lightbox').addEventListener('click', function(e) {
-        if (e.target === this) closeLightbox();
-    });
-
-    document.getElementById('team-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeTeamModal();
+    // Modal close on click outside (optimized)
+    const modals = [
+        { id: 'project-modal', close: closeModal },
+        { id: 'lightbox', close: closeLightbox },
+        { id: 'team-modal', close: closeTeamModal }
+    ];
+    
+    modals.forEach(({ id, close }) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) close();
+            });
+        }
     });
 
     // ESC key to close modals
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            if (!document.getElementById('lightbox').classList.contains('hidden')) {
+            const lightbox = document.getElementById('lightbox');
+            const projectModal = document.getElementById('project-modal');
+            const teamModal = document.getElementById('team-modal');
+            
+            if (lightbox && !lightbox.classList.contains('hidden')) {
                 closeLightbox();
-            } else if (!document.getElementById('project-modal').classList.contains('hidden')) {
+            } else if (projectModal && !projectModal.classList.contains('hidden')) {
                 closeModal();
-            } else if (!document.getElementById('team-modal').classList.contains('hidden')) {
+            } else if (teamModal && !teamModal.classList.contains('hidden')) {
                 closeTeamModal();
             }
         }
-    });
+    }, { passive: true });
 
     // Setup floating action button
     const fab = document.querySelector('.floating-action');
-    fab.style.opacity = '0';
-    fab.style.transform = 'scale(0.8)';
-    fab.style.transition = 'all 0.3s ease';
+    if (fab) {
+        fab.style.opacity = '0';
+        fab.style.transform = 'scale(0.8)';
+        fab.style.pointerEvents = 'none';
+    }
+}
+
+// OPTIMIERT: Intersection Observer für Lazy Loading
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '50px'
+};
+
+const scrollObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, observerOptions);
+
+function setupScrollEffects() {
+    const elements = document.querySelectorAll('.glow-on-scroll');
+    elements.forEach(el => scrollObserver.observe(el));
 }
 
 // Start when DOM is ready
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
