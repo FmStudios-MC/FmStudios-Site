@@ -141,9 +141,23 @@ function renderModpackFilters() {
     `).join('');
 }
 
+// OPTIMIERT: Throttle-Funktion für Scroll-Events
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
 // Initialize everything
 function init() {
-   // createParticles(); //
+    createParticles(); // Jetzt optimiert mit weniger Partikeln
     renderSocialLinks();
     renderSupportLinks();
     renderFooterSocial();
@@ -155,8 +169,8 @@ function init() {
     updateResultsCount();
     setupScrollEffects();
     
-    // Setup event listeners
-    window.addEventListener('scroll', handleScroll);
+    // OPTIMIERT: Throttled Scroll-Handler
+    window.addEventListener('scroll', throttle(handleScroll, 100));
     
     // Modal close on click outside
     document.getElementById('project-modal').addEventListener('click', function(e) {
