@@ -3,20 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FabiMvurice Interactive - Minecraft Projects</title>
     <meta name="description" content="Discover amazing Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive. Create F&M series, Additions, and more!">
+    <meta property="og:title" content="FabiMvurice Interactive - Minecraft Projects">
+    <meta property="og:description" content="Amazing Minecraft modpacks and mods crafted with passion">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <title>FabiMvurice Interactive - Minecraft Projects</title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/data.js" as="script">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://www.youtube.com">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts (optimized) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/fmlogo.png">
 </head>
 <body>
-    <!-- Floating Particles -->
+    <!-- Floating Particles (optimized) -->
     <div class="particles" aria-hidden="true" id="particles"></div>
 
     <!-- Animated Grid Background -->
@@ -26,7 +42,7 @@
     <header class="glass-header sticky top-0 z-40 px-6 py-4 transition-all duration-300">
         <div class="max-w-7xl mx-auto flex items-center justify-between content-wrapper">
             <div class="flex items-center space-x-4">
-                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover">
+                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover" loading="eager">
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">FabiMvurice Interactive</h1>
                     <p class="text-xs text-gray-400">✨ Crafting Minecraft Modpacks</p>
@@ -40,8 +56,8 @@
             </nav>
             
             <!-- Mobile menu button -->
-            <button id="mobile-menu-btn" class="md:hidden text-white" onclick="toggleMobileMenu()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="mobile-menu-btn" class="md:hidden text-white" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
@@ -57,130 +73,135 @@
         </div>
     </header>
 
-    <!-- Home Page -->
-    <div id="home-page" class="page fade-in content-wrapper">
-        <!-- Hero Section with Latest Trailer -->
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="hero-section glass rounded-3xl p-8 mb-10 overflow-hidden relative glow-on-scroll">
-                <div class="relative z-10">
-                    <div class="text-center mb-8">
-                        <span class="inline-block gradient-accent text-xs font-bold px-4 py-2 rounded-full mb-4 pulse-btn">🎬 LATEST Trailer</span>
-                        <h2 class="text-5xl font-black mb-4 gradient-text leading-tight">Discover Our Latest Trailer</h2>
-                        <p class="text-gray-300 text-lg max-w-2xl mx-auto">Experience our Minecraft Modpacks 💎</p>
-                    </div>
-                    
-                    <div class="max-w-4xl mx-auto">
-                        <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl neon-purple">
-                            <iframe 
-                                src="https://www.youtube.com/embed/KWAExkIxZPo?si=pw86kxVQmoO8-N-k" 
-                                class="w-full h-full" 
-                                frameborder="0" 
-                                allow="autoplay; encrypted-media"
-                                allowfullscreen
-                                loading="lazy">
-                            </iframe>
+    <!-- Main Content -->
+    <main>
+        <!-- Home Page -->
+        <div id="home-page" class="page fade-in content-wrapper">
+            <!-- Hero Section with Latest Trailer -->
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="hero-section glass rounded-3xl p-8 mb-10 overflow-hidden relative glow-on-scroll">
+                    <div class="relative z-10">
+                        <div class="text-center mb-8">
+                            <span class="inline-block gradient-accent text-xs font-bold px-4 py-2 rounded-full mb-4 pulse-btn">🎬 LATEST Trailer</span>
+                            <h2 class="text-5xl font-black mb-4 gradient-text leading-tight">Discover Our Latest Trailer</h2>
+                            <p class="text-gray-300 text-lg max-w-2xl mx-auto">Experience our Minecraft Modpacks 💎</p>
+                        </div>
+                        
+                        <div class="max-w-4xl mx-auto">
+                            <div class="aspect-video rounded-2xl overflow-hidden shadow-2xl neon-purple">
+                                <iframe 
+                                    src="https://www.youtube.com/embed/KWAExkIxZPo?si=pw86kxVQmoO8-N-k" 
+                                    class="w-full h-full" 
+                                    frameborder="0" 
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen
+                                    loading="lazy"
+                                    title="FmStudios Latest Trailer">
+                                </iframe>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Social Media & Buttons -->
-        <div class="max-w-7xl mx-auto px-6 mb-10">
-            <div class="glass rounded-3xl p-8">
-                <h3 class="text-2xl font-bold text-center mb-6 gradient-text">✨ Connect With Our Community</h3>
-                <div class="flex flex-wrap justify-center gap-4 mb-8" id="social-links">
-                    <!-- Social links will be loaded by JS -->
-                </div>
-                
-                <!-- Support Buttons -->
-                <div class="flex flex-wrap justify-center gap-4" id="support-links">
-                    <!-- Support links will be loaded by JS -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Search and Filter Section -->
-        <div class="max-w-7xl mx-auto px-6 mb-10">
-            <div class="glass rounded-3xl p-8 glow-on-scroll">
-                <!-- Search Bar -->
-                <div class="mb-8">
-                    <div class="relative max-w-2xl mx-auto">
-                        <input 
-                            type="text" 
-                            id="search-input" 
-                            placeholder="🔍 Search for projects, features, or versions..." 
-                            class="search-bar w-full rounded-2xl px-6 py-4 pl-14 text-white placeholder-gray-400 focus:outline-none transition-all"
-                            oninput="searchProjects()"
-                        >
-                        <svg class="absolute left-5 top-5 w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
+            <!-- Social Media & Buttons -->
+            <div class="max-w-7xl mx-auto px-6 mb-10">
+                <div class="glass rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold text-center mb-6 gradient-text">✨ Connect With Our Community</h3>
+                    <div class="flex flex-wrap justify-center gap-4 mb-8" id="social-links">
+                        <!-- Social links will be loaded by JS -->
+                    </div>
+                    
+                    <!-- Support Buttons -->
+                    <div class="flex flex-wrap justify-center gap-4" id="support-links">
+                        <!-- Support links will be loaded by JS -->
                     </div>
                 </div>
-                
-                <!-- Category Filters -->
-                <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters">
-                    <!-- Category filters will be loaded by JS -->
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="max-w-7xl mx-auto px-6 mb-10">
+                <div class="glass rounded-3xl p-8 glow-on-scroll">
+                    <!-- Search Bar -->
+                    <div class="mb-8">
+                        <div class="relative max-w-2xl mx-auto">
+                            <input 
+                                type="text" 
+                                id="search-input" 
+                                placeholder="🔍 Search for projects, features, or versions..." 
+                                class="search-bar w-full rounded-2xl px-6 py-4 pl-14 text-white placeholder-gray-400 focus:outline-none transition-all"
+                                oninput="searchProjects()"
+                                aria-label="Search projects"
+                            >
+                            <svg class="absolute left-5 top-5 w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Category Filters -->
+                    <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters">
+                        <!-- Category filters will be loaded by JS -->
+                    </div>
+                    
+                    <!-- Modpack Subcategory Filter -->
+                    <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden">
+                        <!-- Modpack filters will be loaded by JS -->
+                    </div>
+                    
+                    <!-- Results count -->
+                    <div class="mt-6 text-center">
+                        <span id="results-count" class="text-sm text-gray-400 font-medium"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Grid -->
+            <div class="max-w-7xl mx-auto px-6 pb-16">
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Projects will be populated by JavaScript -->
                 </div>
                 
-                <!-- Modpack Subcategory Filter -->
-                <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden">
-                    <!-- Modpack filters will be loaded by JS -->
-                </div>
-                
-                <!-- Results count -->
-                <div class="mt-6 text-center">
-                    <span id="results-count" class="text-sm text-gray-400 font-medium"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Projects Grid -->
-        <div class="max-w-7xl mx-auto px-6 pb-16">
-            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Projects will be populated by JavaScript -->
-            </div>
-            
-            <!-- No results message -->
-            <div id="no-results" class="hidden text-center py-16">
-                <div class="glass rounded-3xl p-12">
-                    <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.441-.935-5.99-2.448m0 0A7.962 7.962 0 014 9c0-1.657.416-3.22 1.15-4.512M6.01 6.512A7.962 7.962 0 0112 3c2.34 0 4.441.935 5.99 2.448m0 0A7.962 7.962 0 0120 9c0-1.657-.416-3.22-1.15-4.512"/>
-                    </svg>
-                    <h3 class="text-2xl font-bold text-gray-300 mb-3">No projects found</h3>
-                    <p class="text-gray-400 text-lg">Try adjusting your search or filter criteria</p>
+                <!-- No results message -->
+                <div id="no-results" class="hidden text-center py-16">
+                    <div class="glass rounded-3xl p-12">
+                        <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.441-.935-5.99-2.448m0 0A7.962 7.962 0 014 9c0-1.657.416-3.22 1.15-4.512M6.01 6.512A7.962 7.962 0 0112 3c2.34 0 4.441.935 5.99 2.448m0 0A7.962 7.962 0 0120 9c0-1.657-.416-3.22-1.15-4.512"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold text-gray-300 mb-3">No projects found</h3>
+                        <p class="text-gray-400 text-lg">Try adjusting your search or filter criteria</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Changelog Page -->
-    <div id="changelog-page" class="page hidden fade-in content-wrapper">
-        <div class="max-w-5xl mx-auto px-6 py-12">
-            <div class="text-center mb-12">
-                <h1 class="text-5xl font-black mb-4 gradient-text">📋 Project Changelogs</h1>
-                <p class="text-gray-300 text-lg">Track all updates and improvements across our projects</p>
-            </div>
-            <div id="changelog-content" class="space-y-6">
-                <!-- Changelog content will be populated by JavaScript -->
+        <!-- Changelog Page -->
+        <div id="changelog-page" class="page hidden fade-in content-wrapper">
+            <div class="max-w-5xl mx-auto px-6 py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl font-black mb-4 gradient-text">📋 Project Changelogs</h1>
+                    <p class="text-gray-300 text-lg">Track all updates and improvements across our projects</p>
+                </div>
+                <div id="changelog-content" class="space-y-6">
+                    <!-- Changelog content will be populated by JavaScript -->
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Team Page -->
-    <div id="team-page" class="page hidden content-wrapper">
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="text-center mb-12">
-                <h1 class="text-5xl font-black mb-4 gradient-text">👥 Meet Our Team</h1>
-                <p class="text-gray-300 text-lg">The talented people behind FabiMvurice Interactive</p>
-            </div>
+        <!-- Team Page -->
+        <div id="team-page" class="page hidden content-wrapper">
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl font-black mb-4 gradient-text">👥 Meet Our Team</h1>
+                    <p class="text-gray-300 text-lg">The talented people behind FabiMvurice Interactive</p>
+                </div>
 
-            <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Team members will be populated by JavaScript -->
+                <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Team members will be populated by JavaScript -->
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Modals and other components -->
     <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
@@ -196,9 +217,9 @@
     </div>
 
     <!-- Floating Action Button -->
-    <div class="floating-action">
-        <button onclick="scrollToTop()" class="glass rounded-full p-4 text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-500 transition-all neon-pink">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="floating-action" title="Scroll to top">
+        <button onclick="scrollToTop()" class="glass rounded-full p-4 text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-500 transition-all neon-pink" aria-label="Scroll to top">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
             </svg>
         </button>
@@ -223,10 +244,9 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <!-- JavaScript (optimized loading) -->
+    <script src="js/data.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>
-
