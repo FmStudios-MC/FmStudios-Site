@@ -30,7 +30,6 @@ The website currently highlights the following projects:
 
 * **Hosting:** GitHub Pages
 * **Languages:** HTML5, CSS3, JavaScript
-* **External Assets:** (Add any fonts or icon libraries used, e.g., FontAwesome, Google Fonts)
 
 ## 🚀 Getting Started
 
