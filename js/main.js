@@ -143,7 +143,7 @@ function renderModpackFilters() {
 
 // Initialize everything
 function init() {
-    createParticles();
+   // createParticles(); //
     renderSocialLinks();
     renderSupportLinks();
     renderFooterSocial();
