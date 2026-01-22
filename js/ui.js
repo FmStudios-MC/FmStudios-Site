@@ -185,7 +185,6 @@ function handleScroll() {
     }
 }
 
-// Setup scroll effects
 function setupScrollEffects() {
     const observerOptions = {
         threshold: 0.1,
@@ -196,6 +195,8 @@ function setupScrollEffects() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                // Unobserve nach dem ersten Anzeigen (Performance!)
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
@@ -204,9 +205,7 @@ function setupScrollEffects() {
         observer.observe(el);
     });
 }
-// Modal functions - copy this into js/ui.js after Part 1
 
-// Open project modal
 function openModal(projectId) {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
