@@ -5,6 +5,17 @@
     box-sizing: border-box;
 }
 
+.project-card,
+.social-btn,
+.particle,
+.floating-action,
+.modal-content {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
 :root {
     --primary: #e91e63;
     --secondary: #9c27b0;
@@ -87,10 +98,12 @@ body {
 
 .glass {
     background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--card-border);
     box-shadow: 0 8px 32px rgba(233, 30, 99, 0.2);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
 }
 
 .glass:hover {
