@@ -66,7 +66,6 @@ body {
     }
 }
 
-/* Animated Grid Background */
 .grid-bg {
     position: fixed;
     top: 0;
@@ -79,7 +78,6 @@ body {
     background-size: 60px 60px;
     pointer-events: none;
     z-index: 0;
-    animation: gridMove 25s linear infinite;
 }
 
 @keyframes gridMove {
