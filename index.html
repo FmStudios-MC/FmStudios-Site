@@ -11,18 +11,15 @@
     
     <title>FabiMvurice Interactive - Minecraft Projects</title>
     
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="css/styles.css" as="style">
-    <link rel="preload" href="js/data.js" as="script">
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://www.youtube.com">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (optimized) -->
+    <!-- Google Fonts (optimized with display=swap) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
@@ -35,14 +32,14 @@
     <!-- Floating Particles (optimized) -->
     <div class="particles" aria-hidden="true" id="particles"></div>
 
-    <!-- Animated Grid Background -->
+    <!-- Static Grid Background -->
     <div class="grid-bg"></div>
 
     <!-- Header -->
     <header class="glass-header sticky top-0 z-40 px-6 py-4 transition-all duration-300">
         <div class="max-w-7xl mx-auto flex items-center justify-between content-wrapper">
             <div class="flex items-center space-x-4">
-                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover" loading="eager">
+                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink" width="56" height="56" loading="eager">
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">FabiMvurice Interactive</h1>
                     <p class="text-xs text-gray-400">✨ Crafting Minecraft Modpacks</p>
@@ -203,18 +200,10 @@
         </div>
     </main>
 
-    <!-- Modals and other components -->
-    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
-        <!-- Team modal content will be loaded by JS -->
-    </div>
-
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
-        <!-- Project modal content will be loaded by JS -->
-    </div>
-
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4">
-        <!-- Lightbox content will be loaded by JS -->
-    </div>
+    <!-- Modals -->
+    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4"></div>
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4"></div>
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4"></div>
 
     <!-- Floating Action Button -->
     <div class="floating-action" title="Scroll to top">
@@ -244,7 +233,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript (optimized loading) -->
+    <!-- JavaScript (deferred for better performance) -->
     <script src="js/data.js" defer></script>
     <script src="js/ui.js" defer></script>
     <script src="js/main.js" defer></script>
