@@ -4,6 +4,22 @@ let currentModpackFilter = 'all';
 let searchQuery = '';
 let filteredProjects = [...projects];
 
+// OPTIMIERT: Reduzierte Partikel-Anzahl (von 15 auf 6)
+function createParticles() {
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = window.innerWidth < 768 ? 0 : 6; // Keine Partikel auf Mobile!
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDuration = (Math.random() * 15 + 15) + 's'; // Längere Dauer = weniger Rechenaufwand
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        particle.style.width = particle.style.height = (Math.random() * 3 + 2) + 'px';
+        particlesContainer.appendChild(particle);
+    }
+}
+
 // Page navigation
 function showPage(pageId) {
     const currentPage = document.querySelector('.page:not(.hidden)');
@@ -27,17 +43,14 @@ function showPage(pageId) {
     
     // Close mobile menu if open
     const mobileMenu = document.getElementById('mobile-menu');
-    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+    if (!mobileMenu.classList.contains('hidden')) {
         mobileMenu.classList.add('hidden');
     }
 }
 
 // Mobile menu toggle
 function toggleMobileMenu() {
-    const menu = document.getElementById('mobile-menu');
-    if (menu) {
-        menu.classList.toggle('hidden');
-    }
+    document.getElementById('mobile-menu').classList.toggle('hidden');
 }
 
 // Search functionality
@@ -53,12 +66,9 @@ function filterProjects(category) {
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('active', 'gradient-accent');
         btn.classList.add('glass');
-        btn.setAttribute('aria-pressed', 'false');
     });
-    
     event.target.classList.add('active', 'gradient-accent');
     event.target.classList.remove('glass');
-    event.target.setAttribute('aria-pressed', 'true');
     
     const modpackFilter = document.getElementById('modpack-filter');
     if (category === 'modpacks') {
@@ -78,12 +88,9 @@ function filterModpacks(subcategory) {
     document.querySelectorAll('.modpack-btn').forEach(btn => {
         btn.classList.remove('active', 'gradient-accent');
         btn.classList.add('glass');
-        btn.setAttribute('aria-pressed', 'false');
     });
-    
     event.target.classList.add('active', 'gradient-accent');
     event.target.classList.remove('glass');
-    event.target.setAttribute('aria-pressed', 'true');
     
     applyFilters();
 }
@@ -115,17 +122,13 @@ function updateResultsCount() {
     const count = filteredProjects.length;
     const total = projects.length;
     const countElement = document.getElementById('results-count');
-    if (countElement) {
-        countElement.textContent = count === total ? `Showing all ${total} projects` : `Showing ${count} of ${total} projects`;
-    }
+    countElement.textContent = count === total ? `Showing all ${total} projects` : `Showing ${count} of ${total} projects`;
 }
 
-// Render projects grid - OPTIMIERT
+// Render projects grid
 function renderProjects() {
     const grid = document.getElementById('projects-grid');
     const noResults = document.getElementById('no-results');
-    
-    if (!grid || !noResults) return;
     
     if (filteredProjects.length === 0) {
         grid.innerHTML = '';
@@ -135,19 +138,11 @@ function renderProjects() {
     
     noResults.classList.add('hidden');
     
-    // Performance: Batch DOM updates
-    requestAnimationFrame(() => {
-        const fragment = document.createDocumentFragment();
-        
-        filteredProjects.forEach((project, index) => {
-            const card = document.createElement('div');
-            card.className = 'project-card glass rounded-3xl p-6 fade-in glow-on-scroll';
-            card.style.animationDelay = `${index * 0.05}s`;
-            card.onclick = () => openModal(project.id);
-            
-            card.innerHTML = `
+    setTimeout(() => {
+        grid.innerHTML = filteredProjects.map((project, index) => `
+            <div class="project-card glass rounded-3xl p-6 fade-in glow-on-scroll" onclick="openModal(${project.id})" style="animation-delay: ${index * 0.1}s">
                 <div class="flex items-start space-x-4 mb-4">
-                    <img src="${project.logo}" alt="${project.name}" class="w-20 h-20 rounded-2xl object-cover shadow-lg" loading="lazy" width="80" height="80">
+                    <img src="${project.logo}" alt="${project.name}" class="w-20 h-20 rounded-2xl object-cover shadow-lg">
                     <div class="flex-1">
                         <h3 class="text-xl font-bold text-white mb-2">${project.name}</h3>
                         <div class="flex flex-wrap gap-2">${getStatusBadge(project.status)}</div>
@@ -167,19 +162,10 @@ function renderProjects() {
                     </div>
                     <span class="gradient-text font-bold text-sm">View Details →</span>
                 </div>
-            `;
-            
-            fragment.appendChild(card);
-        });
-        
-        grid.innerHTML = '';
-        grid.appendChild(fragment);
-        
-        // Setup scroll effects for new elements
-        if (typeof setupScrollEffects === 'function') {
-            setupScrollEffects();
-        }
-    });
+            </div>
+        `).join('');
+        setupScrollEffects();
+    }, 200);
 }
 
 // Scroll to top
@@ -187,58 +173,51 @@ function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Handle scroll events - moved to main.js but kept reference
+// Handle scroll events
 function handleScroll() {
     const fab = document.querySelector('.floating-action');
-    if (!fab) return;
-    
-    const shouldShow = window.scrollY > 300;
-    fab.style.opacity = shouldShow ? '1' : '0';
-    fab.style.transform = shouldShow ? 'scale(1)' : 'scale(0.8)';
-    fab.style.pointerEvents = shouldShow ? 'auto' : 'none';
+    if (window.scrollY > 300) {
+        fab.style.opacity = '1';
+        fab.style.transform = 'scale(1)';
+    } else {
+        fab.style.opacity = '0';
+        fab.style.transform = 'scale(0.8)';
+    }
 }
 
-// Setup scroll effects
+// OPTIMIERT: Effizienterer IntersectionObserver
 function setupScrollEffects() {
-    if (!window.scrollObserver) return;
+    // Bestehenden Observer entfernen falls vorhanden
+    if (window.scrollObserver) {
+        window.scrollObserver.disconnect();
+    }
     
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    window.scrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // Unobserve nach dem ersten Anzeigen für bessere Performance
+                window.scrollObserver.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Alle Elemente beobachten
     document.querySelectorAll('.glow-on-scroll').forEach(el => {
         window.scrollObserver.observe(el);
     });
 }
 
-// Open modal - OPTIMIERT
 function openModal(projectId) {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
     
     const modal = document.getElementById('project-modal');
-    if (!modal) return;
-    
-    const screenshotsHTML = project.screenshots.map((screenshot, index) => `
-        <img src="${screenshot}" 
-             alt="Screenshot ${index + 1}" 
-             class="w-full h-40 object-cover rounded-xl cursor-pointer hover:opacity-80 transition-all hover:scale-105" 
-             onclick="openLightbox('${screenshot}', 'Screenshot ${index + 1}')"
-             loading="lazy">
-    `).join('');
-    
-    const featuresHTML = project.features.map(feature => `
-        <li class="flex items-start space-x-3 p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-colors">
-            <span class="gradient-text text-lg">•</span>
-            <span>${feature}</span>
-        </li>
-    `).join('');
-    
-    const modrinthButton = project.modrinthUrl ? `
-        <a href="${project.modrinthUrl}" target="_blank" rel="noopener noreferrer" class="block w-full bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 text-white text-lg">
-            <svg class="w-6 h-6 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-            </svg>
-            Modrinth
-        </a>
-    ` : '';
-    
     modal.innerHTML = `
         <div class="modal-content glass-strong rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-8">
@@ -259,7 +238,11 @@ function openModal(projectId) {
                     <div class="lg:col-span-2">
                         <h3 class="text-2xl font-bold mb-4 gradient-text">📸 Screenshots & Media</h3>
                         <div class="grid grid-cols-2 gap-4 mb-8">
-                            ${screenshotsHTML}
+                            ${project.screenshots.map((screenshot, index) => `
+                                <img src="${screenshot}" alt="Screenshot ${index + 1}" 
+                                     class="w-full h-40 object-cover rounded-xl cursor-pointer hover:opacity-80 transition-all hover:scale-105" 
+                                     onclick="openLightbox('${screenshot}', 'Screenshot ${index + 1}')">
+                            `).join('')}
                         </div>
                         
                         <div class="glass rounded-2xl p-6">
@@ -287,19 +270,31 @@ function openModal(projectId) {
                             <div class="glass rounded-2xl p-6">
                                 <h4 class="text-xl font-bold mb-4 gradient-text">✨ Key Features</h4>
                                 <ul class="text-gray-300 space-y-3 text-sm">
-                                    ${featuresHTML}
+                                    ${project.features.map(feature => `
+                                        <li class="flex items-start space-x-3 p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-colors">
+                                            <span class="gradient-text text-lg">•</span>
+                                            <span>${feature}</span>
+                                        </li>
+                                    `).join('')}
                                 </ul>
                             </div>
                         </div>
                         
                         <div class="mt-8 space-y-4">
-                            <a href="${project.downloadUrl}" target="_blank" rel="noopener noreferrer" class="block w-full gradient-accent rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 text-white text-lg pulse-btn">
+                            <a href="${project.downloadUrl}" target="_blank" class="block w-full gradient-accent rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 text-white text-lg pulse-btn">
                                 <svg class="w-6 h-6 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                                 </svg>
                                 CurseForge
                             </a>
-                            ${modrinthButton}
+                            ${project.modrinthUrl ? `
+                                <a href="${project.modrinthUrl}" target="_blank" class="block w-full bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 rounded-2xl px-6 py-4 font-bold text-center transition-all hover:scale-105 text-white text-lg">
+                                    <svg class="w-6 h-6 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                    </svg>
+                                    Modrinth
+                                </a>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -314,8 +309,6 @@ function openModal(projectId) {
 // Close project modal
 function closeModal() {
     const modal = document.getElementById('project-modal');
-    if (!modal) return;
-    
     modal.style.opacity = '0';
     setTimeout(() => {
         modal.classList.add('hidden');
@@ -324,7 +317,7 @@ function closeModal() {
     }, 200);
 }
 
-// Open team member modal - OPTIMIERT
+// Open team member modal
 function openTeamModal(memberId) {
     const member = teamMembers.find(m => m.id === memberId);
     if (!member) return;
@@ -340,7 +333,7 @@ function openTeamModal(memberId) {
     }
     if (member.social.instagram) {
         socialLinks.push(`
-            <a href="${member.social.instagram}" target="_blank" rel="noopener noreferrer" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 transition-all relative z-10">
+            <a href="${member.social.instagram}" target="_blank" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 transition-all relative z-10">
                 <svg class="w-5 h-5" fill="#E4405F" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 <span class="text-white font-medium">Instagram</span>
             </a>
@@ -348,15 +341,13 @@ function openTeamModal(memberId) {
     }
 
     const modal = document.getElementById('team-modal');
-    if (!modal) return;
-    
     modal.innerHTML = `
         <div class="modal-content glass-strong rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-8">
                 <div class="flex justify-between items-start mb-8">
                     <div class="flex-1">
                         <div class="flex items-center space-x-6 mb-6">
-                            <img src="${member.image}" alt="${member.name}" class="w-32 h-32 rounded-2xl object-cover shadow-lg neon-pink" loading="lazy" width="128" height="128">
+                            <img src="${member.image}" alt="${member.name}" class="w-32 h-32 rounded-2xl object-cover shadow-lg neon-pink">
                             <div>
                                 <h2 class="text-4xl font-black gradient-text mb-2">${member.name}</h2>
                                 <p class="text-xl text-gray-400 font-semibold mb-4">${member.rank}</p>
@@ -388,8 +379,6 @@ function openTeamModal(memberId) {
 // Close team modal
 function closeTeamModal() {
     const modal = document.getElementById('team-modal');
-    if (!modal) return;
-    
     modal.style.opacity = '0';
     setTimeout(() => {
         modal.classList.add('hidden');
@@ -401,12 +390,10 @@ function closeTeamModal() {
 // Open lightbox
 function openLightbox(imageSrc, caption = '') {
     const lightbox = document.getElementById('lightbox');
-    if (!lightbox) return;
-    
     lightbox.innerHTML = `
         <div class="relative max-w-6xl max-h-[90vh]">
             <button onclick="closeLightbox()" class="absolute -top-16 right-0 text-white text-4xl hover:text-pink-400 transition-colors z-10">&times;</button>
-            <img src="${imageSrc}" alt="${caption}" class="max-w-full max-h-full rounded-2xl shadow-2xl" loading="lazy">
+            <img src="${imageSrc}" alt="${caption}" class="max-w-full max-h-full rounded-2xl shadow-2xl">
             <div class="absolute bottom-6 left-6 right-6 text-center">
                 <p class="text-white bg-black bg-opacity-70 rounded-xl px-6 py-3 inline-block font-medium">${caption}</p>
             </div>
@@ -418,8 +405,6 @@ function openLightbox(imageSrc, caption = '') {
 // Close lightbox
 function closeLightbox() {
     const lightbox = document.getElementById('lightbox');
-    if (!lightbox) return;
-    
     lightbox.style.opacity = '0';
     setTimeout(() => {
         lightbox.classList.add('hidden');
@@ -427,60 +412,39 @@ function closeLightbox() {
     }, 200);
 }
 
-// Render team - OPTIMIERT
+// Render team
 function renderTeam() {
     const grid = document.getElementById('team-grid');
-    if (!grid) return;
-    
-    const fragment = document.createDocumentFragment();
-    
-    teamMembers.forEach((member, index) => {
-        const card = document.createElement('div');
-        card.className = 'project-card glass rounded-3xl p-6 fade-in cursor-pointer glow-on-scroll';
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.onclick = () => openTeamModal(member.id);
-        
-        card.innerHTML = `
+    grid.innerHTML = teamMembers.map((member, index) => `
+        <div class="project-card glass rounded-3xl p-6 fade-in cursor-pointer glow-on-scroll" onclick="openTeamModal(${member.id})" style="animation-delay: ${index * 0.1}s">
             <div class="flex flex-col items-center text-center">
-                <img src="${member.image}" alt="${member.name}" class="w-40 h-40 rounded-2xl object-cover shadow-lg mb-4 neon-pink" loading="lazy" width="160" height="160">
+                <img src="${member.image}" alt="${member.name}" class="w-40 h-40 rounded-2xl object-cover shadow-lg mb-4 neon-pink">
                 <h3 class="text-2xl font-bold text-white mb-2">${member.name}</h3>
                 <span class="inline-block gradient-accent text-sm font-bold px-4 py-2 rounded-full mb-4">${member.rank}</span>
                 <p class="text-gray-400 text-sm mb-4 line-clamp-3">${member.description.substring(0, 100)}...</p>
                 <span class="gradient-text font-bold text-sm">View Profile →</span>
             </div>
-        `;
-        
-        fragment.appendChild(card);
-    });
-    
-    grid.appendChild(fragment);
+        </div>
+    `).join('');
 }
 
-// Render changelog - OPTIMIERT
+// Render changelog
 function renderChangelog() {
     const container = document.getElementById('changelog-content');
-    if (!container) return;
-    
     const changelogEntries = Object.entries(changelogs);
-    const fragment = document.createDocumentFragment();
     
-    changelogEntries.forEach(([projectName, entries]) => {
-        const projectId = projectName.replace(/\s+/g, '-').replace(/[{}]/g, '');
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'glass rounded-3xl overflow-hidden glow-on-scroll';
-        
-        wrapper.innerHTML = `
-            <button onclick="toggleChangelog('${projectId}')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white hover:bg-opacity-5 transition-all">
+    container.innerHTML = changelogEntries.map(([projectName, entries]) => `
+        <div class="glass rounded-3xl overflow-hidden glow-on-scroll">
+            <button onclick="toggleChangelog('${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white hover:bg-opacity-5 transition-all">
                 <div>
                     <h3 class="text-2xl font-bold gradient-text mb-2">${projectName}</h3>
                     <p class="text-sm text-gray-400 font-medium">${entries.length} version${entries.length > 1 ? 's' : ''} • Click to expand</p>
                 </div>
-                <svg class="w-8 h-8 transform transition-transform duration-300" id="icon-${projectId}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 transform transition-transform duration-300" id="icon-${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div id="changelog-${projectId}" class="hidden border-t border-white border-opacity-10">
+            <div id="changelog-${projectName.replace(/\s+/g, '-').replace(/[{}]/g, '')}" class="hidden border-t border-white border-opacity-10">
                 ${entries.map((entry, index) => `
                     <div class="p-6 ${index < entries.length - 1 ? 'border-b border-white border-opacity-5' : ''}">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
@@ -503,20 +467,14 @@ function renderChangelog() {
                     </div>
                 `).join('')}
             </div>
-        `;
-        
-        fragment.appendChild(wrapper);
-    });
-    
-    container.appendChild(fragment);
+        </div>
+    `).join('');
 }
 
 // Toggle changelog
 function toggleChangelog(projectId) {
     const content = document.getElementById(`changelog-${projectId}`);
     const icon = document.getElementById(`icon-${projectId}`);
-    
-    if (!content || !icon) return;
     
     if (content.classList.contains('hidden')) {
         content.classList.remove('hidden');
