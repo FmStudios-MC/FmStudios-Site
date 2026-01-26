@@ -5,17 +5,14 @@
     box-sizing: border-box;
 }
 
-/* OPTIMIERT: GPU-Acceleration für häufig animierte Elemente */
+/* GPU-Acceleration für häufig animierte Elemente */
 .project-card,
 .social-btn,
-.particle,
 .floating-action,
 .modal-content {
     transform: translateZ(0);
-    -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    will-change: transform; /* GPU-Optimierung */
 }
 
 :root {
@@ -31,16 +28,15 @@
 body {
     background: var(--darker);
     background-image: 
-        radial-gradient(circle at 20% 50%, rgba(233, 30, 99, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(156, 39, 176, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(217, 70, 239, 0.15) 0%, transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(233, 30, 99, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(156, 39, 176, 0.15) 0%, transparent 50%);
     background-attachment: fixed;
     min-height: 100vh;
     scroll-behavior: smooth;
     color: #fff;
 }
 
-/* Floating Particles */
+/* Partikel nur auf Desktop */
 .particles {
     position: fixed;
     top: 0;
@@ -52,36 +48,35 @@ body {
     overflow: hidden;
 }
 
-/* OPTIMIERT: Einfachere Partikel-Animation */
+/* Einfachere Partikel-Animation */
 .particle {
     position: absolute;
-    width: 4px;
-    height: 4px;
-    background: radial-gradient(circle, rgba(233, 30, 99, 0.8), rgba(156, 39, 176, 0.4));
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, rgba(233, 30, 99, 0.6), transparent);
     border-radius: 50%;
-    animation: float linear infinite;
-    box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
-    will-change: transform, opacity; /* GPU-Optimierung */
+    animation: float 20s linear infinite;
+    will-change: transform;
 }
 
 @keyframes float {
     0% {
-        transform: translate3d(0, 100vh, 0) scale(0);
+        transform: translate3d(0, 100vh, 0);
         opacity: 0;
     }
     10% {
-        opacity: 1;
+        opacity: 0.5;
     }
     90% {
-        opacity: 1;
+        opacity: 0.5;
     }
     100% {
-        transform: translate3d(0, -100vh, 0) scale(1);
+        transform: translate3d(0, -20vh, 0);
         opacity: 0;
     }
 }
 
-/* OPTIMIERT: Grid-Animation entfernt für bessere Performance */
+/* Statisches Grid */
 .grid-bg {
     position: fixed;
     top: 0;
@@ -89,146 +84,115 @@ body {
     width: 100%;
     height: 100%;
     background-image: 
-        linear-gradient(rgba(233, 30, 99, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(156, 39, 176, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(233, 30, 99, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(156, 39, 176, 0.03) 1px, transparent 1px);
     background-size: 60px 60px;
     pointer-events: none;
     z-index: 0;
-    /* Animation entfernt */
 }
 
-/* OPTIMIERT: Reduzierter Blur-Effekt */
+/* Reduzierter Blur */
 .glass {
     background: var(--card-bg);
-    backdrop-filter: blur(5px); /* Von 10px auf 5px reduziert */
-    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--card-border);
-    box-shadow: 0 8px 32px rgba(233, 30, 99, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
+    box-shadow: 0 4px 16px rgba(233, 30, 99, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass:hover {
     background: rgba(78, 22, 98, 0.7);
     border-color: rgba(217, 70, 239, 0.4);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(233, 30, 99, 0.3), 0 0 20px rgba(156, 39, 176, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(233, 30, 99, 0.25);
 }
 
 .glass-strong {
     background: rgba(26, 3, 33, 0.95);
-    backdrop-filter: blur(20px); /* Von 30px auf 20px reduziert */
+    backdrop-filter: blur(15px);
     border: 1px solid var(--card-border);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(233, 30, 99, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .glass-header {
     background: rgba(15, 2, 21, 0.9);
-    backdrop-filter: blur(20px); /* Von 30px auf 20px reduziert */
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
-    box-shadow: 0 4px 20px rgba(233, 30, 99, 0.15);
+    box-shadow: 0 2px 10px rgba(233, 30, 99, 0.1);
 }
 
-/* OPTIMIERT: Gradient-Animation nur bei Hover */
+/* Statischer Gradient */
 .gradient-text {
     background: linear-gradient(135deg, #e91e63, #9c27b0, #d946ef);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    /* Animation entfernt - wird nur bei Hover aktiviert */
 }
 
-.gradient-text:hover {
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-/* OPTIMIERT: Gradient-Accent Animation nur bei Hover */
+/* Gradient nur bei Hover animiert */
 .gradient-accent {
     background: linear-gradient(135deg, #e91e63, #d946ef, #9c27b0);
-    box-shadow: 0 4px 20px rgba(233, 30, 99, 0.5), 0 4px 20px rgba(156, 39, 176, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+    transition: all 0.2s ease;
 }
 
 .gradient-accent:hover {
-    background: linear-gradient(135deg, #f50057, #e91e63, #d946ef);
-    background-size: 200% 200%;
-    box-shadow: 0 8px 30px rgba(233, 30, 99, 0.7), 0 8px 30px rgba(217, 70, 239, 0.5);
-    transform: translateY(-2px) scale(1.02);
-    animation: gradientShift 3s ease infinite;
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
+    transform: translateY(-2px);
 }
 
 .project-card {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Von 0.5s auf 0.4s reduziert */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     position: relative;
     overflow: hidden;
 }
 
-/* OPTIMIERT: Einfacherer Hover-Effekt */
-.project-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(233, 30, 99, 0.1), rgba(217, 70, 239, 0.1), transparent);
-    transition: left 0.5s; /* Von 0.7s auf 0.5s reduziert */
-}
-
-.project-card:hover::before {
-    left: 100%;
-}
+/* Entfernt: aufwendiger ::before Effekt */
 
 .project-card:hover {
-    transform: translateY(-8px) scale(1.02); /* Von scale(1.03) auf 1.02 reduziert */
-    box-shadow: 0 20px 50px rgba(233, 30, 99, 0.3), 0 20px 50px rgba(156, 39, 176, 0.2);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 30px rgba(233, 30, 99, 0.25);
 }
 
 .project-card img {
-    transition: transform 0.4s ease; /* Von 0.6s auf 0.4s reduziert */
+    transition: transform 0.3s ease;
 }
 
 .project-card:hover img {
-    transform: scale(1.1) rotate(2deg); /* Von scale(1.15) und rotate(3deg) reduziert */
+    transform: scale(1.08);
 }
 
 /* Status Badges */
 .status-discontinued {
     background: linear-gradient(135deg, #dc2626, #991b1b);
-    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
 }
 
 .status-beta {
     background: linear-gradient(135deg, #f59e0b, #d97706);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 
 .status-soon {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
 }
 
 .status-active {
     background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 .status-updated {
     background: linear-gradient(135deg, #e91e63, #d946ef);
-    box-shadow: 0 0 20px rgba(233, 30, 99, 0.6);
+    box-shadow: 0 0 10px rgba(233, 30, 99, 0.4);
 }
 
 .nav-link {
     position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .nav-link::before {
@@ -239,7 +203,7 @@ body {
     width: 0;
     height: 2px;
     background: linear-gradient(90deg, var(--primary), var(--secondary));
-    transition: width 0.3s ease;
+    transition: width 0.2s ease;
 }
 
 .nav-link:hover::before {
@@ -247,12 +211,12 @@ body {
 }
 
 .modal {
-    backdrop-filter: blur(20px); /* Von 30px auf 20px reduziert */
-    animation: fadeIn 0.3s ease-out;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
-    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Von 0.4s auf 0.3s reduziert */
+    animation: slideIn 0.2s ease-out;
 }
 
 @keyframes fadeIn {
@@ -261,48 +225,29 @@ body {
 }
 
 @keyframes slideIn {
-    from { transform: translateY(50px) scale(0.9); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .social-btn {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Von 0.4s auf 0.3s reduziert */
+    transition: all 0.2s ease;
     position: relative;
-    overflow: hidden;
 }
 
-/* OPTIMIERT: Einfacherer Ripple-Effekt */
-.social-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: translate(-50%, -50%);
-    transition: width 0.4s, height 0.4s; /* Von 0.6s auf 0.4s reduziert */
-}
-
-.social-btn:hover::after {
-    width: 250px; /* Von 300px auf 250px reduziert */
-    height: 250px;
-}
-
+/* Einfacher Hover ohne ::after */
 .social-btn:hover {
-    transform: translateY(-3px) scale(1.03); /* Von translateY(-5px) scale(1.05) reduziert */
-    box-shadow: 0 8px 25px rgba(233, 30, 99, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
 }
 
 .fade-in {
-    animation: fadeInUp 0.5s ease-out forwards; /* Von 0.6s auf 0.5s reduziert */
+    animation: fadeInUp 0.4s ease-out forwards;
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px); /* Von 40px auf 30px reduziert */
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -311,15 +256,15 @@ body {
 }
 
 .search-bar {
-    transition: all 0.3s ease; /* Von 0.4s auf 0.3s reduziert */
+    transition: all 0.2s ease;
     background: rgba(58, 12, 78, 0.6);
     border: 2px solid rgba(233, 30, 99, 0.3);
 }
 
 .search-bar:focus {
     background: rgba(78, 22, 98, 0.8);
-    box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.3), 0 0 30px rgba(217, 70, 239, 0.4);
-    border-color: rgba(217, 70, 239, 0.6);
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+    border-color: rgba(217, 70, 239, 0.5);
 }
 
 .floating-action {
@@ -327,16 +272,12 @@ body {
     bottom: 2rem;
     right: 2rem;
     z-index: 30;
-    /* Permanente Animation entfernt - nur noch Hover */
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* Nur Hover-Animation */
 .floating-action:hover {
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); } /* Von -15px auf -10px reduziert */
+    transform: translateY(-5px);
 }
 
 .hero-section {
@@ -344,30 +285,14 @@ body {
     overflow: hidden;
 }
 
-/* OPTIMIERT: Subtilerer Pulse-Effekt */
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(156, 39, 176, 0.1));
-    border-radius: 1rem;
-    animation: pulse 6s ease-in-out infinite; /* Von 4s auf 6s verlängert */
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.2; transform: scale(1); } /* Reduzierte Opacity */
-    50% { opacity: 0.4; transform: scale(1.01); } /* Von scale(1.02) auf 1.01 reduziert */
-}
+/* Entfernt: ::before Pulse */
 
 .neon-pink {
-    box-shadow: 0 0 15px rgba(233, 30, 99, 0.5), 0 0 30px rgba(233, 30, 99, 0.3); /* Reduziert */
+    box-shadow: 0 0 20px rgba(233, 30, 99, 0.4);
 }
 
 .neon-purple {
-    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5), 0 0 30px rgba(156, 39, 176, 0.3); /* Reduziert */
+    box-shadow: 0 0 20px rgba(156, 39, 176, 0.4);
 }
 
 .content-wrapper {
@@ -376,112 +301,82 @@ body {
 }
 
 .enhanced-hover {
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Von 0.4s auf 0.3s reduziert */
+    transition: transform 0.2s ease;
 }
 
 .enhanced-hover:hover {
-    transform: translateY(-6px) rotate(-2deg); /* Von translateY(-8px) reduziert */
+    transform: translateY(-3px);
 }
 
-/* OPTIMIERT: Subtilerer Glow-Effekt */
+/* Subtiler Glow */
 .glow-on-scroll {
-    transition: all 0.4s ease; /* Von 0.5s auf 0.4s reduziert */
+    transition: box-shadow 0.3s ease;
 }
 
 .glow-on-scroll.visible {
-    animation: glowPulse 3s ease-in-out infinite; /* Von 2s auf 3s verlängert */
-}
-
-@keyframes glowPulse {
-    0%, 100% { 
-        box-shadow: 0 0 15px rgba(233, 30, 99, 0.2); /* Reduziert */
-    }
-    50% { 
-        box-shadow: 0 0 30px rgba(233, 30, 99, 0.4), 0 0 45px rgba(156, 39, 176, 0.3); /* Reduziert */
-    }
-}
-
-.loading-skeleton {
-    background: linear-gradient(90deg, rgba(233, 30, 99, 0.05) 25%, rgba(217, 70, 239, 0.15) 50%, rgba(156, 39, 176, 0.05) 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    box-shadow: 0 0 20px rgba(233, 30, 99, 0.2);
 }
 
 .page {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.2s ease;
 }
 
 .page.hidden {
     opacity: 0;
-    transform: translateY(20px);
 }
 
-/* OPTIMIERT: Subtilerer Button-Pulse */
+/* Reduzierter Button-Pulse */
 .pulse-btn {
-    animation: buttonPulse 3s ease-in-out infinite; /* Von 2s auf 3s verlängert */
+    animation: buttonPulse 4s ease-in-out infinite;
 }
 
 @keyframes buttonPulse {
     0%, 100% { 
         transform: scale(1);
-        box-shadow: 0 4px 20px rgba(233, 30, 99, 0.4); /* Reduziert */
     }
     50% { 
-        transform: scale(1.03); /* Von 1.05 auf 1.03 reduziert */
-        box-shadow: 0 6px 25px rgba(233, 30, 99, 0.5), 0 6px 25px rgba(217, 70, 239, 0.3); /* Reduziert */
+        transform: scale(1.02);
     }
 }
 
-/* OPTIMIERT: Mobile-Optimierungen */
+/* Mobile-Optimierungen */
 @media (max-width: 768px) {
     .floating-action {
         bottom: 1rem;
         right: 1rem;
     }
     
-    /* Alle Performance-hungrigen Effekte auf Mobile entfernen */
+    /* Keine Partikel auf Mobile */
     .particle {
-        display: none;
+        display: none !important;
     }
     
-    .project-card::before {
-        display: none;
-    }
-    
+    /* Kein Blur auf Mobile */
     .glass,
     .glass-strong,
     .glass-header {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        background: rgba(58, 12, 78, 0.9);
+        background: rgba(58, 12, 78, 0.95);
     }
     
-    /* Animationen deaktivieren */
-    .gradient-text,
-    .gradient-accent,
-    .hero-section::before,
-    .glow-on-scroll.visible,
+    /* Reduzierte Animationen */
     .pulse-btn,
-    .floating-action {
+    .glow-on-scroll.visible {
         animation: none !important;
     }
     
-    /* Reduzierte Hover-Effekte */
+    /* Einfachere Hover */
     .project-card:hover {
-        transform: translateY(-4px) scale(1);
+        transform: translateY(-2px);
     }
     
     .social-btn:hover {
-        transform: translateY(-2px) scale(1);
+        transform: translateY(-1px);
     }
 }
 
-/* OPTIMIERT: Prefers-reduced-motion Support */
+/* Prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -490,4 +385,10 @@ body {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+    
+    .particle {
+        display: none !important;
+    }
 }
+
+/* Loading Skeleton entfernt - wird nicht verwendet */
