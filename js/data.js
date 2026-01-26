@@ -6,11 +6,11 @@ const projects = [
         category: "modpacks",
         subcategory: "tech",
         status: "soon",
-        logo: "https://media.forgecdn.net/avatars/1459/645/638947343050937463.png",
+        logo: "images/unboundlogo.webp",
         description: "COMING SOON",
         version: "Neoforge 1.21.1",
         features: ["Create", "Coming Soon", "Revolutionary Automation"],
-        screenshots: ["https://media.forgecdn.net/avatars/1459/645/638947343050937463.png"],
+        screenshots: ["images/unboundlogo.webp"],
         downloadUrl: "#",
         downloads: "-",
         lastUpdate: "-"
