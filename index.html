@@ -11,13 +11,10 @@
     
     <title>FabiMvurice Interactive - Minecraft Projects</title>
     
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="css/styles.css" as="style">
-    <link rel="preload" href="js/data.js" as="script">
+    <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,31 +29,31 @@
     <link rel="icon" type="image/png" href="images/fmlogo.png">
 </head>
 <body>
-    <!-- Floating Particles (optimized) -->
+    <!-- Floating Particles (Desktop only) -->
     <div class="particles" aria-hidden="true" id="particles"></div>
 
     <!-- Animated Grid Background -->
-    <div class="grid-bg"></div>
+    <div class="grid-bg" aria-hidden="true"></div>
 
     <!-- Header -->
     <header class="glass-header sticky top-0 z-40 px-6 py-4 transition-all duration-300">
         <div class="max-w-7xl mx-auto flex items-center justify-between content-wrapper">
             <div class="flex items-center space-x-4">
-                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover" loading="eager">
+                <img src="images/fmlogo.png" alt="FmStudios Logo" class="w-14 h-14 rounded-xl transition-transform duration-300 hover:scale-110 neon-pink enhanced-hover" loading="eager" width="56" height="56">
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">FabiMvurice Interactive</h1>
                     <p class="text-xs text-gray-400">✨ Crafting Minecraft Modpacks</p>
                 </div>
             </div>
             
-            <nav class="hidden md:flex space-x-8">
+            <nav class="hidden md:flex space-x-8" aria-label="Main navigation">
                 <button onclick="showPage('home')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Projects</button>
                 <button onclick="showPage('changelog')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Changelog</button>
                 <button onclick="showPage('team')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Team</button>
             </nav>
             
             <!-- Mobile menu button -->
-            <button id="mobile-menu-btn" class="md:hidden text-white" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            <button id="mobile-menu-btn" class="md:hidden text-white" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu" aria-expanded="false">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -64,13 +61,13 @@
         </div>
         
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 content-wrapper">
+        <nav id="mobile-menu" class="hidden md:hidden mt-4 pb-4 content-wrapper" aria-label="Mobile navigation">
             <div class="flex flex-col space-y-2">
                 <button onclick="showPage('home')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Projects</button>
                 <button onclick="showPage('changelog')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Changelog</button>
                 <button onclick="showPage('team')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Team</button>
             </div>
-        </div>
+        </nav>
     </header>
 
     <!-- Main Content -->
@@ -78,7 +75,7 @@
         <!-- Home Page -->
         <div id="home-page" class="page fade-in content-wrapper">
             <!-- Hero Section with Latest Trailer -->
-            <div class="max-w-7xl mx-auto px-6 py-12">
+            <section class="max-w-7xl mx-auto px-6 py-12">
                 <div class="hero-section glass rounded-3xl p-8 mb-10 overflow-hidden relative glow-on-scroll">
                     <div class="relative z-10">
                         <div class="text-center mb-8">
@@ -102,10 +99,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Social Media & Buttons -->
-            <div class="max-w-7xl mx-auto px-6 mb-10">
+            <section class="max-w-7xl mx-auto px-6 mb-10">
                 <div class="glass rounded-3xl p-8">
                     <h3 class="text-2xl font-bold text-center mb-6 gradient-text">✨ Connect With Our Community</h3>
                     <div class="flex flex-wrap justify-center gap-4 mb-8" id="social-links">
@@ -117,10 +114,10 @@
                         <!-- Support links will be loaded by JS -->
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Search and Filter Section -->
-            <div class="max-w-7xl mx-auto px-6 mb-10">
+            <section class="max-w-7xl mx-auto px-6 mb-10">
                 <div class="glass rounded-3xl p-8 glow-on-scroll">
                     <!-- Search Bar -->
                     <div class="mb-8">
@@ -133,37 +130,37 @@
                                 oninput="searchProjects()"
                                 aria-label="Search projects"
                             >
-                            <svg class="absolute left-5 top-5 w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg class="absolute left-5 top-5 w-6 h-6 text-pink-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
                     </div>
                     
                     <!-- Category Filters -->
-                    <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters">
+                    <div class="flex flex-wrap gap-4 justify-center mb-6" id="category-filters" role="group" aria-label="Category filters">
                         <!-- Category filters will be loaded by JS -->
                     </div>
                     
                     <!-- Modpack Subcategory Filter -->
-                    <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden">
+                    <div id="modpack-filter" class="mt-6 flex flex-wrap gap-3 justify-center hidden" role="group" aria-label="Modpack type filters">
                         <!-- Modpack filters will be loaded by JS -->
                     </div>
                     
                     <!-- Results count -->
                     <div class="mt-6 text-center">
-                        <span id="results-count" class="text-sm text-gray-400 font-medium"></span>
+                        <span id="results-count" class="text-sm text-gray-400 font-medium" role="status" aria-live="polite"></span>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Projects Grid -->
-            <div class="max-w-7xl mx-auto px-6 pb-16">
-                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <section class="max-w-7xl mx-auto px-6 pb-16">
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
                     <!-- Projects will be populated by JavaScript -->
                 </div>
                 
                 <!-- No results message -->
-                <div id="no-results" class="hidden text-center py-16">
+                <div id="no-results" class="hidden text-center py-16" role="status">
                     <div class="glass rounded-3xl p-12">
                         <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.441-.935-5.99-2.448m0 0A7.962 7.962 0 014 9c0-1.657.416-3.22 1.15-4.512M6.01 6.512A7.962 7.962 0 0112 3c2.34 0 4.441.935 5.99 2.448m0 0A7.962 7.962 0 0120 9c0-1.657-.416-3.22-1.15-4.512"/>
@@ -172,7 +169,7 @@
                         <p class="text-gray-400 text-lg">Try adjusting your search or filter criteria</p>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
 
         <!-- Changelog Page -->
@@ -196,23 +193,23 @@
                     <p class="text-gray-300 text-lg">The talented people behind FabiMvurice Interactive</p>
                 </div>
 
-                <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
                     <!-- Team members will be populated by JavaScript -->
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modals and other components -->
-    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
+    <!-- Modals -->
+    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
         <!-- Team modal content will be loaded by JS -->
     </div>
 
-    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4">
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
         <!-- Project modal content will be loaded by JS -->
     </div>
 
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4">
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 lightbox hidden z-[70] flex items-center justify-center p-4" role="dialog" aria-modal="true">
         <!-- Lightbox content will be loaded by JS -->
     </div>
 
@@ -244,7 +241,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript (optimized loading) -->
+    <!-- JavaScript (defer for better performance) -->
     <script src="js/data.js" defer></script>
     <script src="js/ui.js" defer></script>
     <script src="js/main.js" defer></script>
