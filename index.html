@@ -48,6 +48,7 @@
             
             <nav class="hidden md:flex space-x-8" aria-label="Main navigation">
                 <button onclick="showPage('home')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Projects</button>
+                <button onclick="showPage('roadmap')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Roadmap</button>
                 <button onclick="showPage('changelog')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Changelog</button>
                 <button onclick="showPage('team')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Team</button>
             </nav>
@@ -64,6 +65,7 @@
         <nav id="mobile-menu" class="hidden md:hidden mt-4 pb-4 content-wrapper" aria-label="Mobile navigation">
             <div class="flex flex-col space-y-2">
                 <button onclick="showPage('home')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Projects</button>
+                <button onclick="showPage('roadmap')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Roadmap</button>
                 <button onclick="showPage('changelog')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Changelog</button>
                 <button onclick="showPage('team')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Team</button>
             </div>
@@ -181,6 +183,44 @@
                 </div>
                 <div id="changelog-content" class="space-y-6">
                     <!-- Changelog content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Roadmap Page -->
+        <div id="roadmap-page" class="page hidden fade-in content-wrapper">
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl font-black mb-4 gradient-text">🗺️ Project Roadmap</h1>
+                    <p class="text-gray-300 text-lg max-w-3xl mx-auto">Follow our journey as we build amazing Minecraft experiences. Here's what we're working on and what's coming next!</p>
+                </div>
+
+                <!-- Roadmap Filters -->
+                <div class="glass rounded-3xl p-6 mb-10 glow-on-scroll">
+                    <div class="flex flex-wrap gap-4 justify-center" id="roadmap-filters">
+                        <!-- Roadmap filters will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Roadmap Timeline -->
+                <div id="roadmap-timeline" class="space-y-8">
+                    <!-- Roadmap items will be populated by JavaScript -->
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+                    <div class="glass rounded-3xl p-6 text-center">
+                        <div class="text-4xl font-black gradient-text mb-2" id="roadmap-completed">0</div>
+                        <div class="text-gray-400 text-sm font-medium">Completed</div>
+                    </div>
+                    <div class="glass rounded-3xl p-6 text-center">
+                        <div class="text-4xl font-black gradient-text mb-2" id="roadmap-inprogress">0</div>
+                        <div class="text-gray-400 text-sm font-medium">In Progress</div>
+                    </div>
+                    <div class="glass rounded-3xl p-6 text-center">
+                        <div class="text-4xl font-black gradient-text mb-2" id="roadmap-planned">0</div>
+                        <div class="text-gray-400 text-sm font-medium">Planned</div>
+                    </div>
                 </div>
             </div>
         </div>
