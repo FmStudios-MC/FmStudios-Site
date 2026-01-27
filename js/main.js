@@ -202,15 +202,6 @@ function throttle(func, limit) {
     }
 }
 
-// Debounce für Search
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    }
-}
-
 // Lazy Loading für Partikel - nur Desktop
 let particlesCreated = false;
 function createParticles() {
@@ -238,6 +229,9 @@ function createParticles() {
 
 // Initialize
 function init() {
+    // Initialize filtered projects
+    filteredProjects = [...projects];
+    
     // Lazy load particles nur auf Desktop
     requestIdleCallback(() => {
         if (window.innerWidth >= 768) {
@@ -253,6 +247,8 @@ function init() {
     renderProjects();
     renderChangelog();
     renderTeam();
+    renderRoadmapFilters();
+    renderRoadmap();
     updateResultsCount();
     setupScrollEffects();
     
