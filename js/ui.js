@@ -2,7 +2,17 @@
 let currentFilter = 'all';
 let currentModpackFilter = 'all';
 let searchQuery = '';
-let filteredProjects = [...projects];
+let filteredProjects = [];
+let currentRoadmapFilter = 'all';
+
+// Utility function: Debounce
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    }
+}
 
 // Page navigation
 function showPage(pageId) {
@@ -89,6 +99,11 @@ function filterModpacks(subcategory) {
 
 // Apply all filters
 function applyFilters() {
+    // Initialize filteredProjects if empty
+    if (filteredProjects.length === 0 && projects.length > 0) {
+        filteredProjects = [...projects];
+    }
+    
     filteredProjects = projects.filter(project => {
         if (currentFilter !== 'all' && project.category !== currentFilter) return false;
         if (currentFilter === 'modpacks' && currentModpackFilter !== 'all' && project.subcategory !== currentModpackFilter) return false;
@@ -495,4 +510,199 @@ function toggleChangelog(projectId) {
         content.classList.add('hidden');
         icon.style.transform = 'rotate(0deg)';
     }
+}
+
+// Roadmap functionality
+function filterRoadmap(filter) {
+    currentRoadmapFilter = filter;
+    
+    // Update button states
+    document.querySelectorAll('.roadmap-filter-btn').forEach(btn => {
+        btn.classList.remove('gradient-accent');
+        btn.classList.add('glass');
+    });
+    
+    const activeBtn = event.target;
+    activeBtn.classList.add('gradient-accent');
+    activeBtn.classList.remove('glass');
+    
+    renderRoadmap();
+}
+
+function renderRoadmapFilters() {
+    const container = document.getElementById('roadmap-filters');
+    if (!container) return;
+    
+    const filters = [
+        { id: 'all', label: 'All Items', icon: '🎯' },
+        { id: 'in-progress', label: 'In Progress', icon: '🚧' },
+        { id: 'planned', label: 'Planned', icon: '📋' },
+        { id: 'high', label: 'High Priority', icon: '🔥' }
+    ];
+    
+    const fragment = document.createDocumentFragment();
+    
+    filters.forEach((filter, index) => {
+        const btn = document.createElement('button');
+        btn.className = `roadmap-filter-btn ${index === 0 ? 'gradient-accent' : 'glass'} rounded-xl px-6 py-3 font-semibold transition-all text-white`;
+        btn.onclick = () => filterRoadmap(filter.id);
+        btn.innerHTML = `${filter.icon} ${filter.label}`;
+        fragment.appendChild(btn);
+    });
+    
+    container.appendChild(fragment);
+}
+
+function renderRoadmap() {
+    const timeline = document.getElementById('roadmap-timeline');
+    if (!timeline) return;
+    
+    // Filter items
+    let items = roadmapItems.filter(item => {
+        if (currentRoadmapFilter === 'all') return true;
+        if (currentRoadmapFilter === 'high') return item.priority === 'high';
+        return item.status === currentRoadmapFilter;
+    });
+    
+    // Sort by priority and progress
+    items.sort((a, b) => {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        const statusOrder = { 'in-progress': 0, planned: 1, completed: 2, onhold: 3 };
+        
+        if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
+        if (a.priority !== b.priority) return priorityOrder[a.priority] - priorityOrder[b.priority];
+        return b.progress - a.progress;
+    });
+    
+    const fragment = document.createDocumentFragment();
+    
+    items.forEach((item, index) => {
+        const statusInfo = roadmapStatusConfig[item.status];
+        const priorityInfo = priorityConfig[item.priority];
+        
+        const card = document.createElement('div');
+        card.className = 'glass rounded-3xl overflow-hidden glow-on-scroll fade-in';
+        card.style.animationDelay = `${index * 0.05}s`;
+        
+        card.innerHTML = `
+            <div class="p-8">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white">${item.title}</h3>
+                        </div>
+                        <p class="text-gray-300 leading-relaxed mb-4">${item.description}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="${statusInfo.class} text-xs font-bold px-3 py-1 rounded-full text-white">
+                                ${statusInfo.label}
+                            </span>
+                            <span class="${priorityInfo.class} text-xs font-bold px-3 py-1 rounded-full bg-opacity-20 bg-white">
+                                ${priorityInfo.icon} ${priorityInfo.label}
+                            </span>
+                            <span class="bg-gradient-to-r from-pink-500 to-purple-500 text-xs font-bold px-3 py-1 rounded-full text-white capitalize">
+                                ${item.category}
+                            </span>
+                            <span class="glass text-xs font-bold px-3 py-1 rounded-full text-white">
+                                📅 ${item.estimatedDate}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                ${item.status !== 'completed' ? `
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-400">Progress</span>
+                            <span class="text-sm font-bold gradient-text">${item.progress}%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 bg-opacity-50 rounded-full h-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-pink-500 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-lg" 
+                                 style="width: ${item.progress}%"></div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <!-- Features -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-bold gradient-text mb-3">✨ Key Features</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        ${item.features.map(feature => `
+                            <div class="flex items-start space-x-2 text-gray-300 text-sm p-2 rounded-lg hover:bg-white hover:bg-opacity-5 transition-colors">
+                                <span class="text-pink-400 mt-0.5 flex-shrink-0">▸</span>
+                                <span>${feature}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- Recent Updates -->
+                ${item.updates.length > 0 ? `
+                    <div class="border-t border-white border-opacity-10 pt-6">
+                        <button onclick="toggleRoadmapUpdates('${item.id}')" 
+                                class="flex items-center justify-between w-full text-left mb-4 hover:text-pink-400 transition-colors">
+                            <h4 class="text-lg font-bold gradient-text">📢 Recent Updates (${item.updates.length})</h4>
+                            <svg class="w-5 h-5 transform transition-transform" id="updates-icon-${item.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="updates-${item.id}" class="hidden space-y-3">
+                            ${item.updates.map(update => `
+                                <div class="glass rounded-xl p-4">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="bg-gradient-to-r from-pink-500 to-purple-500 rounded-full p-2 flex-shrink-0">
+                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-xs text-gray-400 mb-1 font-medium">${update.date}</div>
+                                            <div class="text-sm text-gray-300">${update.text}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        fragment.appendChild(card);
+    });
+    
+    timeline.innerHTML = '';
+    timeline.appendChild(fragment);
+    
+    updateRoadmapStats();
+}
+
+function toggleRoadmapUpdates(itemId) {
+    const content = document.getElementById(`updates-${itemId}`);
+    const icon = document.getElementById(`updates-icon-${itemId}`);
+    
+    if (!content || !icon) return;
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function updateRoadmapStats() {
+    const completed = roadmapItems.filter(i => i.status === 'completed').length;
+    const inProgress = roadmapItems.filter(i => i.status === 'in-progress').length;
+    const planned = roadmapItems.filter(i => i.status === 'planned').length;
+    
+    const completedEl = document.getElementById('roadmap-completed');
+    const inProgressEl = document.getElementById('roadmap-inprogress');
+    const plannedEl = document.getElementById('roadmap-planned');
+    
+    if (completedEl) completedEl.textContent = completed;
+    if (inProgressEl) inProgressEl.textContent = inProgress;
+    if (plannedEl) plannedEl.textContent = planned;
 }
