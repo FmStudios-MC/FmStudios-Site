@@ -151,3 +151,89 @@ const changelogs = {
         }
     ]
 };
+
+// Roadmap data
+const roadmapItems = [
+    {
+        id: 1,
+        title: "Create Unbound - Full Release",
+        description: "The ultimate Create mod experience with new features and performance optimizations.",
+        status: "in-progress",
+        category: "modpacks",
+        priority: "high",
+        progress: 0,
+        estimatedDate: "Q2 2026",
+        features: [
+            "Advanced Create automation chains",
+            "Custom dimension with unique mechanics",
+            "Performance optimization for large factories",
+            "Integration with  Create addons",
+            "Modrinth and Curseforge as a same Version"
+        ],
+        updates: [
+            {
+                date: "2025-01-15",
+                text: "Waiting for 26.1 release of the create mod"
+            }
+        ]
+    },
+    {
+        id: 2,
+        title: "{Additions} Rebound",
+        description: "A Vanilla+ modpack",
+        status: "planned",
+        category: "modpacks",
+        priority: "medium",
+        progress: 0,
+        estimatedDate: "2026",
+        features: [
+            "Vanilla+ mods"
+        ],
+        updates: []
+    },
+    {
+        id: 3,
+        title: "Create: Project Arcane",
+        description: "A Create Modpack based on create and magic mods",
+        status: "onhold",
+        category: "modpacks",
+        priority: "low",
+        progress: 0,
+        estimatedDate: "2026",
+        features: [
+            "Advanced Create automation with magic"
+        ],
+        updates: []
+    }
+];
+
+// Roadmap status configuration
+const roadmapStatusConfig = {
+    completed: {
+        label: "✅ Completed",
+        class: "bg-gradient-to-r from-green-500 to-emerald-600",
+        icon: "✅"
+    },
+    "in-progress": {
+        label: "🚧 In Progress",
+        class: "bg-gradient-to-r from-blue-500 to-cyan-600",
+        icon: "🚧"
+    },
+    planned: {
+        label: "📋 Planned",
+        class: "bg-gradient-to-r from-purple-500 to-pink-600",
+        icon: "📋"
+    },
+    onhold: {
+        label: "⏸️ On Hold",
+        class: "bg-gradient-to-r from-yellow-500 to-orange-600",
+        icon: "⏸️"
+    }
+};
+
+// Roadmap priority configuration
+const priorityConfig = {
+    high: { label: "High Priority", class: "text-red-400", icon: "🔥" },
+    medium: { label: "Medium Priority", class: "text-yellow-400", icon: "⚡" },
+    low: { label: "Low Priority", class: "text-blue-400", icon: "💡" }
+};
