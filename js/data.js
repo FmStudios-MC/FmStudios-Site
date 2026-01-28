@@ -207,6 +207,10 @@ const roadmapItems = [
             {
                 date: "2026-01-28",
                 text: "Started work on the game again since 2024"
+            },
+            {
+                date: "2026-01-29",
+                text: "Added Stamina System"
             }
         ]
     },
