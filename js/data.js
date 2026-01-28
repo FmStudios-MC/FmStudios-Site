@@ -129,7 +129,7 @@ const teamMembers = [
 const statusConfig = {
     discontinued: { label: "🚫 Discontinued", class: "status-discontinued" },
     beta: { label: "⚠️ Beta", class: "status-beta" },
-    soon: { label: "🔜 Coming Soon", class: "status-soon" },
+    soon: { label: "Coming Soon", class: "status-soon" },
     active: { label: "✅ Active", class: "status-active" },
     updated: { label: "🆕 Recently Updated", class: "status-updated" }
 };
@@ -165,14 +165,13 @@ const roadmapItems = [
         estimatedDate: "Q2 2026",
         features: [
             "Advanced Create automation chains",
-            "Custom dimension with unique mechanics",
             "Performance optimization for large factories",
             "Integration with  Create addons",
             "Modrinth and Curseforge as a same Version"
         ],
         updates: [
             {
-                date: "2025-01-15",
+                date: "2026-01-15",
                 text: "Waiting for 26.1 release of the create mod"
             }
         ]
@@ -191,8 +190,28 @@ const roadmapItems = [
         ],
         updates: []
     },
-    {
+        {
         id: 3,
+        title: "Project Leuna - Reborn (Roblox)",
+        description: "A Roblox roleplay game",
+        status: "in-progress",
+        category: "roblox",
+        priority: "low",
+        progress: 2,
+        estimatedDate: "2026/2027",
+        features: [
+            "Roleplay Elements",
+            "Replica of the german city Leuna"
+        ],
+        updates: [
+            {
+                date: "2026-01-28",
+                text: "Started work on the game again since 2024"
+            }
+        ]
+    },
+    {
+        id: 4,
         title: "Create: Project Arcane",
         description: "A Create Modpack based on create and magic mods",
         status: "onhold",
