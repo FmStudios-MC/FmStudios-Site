@@ -227,18 +227,74 @@ function createParticles() {
     container.appendChild(fragment);
 }
 
+// Theme state
+let currentTheme = 'dark';
+
+// Theme toggle functionality
+function toggleTheme() {
+    const html = document.documentElement;
+    const isLight = html.classList.contains('light-theme');
+
+    if (isLight) {
+        html.classList.remove('light-theme');
+        currentTheme = 'dark';
+    } else {
+        html.classList.add('light-theme');
+        currentTheme = 'light';
+    }
+
+    // Save preference to localStorage
+    localStorage.setItem('theme', currentTheme);
+}
+
+function initTheme() {
+    // Check for saved preference
+    const savedTheme = localStorage.getItem('theme');
+
+    // Check for system preference if no saved preference
+    if (savedTheme) {
+        currentTheme = savedTheme;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        currentTheme = 'light';
+    }
+
+    // Apply theme
+    if (currentTheme === 'light') {
+        document.documentElement.classList.add('light-theme');
+    }
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+            // Only auto-switch if user hasn't set a preference
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    document.documentElement.classList.add('light-theme');
+                    currentTheme = 'light';
+                } else {
+                    document.documentElement.classList.remove('light-theme');
+                    currentTheme = 'dark';
+                }
+            }
+        });
+    }
+}
+
 // Initialize
 function init() {
+    // Initialize theme first to prevent flash
+    initTheme();
+
     // Initialize filtered projects
     filteredProjects = [...projects];
-    
+
     // Lazy load particles nur auf Desktop
     requestIdleCallback(() => {
         if (window.innerWidth >= 768) {
             createParticles();
         }
     });
-    
+
     renderSocialLinks();
     renderSupportLinks();
     renderFooterSocial();
@@ -251,13 +307,13 @@ function init() {
     renderRoadmap();
     updateResultsCount();
     setupScrollEffects();
-    
+
     // Throttled Scroll-Handler
     window.addEventListener('scroll', throttle(handleScroll, 150), { passive: true });
-    
+
     // Modal close handlers
     setupModalHandlers();
-    
+
     // ESC key handler
     document.addEventListener('keydown', handleEscKey, { passive: true });
 
