@@ -59,9 +59,10 @@
             
             <nav class="hidden md:flex items-center space-x-8" aria-label="Main navigation">
                 <button onclick="showPage('home')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Projects</button>
+                <button onclick="showPage('news')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">News</button>
                 <button onclick="showPage('roadmap')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Roadmap</button>
                 <button onclick="showPage('changelog')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Changelog</button>
-                <button onclick="showPage('team')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all font-medium px-2 py-1">Team</button>
+                <button onclick="showPage('hosting')" class="nav-link text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-cyan-400 hover:to-blue-500 transition-all font-medium px-2 py-1">Hosting</button>
 
                 <!-- Theme Toggle -->
                 <button id="theme-toggle" onclick="toggleTheme()" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">
@@ -96,9 +97,10 @@
         <nav id="mobile-menu" class="hidden md:hidden mt-4 pb-4 content-wrapper" aria-label="Mobile navigation">
             <div class="flex flex-col space-y-2">
                 <button onclick="showPage('home')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Projects</button>
+                <button onclick="showPage('news')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">News</button>
                 <button onclick="showPage('roadmap')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Roadmap</button>
                 <button onclick="showPage('changelog')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Changelog</button>
-                <button onclick="showPage('team')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all py-2">Team</button>
+                <button onclick="showPage('hosting')" class="text-left text-white hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-cyan-400 hover:to-blue-500 transition-all py-2">Hosting</button>
             </div>
         </nav>
     </header>
@@ -205,6 +207,49 @@
             </section>
         </div>
 
+        <!-- News/Blog Page -->
+        <div id="news-page" class="page hidden fade-in content-wrapper">
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl font-black mb-4 gradient-text">Latest News</h1>
+                    <p class="text-gray-300 text-lg max-w-3xl mx-auto">Stay updated with announcements, updates, and community news from FabiMvurice Interactive</p>
+                </div>
+
+                <!-- News Filters -->
+                <div class="glass rounded-3xl p-6 mb-10 glow-on-scroll">
+                    <div class="flex flex-wrap gap-4 justify-center" id="news-filters">
+                        <!-- News filters will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Featured Post -->
+                <div id="featured-post" class="mb-10">
+                    <!-- Featured post will be populated by JavaScript -->
+                </div>
+
+                <!-- News Grid -->
+                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- News posts will be populated by JavaScript -->
+                </div>
+
+                <!-- No posts message -->
+                <div id="no-posts" class="hidden text-center py-16" role="status">
+                    <div class="glass rounded-3xl p-12">
+                        <svg class="w-20 h-20 mx-auto text-gray-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold text-gray-300 mb-3">No posts found</h3>
+                        <p class="text-gray-400 text-lg">Check back later for updates</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Post Modal -->
+        <div id="blog-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="blog-modal-title">
+            <!-- Blog modal content will be loaded by JS -->
+        </div>
+
         <!-- Changelog Page -->
         <div id="changelog-page" class="page hidden fade-in content-wrapper">
             <div class="max-w-5xl mx-auto px-6 py-12">
@@ -256,26 +301,93 @@
             </div>
         </div>
 
-        <!-- Team Page -->
-        <div id="team-page" class="page hidden content-wrapper">
-            <div class="max-w-7xl mx-auto px-6 py-12">
-                <div class="text-center mb-12">
-                    <h1 class="text-5xl font-black mb-4 gradient-text">👥 Meet Our Team</h1>
-                    <p class="text-gray-300 text-lg">The talented people behind FabiMvurice Interactive</p>
-                </div>
+        <!-- Hosting Partner Page (Kinetic Hosting Style) -->
+        <div id="hosting-page" class="page hidden fade-in">
+            <!-- Kinetic-style dark background -->
+            <div class="kinetic-bg">
+                <!-- Hero Section -->
+                <section class="max-w-7xl mx-auto px-6 py-16">
+                    <div class="kinetic-hero text-center mb-16">
+                        <div class="inline-block kinetic-badge text-sm font-bold px-4 py-2 rounded-full mb-6">
+                            Official Partner
+                        </div>
+                        <h1 class="text-5xl md:text-6xl font-black mb-6 kinetic-gradient-text">
+                            Kinetic Hosting
+                        </h1>
+                        <p class="text-xl text-gray-300 max-w-3xl mx-auto mb-8" id="kinetic-tagline">
+                            <!-- Populated by JS -->
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <a id="kinetic-cta-main" href="#" target="_blank" rel="noopener noreferrer"
+                               class="kinetic-btn-primary rounded-xl px-8 py-4 font-bold text-lg transition-all hover:scale-105">
+                                Create Your Server
+                            </a>
+                            <a href="#kinetic-features"
+                               class="kinetic-btn-secondary rounded-xl px-8 py-4 font-bold text-lg transition-all hover:scale-105">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
 
-                <div id="team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
-                    <!-- Team members will be populated by JavaScript -->
-                </div>
+                    <!-- Stats Bar -->
+                    <div class="kinetic-stats-bar rounded-2xl p-6 mb-16" id="kinetic-stats">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+
+                <!-- Features Section -->
+                <section id="kinetic-features" class="max-w-7xl mx-auto px-6 py-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-black mb-4 kinetic-gradient-text">Perfect for Modpacks</h2>
+                        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                            Everything you need to run heavy modpacks like Create Unbound smoothly
+                        </p>
+                    </div>
+
+                    <div id="kinetic-features-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+
+                <!-- Why We Chose Section -->
+                <section class="max-w-7xl mx-auto px-6 py-16">
+                    <div class="kinetic-quote-card rounded-3xl p-8 md:p-12">
+                        <div class="flex flex-col md:flex-row items-center gap-8">
+                            <div class="flex-shrink-0">
+                                <img src="images/fmlogo.png" alt="FmStudios" class="w-24 h-24 rounded-2xl kinetic-glow">
+                            </div>
+                            <div class="flex-1 text-center md:text-left">
+                                <h3 class="text-2xl font-bold text-white mb-4">Why We Partnered with Kinetic</h3>
+                                <p class="text-gray-300 text-lg leading-relaxed" id="kinetic-why-text">
+                                    <!-- Populated by JS -->
+                                </p>
+                                <p class="mt-4 text-cyan-400 font-semibold">— FabiMvurice Interactive Team</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA Section -->
+                <section class="max-w-7xl mx-auto px-6 py-16">
+                    <div class="kinetic-cta-card rounded-3xl p-12 text-center">
+                        <h2 class="text-4xl font-black mb-4 text-white">Ready to Host Your Server?</h2>
+                        <p class="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+                            Join thousands of Minecraft players who trust Kinetic Hosting for their modded servers.
+                        </p>
+                        <a id="kinetic-cta-bottom" href="#" target="_blank" rel="noopener noreferrer"
+                           class="kinetic-btn-primary rounded-xl px-10 py-5 font-bold text-xl inline-block transition-all hover:scale-105">
+                            Get Started Now
+                        </a>
+                        <p class="mt-6 text-gray-500 text-sm">
+                            By using our link, you support FabiMvurice Interactive at no extra cost to you.
+                        </p>
+                    </div>
+                </section>
             </div>
         </div>
     </main>
 
     <!-- Modals -->
-    <div id="team-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
-        <!-- Team modal content will be loaded by JS -->
-    </div>
-
     <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-80 modal hidden z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
         <!-- Project modal content will be loaded by JS -->
     </div>

@@ -89,42 +89,6 @@ const projects = [
     }
 ];
 
-// Team members data
-const teamMembers = [
-    {
-        id: 1,
-        name: "Itzz_Fabi",
-        rank: "Founder & Lead Developer",
-        image: "https://i.imgur.com/r15H56Q.jpeg",
-        description: "Fabi had the original Idea to make Minecraft Modpacks. In 2023 he an Maurice decided to make some modpacks.",
-        social: { discord: "itzz_fabi237", instagram: "https://www.instagram.com/fabimvurice.interactive/#" }
-    },
-    {
-        id: 2,
-        name: "Mvurice",
-        rank: "Founder",
-        image: "https://i.imgur.com/rE2mi9F.jpeg",
-        description: "Maurice is one of the original Founders with Fabi.",
-        social: { instagram: "https://www.instagram.com/fabimvurice.interactive/#", discord: "mvurice.kk" }
-    },
-    {
-        id: 3,
-        name: "Moped_Junge",
-        rank: "Co-Owner",
-        image: "https://i.imgur.com/aZcdHkp.jpeg",
-        description: "Moped Junge was there from the very beginning and became co-owner when Create Unbound was released.",
-        social: { discord: "moped_junge", instagram: "https://www.instagram.com/2_takt_jeremy" }
-    },
-    {
-        id: 4,
-        name: "ItzErrorz",
-        rank: "Support",
-        image: "https://i.imgur.com/SbOvaHd.png",
-        description: "ItzErrorz was a player of the Create F&M 3 Modpack and joined the team.",
-        social: {}
-    }
-];
-
 // Status configuration
 const statusConfig = {
     discontinued: { label: "🚫 Discontinued", class: "status-discontinued" },
@@ -263,4 +227,89 @@ const priorityConfig = {
     high: { label: "High Priority", class: "text-red-400", icon: "🔥" },
     medium: { label: "Medium Priority", class: "text-yellow-400", icon: "⚡" },
     low: { label: "Low Priority", class: "text-blue-400", icon: "💡" }
+};
+
+// Blog/News data
+const blogPosts = [
+    {
+        id: 1,
+        title: "Welcome to FabiMvurice Interactive",
+        slug: "welcome-to-fmstudios",
+        category: "news",
+        date: "2026-02-02",
+        author: "Itzz_Fabi",
+        excerpt: "Happy New Year! We're kicking off 2026 with exciting plans for our Minecraft modpack community.",
+        content: `
+            <p>Happy New Year from the entire FabiMvurice Interactive team! We're thrilled to kick off 2026 with some exciting plans for our Minecraft modpack community.</p>
+
+            <h3>Looking Back at 2025</h3>
+            <p>Last year was incredible for us. We released multiple updates for {Additions} and Create F&M 3, reaching over 25K+ combined downloads across our projects!</p>
+
+            <h3>What's Coming in 2026</h3>
+            <ul>
+                <li><strong>Create Unbound</strong> - Our most ambitious project yet</li>
+                <li><strong>{Additions} Rebound</strong> - A fresh take on Vanilla+</li>
+                <li><strong>Project Leuna - Reborn</strong> - Expanding beyond Minecraft into Roblox</li>
+            </ul>
+
+            <p>Thank you for being part of our community. Here's to an amazing 2026!</p>
+        `,
+        image: "images/fmlogo.png",
+        tags: ["News", "Community", "2026"]
+    }
+];
+
+// Blog category configuration
+const blogCategoryConfig = {
+    announcement: { label: "Announcement", class: "bg-gradient-to-r from-purple-500 to-pink-600", icon: "📢" },
+    update: { label: "Update", class: "bg-gradient-to-r from-green-500 to-emerald-600", icon: "🆕" },
+    news: { label: "News", class: "bg-gradient-to-r from-blue-500 to-cyan-600", icon: "📰" },
+    guide: { label: "Guide", class: "bg-gradient-to-r from-orange-500 to-amber-600", icon: "📖" }
+};
+
+// Kinetic Hosting Partner Data
+const kineticHosting = {
+    name: "Kinetic Hosting",
+    tagline: "Premium Minecraft Server Hosting",
+    description: "Our official hosting partner for all FabiMvurice Interactive modpacks. Get powerful servers optimized for modded Minecraft with instant setup and 24/7 human support.",
+    affiliateUrl: "https://billing.kinetichosting.net/aff.php?aff=855",
+    features: [
+        {
+            icon: "rocket",
+            title: "Instant Modpack Installation",
+            description: "One-click installation for popular modpacks including Create, Fabric, and Forge packs. Get your server running in minutes."
+        },
+        {
+            icon: "memory",
+            title: "High RAM Plans",
+            description: "Plans up to 32GB RAM perfect for heavy modpacks like Create Unbound and tech-focused packs with large factories."
+        },
+        {
+            icon: "support",
+            title: "24/7 Human Support",
+            description: "Real humans available around the clock. No AI bots - get actual help when you need it most."
+        },
+        {
+            icon: "panel",
+            title: "Custom Game Panel",
+            description: "Easy-to-use control panel with built-in mod/plugin installers, file manager, and server console."
+        },
+        {
+            icon: "performance",
+            title: "Premium Hardware",
+            description: "High-performance NVMe SSDs and latest-gen processors for smooth gameplay even with 200+ mods."
+        },
+        {
+            icon: "price",
+            title: "Affordable Pricing",
+            description: "Starting at just $0.87/GB - up to 70% cheaper than competitors without sacrificing quality."
+        }
+    ],
+    stats: [
+        { value: "44+", label: "Games Supported" },
+        { value: "24/7", label: "Human Support" },
+        { value: "99.9%", label: "Uptime Guarantee" },
+        { value: "$0.87", label: "Per GB/Month" }
+    ],
+    whyWeChose: "We partnered with Kinetic Hosting because they understand modded Minecraft. Their servers handle our Create modpacks flawlessly, and their support team actually knows what they're doing. When our community members have issues, they get real help - not automated responses."
 };

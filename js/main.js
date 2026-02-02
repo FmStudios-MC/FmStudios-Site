@@ -302,9 +302,12 @@ function init() {
     renderModpackFilters();
     renderProjects();
     renderChangelog();
-    renderTeam();
     renderRoadmapFilters();
     renderRoadmap();
+    renderNewsFilters();
+    renderFeaturedPost();
+    renderNews();
+    renderKineticHosting();
     updateResultsCount();
     setupScrollEffects();
 
@@ -329,7 +332,7 @@ function setupModalHandlers() {
     const modals = [
         { id: 'project-modal', close: closeModal },
         { id: 'lightbox', close: closeLightbox },
-        { id: 'team-modal', close: closeTeamModal }
+        { id: 'blog-modal', close: closeBlogModal }
     ];
     
     modals.forEach(({ id, close }) => {
@@ -344,17 +347,17 @@ function setupModalHandlers() {
 
 function handleEscKey(e) {
     if (e.key !== 'Escape') return;
-    
+
     const lightbox = document.getElementById('lightbox');
     const projectModal = document.getElementById('project-modal');
-    const teamModal = document.getElementById('team-modal');
-    
+    const blogModal = document.getElementById('blog-modal');
+
     if (lightbox && !lightbox.classList.contains('hidden')) {
         closeLightbox();
+    } else if (blogModal && !blogModal.classList.contains('hidden')) {
+        closeBlogModal();
     } else if (projectModal && !projectModal.classList.contains('hidden')) {
         closeModal();
-    } else if (teamModal && !teamModal.classList.contains('hidden')) {
-        closeTeamModal();
     }
 }
 

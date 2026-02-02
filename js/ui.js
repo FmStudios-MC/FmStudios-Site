@@ -4,6 +4,8 @@ let currentModpackFilter = 'all';
 let searchQuery = '';
 let filteredProjects = [];
 let currentRoadmapFilter = 'all';
+let currentNewsFilter = 'all';
+let filteredPosts = [];
 
 // Utility function: Debounce
 function debounce(func, wait) {
@@ -18,20 +20,27 @@ function debounce(func, wait) {
 function showPage(pageId) {
     const currentPage = document.querySelector('.page:not(.hidden)');
     const targetPage = document.getElementById(pageId + '-page');
-    
+
     if (currentPage) {
         currentPage.classList.add('hidden');
     }
-    
+
     if (targetPage) {
         targetPage.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
+
     // Close mobile menu
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
         mobileMenu.classList.add('hidden');
+    }
+
+    // Toggle Kinetic theme for hosting page
+    if (pageId === 'hosting') {
+        document.body.classList.add('kinetic-theme');
+    } else {
+        document.body.classList.remove('kinetic-theme');
     }
 }
 
@@ -322,74 +331,6 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-function openTeamModal(memberId) {
-    const member = teamMembers.find(m => m.id === memberId);
-    if (!member) return;
-
-    const socialLinks = [];
-    if (member.social.discord) {
-        socialLinks.push(`
-            <div class="glass rounded-xl px-6 py-3 flex items-center space-x-3">
-                <svg class="w-5 h-5" fill="#5865F2" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/></svg>
-                <span class="text-white font-medium">${member.social.discord}</span>
-            </div>
-        `);
-    }
-    if (member.social.instagram) {
-        socialLinks.push(`
-            <a href="${member.social.instagram}" target="_blank" rel="noopener noreferrer" class="social-btn glass rounded-xl px-6 py-3 flex items-center space-x-3 transition-all relative z-10">
-                <svg class="w-5 h-5" fill="#E4405F" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                <span class="text-white font-medium">Instagram</span>
-            </a>
-        `);
-    }
-
-    const modal = document.getElementById('team-modal');
-    if (!modal) return;
-    
-    modal.innerHTML = `
-        <div class="modal-content glass-strong rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-8">
-                <div class="flex justify-between items-start mb-8">
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-6 mb-6">
-                            <img src="${member.image}" alt="${member.name}" class="w-32 h-32 rounded-2xl object-cover shadow-lg neon-pink" loading="lazy">
-                            <div>
-                                <h2 class="text-4xl font-black gradient-text mb-2">${member.name}</h2>
-                                <p class="text-xl text-gray-400 font-semibold mb-4">${member.rank}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="closeTeamModal()" class="text-gray-400 hover:text-pink-400 text-4xl transition-colors ml-4" aria-label="Close modal">&times;</button>
-                </div>
-
-                <div class="glass rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold mb-4 gradient-text">📖 About</h3>
-                    <p class="text-gray-300 leading-relaxed text-lg">${member.description}</p>
-                </div>
-
-                ${socialLinks.length > 0 ? `
-                    <div class="glass rounded-2xl p-6 mt-6">
-                        <h3 class="text-2xl font-bold mb-4 gradient-text">🔗 Connect</h3>
-                        <div class="flex flex-wrap gap-4">${socialLinks.join('')}</div>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-    
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeTeamModal() {
-    const modal = document.getElementById('team-modal');
-    if (!modal) return;
-    
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
 function openLightbox(imageSrc, caption = '') {
     const lightbox = document.getElementById('lightbox');
     if (!lightbox) return;
@@ -413,34 +354,6 @@ function closeLightbox() {
     if (!lightbox) return;
     
     lightbox.classList.add('hidden');
-}
-
-function renderTeam() {
-    const grid = document.getElementById('team-grid');
-    if (!grid) return;
-    
-    const fragment = document.createDocumentFragment();
-    
-    teamMembers.forEach((member, index) => {
-        const card = document.createElement('div');
-        card.className = 'project-card glass rounded-3xl p-6 fade-in cursor-pointer glow-on-scroll';
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.onclick = () => openTeamModal(member.id);
-        
-        card.innerHTML = `
-            <div class="flex flex-col items-center text-center">
-                <img src="${member.image}" alt="${member.name}" class="w-40 h-40 rounded-2xl object-cover shadow-lg mb-4 neon-pink" loading="lazy">
-                <h3 class="text-2xl font-bold text-white mb-2">${member.name}</h3>
-                <span class="inline-block gradient-accent text-sm font-bold px-4 py-2 rounded-full mb-4">${member.rank}</span>
-                <p class="text-gray-400 text-sm mb-4 line-clamp-3">${member.description.substring(0, 100)}...</p>
-                <span class="gradient-text font-bold text-sm">View Profile →</span>
-            </div>
-        `;
-        
-        fragment.appendChild(card);
-    });
-    
-    grid.appendChild(fragment);
 }
 
 function renderChangelog() {
@@ -697,12 +610,320 @@ function updateRoadmapStats() {
     const completed = roadmapItems.filter(i => i.status === 'completed').length;
     const inProgress = roadmapItems.filter(i => i.status === 'in-progress').length;
     const planned = roadmapItems.filter(i => i.status === 'planned').length;
-    
+
     const completedEl = document.getElementById('roadmap-completed');
     const inProgressEl = document.getElementById('roadmap-inprogress');
     const plannedEl = document.getElementById('roadmap-planned');
-    
+
     if (completedEl) completedEl.textContent = completed;
     if (inProgressEl) inProgressEl.textContent = inProgress;
     if (plannedEl) plannedEl.textContent = planned;
+}
+
+// News/Blog functionality
+function renderNewsFilters() {
+    const container = document.getElementById('news-filters');
+    if (!container) return;
+
+    const filters = [
+        { id: 'all', label: 'All Posts', icon: '📰' },
+        { id: 'announcement', label: 'Announcements', icon: '📢' },
+        { id: 'update', label: 'Updates', icon: '🆕' },
+        { id: 'news', label: 'News', icon: '📰' },
+        { id: 'guide', label: 'Guides', icon: '📖' }
+    ];
+
+    const fragment = document.createDocumentFragment();
+
+    filters.forEach((filter, index) => {
+        const btn = document.createElement('button');
+        btn.className = `news-filter-btn ${index === 0 ? 'gradient-accent' : 'glass'} rounded-xl px-6 py-3 font-semibold transition-all text-white`;
+        btn.onclick = () => filterNews(filter.id);
+        btn.innerHTML = `${filter.icon} ${filter.label}`;
+        fragment.appendChild(btn);
+    });
+
+    container.appendChild(fragment);
+}
+
+function filterNews(filter) {
+    currentNewsFilter = filter;
+
+    document.querySelectorAll('.news-filter-btn').forEach(btn => {
+        btn.classList.remove('gradient-accent');
+        btn.classList.add('glass');
+    });
+
+    event.target.classList.add('gradient-accent');
+    event.target.classList.remove('glass');
+
+    renderNews();
+}
+
+function renderFeaturedPost() {
+    const container = document.getElementById('featured-post');
+    if (!container || !blogPosts || blogPosts.length === 0) return;
+
+    // Get the most recent post as featured
+    const featured = blogPosts[0];
+    const categoryInfo = blogCategoryConfig[featured.category] || blogCategoryConfig.news;
+
+    container.innerHTML = `
+        <div class="glass rounded-3xl overflow-hidden glow-on-scroll cursor-pointer" onclick="openBlogModal(${featured.id})">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                <div class="aspect-video lg:aspect-auto">
+                    <img src="${featured.image}" alt="${featured.title}"
+                         class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <div class="p-8 flex flex-col justify-center">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full text-white ${categoryInfo.class}">
+                            ${categoryInfo.icon} ${categoryInfo.label}
+                        </span>
+                        <span class="glass text-xs font-bold px-3 py-1 rounded-full text-white">
+                            Featured
+                        </span>
+                    </div>
+                    <h2 class="text-3xl font-bold text-white mb-4 hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all">
+                        ${featured.title}
+                    </h2>
+                    <p class="text-gray-300 mb-6 line-clamp-3">${featured.excerpt}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 text-sm text-gray-400">
+                            <span>✍️ ${featured.author}</span>
+                            <span>📅 ${featured.date}</span>
+                        </div>
+                        <span class="gradient-text font-bold">Read More →</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderNews() {
+    const grid = document.getElementById('news-grid');
+    const noPosts = document.getElementById('no-posts');
+
+    if (!grid || !blogPosts) return;
+
+    // Filter posts (skip first one if showing all - it's featured)
+    let posts = blogPosts.filter((post, index) => {
+        if (currentNewsFilter === 'all') {
+            return index > 0; // Skip featured post
+        }
+        return post.category === currentNewsFilter;
+    });
+
+    filteredPosts = posts;
+
+    if (posts.length === 0) {
+        grid.innerHTML = '';
+        if (noPosts) noPosts.classList.remove('hidden');
+        return;
+    }
+
+    if (noPosts) noPosts.classList.add('hidden');
+
+    const fragment = document.createDocumentFragment();
+
+    posts.forEach((post, index) => {
+        const categoryInfo = blogCategoryConfig[post.category] || blogCategoryConfig.news;
+
+        const card = document.createElement('div');
+        card.className = 'blog-card glass rounded-3xl overflow-hidden fade-in glow-on-scroll cursor-pointer';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.onclick = () => openBlogModal(post.id);
+
+        card.innerHTML = `
+            <div class="aspect-video overflow-hidden">
+                <img src="${post.image}" alt="${post.title}"
+                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-110" loading="lazy">
+            </div>
+            <div class="p-6">
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full text-white ${categoryInfo.class}">
+                        ${categoryInfo.icon} ${categoryInfo.label}
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3 line-clamp-2 hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-pink-400 hover:to-purple-500 transition-all">
+                    ${post.title}
+                </h3>
+                <p class="text-gray-300 text-sm mb-4 line-clamp-3">${post.excerpt}</p>
+                <div class="flex items-center justify-between text-xs text-gray-400 pt-4 border-t border-white border-opacity-10">
+                    <div class="flex items-center space-x-3">
+                        <span>✍️ ${post.author}</span>
+                        <span>📅 ${post.date}</span>
+                    </div>
+                    <span class="gradient-text font-bold">Read →</span>
+                </div>
+            </div>
+        `;
+
+        fragment.appendChild(card);
+    });
+
+    grid.innerHTML = '';
+    grid.appendChild(fragment);
+
+    requestAnimationFrame(() => setupScrollEffects());
+}
+
+function openBlogModal(postId) {
+    const post = blogPosts.find(p => p.id === postId);
+    if (!post) return;
+
+    const modal = document.getElementById('blog-modal');
+    if (!modal) return;
+
+    const categoryInfo = blogCategoryConfig[post.category] || blogCategoryConfig.news;
+
+    modal.innerHTML = `
+        <div class="modal-content glass-strong rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="relative">
+                <div class="aspect-video w-full overflow-hidden rounded-t-3xl">
+                    <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover">
+                </div>
+                <button onclick="closeBlogModal()" class="absolute top-4 right-4 glass rounded-full p-2 text-white hover:text-pink-400 transition-colors" aria-label="Close modal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-8">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full text-white ${categoryInfo.class}">
+                        ${categoryInfo.icon} ${categoryInfo.label}
+                    </span>
+                    ${post.tags.map(tag => `
+                        <span class="glass text-xs font-medium px-3 py-1 rounded-full text-gray-300">
+                            #${tag}
+                        </span>
+                    `).join('')}
+                </div>
+
+                <h1 class="text-4xl font-black gradient-text mb-4">${post.title}</h1>
+
+                <div class="flex items-center space-x-6 text-sm text-gray-400 mb-8 pb-6 border-b border-white border-opacity-10">
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span>${post.author}</span>
+                    </span>
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>${post.date}</span>
+                    </span>
+                </div>
+
+                <div class="blog-content prose prose-invert max-w-none">
+                    ${post.content}
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white border-opacity-10">
+                    <button onclick="closeBlogModal()" class="gradient-accent rounded-xl px-6 py-3 font-semibold text-white transition-all hover:scale-105">
+                        ← Back to News
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBlogModal() {
+    const modal = document.getElementById('blog-modal');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Kinetic Hosting Page Functions
+function renderKineticHosting() {
+    if (!kineticHosting) return;
+
+    // Set tagline
+    const tagline = document.getElementById('kinetic-tagline');
+    if (tagline) tagline.textContent = kineticHosting.description;
+
+    // Set affiliate links
+    const ctaMain = document.getElementById('kinetic-cta-main');
+    const ctaBottom = document.getElementById('kinetic-cta-bottom');
+    if (ctaMain) ctaMain.href = kineticHosting.affiliateUrl;
+    if (ctaBottom) ctaBottom.href = kineticHosting.affiliateUrl;
+
+    // Set why text
+    const whyText = document.getElementById('kinetic-why-text');
+    if (whyText) whyText.textContent = kineticHosting.whyWeChose;
+
+    // Render stats
+    renderKineticStats();
+
+    // Render features
+    renderKineticFeatures();
+}
+
+function renderKineticStats() {
+    const container = document.getElementById('kinetic-stats');
+    if (!container || !kineticHosting.stats) return;
+
+    const fragment = document.createDocumentFragment();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grid grid-cols-2 md:grid-cols-4 gap-6';
+
+    kineticHosting.stats.forEach(stat => {
+        const statEl = document.createElement('div');
+        statEl.className = 'text-center';
+        statEl.innerHTML = `
+            <div class="text-3xl md:text-4xl font-black kinetic-gradient-text mb-2">${stat.value}</div>
+            <div class="text-gray-400 font-medium">${stat.label}</div>
+        `;
+        wrapper.appendChild(statEl);
+    });
+
+    fragment.appendChild(wrapper);
+    container.innerHTML = '';
+    container.appendChild(fragment);
+}
+
+function renderKineticFeatures() {
+    const container = document.getElementById('kinetic-features-grid');
+    if (!container || !kineticHosting.features) return;
+
+    const iconSvgs = {
+        rocket: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+        memory: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>',
+        support: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
+        panel: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>',
+        performance: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+        price: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+
+    const fragment = document.createDocumentFragment();
+
+    kineticHosting.features.forEach((feature, index) => {
+        const card = document.createElement('div');
+        card.className = 'kinetic-feature-card rounded-2xl p-6 fade-in';
+        card.style.animationDelay = `${index * 0.1}s`;
+
+        card.innerHTML = `
+            <div class="kinetic-feature-icon rounded-xl w-14 h-14 flex items-center justify-center mb-4">
+                ${iconSvgs[feature.icon] || iconSvgs.rocket}
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">${feature.title}</h3>
+            <p class="text-gray-400 leading-relaxed">${feature.description}</p>
+        `;
+
+        fragment.appendChild(card);
+    });
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
 }
