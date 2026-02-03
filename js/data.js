@@ -233,6 +233,30 @@ const priorityConfig = {
 const blogPosts = [
     {
         id: 1,
+        title: "Hytale Community Server is now open!",
+        slug: "hytale-server-opening",
+        category: "announcement",
+        date: "2026-02-03",
+        author: "Itzz_Fabi",
+        excerpt: "Our Hytale community server is now open!",
+        content: `
+            <h3>Join us!</h3>
+            <p>The Server is now open!</p>
+
+            <h3>Important Information</h3>
+            <ul>
+                <li><strong>Server IP:</strong> 176.9.102.179:25571</li>
+                <li><strong>Ingame use /help</strong> - For viewing important commands</li>
+                <li><strong>Claiming Mod</strong> - You can claim chunks. Use /help and search for simpleclaims</li>
+            </ul>
+
+            <p>Come join us!</p>
+        `,
+        image: "images/news/hytale.webp",
+        tags: ["News", "Community", "Hytale"]
+    },
+    {
+        id: 2,
         title: "Welcome to FabiMvurice Interactive",
         slug: "welcome-to-fmstudios",
         category: "news",
