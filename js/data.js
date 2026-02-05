@@ -179,7 +179,11 @@ const roadmapItems = [
             {
                 date: "2026-01-30",
                 text: "Added Main Menu and Map updates"
-            }          
+            },
+            {
+                date: "2026-02-05",
+                text: "Reworked the entire Roleplay Framework"
+            }        
         ]
     },
     {
