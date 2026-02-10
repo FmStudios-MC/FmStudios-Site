@@ -71,13 +71,13 @@ const projects = [
     },
     {
         id: 5,
-        name: "Fabí s Lootr",
+        name: "Fabi's Lootr",
         category: "resourcepacks",
         status: "updated",
         logo: "https://media.forgecdn.net/attachments/1206/422/lootr-png.png",
-        description: "Transform your Lootr chests and barrels with high-quality, realistic textures.",
+        description: "New textures for the Lootr mod.",
         version: "1.20.1+",
-        features: ["Lootr Chest Reskin", "Lootr Barrel Reskin", "Realistic Design"],
+        features: ["Lootr Chest Reskin", "Lootr Barrel Reskin"],
         screenshots: [
             "https://cdn.modrinth.com/data/cached_images/49a06ad5bbbff69935e092dee42189c5a47ee27b.png",
             "https://cdn.modrinth.com/data/cached_images/ae32144429b2759c1bf64613fa9d20e2d8f655c0.png"
@@ -194,7 +194,7 @@ const roadmapItems = [
         category: "modpacks",
         priority: "low",
         progress: 0,
-        estimatedDate: "2026",
+        estimatedDate: "2026/2027",
         features: [
             "Advanced Create automation with magic"
         ],
