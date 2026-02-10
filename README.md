@@ -5,7 +5,7 @@
 
 Welcome to the official repository for the **FmStudios (FabiMvurice Interactive)** website. This site serves as the central hub and portfolio for our Minecraft modpacks, news, and project updates.
 
-🔗 **Live Website:** [https://fmstudios-mc.github.io/FmStudios-Site/](https://fmstudios-mc.github.io/FmStudios-Site/)
+🔗 **Live Website:**  [https://www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
 
 ## 📖 About
 
@@ -75,4 +75,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 **FmStudios / FabiMvurice Interactive**
 
 * **GitHub:** [FmStudios-MC](https://github.com/FmStudios-MC)
-* **Website:** [fmstudios-mc.github.io/FmStudios-Site](https://fmstudios-mc.github.io/FmStudios-Site/)
+* **Website:** [https://www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
