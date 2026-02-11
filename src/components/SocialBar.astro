@@ -1,0 +1,32 @@
+---
+import Icon from './Icon.astro';
+import { socialLinks, platformLinks } from '../data/social';
+---
+
+<div class="flex flex-wrap justify-center gap-3">
+  {socialLinks.map((link) => (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-[var(--border-card)] hover:border-[var(--accent)] transition-all"
+      style="color: var(--text-muted); background-color: var(--bg-card);"
+      aria-label={`Visit ${link.name}`}
+    >
+      <Icon name={link.icon} size={16} />
+      <span>{link.name}</span>
+    </a>
+  ))}
+  {platformLinks.map((link) => (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-2 px-5 py-2 text-sm font-bold transition-all btn-primary"
+      aria-label={`Visit ${link.name}`}
+    >
+      <Icon name={link.icon} size={16} />
+      <span>{link.name}</span>
+    </a>
+  ))}
+</div>

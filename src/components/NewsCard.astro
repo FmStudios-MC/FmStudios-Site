@@ -1,0 +1,66 @@
+---
+import Icon from './Icon.astro';
+import type { BlogPost } from '../data/news';
+import { blogCategoryConfig } from '../data/news';
+
+interface Props {
+  post: BlogPost;
+  featured?: boolean;
+}
+
+const { post, featured = false } = Astro.props;
+const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
+---
+
+{featured ? (
+  <div
+    class="card cursor-pointer news-card"
+    data-post-id={post.id}
+    data-category={post.category}
+  >
+    <div class="grid grid-cols-1 lg:grid-cols-2">
+      <div class="aspect-video lg:aspect-auto overflow-hidden">
+        <img src={post.image} alt={post.title} class="w-full h-full object-cover" loading="lazy" />
+      </div>
+      <div class="p-6 lg:p-8 flex flex-col justify-center">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5`}>{catConfig.label}</span>
+          <span class="text-xs font-semibold px-2 py-0.5" style="background-color: var(--accent); color: #fff;">Featured</span>
+        </div>
+        <h2 class="text-2xl lg:text-3xl font-bold mb-3" style="color: var(--text-primary);">{post.title}</h2>
+        <p class="line-clamp-3 mb-4" style="color: var(--text-muted);">{post.excerpt}</p>
+        <div class="flex items-center justify-between text-sm" style="color: var(--text-dim);">
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1"><Icon name="circle-dot" size={14} />{post.author}</span>
+            <span class="flex items-center gap-1"><Icon name="calendar" size={14} />{post.date}</span>
+          </div>
+          <span class="font-semibold" style="color: var(--accent);">READ --&gt;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+) : (
+  <div
+    class="card cursor-pointer news-card overflow-hidden"
+    data-post-id={post.id}
+    data-category={post.category}
+  >
+    <div class="aspect-video overflow-hidden">
+      <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" />
+    </div>
+    <div class="p-5">
+      <div class="flex flex-wrap gap-2 mb-2">
+        <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5`}>{catConfig.label}</span>
+      </div>
+      <h3 class="text-lg font-bold line-clamp-2 mb-2" style="color: var(--text-primary);">{post.title}</h3>
+      <p class="text-sm line-clamp-3 mb-4" style="color: var(--text-muted);">{post.excerpt}</p>
+      <div class="flex items-center justify-between text-xs pt-3 border-t border-[var(--border-card)]">
+        <div class="flex items-center gap-3" style="color: var(--text-dim);">
+          <span>{post.author}</span>
+          <span>{post.date}</span>
+        </div>
+        <span class="font-semibold" style="color: var(--accent);">READ --&gt;</span>
+      </div>
+    </div>
+  </div>
+)}

@@ -1,0 +1,111 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { projects } from '../data/projects';
+
+// Collect all screenshots with project names
+const galleryItems = projects.flatMap((project) =>
+  project.screenshots.map((src, i) => ({
+    src,
+    alt: `${project.name} - Screenshot ${i + 1}`,
+    projectName: project.name,
+    projectId: project.id,
+  }))
+);
+---
+
+<Layout title="Gallery - FabiMvurice Interactive">
+  <section class="max-w-7xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <ScrollReveal>
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Screenshots</p>
+        <h1 class="text-4xl font-black mb-3" style="color: var(--text-primary);">Gallery</h1>
+        <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Screenshots and media from our projects.</p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Gallery Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {galleryItems.map((item, i) => (
+        <ScrollReveal delay={i * 60}>
+          <div
+            class="card overflow-hidden cursor-pointer gallery-item group"
+            data-src={item.src}
+            data-alt={item.alt}
+          >
+            <div class="aspect-video overflow-hidden">
+              <img
+                src={item.src}
+                alt={item.alt}
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+            </div>
+            <div class="p-3 flex items-center justify-between">
+              <span class="text-xs font-medium" style="color: var(--text-muted);">{item.projectName}</span>
+              <Icon name="image" size={14} class="opacity-50" />
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    {galleryItems.length === 0 && (
+      <div class="text-center py-16">
+        <div class="card p-12">
+          <Icon name="image" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
+          <h3 class="text-xl font-bold mb-2" style="color: var(--text-primary);">No images yet</h3>
+          <p style="color: var(--text-muted);">Check back soon for project screenshots.</p>
+        </div>
+      </div>
+    )}
+  </section>
+
+  <!-- Lightbox -->
+  <div
+    id="gallery-lightbox"
+    class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="relative max-w-6xl">
+      <button id="gallery-lightbox-close" class="absolute -top-12 right-0 text-white text-3xl hover:text-red-400 transition-colors">&times;</button>
+      <img id="gallery-lightbox-img" src="" alt="" class="max-w-full max-h-[85vh]" />
+    </div>
+  </div>
+
+  <script>
+    const lightbox = document.getElementById('gallery-lightbox');
+    const lightboxImg = document.getElementById('gallery-lightbox-img') as HTMLImageElement;
+    const lightboxClose = document.getElementById('gallery-lightbox-close');
+
+    document.querySelectorAll('.gallery-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        const el = item as HTMLElement;
+        const src = el.dataset.src || '';
+        const alt = el.dataset.alt || '';
+        if (lightbox && lightboxImg) {
+          lightboxImg.src = src;
+          lightboxImg.alt = alt;
+          lightbox.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+
+    function closeLightbox() {
+      lightbox?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    lightboxClose?.addEventListener('click', closeLightbox);
+    lightbox?.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox && !lightbox.classList.contains('hidden')) closeLightbox();
+    });
+  </script>
+</Layout>

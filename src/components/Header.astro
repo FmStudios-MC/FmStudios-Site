@@ -1,0 +1,102 @@
+---
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'News', href: '/news' },
+  { label: 'Roadmap', href: '/roadmap' },
+  { label: 'Changelog', href: '/changelog' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Gallery', href: '/gallery' },
+  { label: 'Hosting', href: '/hosting' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-40 border-b border-[var(--border-card)] bg-[var(--bg-primary)] transition-colors duration-300" style="background-color: var(--bg-primary);">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 no-underline">
+      <img src="/images/fmlogo.png" alt="FabiMvurice Interactive" width="40" height="40" class="w-10 h-10" />
+      <span class="font-bold text-lg tracking-tight hidden sm:block" style="color: var(--text-primary);">FabiMvurice Interactive</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-6" aria-label="Main navigation">
+      {navItems.map((item) => {
+        const isHosting = item.href === '/hosting';
+        const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'nav-link text-sm',
+              isHosting && 'hosting-link',
+            ]}
+            aria-current={isCurrent ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+      <ThemeToggle />
+    </nav>
+
+    <!-- Mobile Controls -->
+    <div class="flex lg:hidden items-center gap-3">
+      <ThemeToggle />
+      <button
+        id="mobile-menu-btn"
+        class="w-10 h-10 flex items-center justify-center"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        style="color: var(--text-primary);"
+      >
+        <Icon name="menu" size={22} />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <nav
+    id="mobile-menu"
+    class="hidden lg:hidden border-t border-[var(--border-card)] px-6 pb-4"
+    aria-label="Mobile navigation"
+  >
+    <div class="flex flex-col gap-1 pt-2">
+      {navItems.map((item) => {
+        const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+        return (
+          <a
+            href={item.href}
+            class="py-2 text-sm font-medium transition-colors"
+            style={`color: ${isCurrent ? 'var(--accent)' : 'var(--text-muted)'};`}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+    </div>
+  </nav>
+</header>
+
+<style>
+  .hosting-link {
+    color: #0ea5e9 !important;
+  }
+  .hosting-link:hover {
+    color: #00d4ff !important;
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => {
+    const expanded = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(expanded));
+  });
+</script>

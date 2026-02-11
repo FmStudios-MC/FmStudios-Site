@@ -1,0 +1,18 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button
+  id="theme-toggle"
+  class="relative w-10 h-10 flex items-center justify-center border border-[var(--border-card)] bg-[var(--bg-card)] hover:border-[var(--accent)] transition-all cursor-pointer"
+  aria-label="Toggle dark/light mode"
+  title="Toggle theme"
+>
+  <span class="theme-icon-moon"><Icon name="moon" size={18} /></span>
+  <span class="theme-icon-sun hidden"><Icon name="sun" size={18} /></span>
+</button>
+
+<style>
+  .light-theme .theme-icon-moon { display: none; }
+  .light-theme .theme-icon-sun { display: block !important; }
+</style>

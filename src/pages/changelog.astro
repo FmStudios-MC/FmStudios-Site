@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import ChangelogBlock from '../components/ChangelogBlock.astro';
+import { changelogs } from '../data/changelog';
+
+const changelogEntries = Object.entries(changelogs);
+---
+
+<Layout title="Changelog - FabiMvurice Interactive">
+  <section class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <ScrollReveal>
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">History</p>
+        <h1 class="text-4xl font-black mb-3" style="color: var(--text-primary);">Project Changelogs</h1>
+        <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Track all updates and improvements across our projects.</p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Changelog Entries -->
+    <div class="space-y-4">
+      {changelogEntries.map(([name, entries], i) => (
+        <ScrollReveal delay={i * 100}>
+          <ChangelogBlock projectName={name} entries={entries} />
+        </ScrollReveal>
+      ))}
+    </div>
+  </section>
+</Layout>

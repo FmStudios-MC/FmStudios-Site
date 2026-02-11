@@ -1,0 +1,127 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { kineticHosting } from '../data/hosting';
+---
+
+<Layout title="Hosting - FabiMvurice Interactive" kinetic={true}>
+  <div class="kinetic-theme" style="background: linear-gradient(180deg, #020617 0%, #0f172a 50%, #020617 100%); min-height: 100vh;">
+    <!-- Background Grid Effect -->
+    <div class="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style="background-image: radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.06) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.06) 0%, transparent 40%);"></div>
+
+    <!-- Hero -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-12">
+      <ScrollReveal>
+        <div class="text-center mb-12">
+          <span class="inline-block text-sm font-bold px-4 py-1.5 mb-6" style="background: rgba(0, 212, 255, 0.15); border: 1px solid rgba(0, 212, 255, 0.4); color: #00d4ff;">
+            Official Partner
+          </span>
+          <h1 class="text-5xl md:text-6xl font-black mb-4 kinetic-gradient-text">
+            Kinetic Hosting
+          </h1>
+          <p class="text-lg max-w-3xl mx-auto mb-8" style="color: #94a3b8;">
+            {kineticHosting.description}
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a
+              href={kineticHosting.affiliateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="kinetic-btn-primary px-8 py-4 font-bold text-lg transition-all hover:scale-105 inline-block"
+            >
+              Create Your Server
+            </a>
+            <a
+              href="#features"
+              class="kinetic-btn-secondary px-8 py-4 font-bold text-lg transition-all hover:scale-105 inline-block"
+            >
+              Learn More
+            </a>
+          </div>
+        </div>
+      </ScrollReveal>
+
+      <!-- Stats Bar -->
+      <ScrollReveal>
+        <div class="kinetic-card p-6 mb-12">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {kineticHosting.stats.map((stat) => (
+              <div class="text-center">
+                <div class="text-3xl md:text-4xl font-black kinetic-gradient-text mb-1">{stat.value}</div>
+                <div class="text-sm" style="color: #94a3b8;">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ScrollReveal>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      <ScrollReveal>
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-black mb-3 kinetic-gradient-text">Perfect for Modpacks</h2>
+          <p class="max-w-2xl mx-auto" style="color: #94a3b8;">
+            Everything you need to run heavy modpacks like Create Unbound smoothly.
+          </p>
+        </div>
+      </ScrollReveal>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {kineticHosting.features.map((feature, i) => (
+          <ScrollReveal delay={i * 80}>
+            <div class="kinetic-card p-6 h-full">
+              <div class="w-12 h-12 flex items-center justify-center mb-4" style="background: rgba(0, 212, 255, 0.15); border: 1px solid rgba(0, 212, 255, 0.3); color: #00d4ff;">
+                <Icon name={feature.icon} size={24} />
+              </div>
+              <h3 class="text-lg font-bold mb-2 text-white">{feature.title}</h3>
+              <p class="text-sm" style="color: #94a3b8;">{feature.description}</p>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </section>
+
+    <!-- Why We Chose -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      <ScrollReveal>
+        <div class="kinetic-card p-8 md:p-12">
+          <div class="flex flex-col md:flex-row items-center gap-8">
+            <div class="flex-shrink-0">
+              <img src="/images/fmlogo.png" alt="FabiMvurice Interactive" width="96" height="96" class="w-24 h-24" style="box-shadow: 0 0 24px rgba(0, 212, 255, 0.3);" />
+            </div>
+            <div class="flex-1 text-center md:text-left">
+              <h3 class="text-xl font-bold text-white mb-3">Why We Partnered with Kinetic</h3>
+              <p class="leading-relaxed" style="color: #94a3b8;">{kineticHosting.whyWeChose}</p>
+              <p class="mt-3 font-semibold" style="color: #00d4ff;">-- FabiMvurice Interactive Team</p>
+            </div>
+          </div>
+        </div>
+      </ScrollReveal>
+    </section>
+
+    <!-- CTA -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      <ScrollReveal>
+        <div class="kinetic-card p-12 text-center" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(14, 165, 233, 0.05));">
+          <h2 class="text-3xl font-black text-white mb-3">Ready to Host Your Server?</h2>
+          <p class="text-lg mb-8 max-w-2xl mx-auto" style="color: #94a3b8;">
+            Join thousands of Minecraft players who trust Kinetic Hosting for their modded servers.
+          </p>
+          <a
+            href={kineticHosting.affiliateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="kinetic-btn-primary px-10 py-5 font-bold text-xl inline-block transition-all hover:scale-105"
+          >
+            Get Started Now
+          </a>
+          <p class="mt-4 text-xs" style="color: #64748b;">
+            By using our link, you support FabiMvurice Interactive at no extra cost to you.
+          </p>
+        </div>
+      </ScrollReveal>
+    </section>
+  </div>
+</Layout>

@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  question: string;
+  answer: string;
+  id: string;
+}
+
+const { question, answer, id } = Astro.props;
+---
+
+<div class="card overflow-hidden">
+  <button
+    class="faq-toggle w-full p-5 text-left flex justify-between items-center gap-4 hover:bg-[var(--bg-card-hover)] transition-colors"
+    data-target={`faq-${id}`}
+  >
+    <span class="font-semibold text-sm" style="color: var(--text-primary);">{question}</span>
+    <Icon name="chevron-down" size={18} class="transition-transform flex-shrink-0" style="color: var(--text-dim);" />
+  </button>
+  <div id={`faq-${id}`} class="accordion-content">
+    <div class="px-5 pb-5 text-sm leading-relaxed" style="color: var(--text-muted);">
+      {answer}
+    </div>
+  </div>
+</div>

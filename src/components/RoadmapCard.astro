@@ -1,0 +1,80 @@
+---
+import Icon from './Icon.astro';
+import type { RoadmapItem } from '../data/roadmap';
+import { roadmapStatusConfig, priorityConfig } from '../data/roadmap';
+
+interface Props {
+  item: RoadmapItem;
+}
+
+const { item } = Astro.props;
+const statusInfo = roadmapStatusConfig[item.status];
+const priorityInfo = priorityConfig[item.priority];
+---
+
+<div class="card p-6 roadmap-card" data-status={item.status} data-priority={item.priority}>
+  <!-- Header -->
+  <div class="mb-4">
+    <h3 class="text-xl font-bold mb-2" style="color: var(--text-primary);">{item.title}</h3>
+    <p class="text-sm mb-3" style="color: var(--text-muted);">{item.description}</p>
+    <div class="flex flex-wrap gap-2">
+      <span class={`${statusInfo.badge} text-xs font-semibold px-2 py-0.5`}>{statusInfo.label}</span>
+      <span class={`${priorityInfo.badge} text-xs font-semibold px-2 py-0.5`}>{priorityInfo.label}</span>
+      <span class="text-xs font-semibold px-2 py-0.5 capitalize" style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-muted);">
+        {item.category}
+      </span>
+      <span class="text-xs font-semibold px-2 py-0.5 flex items-center gap-1" style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-muted);">
+        <Icon name="calendar" size={12} /> {item.estimatedDate}
+      </span>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  {item.status !== 'completed' && (
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-xs font-medium" style="color: var(--text-dim);">Progress</span>
+        <span class="text-xs font-bold" style="color: var(--accent);">{item.progress}%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style={`width: ${item.progress}%`}></div>
+      </div>
+    </div>
+  )}
+
+  <!-- Features -->
+  <div class="mb-4">
+    <h4 class="text-sm font-bold mb-2" style="color: var(--text-primary);">Key Features</h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
+      {item.features.map((feature) => (
+        <div class="flex items-start gap-2 text-sm py-1" style="color: var(--text-muted);">
+          <Icon name="chevron-right" size={14} class="flex-shrink-0 mt-0.5" style="color: var(--accent);" />
+          <span>{feature}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Updates -->
+  {item.updates.length > 0 && (
+    <div class="border-t border-[var(--border-card)] pt-4">
+      <button
+        class="roadmap-updates-toggle flex items-center justify-between w-full text-left"
+        data-target={`updates-${item.id}`}
+      >
+        <span class="text-sm font-bold" style="color: var(--text-primary);">
+          Recent Updates ({item.updates.length})
+        </span>
+        <Icon name="chevron-down" size={16} class="transition-transform" />
+      </button>
+      <div id={`updates-${item.id}`} class="hidden mt-3 space-y-2">
+        {item.updates.map((update) => (
+          <div class="p-3 text-sm" style="background-color: var(--bg-card); border: 1px solid var(--border-card);">
+            <div class="text-xs mb-1" style="color: var(--text-dim);">{update.date}</div>
+            <div style="color: var(--text-muted);">{update.text}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>

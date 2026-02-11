@@ -1,0 +1,20 @@
+---
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div
+  id={id}
+  class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-content max-w-5xl w-full max-h-[90vh] overflow-y-auto" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
+    <div id={`${id}-content`}>
+      <!-- Dynamic content inserted by JS -->
+    </div>
+  </div>
+</div>

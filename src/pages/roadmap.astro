@@ -1,0 +1,82 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import RoadmapCard from '../components/RoadmapCard.astro';
+import { roadmapItems, roadmapFilters } from '../data/roadmap';
+
+// Sort items
+const sortedItems = [...roadmapItems].sort((a, b) => {
+  const statusOrder: Record<string, number> = { 'in-progress': 0, planned: 1, completed: 2, onhold: 3 };
+  const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+  if (a.status !== b.status) return (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+  if (a.priority !== b.priority) return (priorityOrder[a.priority] ?? 9) - (priorityOrder[b.priority] ?? 9);
+  return b.progress - a.progress;
+});
+
+const stats = {
+  completed: roadmapItems.filter((i) => i.status === 'completed').length,
+  inProgress: roadmapItems.filter((i) => i.status === 'in-progress').length,
+  planned: roadmapItems.filter((i) => i.status === 'planned').length,
+};
+---
+
+<Layout title="Roadmap - FabiMvurice Interactive">
+  <section class="max-w-7xl mx-auto px-6 py-12">
+    <!-- Header -->
+    <ScrollReveal>
+      <div class="text-center mb-10">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Development</p>
+        <h1 class="text-4xl font-black mb-3" style="color: var(--text-primary);">Project Roadmap</h1>
+        <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Follow our journey. Here's what we're working on and what's coming next.</p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Filters -->
+    <ScrollReveal>
+      <div class="card p-5 mb-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+          {roadmapFilters.map((filter, i) => (
+            <button
+              class:list={['filter-btn roadmap-filter-btn', i === 0 && 'active']}
+              data-filter={filter.id}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Roadmap Cards -->
+    <div class="space-y-6">
+      {sortedItems.map((item, i) => (
+        <ScrollReveal delay={i * 80}>
+          <RoadmapCard item={item} />
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- Stats -->
+    <ScrollReveal>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-black mb-1" style="color: var(--accent);">{stats.completed}</div>
+          <div class="text-sm" style="color: var(--text-dim);">Completed</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-black mb-1" style="color: var(--accent);">{stats.inProgress}</div>
+          <div class="text-sm" style="color: var(--text-dim);">In Progress</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-black mb-1" style="color: var(--accent);">{stats.planned}</div>
+          <div class="text-sm" style="color: var(--text-dim);">Planned</div>
+        </div>
+      </div>
+    </ScrollReveal>
+  </section>
+
+  <script>
+    import '../scripts/search';
+  </script>
+</Layout>
