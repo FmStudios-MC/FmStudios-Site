@@ -102,7 +102,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
     aria-modal="true"
   >
     <div class="relative max-w-6xl">
-      <button class="absolute -top-12 right-0 text-white text-3xl hover:text-red-400 transition-colors" id="lightbox-close">&times;</button>
+      <button class="modal-close-btn absolute -top-12 right-0" id="lightbox-close">&times;</button>
       <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh]" />
     </div>
   </div>
@@ -136,7 +136,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
                   <span class="text-xs font-semibold px-2 py-0.5" style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-dim);">${project.downloads} downloads</span>
                 </div>
               </div>
-              <button onclick="window.__closeModal('project-modal')" class="text-3xl ml-4 hover:opacity-70 transition-opacity" style="color: var(--text-dim);">&times;</button>
+              <button onclick="window.__closeModal('project-modal')" class="modal-close-btn ml-4">&times;</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div class="lg:col-span-2">

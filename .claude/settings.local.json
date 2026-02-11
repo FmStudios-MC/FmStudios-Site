@@ -12,7 +12,9 @@
       "Bash(npm --version:*)",
       "Bash(npm run build:*)",
       "Bash(curl:*)",
-      "Bash(export PATH=\"/c/Program Files/nodejs:/c/Windows/System32/WindowsPowerShell/v1.0:$PATH\")"
+      "Bash(export PATH=\"/c/Program Files/nodejs:/c/Windows/System32/WindowsPowerShell/v1.0:$PATH\")",
+      "Bash(wc:*)",
+      "Bash(npm ls:*)"
     ]
   }
 }

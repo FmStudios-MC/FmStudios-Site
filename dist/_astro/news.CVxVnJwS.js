@@ -19,4 +19,4 @@ const e=[{id:1,title:"Hytale Community Server is now open!",slug:"hytale-server-
         <li><strong>Project Leuna - Reborn</strong> - Expanding beyond Minecraft into Roblox</li>
       </ul>
       <p>Thank you for being part of our community. Here's to an amazing 2026!</p>
-    `,image:"/images/fmlogo.png",tags:["News","Community","2026"]}],o={announcement:{label:"Announcement",badge:"badge-updated"},update:{label:"Update",badge:"badge-active"},news:{label:"News",badge:"badge-in-progress"},guide:{label:"Guide",badge:"badge-medium"}};export{o as blogCategoryConfig,e as blogPosts};
+    `,image:"/images/logoneu.webp",tags:["News","Community","2026"]}],o={announcement:{label:"Announcement",badge:"badge-updated"},update:{label:"Update",badge:"badge-active"},news:{label:"News",badge:"badge-in-progress"},guide:{label:"Guide",badge:"badge-medium"}};export{o as blogCategoryConfig,e as blogPosts};

@@ -1,4 +1,4 @@
-import{_ as r,o as i}from"./modal.pjlDMRb4.js";import"./roadmap.astro_astro_type_script_index_0_lang.B_fvNa2S.js";const l={projects:(await r(async()=>{const{projects:e}=await import("./projects.DnwrZvn-.js");return{projects:e}},[])).projects,statusConfig:(await r(async()=>{const{statusConfig:e}=await import("./projects.DnwrZvn-.js");return{statusConfig:e}},[])).statusConfig};document.querySelectorAll(".project-card").forEach(e=>{e.addEventListener("click",()=>{const o=Number(e.dataset.projectId),t=l.projects.find(s=>s.id===o);if(!t)return;const a=l.statusConfig[t.status],c=`
+import{_ as r,o as d}from"./modal.pjlDMRb4.js";import"./roadmap.astro_astro_type_script_index_0_lang.B_G4SpN-.js";const l={projects:(await r(async()=>{const{projects:e}=await import("./projects.DnwrZvn-.js");return{projects:e}},[])).projects,statusConfig:(await r(async()=>{const{statusConfig:e}=await import("./projects.DnwrZvn-.js");return{statusConfig:e}},[])).statusConfig};document.querySelectorAll(".project-card").forEach(e=>{e.addEventListener("click",()=>{const o=Number(e.dataset.projectId),t=l.projects.find(s=>s.id===o);if(!t)return;const a=l.statusConfig[t.status],c=`
           <div class="p-6 sm:p-8">
             <div class="flex justify-between items-start mb-6">
               <div class="flex-1">
@@ -10,7 +10,7 @@ import{_ as r,o as i}from"./modal.pjlDMRb4.js";import"./roadmap.astro_astro_type
                   <span class="text-xs font-semibold px-2 py-0.5" style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-dim);">${t.downloads} downloads</span>
                 </div>
               </div>
-              <button onclick="window.__closeModal('project-modal')" class="text-3xl ml-4 hover:opacity-70 transition-opacity" style="color: var(--text-dim);">&times;</button>
+              <button onclick="window.__closeModal('project-modal')" class="modal-close-btn ml-4">&times;</button>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div class="lg:col-span-2">
@@ -33,4 +33,4 @@ import{_ as r,o as i}from"./modal.pjlDMRb4.js";import"./roadmap.astro_astro_type
               </div>
             </div>
           </div>
-        `;i("project-modal",c)})});window.__openLightbox=e=>{const o=document.getElementById("lightbox-modal"),t=document.getElementById("lightbox-img");!o||!t||(t.src=e,o.classList.remove("hidden"),document.body.style.overflow="hidden",o.addEventListener("click",a=>{a.target===o&&(o.classList.add("hidden"),document.body.style.overflow="")}))};document.getElementById("lightbox-close")?.addEventListener("click",()=>{const e=document.getElementById("lightbox-modal");e&&(e.classList.add("hidden"),document.body.style.overflow="")});
+        `;d("project-modal",c)})});window.__openLightbox=e=>{const o=document.getElementById("lightbox-modal"),t=document.getElementById("lightbox-img");!o||!t||(t.src=e,o.classList.remove("hidden"),document.body.style.overflow="hidden",o.addEventListener("click",a=>{a.target===o&&(o.classList.add("hidden"),document.body.style.overflow="")}))};document.getElementById("lightbox-close")?.addEventListener("click",()=>{const e=document.getElementById("lightbox-modal");e&&(e.classList.add("hidden"),document.body.style.overflow="")});
