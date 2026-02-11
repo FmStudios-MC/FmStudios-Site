@@ -55,7 +55,7 @@ export const blogPosts: BlogPost[] = [
       </ul>
       <p>Thank you for being part of our community. Here's to an amazing 2026!</p>
     `,
-    image: '/images/fmlogo.png',
+    image: '/images/logoneu.webp',
     tags: ['News', 'Community', '2026'],
   },
 ];
