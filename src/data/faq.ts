@@ -20,7 +20,7 @@ export const faqSections: FAQSection[] = [
       {
         question: 'Who is behind the projects?',
         answer:
-          'The projects are created and maintained by Itzz_Fabi (FabiMvurice). Community contributions and feedback are always welcome!',
+          'The projects are created and maintained by Itzz_Fabi. Mvurice and Moped_Junge are also Owners. Community contributions and feedback are always welcome!',
       },
       {
         question: 'How can I contribute or get involved?',
