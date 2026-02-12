@@ -23,12 +23,12 @@ export const platformLinks: PlatformLink[] = [
   {
     name: 'CurseForge',
     url: 'https://www.curseforge.com/members/fabimvurice_interactive/projects',
-    icon: 'flame',
+    icon: 'curseforge',
   },
   {
     name: 'Modrinth',
     url: 'https://modrinth.com/user/FabiMvurice_Interactive',
-    icon: 'package',
+    icon: 'modrinth',
   },
 ];
 
