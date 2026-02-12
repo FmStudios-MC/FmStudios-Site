@@ -1,0 +1,1 @@
+import{o as s}from"./lightbox.DpWZFFGm.js";const r=Array.from(document.querySelectorAll(".gallery-item"));r.forEach((a,e)=>{a.addEventListener("click",()=>{const o=r.map(t=>({src:t.dataset.src||"",alt:t.dataset.alt||""}));s(o,e)})});

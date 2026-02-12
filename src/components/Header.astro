@@ -95,8 +95,58 @@ const currentPath = Astro.url.pathname;
 <script>
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
+  let trapCleanup: (() => void) | null = null;
+
+  function openMenu() {
+    if (!menu || !btn) return;
+    menu.classList.remove('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+
+    // Lightweight inline focus trap
+    const focusable = 'a[href], button:not([disabled])';
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const els = Array.from(menu.querySelectorAll<HTMLElement>(focusable));
+      // Include the toggle button in the trap
+      els.unshift(btn as HTMLElement);
+      if (els.length === 0) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeydown);
+    trapCleanup = () => document.removeEventListener('keydown', onKeydown);
+
+    // Focus first menu link
+    const firstLink = menu.querySelector<HTMLElement>('a');
+    firstLink?.focus();
+  }
+
+  function closeMenu() {
+    if (!menu || !btn) return;
+    menu.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+    trapCleanup?.();
+    trapCleanup = null;
+    btn.focus();
+  }
+
   btn?.addEventListener('click', () => {
-    const expanded = menu?.classList.toggle('hidden') === false;
-    btn.setAttribute('aria-expanded', String(expanded));
+    const isHidden = menu?.classList.contains('hidden');
+    if (isHidden) {
+      openMenu();
+    } else {
+      closeMenu();
+    }
   });
 </script>

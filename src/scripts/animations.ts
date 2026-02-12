@@ -50,18 +50,35 @@ function initAccordions() {
       if (!content) return;
 
       const icon = btn.querySelector('svg:last-child');
-      const isHidden = content.classList.contains('hidden');
+      const isOpen = content.classList.contains('open');
 
       if (content.classList.contains('accordion-content')) {
-        // CSS transition accordion
-        content.classList.toggle('open');
+        if (isOpen) {
+          // Close: set explicit height then transition to 0
+          content.style.maxHeight = content.scrollHeight + 'px';
+          // Force reflow
+          content.offsetHeight;
+          content.style.maxHeight = '0';
+          content.classList.remove('open');
+        } else {
+          // Open: transition to scrollHeight, then remove inline style
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.classList.add('open');
+          const onEnd = () => {
+            if (content.classList.contains('open')) {
+              content.style.maxHeight = '';
+            }
+            content.removeEventListener('transitionend', onEnd);
+          };
+          content.addEventListener('transitionend', onEnd);
+        }
       } else {
         // Simple show/hide
         content.classList.toggle('hidden');
       }
 
       if (icon) {
-        icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
       }
     });
   });

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import NewsCard from '../components/NewsCard.astro';
+import Modal from '../components/Modal.astro';
 import { blogPosts, newsFilters, blogCategoryConfig } from '../data/news';
 
 const featuredPost = blogPosts[0];
@@ -28,6 +29,7 @@ const otherPosts = blogPosts.slice(1);
             <button
               class:list={['filter-btn news-filter-btn', i === 0 && 'active']}
               data-filter={filter.id}
+              aria-pressed={i === 0 ? 'true' : 'false'}
             >
               {filter.label}
             </button>
@@ -63,16 +65,7 @@ const otherPosts = blogPosts.slice(1);
   </section>
 
   <!-- Blog Modal -->
-  <div
-    id="blog-modal"
-    class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div class="modal-content max-w-4xl w-full max-h-[90vh] overflow-y-auto" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
-      <div id="blog-modal-content"></div>
-    </div>
-  </div>
+  <Modal id="blog-modal" />
 
   <script>
     import { openModal, closeModal } from '../scripts/modal';
@@ -87,20 +80,22 @@ const otherPosts = blogPosts.slice(1);
         if (!post) return;
         const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
 
+        // Note: post.content is from trusted local data files.
+        // If content sources ever change to user-generated input, add DOMPurify sanitization here.
         const html = `
           <div class="relative">
             <div class="aspect-video overflow-hidden">
               <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover" />
             </div>
-            <button onclick="window.__closeModal('blog-modal')" class="modal-close-btn absolute top-4 right-4">&times;</button>
+            <button class="modal-close-btn absolute top-4 right-4" aria-label="Close modal">&times;</button>
           </div>
           <div class="p-6 sm:p-8">
             <div class="flex flex-wrap gap-2 mb-3">
               <span class="${catConfig.badge} text-xs font-semibold px-2 py-0.5">${catConfig.label}</span>
-              ${post.tags.map((t) => `<span class="text-xs px-2 py-0.5 border border-[var(--border-card)]" style="color: var(--text-dim);">#${t}</span>`).join('')}
+              ${post.tags.map((t) => `<span class="text-xs px-2 py-0.5 border border-[var(--border-card)] text-dim">#${t}</span>`).join('')}
             </div>
             <h1 class="text-3xl font-black mb-3 gradient-text">${post.title}</h1>
-            <div class="flex items-center gap-4 text-sm mb-6 pb-4 border-b border-[var(--border-card)]" style="color: var(--text-dim);">
+            <div class="flex items-center gap-4 text-sm mb-6 pb-4 border-b border-[var(--border-card)] text-dim">
               <span>${post.author}</span>
               <span>${post.date}</span>
             </div>
@@ -108,13 +103,21 @@ const otherPosts = blogPosts.slice(1);
               ${post.content}
             </div>
             <div class="mt-6 pt-4 border-t border-[var(--border-card)]">
-              <button onclick="window.__closeModal('blog-modal')" class="btn-primary inline-flex items-center gap-2">
+              <button class="btn-primary inline-flex items-center gap-2 blog-modal-back-btn">
                 Back to News
               </button>
             </div>
           </div>
         `;
         openModal('blog-modal', html);
+
+        // Attach close handlers via addEventListener instead of inline onclick
+        document.querySelectorAll('#blog-modal .modal-close-btn').forEach((btn) => {
+          btn.addEventListener('click', () => closeModal('blog-modal'));
+        });
+        document.querySelector('#blog-modal .blog-modal-back-btn')?.addEventListener('click', () => {
+          closeModal('blog-modal');
+        });
       });
     });
   </script>

@@ -4,6 +4,8 @@ import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import SocialBar from '../components/SocialBar.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import Modal from '../components/Modal.astro';
+import LightboxModal from '../components/LightboxModal.astro';
 import { projects } from '../data/projects';
 
 // Featured: first 3 projects
@@ -12,14 +14,15 @@ const featured = projects.slice(0, 3);
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
   <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-6 pt-16 pb-12">
+  <section class="max-w-7xl mx-auto px-6 pt-16 pb-12 relative">
+    <div class="hero-glow" aria-hidden="true"></div>
     <ScrollReveal>
-      <div class="max-w-3xl">
+      <div class="max-w-3xl relative z-10">
         <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: var(--accent);">
           Minecraft Modpacks &amp; More
         </p>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6">
-          <span class="gradient-text">FabiMvurice</span>
+          <span class="gradient-text hero-text-reveal">FabiMvurice</span>
           <br />
           <span style="color: var(--text-primary);">Interactive</span>
         </h1>
@@ -89,35 +92,17 @@ const featured = projects.slice(0, 3);
   </section>
 
   <!-- Project modal -->
-  <div
-    id="project-modal"
-    class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div class="modal-content max-w-5xl w-full max-h-[90vh] overflow-y-auto" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
-      <div id="project-modal-content"></div>
-    </div>
-  </div>
+  <Modal id="project-modal" />
 
   <!-- Lightbox -->
-  <div
-    id="lightbox-modal"
-    class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div class="relative max-w-6xl">
-      <button onclick="(window as any).__closeModal?.('lightbox-modal')" class="absolute -top-12 right-0 text-white text-3xl hover:text-red-400 transition-colors">&times;</button>
-      <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh]" />
-    </div>
-  </div>
+  <LightboxModal />
 
   <script>
     import { openModal, closeModal } from '../scripts/modal';
+    import { renderProjectModalHtml } from '../scripts/project-modal';
+    import { openLightbox } from '../scripts/lightbox';
     import '../scripts/search';
 
-    // Import project data for modal
     const projectData = {
       projects: (await import('../data/projects')).projects,
       statusConfig: (await import('../data/projects')).statusConfig,
@@ -131,78 +116,25 @@ const featured = projects.slice(0, 3);
         if (!project) return;
 
         const status = projectData.statusConfig[project.status];
-
-        const html = `
-          <div class="p-6 sm:p-8">
-            <div class="flex justify-between items-start mb-6">
-              <div class="flex-1">
-                <h2 class="text-3xl font-black gradient-text mb-3">${project.name}</h2>
-                <div class="flex flex-wrap gap-2">
-                  ${status ? `<span class="${status.badge} text-xs font-semibold px-2 py-0.5">${status.label}</span>` : ''}
-                  <span class="text-xs font-semibold px-2 py-0.5 capitalize" style="background-color: var(--accent); color: #fff;">${project.category}</span>
-                  <span class="text-xs font-mono px-2 py-0.5 border border-[var(--border-card)]" style="color: var(--text-muted);">${project.version}</span>
-                  <span class="text-xs font-semibold px-2 py-0.5" style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-dim);">${project.downloads} downloads</span>
-                </div>
-              </div>
-              <button onclick="window.__closeModal('project-modal')" class="text-3xl ml-4 hover:opacity-70 transition-opacity" style="color: var(--text-dim);">&times;</button>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div class="lg:col-span-2">
-                <h3 class="text-sm font-bold uppercase tracking-widest mb-3" style="color: var(--accent);">Screenshots</h3>
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                  ${project.screenshots.map((s, i) => `
-                    <img src="${s}" alt="Screenshot ${i + 1}" class="w-full h-36 object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="window.__openLightbox('${s}')" loading="lazy" />
-                  `).join('')}
-                </div>
-                <h3 class="text-sm font-bold uppercase tracking-widest mb-3" style="color: var(--accent);">About</h3>
-                <p style="color: var(--text-muted); line-height: 1.75;">${project.description}</p>
-              </div>
-
-              <div>
-                <h3 class="text-sm font-bold uppercase tracking-widest mb-3" style="color: var(--accent);">Features</h3>
-                <ul class="space-y-2 mb-6">
-                  ${project.features.map((f) => `
-                    <li class="flex items-start gap-2 text-sm p-2" style="color: var(--text-muted); border: 1px solid var(--border-card);">
-                      <span style="color: var(--accent);">&#9656;</span>
-                      <span>${f}</span>
-                    </li>
-                  `).join('')}
-                </ul>
-
-                <div class="space-y-3">
-                  <a href="${project.downloadUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary w-full flex items-center justify-center gap-2 text-center">
-                    CurseForge
-                  </a>
-                  ${project.modrinthUrl ? `
-                    <a href="${project.modrinthUrl}" target="_blank" rel="noopener noreferrer" class="btn-outline w-full flex items-center justify-center gap-2 text-center">
-                      Modrinth
-                    </a>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-
+        const html = renderProjectModalHtml(project, status);
         openModal('project-modal', html);
+
+        // Attach close handler to modal close button
+        document.querySelector('#project-modal .modal-close-btn')?.addEventListener('click', () => {
+          closeModal('project-modal');
+        });
+
+        // Attach lightbox triggers for screenshots
+        document.querySelectorAll('#project-modal .lightbox-trigger').forEach((img, i) => {
+          img.addEventListener('click', () => {
+            const srcs = project.screenshots.map((s, idx) => ({
+              src: s,
+              alt: `${project.name} screenshot ${idx + 1}`,
+            }));
+            openLightbox(srcs, i);
+          });
+        });
       });
     });
-
-    // Lightbox
-    (window as any).__openLightbox = (src: string) => {
-      const modal = document.getElementById('lightbox-modal');
-      const img = document.getElementById('lightbox-img') as HTMLImageElement;
-      if (!modal || !img) return;
-      img.src = src;
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-          document.body.style.overflow = '';
-        }
-      });
-    };
   </script>
 </Layout>

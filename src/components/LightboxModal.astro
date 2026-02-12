@@ -1,0 +1,28 @@
+---
+// Reusable lightbox modal markup — used on index, projects, and gallery pages
+---
+
+<div
+  id="lightbox-modal"
+  class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image lightbox"
+>
+  <div class="modal-content relative max-w-6xl flex items-center">
+    <!-- Counter -->
+    <span id="lightbox-counter" class="absolute top-0 left-0 -translate-y-12 text-sm font-medium text-white/80" aria-live="polite"></span>
+    <!-- Close -->
+    <button id="lightbox-close" class="modal-close-btn absolute top-0 right-0 -translate-y-12" aria-label="Close lightbox">&times;</button>
+    <!-- Prev -->
+    <button id="lightbox-prev" class="absolute left-0 -translate-x-14 max-md:translate-x-2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" aria-label="Previous image">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <!-- Image -->
+    <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] transition-opacity duration-200" />
+    <!-- Next -->
+    <button id="lightbox-next" class="absolute right-0 translate-x-14 max-md:-translate-x-2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" aria-label="Next image">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>

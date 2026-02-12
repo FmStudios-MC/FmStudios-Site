@@ -61,30 +61,17 @@ const filledIcons = new Set(['curseforge', 'modrinth']);
 const isFilled = filledIcons.has(name);
 ---
 
-{isFilled ? (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    class={className}
-    aria-hidden="true"
-    set:html={svgContent}
-  />
-) : (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class={className}
-    aria-hidden="true"
-    set:html={svgContent}
-  />
-)}
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill={isFilled ? 'currentColor' : 'none'}
+  stroke={isFilled ? undefined : 'currentColor'}
+  stroke-width={isFilled ? undefined : '2'}
+  stroke-linecap={isFilled ? undefined : 'round'}
+  stroke-linejoin={isFilled ? undefined : 'round'}
+  class={className}
+  aria-hidden="true"
+  set:html={svgContent}
+/>

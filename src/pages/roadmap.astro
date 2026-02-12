@@ -40,6 +40,7 @@ const stats = {
             <button
               class:list={['filter-btn roadmap-filter-btn', i === 0 && 'active']}
               data-filter={filter.id}
+              aria-pressed={i === 0 ? 'true' : 'false'}
             >
               {filter.label}
             </button>

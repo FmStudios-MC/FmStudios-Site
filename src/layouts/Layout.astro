@@ -44,12 +44,14 @@ const {
   </script>
 </head>
 <body class:list={[kinetic && 'kinetic-page']}>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Background glow -->
   {!kinetic && <div class="bg-glow-red" aria-hidden="true"></div>}
 
   <Header />
 
-  <main class="relative z-10 min-h-screen">
+  <main id="main-content" class="relative z-10 min-h-screen">
     <slot />
   </main>
 

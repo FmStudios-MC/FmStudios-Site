@@ -19,17 +19,48 @@ function setParams(params: Record<string, string>) {
   history.replaceState(null, '', newUrl);
 }
 
+// Generic filter group helper
+function initFilterGroup(
+  btnSelector: string,
+  paramKey: string,
+  onFilter: (filter: string) => void
+): string {
+  const btns = document.querySelectorAll(btnSelector);
+  const savedFilter = getParam(paramKey) || 'all';
+
+  // Restore active button from URL
+  btns.forEach((btn) => {
+    const filter = (btn as HTMLElement).dataset.filter || 'all';
+    btn.classList.toggle('active', filter === savedFilter);
+    (btn as HTMLElement).setAttribute('aria-pressed', String(filter === savedFilter));
+  });
+
+  // Attach click handlers
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = (btn as HTMLElement).dataset.filter || 'all';
+      btns.forEach((b) => {
+        b.classList.remove('active');
+        (b as HTMLElement).setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      (btn as HTMLElement).setAttribute('aria-pressed', 'true');
+      onFilter(filter);
+    });
+  });
+
+  return savedFilter;
+}
+
 function initSearch() {
   const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
-  const categoryBtns = document.querySelectorAll('.category-filter-btn');
   const modpackBtns = document.querySelectorAll('.modpack-filter-btn');
   const modpackFilterContainer = document.getElementById('modpack-filter');
   const projectCards = document.querySelectorAll('.project-card');
   const resultsCount = document.getElementById('results-count');
   const noResults = document.getElementById('no-results');
 
-  // Restore from URL
-  let currentCategory = getParam('category') || 'all';
+  let currentCategory = 'all';
   let currentModpack = getParam('modpack') || 'all';
   let searchQuery = getParam('q') || '';
 
@@ -38,21 +69,11 @@ function initSearch() {
     searchInput.value = searchQuery;
   }
 
-  // Restore active category button
-  categoryBtns.forEach((btn) => {
-    const filter = (btn as HTMLElement).dataset.filter || 'all';
-    btn.classList.toggle('active', filter === currentCategory);
-  });
-
-  // Show modpack sub-filter if needed
-  if (modpackFilterContainer) {
-    modpackFilterContainer.style.display = currentCategory === 'modpacks' ? '' : 'none';
-  }
-
-  // Restore active modpack button
+  // Restore modpack button state
   modpackBtns.forEach((btn) => {
     const filter = (btn as HTMLElement).dataset.filter || 'all';
     btn.classList.toggle('active', filter === currentModpack);
+    (btn as HTMLElement).setAttribute('aria-pressed', String(filter === currentModpack));
   });
 
   function applyFilters() {
@@ -81,9 +102,26 @@ function initSearch() {
         if (!name.includes(q) && !description.includes(q) && !features.includes(q)) show = false;
       }
 
-      el.style.display = show ? '' : 'none';
-      if (show) visible++;
+      if (show) {
+        el.classList.remove('card-hidden');
+        // Remove display:none after transition
+        el.style.display = '';
+        visible++;
+      } else {
+        el.classList.add('card-hidden');
+        setTimeout(() => {
+          if (el.classList.contains('card-hidden')) {
+            el.style.display = 'none';
+          }
+        }, 250);
+      }
     });
+
+    // Search result highlighting
+    clearHighlights();
+    if (searchQuery) {
+      highlightMatches(searchQuery);
+    }
 
     // Results count
     if (resultsCount) {
@@ -110,30 +148,35 @@ function initSearch() {
     }, 300);
   });
 
-  // Category buttons
-  categoryBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      currentCategory = (btn as HTMLElement).dataset.filter || 'all';
-      categoryBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+  // Category filter group
+  currentCategory = initFilterGroup('.category-filter-btn', 'category', (filter) => {
+    currentCategory = filter;
 
-      // Toggle modpack filter visibility
-      if (modpackFilterContainer) {
-        modpackFilterContainer.style.display = currentCategory === 'modpacks' ? '' : 'none';
-      }
+    // Toggle modpack filter visibility
+    if (modpackFilterContainer) {
+      modpackFilterContainer.style.display = currentCategory === 'modpacks' ? '' : 'none';
+    }
 
-      if (currentCategory !== 'modpacks') currentModpack = 'all';
+    if (currentCategory !== 'modpacks') currentModpack = 'all';
 
-      applyFilters();
-    });
+    applyFilters();
   });
+
+  // Show modpack sub-filter if needed
+  if (modpackFilterContainer) {
+    modpackFilterContainer.style.display = currentCategory === 'modpacks' ? '' : 'none';
+  }
 
   // Modpack type buttons
   modpackBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       currentModpack = (btn as HTMLElement).dataset.filter || 'all';
-      modpackBtns.forEach((b) => b.classList.remove('active'));
+      modpackBtns.forEach((b) => {
+        b.classList.remove('active');
+        (b as HTMLElement).setAttribute('aria-pressed', 'false');
+      });
       btn.classList.add('active');
+      (btn as HTMLElement).setAttribute('aria-pressed', 'true');
       applyFilters();
     });
   });
@@ -142,22 +185,65 @@ function initSearch() {
   applyFilters();
 }
 
+// Search result highlighting
+function highlightMatches(query: string) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.project-card:not(.card-hidden)').forEach((card) => {
+    const titleEl = card.querySelector('.project-card-title');
+    const descEl = card.querySelector('.project-card-desc');
+    [titleEl, descEl].forEach((el) => {
+      if (!el) return;
+      walkTextNodes(el, q);
+    });
+  });
+}
+
+function walkTextNodes(node: Node, query: string) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent || '';
+    const lower = text.toLowerCase();
+    const idx = lower.indexOf(query);
+    if (idx === -1) return;
+
+    const before = text.slice(0, idx);
+    const match = text.slice(idx, idx + query.length);
+    const after = text.slice(idx + query.length);
+
+    const frag = document.createDocumentFragment();
+    if (before) frag.appendChild(document.createTextNode(before));
+
+    const mark = document.createElement('mark');
+    mark.className = 'search-highlight';
+    mark.textContent = match;
+    frag.appendChild(mark);
+
+    if (after) frag.appendChild(document.createTextNode(after));
+
+    node.parentNode?.replaceChild(frag, node);
+  } else {
+    // Clone childNodes list since we modify the DOM
+    Array.from(node.childNodes).forEach((child) => {
+      if ((child as Element).classList?.contains('search-highlight')) return;
+      walkTextNodes(child, query);
+    });
+  }
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.search-highlight').forEach((mark) => {
+    const parent = mark.parentNode;
+    if (!parent) return;
+    parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
+    parent.normalize();
+  });
+}
+
 // News filter
 function initNewsFilter() {
-  const filterBtns = document.querySelectorAll('.news-filter-btn');
   const newsCards = document.querySelectorAll('.news-card');
   const featuredPost = document.getElementById('featured-post');
 
-  // Restore from URL
-  const savedFilter = getParam('filter') || 'all';
-
-  // Restore active button
-  filterBtns.forEach((btn) => {
-    const filter = (btn as HTMLElement).dataset.filter || 'all';
-    btn.classList.toggle('active', filter === savedFilter);
-  });
-
-  function applyNewsFilter(filter: string) {
+  initFilterGroup('.news-filter-btn', 'filter', (filter) => {
     newsCards.forEach((card) => {
       const el = card as HTMLElement;
       const category = el.dataset.category || '';
@@ -173,36 +259,31 @@ function initNewsFilter() {
     }
 
     setParams({ filter });
-  }
-
-  filterBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = (btn as HTMLElement).dataset.filter || 'all';
-      filterBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyNewsFilter(filter);
-    });
   });
 
-  // Apply restored filter on init
-  applyNewsFilter(savedFilter);
+  // Apply initial filter
+  const savedFilter = getParam('filter') || 'all';
+  if (savedFilter !== 'all') {
+    newsCards.forEach((card) => {
+      const el = card as HTMLElement;
+      const category = el.dataset.category || '';
+      el.style.display = savedFilter === 'all' || category === savedFilter ? '' : 'none';
+    });
+    if (featuredPost) {
+      const featuredCard = featuredPost.querySelector('.news-card') as HTMLElement;
+      if (featuredCard) {
+        const category = featuredCard.dataset.category || '';
+        featuredPost.style.display = savedFilter === 'all' || category === savedFilter ? '' : 'none';
+      }
+    }
+  }
 }
 
 // Roadmap filter
 function initRoadmapFilter() {
-  const filterBtns = document.querySelectorAll('.roadmap-filter-btn');
   const roadmapCards = document.querySelectorAll('.roadmap-card');
 
-  // Restore from URL
-  const savedFilter = getParam('filter') || 'all';
-
-  // Restore active button
-  filterBtns.forEach((btn) => {
-    const filter = (btn as HTMLElement).dataset.filter || 'all';
-    btn.classList.toggle('active', filter === savedFilter);
-  });
-
-  function applyRoadmapFilter(filter: string) {
+  initFilterGroup('.roadmap-filter-btn', 'filter', (filter) => {
     roadmapCards.forEach((card) => {
       const el = card as HTMLElement;
       const status = el.dataset.status || '';
@@ -212,19 +293,19 @@ function initRoadmapFilter() {
     });
 
     setParams({ filter });
-  }
-
-  filterBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = (btn as HTMLElement).dataset.filter || 'all';
-      filterBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyRoadmapFilter(filter);
-    });
   });
 
-  // Apply restored filter on init
-  applyRoadmapFilter(savedFilter);
+  // Apply initial filter
+  const savedFilter = getParam('filter') || 'all';
+  if (savedFilter !== 'all') {
+    roadmapCards.forEach((card) => {
+      const el = card as HTMLElement;
+      const status = el.dataset.status || '';
+      const priority = el.dataset.priority || '';
+      let show = savedFilter === 'all' || status === savedFilter || (savedFilter === 'high' && priority === 'high');
+      el.style.display = show ? '' : 'none';
+    });
+  }
 }
 
 // Initialize based on what's on the page
