@@ -12,10 +12,11 @@ import { projects, categories, modpackTypes } from '../data/projects';
   <section class="max-w-7xl mx-auto px-6 py-12">
     <!-- Header -->
     <ScrollReveal>
-      <div class="text-center mb-10">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Browse</p>
-        <h1 class="text-4xl font-black mb-3" style="color: var(--text-primary);">Projects</h1>
+      <div class="text-center mb-12">
+        <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Browse</p>
+        <h1 class="text-4xl sm:text-5xl font-black mb-4" style="color: var(--text-primary);">Projects</h1>
         <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Explore our Minecraft modpacks, mods, and resource packs.</p>
+        <p class="text-sm font-medium mt-2" style="color: var(--text-dim);">{projects.length} projects available</p>
       </div>
     </ScrollReveal>
 
@@ -23,13 +24,13 @@ import { projects, categories, modpackTypes } from '../data/projects';
     <ScrollReveal>
       <div class="card p-6 mb-8">
         <!-- Search -->
-        <div class="relative max-w-xl mx-auto mb-6">
+        <div class="relative max-w-2xl mx-auto mb-6">
           <Icon name="search" size={18} class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color: var(--text-dim);" />
           <input
             type="text"
             id="search-input"
             placeholder="Search projects, features, versions..."
-            class="search-input w-full pl-11 pr-4 py-3 text-sm"
+            class="search-input w-full pl-12 pr-4 py-3.5 text-sm"
             aria-label="Search projects"
           />
         </div>
@@ -68,7 +69,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
     </ScrollReveal>
 
     <!-- Projects Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {projects.map((project, i) => (
         <ScrollReveal delay={i * 80}>
           <ProjectCard project={project} />
@@ -77,10 +78,10 @@ import { projects, categories, modpackTypes } from '../data/projects';
     </div>
 
     <!-- No Results -->
-    <div id="no-results" class="text-center py-16" style="display: none;">
-      <div class="card p-12">
-        <Icon name="search" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
-        <h3 class="text-xl font-bold mb-2" style="color: var(--text-primary);">No projects found</h3>
+    <div id="no-results" class="text-center py-20" style="display: none;">
+      <div class="card p-16 max-w-lg mx-auto">
+        <Icon name="search" size={56} class="mx-auto mb-6" style="color: var(--text-dim);" />
+        <h3 class="text-2xl font-bold mb-3" style="color: var(--text-primary);">No projects found</h3>
         <p style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
       </div>
     </div>

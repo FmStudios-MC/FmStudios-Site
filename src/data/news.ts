@@ -13,6 +13,34 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    id: 3,
+    title: '"Project Leuna - Reborn" Progress',
+    slug: 'prleunapr0226',
+    category: 'update',
+    date: '2026-02-17',
+    author: 'Itzz_Fabi',
+    excerpt: 'A look at progress I made for my Roblox game "Project Leuna - Reborn".',
+    content: `
+      <h3>What is my progess</h3>
+      <p>I have been working on the game for some weeks now. Not that often but a decent amount. I think this game will be my first good Roblox game.</p>
+
+      <h3>Recent Progress</h3>
+      <ul>
+        <li><strong>Stable Framework</strong> — Stable Framework with basic needs for money and Datastore</li>
+        <li><strong>Main Menu</strong> — Working main menu with settings and changelogs</li>
+        <li><strong>Some Map Progess</strong> — Some little map progress.</li>
+      </ul>
+
+      <h3>Preview</h3>
+      <p>Here's a sneak peek at a part of the map:</p>
+
+      <img src="/images/news/prleunascreen.webp" alt="Preview Screenshot 1" style="width:100%;border-radius:0.5rem;margin:1rem 0;" />
+      <p>Stay tuned for more details!</p>
+    `,
+    image: '/images/news/projectleunalogo.webp',
+    tags: ['Updates', 'Community', '2026'],
+  },
+  {
     id: 1,
     title: 'Hytale Community Server is now open!',
     slug: 'hytale-server-opening',

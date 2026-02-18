@@ -14,7 +14,7 @@ const featured = projects.slice(0, 3);
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
   <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-6 pt-16 pb-12 relative">
+  <section class="max-w-7xl mx-auto px-6 pt-24 pb-20 relative">
     <div class="hero-glow" aria-hidden="true"></div>
     <ScrollReveal>
       <div class="max-w-3xl relative z-10">
@@ -26,7 +26,7 @@ const featured = projects.slice(0, 3);
           <br />
           <span style="color: var(--text-primary);">Interactive</span>
         </h1>
-        <p class="text-lg mb-8 max-w-2xl" style="color: var(--text-muted);">
+        <p class="text-xl leading-relaxed mb-10 max-w-2xl" style="color: var(--text-muted);">
           Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
         </p>
         <div class="flex flex-wrap gap-4">
@@ -43,16 +43,21 @@ const featured = projects.slice(0, 3);
     </ScrollReveal>
   </section>
 
+  <!-- Section Divider -->
+  <div class="max-w-7xl mx-auto px-6" aria-hidden="true">
+    <div class="h-px" style="background: linear-gradient(90deg, transparent, var(--border-card-hover), transparent);"></div>
+  </div>
+
   <!-- Featured Projects -->
-  <section class="max-w-7xl mx-auto px-6 pb-12">
+  <section class="max-w-7xl mx-auto px-6 py-16">
     <ScrollReveal>
       <div class="flex items-center justify-between mb-8">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color: var(--accent);">Featured</p>
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary);">Projects</h2>
+          <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Featured</p>
+          <h2 class="text-3xl font-bold" style="color: var(--text-primary);">Projects</h2>
         </div>
-        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1" style="color: var(--accent);">
-          View all <Icon name="chevron-right" size={16} />
+        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 hover:underline underline-offset-4" style="color: var(--accent);">
+          View all projects <Icon name="arrow-right" size={16} />
         </a>
       </div>
     </ScrollReveal>
@@ -66,12 +71,12 @@ const featured = projects.slice(0, 3);
   </section>
 
   <!-- About Blurb -->
-  <section class="max-w-7xl mx-auto px-6 pb-12">
+  <section class="max-w-7xl mx-auto px-6 py-16">
     <ScrollReveal>
-      <div class="card p-8">
+      <div class="card p-8 sm:p-10" style="border-left: 3px solid var(--accent);">
         <div class="max-w-2xl">
-          <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">About</p>
-          <h2 class="text-2xl font-bold mb-4" style="color: var(--text-primary);">Who We Are</h2>
+          <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">About</p>
+          <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Who We Are</h2>
           <p class="leading-relaxed" style="color: var(--text-muted);">
             FabiMvurice Interactive is a small creative studio focused on Minecraft content creation. We build modpacks that combine the best community mods into polished, performant experiences. Whether you're into Create-based automation, Vanilla+ gameplay, or resource packs, we've got something for you.
           </p>
@@ -81,11 +86,11 @@ const featured = projects.slice(0, 3);
   </section>
 
   <!-- Social Links -->
-  <section class="max-w-7xl mx-auto px-6 pb-16">
+  <section class="max-w-7xl mx-auto px-6 pt-16 pb-24">
     <ScrollReveal>
       <div class="text-center mb-6">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color: var(--accent);">Connect</p>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary);">Join the Community</h2>
+        <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Connect</p>
+        <h2 class="text-3xl font-bold" style="color: var(--text-primary);">Join the Community</h2>
       </div>
       <SocialBar />
     </ScrollReveal>

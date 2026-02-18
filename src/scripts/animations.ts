@@ -66,7 +66,7 @@ function initAccordions() {
           content.classList.add('open');
           const onEnd = () => {
             if (content.classList.contains('open')) {
-              content.style.maxHeight = '';
+              content.style.maxHeight = 'none';
             }
             content.removeEventListener('transitionend', onEnd);
           };

@@ -9,7 +9,7 @@ import { socialLinks, platformLinks } from '../data/social';
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-[var(--border-card)] hover:border-[var(--accent)] transition-all"
+      class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-card)] hover:border-[var(--accent)] transition-all"
       style="color: var(--text-muted); background-color: var(--bg-card);"
       aria-label={`Visit ${link.name}`}
     >
@@ -17,12 +17,13 @@ import { socialLinks, platformLinks } from '../data/social';
       <span>{link.name}</span>
     </a>
   ))}
+  <div class="hidden sm:block w-px h-8 mx-2 self-center" style="background-color: var(--border-card);" aria-hidden="true"></div>
   {platformLinks.map((link) => (
     <a
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-2 px-5 py-2 text-sm font-bold transition-all btn-primary"
+      class="flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-lg transition-all btn-primary"
       aria-label={`Visit ${link.name}`}
     >
       <Icon name={link.icon} size={16} />

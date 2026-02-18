@@ -3,24 +3,31 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import { kineticHosting } from '../data/hosting';
+
+const steps = [
+  { step: '01', title: 'Use Our Link', description: 'Click the affiliate link below to visit Kinetic Hosting. It costs you nothing extra.' },
+  { step: '02', title: 'Pick a Plan', description: 'Choose a RAM tier that fits your modpack. 8GB+ recommended for Create Unbound.' },
+  { step: '03', title: 'Install & Play', description: 'Use the one-click modpack installer and invite your friends. You\'re ready in minutes.' },
+];
 ---
 
 <Layout title="Hosting - FabiMvurice Interactive" kinetic={true}>
-  <div class="kinetic-theme" style="background: linear-gradient(180deg, #020617 0%, #0f172a 50%, #020617 100%); min-height: 100vh;">
-    <!-- Background Grid Effect -->
-    <div class="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style="background-image: radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.06) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.06) 0%, transparent 40%);"></div>
+  <div class="kinetic-theme" style="background: linear-gradient(180deg, #11141B 0%, #181C25 50%, #11141B 100%); min-height: 100vh;">
+
+    <!-- Background glow -->
+    <div class="fixed inset-0 pointer-events-none z-0" aria-hidden="true" style="background-image: radial-gradient(ellipse at 20% 20%, rgba(120, 104, 230, 0.08) 0%, transparent 55%), radial-gradient(ellipse at 80% 75%, rgba(90, 79, 207, 0.07) 0%, transparent 55%);"></div>
 
     <!-- Hero -->
     <section class="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-12">
       <ScrollReveal>
         <div class="text-center mb-12">
-          <span class="inline-block text-sm font-bold px-4 py-1.5 mb-6" style="background: rgba(0, 212, 255, 0.15); border: 1px solid rgba(0, 212, 255, 0.4); color: #00d4ff;">
+          <span class="inline-block text-xs font-bold tracking-widest uppercase px-4 py-1.5 mb-6 rounded-full" style="background: rgba(120, 104, 230, 0.15); border: 1px solid rgba(120, 104, 230, 0.4); color: #B9AAFF; letter-spacing: 0.15em;">
             Official Partner
           </span>
           <h1 class="text-5xl md:text-6xl font-black mb-4 kinetic-gradient-text">
             Kinetic Hosting
           </h1>
-          <p class="text-lg max-w-3xl mx-auto mb-8" style="color: #94a3b8;">
+          <p class="text-lg max-w-2xl mx-auto mb-10" style="color: #ADADAD;">
             {kineticHosting.description}
           </p>
           <div class="flex flex-wrap justify-center gap-4">
@@ -44,12 +51,12 @@ import { kineticHosting } from '../data/hosting';
 
       <!-- Stats Bar -->
       <ScrollReveal>
-        <div class="kinetic-card p-6 mb-12">
+        <div class="kinetic-card p-6 mb-4">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             {kineticHosting.stats.map((stat) => (
               <div class="text-center">
                 <div class="text-3xl md:text-4xl font-black kinetic-gradient-text mb-1">{stat.value}</div>
-                <div class="text-sm" style="color: #94a3b8;">{stat.label}</div>
+                <div class="text-sm" style="color: #ADADAD;">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -57,12 +64,39 @@ import { kineticHosting } from '../data/hosting';
       </ScrollReveal>
     </section>
 
+    <!-- How to Get Started -->
+    <section class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      <ScrollReveal>
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-black mb-3 kinetic-gradient-text">Get Started in 3 Steps</h2>
+          <p class="max-w-xl mx-auto" style="color: #ADADAD;">
+            From zero to playing with friends in under 10 minutes.
+          </p>
+        </div>
+      </ScrollReveal>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {steps.map((s, i) => (
+          <ScrollReveal delay={i * 100}>
+            <div class="kinetic-card p-8 text-center h-full relative overflow-hidden">
+              <div class="absolute top-4 right-5 text-6xl font-black select-none" style="color: rgba(120, 104, 230, 0.1); line-height: 1;">{s.step}</div>
+              <div class="w-10 h-10 flex items-center justify-center mx-auto mb-5 font-black text-lg" style="background: linear-gradient(135deg, #7868E6, #5A4FCF); color: #fff; border-radius: 50%;">
+                {i + 1}
+              </div>
+              <h3 class="text-lg font-bold mb-2 text-white">{s.title}</h3>
+              <p class="text-sm" style="color: #ADADAD;">{s.description}</p>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </section>
+
     <!-- Features -->
     <section id="features" class="relative z-10 max-w-7xl mx-auto px-6 py-12">
       <ScrollReveal>
         <div class="text-center mb-10">
-          <h2 class="text-3xl font-black mb-3 kinetic-gradient-text">Perfect for Modpacks</h2>
-          <p class="max-w-2xl mx-auto" style="color: #94a3b8;">
+          <h2 class="text-3xl font-black mb-3 kinetic-gradient-text">Built for Modded Minecraft</h2>
+          <p class="max-w-2xl mx-auto" style="color: #ADADAD;">
             Everything you need to run heavy modpacks like Create Unbound smoothly.
           </p>
         </div>
@@ -72,29 +106,36 @@ import { kineticHosting } from '../data/hosting';
         {kineticHosting.features.map((feature, i) => (
           <ScrollReveal delay={i * 80}>
             <div class="kinetic-card p-6 h-full">
-              <div class="w-12 h-12 flex items-center justify-center mb-4" style="background: rgba(0, 212, 255, 0.15); border: 1px solid rgba(0, 212, 255, 0.3); color: #00d4ff;">
+              <div class="w-12 h-12 flex items-center justify-center mb-4" style="background: rgba(120, 104, 230, 0.15); border: 1px solid rgba(120, 104, 230, 0.35); color: #B9AAFF; border-radius: 8px;">
                 <Icon name={feature.icon} size={24} />
               </div>
               <h3 class="text-lg font-bold mb-2 text-white">{feature.title}</h3>
-              <p class="text-sm" style="color: #94a3b8;">{feature.description}</p>
+              <p class="text-sm" style="color: #ADADAD;">{feature.description}</p>
             </div>
           </ScrollReveal>
         ))}
       </div>
     </section>
 
-    <!-- Why We Chose -->
+    <!-- Why We Partnered -->
     <section class="relative z-10 max-w-7xl mx-auto px-6 py-12">
       <ScrollReveal>
-        <div class="kinetic-card p-8 md:p-12">
+        <div class="kinetic-card p-8 md:p-12" style="background: linear-gradient(135deg, rgba(120, 104, 230, 0.08), rgba(90, 79, 207, 0.04));">
           <div class="flex flex-col md:flex-row items-center gap-8">
             <div class="flex-shrink-0">
-              <img src="/images/logoneu.webp" alt="FabiMvurice Interactive" width="96" height="96" class="w-24 h-24" style="box-shadow: 0 0 24px rgba(0, 212, 255, 0.3);" />
+              <img
+                src="/images/logoneu.webp"
+                alt="FabiMvurice Interactive"
+                width="96"
+                height="96"
+                class="w-24 h-24"
+                style="box-shadow: 0 0 28px rgba(120, 104, 230, 0.35); border-radius: 12px;"
+              />
             </div>
             <div class="flex-1 text-center md:text-left">
               <h3 class="text-xl font-bold text-white mb-3">Why We Partnered with Kinetic</h3>
-              <p class="leading-relaxed" style="color: #94a3b8;">{kineticHosting.whyWeChose}</p>
-              <p class="mt-3 font-semibold" style="color: #00d4ff;">-- FabiMvurice Interactive Team</p>
+              <p class="leading-relaxed" style="color: #ADADAD;">{kineticHosting.whyWeChose}</p>
+              <p class="mt-4 font-semibold" style="color: #B9AAFF;">— FabiMvurice Interactive Team</p>
             </div>
           </div>
         </div>
@@ -104,10 +145,10 @@ import { kineticHosting } from '../data/hosting';
     <!-- CTA -->
     <section class="relative z-10 max-w-7xl mx-auto px-6 py-12">
       <ScrollReveal>
-        <div class="kinetic-card p-12 text-center" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(14, 165, 233, 0.05));">
+        <div class="kinetic-card p-12 text-center" style="background: linear-gradient(135deg, rgba(120, 104, 230, 0.12), rgba(90, 79, 207, 0.06)); border-color: rgba(120, 104, 230, 0.35);">
           <h2 class="text-3xl font-black text-white mb-3">Ready to Host Your Server?</h2>
-          <p class="text-lg mb-8 max-w-2xl mx-auto" style="color: #94a3b8;">
-            Join thousands of Minecraft players who trust Kinetic Hosting for their modded servers.
+          <p class="text-lg mb-8 max-w-2xl mx-auto" style="color: #ADADAD;">
+            Join thousands of players who trust Kinetic Hosting for their modded servers.
           </p>
           <a
             href={kineticHosting.affiliateUrl}
@@ -117,11 +158,12 @@ import { kineticHosting } from '../data/hosting';
           >
             Get Started Now
           </a>
-          <p class="mt-4 text-xs" style="color: #64748b;">
-            By using our link, you support FabiMvurice Interactive at no extra cost to you.
+          <p class="mt-5 text-xs" style="color: #64748b;">
+            Using our link supports FabiMvurice Interactive at no extra cost to you.
           </p>
         </div>
       </ScrollReveal>
     </section>
+
   </div>
 </Layout>

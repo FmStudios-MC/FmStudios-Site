@@ -1,4 +1,24 @@
-const e=[{id:1,title:"Hytale Community Server is now open!",slug:"hytale-server-opening",category:"announcement",date:"2026-02-03",author:"Itzz_Fabi",excerpt:"Our Hytale community server is now open!",content:`
+const e=[{id:3,title:'"Project Leuna - Reborn" Progress',slug:"prleunapr0226",category:"update",date:"2026-02-17",author:"Itzz_Fabi",excerpt:'A look at progress I made for my Roblox game "Project Leuna - Reborn".',content:`
+      <h3>What is my progess</h3>
+      <p>I have been working on the game for some weeks now. Not that often but a decent amount. I think this game will be my first good Roblox game.</p>
+
+      <h3>Recent Progress</h3>
+      <ul>
+        <li><strong>Stable Framework</strong> — Stable Framework with basic needs for money and Datastore</li>
+        <li><strong>Main Menu</strong> — Working main menu with settings and changelogs</li>
+        <li><strong>Some Map Progess</strong> — Some little map progress.</li>
+      </ul>
+
+      <h3>Preview</h3>
+      <p>Here's a sneak peek at some of the new content coming soon:</p>
+
+      <img src="/images/news/update-preview-1.webp" alt="Preview Screenshot 1" style="width:100%;border-radius:0.5rem;margin:1rem 0;" />
+      <img src="/images/news/update-preview-1.webp" alt="Preview Screenshot 1" style="width:100%;border-radius:0.5rem;margin:1rem 0;" />
+
+
+
+      <p>Stay tuned for more details — and as always, thank you for being part of the FabiMvurice Interactive community!</p>
+    `,image:"/images/news/projectleunalogo.webp",tags:["Updates","Community","2026"]},{id:1,title:"Hytale Community Server is now open!",slug:"hytale-server-opening",category:"announcement",date:"2026-02-03",author:"Itzz_Fabi",excerpt:"Our Hytale community server is now open!",content:`
       <h3>Join us!</h3>
       <p>The Server is now open!</p>
       <h3>Important Information</h3>

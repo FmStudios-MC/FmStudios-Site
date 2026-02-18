@@ -1,4 +1,4 @@
-import{_ as c,o as n,c as s}from"./modal.Cd8kksDI.js";import"./roadmap.astro_astro_type_script_index_0_lang.DXexo0ni.js";const{blogPosts:i,blogCategoryConfig:d}=await c(async()=>{const{blogPosts:e,blogCategoryConfig:a}=await import("./news.CVxVnJwS.js");return{blogPosts:e,blogCategoryConfig:a}},[]);document.querySelectorAll(".news-card").forEach(e=>{e.addEventListener("click",()=>{const a=Number(e.dataset.postId),t=i.find(o=>o.id===a);if(!t)return;const l=d[t.category]||d.news,r=`
+import{_ as c,o as n,c as s}from"./modal.Cd8kksDI.js";import"./roadmap.astro_astro_type_script_index_0_lang.DXexo0ni.js";const{blogPosts:i,blogCategoryConfig:d}=await c(async()=>{const{blogPosts:e,blogCategoryConfig:a}=await import("./news.Dln9kky5.js");return{blogPosts:e,blogCategoryConfig:a}},[]);document.querySelectorAll(".news-card").forEach(e=>{e.addEventListener("click",()=>{const a=Number(e.dataset.postId),t=i.find(o=>o.id===a);if(!t)return;const l=d[t.category]||d.news,r=`
           <div class="relative">
             <div class="aspect-video overflow-hidden">
               <img src="${t.image}" alt="${t.title}" class="w-full h-full object-cover" />
