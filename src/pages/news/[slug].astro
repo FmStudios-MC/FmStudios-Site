@@ -1,0 +1,62 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../../components/Icon.astro';
+import { blogPosts, blogCategoryConfig } from '../../data/news';
+
+export function getStaticPaths() {
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
+---
+
+<Layout title={`${post.title} - FabiMvurice Interactive`} description={post.excerpt}>
+  <section class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Back link -->
+    <a href="/news" class="inline-flex items-center gap-2 mb-8 text-sm font-semibold transition-colors" style="color: var(--accent);">
+      <Icon name="chevron-right" size={16} class="rotate-180" />
+      Back to News
+    </a>
+
+    <article class="card overflow-hidden">
+      <!-- Cover image -->
+      <div class="aspect-video overflow-hidden">
+        <img src={post.image} alt={post.title} class="w-full h-full object-cover" />
+      </div>
+
+      <div class="p-6 sm:p-10">
+        <!-- Badges -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5`}>{catConfig.label}</span>
+          {post.tags.map((tag) => (
+            <span class="text-xs px-2 py-0.5 border border-[var(--border-card)]" style="color: var(--text-dim);">#{tag}</span>
+          ))}
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl sm:text-4xl font-black mb-4 gradient-text">{post.title}</h1>
+
+        <!-- Meta -->
+        <div class="flex items-center gap-4 text-sm mb-8 pb-6 border-b border-[var(--border-card)]" style="color: var(--text-dim);">
+          <span class="flex items-center gap-1"><Icon name="circle-dot" size={14} />{post.author}</span>
+          <span class="flex items-center gap-1"><Icon name="calendar" size={14} />{post.date}</span>
+        </div>
+
+        <!-- Content -->
+        <div class="blog-content" set:html={post.content} />
+
+        <!-- Footer -->
+        <div class="mt-10 pt-6 border-t border-[var(--border-card)]">
+          <a href="/news" class="btn-primary inline-flex items-center gap-2">
+            <Icon name="chevron-right" size={16} class="rotate-180" />
+            Back to News
+          </a>
+        </div>
+      </div>
+    </article>
+  </section>
+</Layout>
