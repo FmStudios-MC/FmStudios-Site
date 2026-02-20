@@ -14,19 +14,26 @@ const featured = projects.slice(0, 3);
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
   <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-6 pt-24 pb-20 relative">
+  <section class="max-w-7xl mx-auto px-6 pt-28 pb-24 relative overflow-hidden">
+    <!-- Dot grid overlay -->
+    <div class="absolute inset-0 dot-grid opacity-50 pointer-events-none" aria-hidden="true"></div>
+    <!-- Primary glow -->
     <div class="hero-glow" aria-hidden="true"></div>
+    <!-- Secondary glow -->
+    <div class="hero-glow-secondary" aria-hidden="true"></div>
     <ScrollReveal>
-      <div class="max-w-3xl relative z-10">
-        <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: var(--accent);">
+      <div class="max-w-4xl relative z-10">
+        <!-- Eyebrow badge -->
+        <div class="hero-eyebrow">
+          <span aria-hidden="true">▸</span>
           Minecraft Modpacks &amp; More
-        </p>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6">
+        </div>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-6">
           <span class="gradient-text hero-text-reveal">FabiMvurice</span>
           <br />
           <span style="color: var(--text-primary);">Interactive</span>
         </h1>
-        <p class="text-xl leading-relaxed mb-10 max-w-2xl" style="color: var(--text-muted);">
+        <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style="color: var(--text-muted);">
           Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
         </p>
         <div class="flex flex-wrap gap-4">
@@ -35,8 +42,8 @@ const featured = projects.slice(0, 3);
             View Projects
           </a>
           <a href="/news" class="btn-outline inline-flex items-center gap-2">
-            <Icon name="chevron-right" size={18} />
             Latest News
+            <Icon name="arrow-right" size={16} />
           </a>
         </div>
       </div>
@@ -49,15 +56,15 @@ const featured = projects.slice(0, 3);
   </div>
 
   <!-- Featured Projects -->
-  <section class="max-w-7xl mx-auto px-6 py-16">
+  <section class="max-w-7xl mx-auto px-6 py-20">
     <ScrollReveal>
-      <div class="flex items-center justify-between mb-8">
+      <div class="flex items-end justify-between mb-10">
         <div>
-          <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Featured</p>
-          <h2 class="text-3xl font-bold" style="color: var(--text-primary);">Projects</h2>
+          <p class="section-eyebrow">Featured</p>
+          <h2 class="text-4xl font-black" style="color: var(--text-primary);">Projects</h2>
         </div>
-        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 hover:underline underline-offset-4" style="color: var(--accent);">
-          View all projects <Icon name="arrow-right" size={16} />
+        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 transition-colors hover:opacity-80" style="color: var(--accent);">
+          View all <Icon name="arrow-right" size={15} />
         </a>
       </div>
     </ScrollReveal>
@@ -71,26 +78,34 @@ const featured = projects.slice(0, 3);
   </section>
 
   <!-- About Blurb -->
-  <section class="max-w-7xl mx-auto px-6 py-16">
+  <section class="max-w-7xl mx-auto px-6 py-12">
     <ScrollReveal>
-      <div class="card p-8 sm:p-10" style="border-left: 3px solid var(--accent);">
-        <div class="max-w-2xl">
-          <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">About</p>
-          <h2 class="text-3xl font-bold mb-4" style="color: var(--text-primary);">Who We Are</h2>
-          <p class="leading-relaxed" style="color: var(--text-muted);">
-            FabiMvurice Interactive is a small creative studio focused on Minecraft content creation. We build modpacks that combine the best community mods into polished, performant experiences. Whether you're into Create-based automation, Vanilla+ gameplay, or resource packs, we've got something for you.
+      <div class="card p-8 sm:p-12 relative overflow-hidden">
+        <!-- Subtle dot grid inside card -->
+        <div class="absolute inset-0 dot-grid opacity-30 pointer-events-none" aria-hidden="true"></div>
+        <!-- Accent glow -->
+        <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(232, 112, 26, 0.1), transparent 70%); filter: blur(40px);"></div>
+        <div class="relative z-10 max-w-2xl">
+          <p class="section-eyebrow mb-3">About</p>
+          <h2 class="text-4xl font-black mb-5" style="color: var(--text-primary);">Who We Are</h2>
+          <p class="text-lg leading-relaxed mb-6" style="color: var(--text-muted);">
+            FabiMvurice Interactive is a small creative studio focused on Minecraft content creation. We build modpacks that combine the best community mods into polished, performant experiences — from Create-based automation to Vanilla+ gameplay and resource packs.
           </p>
+          <a href="/projects" class="btn-primary inline-flex items-center gap-2">
+            <Icon name="package" size={16} />
+            Explore Projects
+          </a>
         </div>
       </div>
     </ScrollReveal>
   </section>
 
   <!-- Social Links -->
-  <section class="max-w-7xl mx-auto px-6 pt-16 pb-24">
+  <section class="max-w-7xl mx-auto px-6 pt-16 pb-28">
     <ScrollReveal>
-      <div class="text-center mb-6">
-        <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Connect</p>
-        <h2 class="text-3xl font-bold" style="color: var(--text-primary);">Join the Community</h2>
+      <div class="text-center mb-8">
+        <p class="section-eyebrow justify-center mb-3">Connect</p>
+        <h2 class="text-4xl font-black" style="color: var(--text-primary);">Join the Community</h2>
       </div>
       <SocialBar />
     </ScrollReveal>

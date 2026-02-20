@@ -10,30 +10,32 @@ const otherPosts = blogPosts.slice(1);
 ---
 
 <Layout title="News - FabiMvurice Interactive">
-  <section class="max-w-7xl mx-auto px-6 py-12">
+  <section class="max-w-7xl mx-auto px-6 pt-16 pb-12">
     <!-- Header -->
     <ScrollReveal>
-      <div class="text-center mb-10">
-        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Stay Updated</p>
-        <h1 class="text-4xl font-black mb-3" style="color: var(--text-primary);">Latest News</h1>
-        <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Announcements, updates, and community news from FabiMvurice Interactive.</p>
+      <div class="relative text-center mb-12 py-8">
+        <!-- Subtle background glow -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 pointer-events-none" style="background: radial-gradient(ellipse, rgba(232, 112, 26, 0.1), transparent 70%); filter: blur(40px);" aria-hidden="true"></div>
+        <div class="relative z-10">
+          <p class="section-eyebrow justify-center mb-4">Stay Updated</p>
+          <h1 class="text-5xl sm:text-6xl font-black mb-4" style="color: var(--text-primary);">Latest News</h1>
+          <p class="max-w-xl mx-auto text-lg" style="color: var(--text-muted);">Announcements, updates, and community news from FabiMvurice Interactive.</p>
+        </div>
       </div>
     </ScrollReveal>
 
     <!-- Filters -->
     <ScrollReveal>
-      <div class="card p-5 mb-8">
-        <div class="flex flex-wrap gap-2 justify-center">
-          {newsFilters.map((filter, i) => (
-            <button
-              class:list={['filter-btn news-filter-btn', i === 0 && 'active']}
-              data-filter={filter.id}
-              aria-pressed={i === 0 ? 'true' : 'false'}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+      <div class="flex flex-wrap gap-2 justify-center mb-10">
+        {newsFilters.map((filter, i) => (
+          <button
+            class:list={['filter-btn news-filter-btn', i === 0 && 'active']}
+            data-filter={filter.id}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
     </ScrollReveal>
 

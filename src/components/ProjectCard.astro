@@ -21,19 +21,19 @@ const status = statusConfig[project.status];
   data-features={project.features.join(' ').toLowerCase()}
 >
   <div class="flex items-start gap-4 mb-4">
-    <div class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
+    <div class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl relative" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
       <img
         src={project.logo}
         alt={project.name}
         width="64"
         height="64"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
         loading="lazy"
       />
     </div>
     <div class="flex-1 min-w-0">
-      <h3 class="text-lg font-bold truncate" style="color: var(--text-primary);">{project.name}</h3>
-      <div class="flex flex-wrap gap-2 mt-1">
+      <h3 class="text-lg font-bold truncate mb-1" style="color: var(--text-primary);">{project.name}</h3>
+      <div class="flex flex-wrap gap-2">
         {status && (
           <span class={`${status.badge} text-xs font-semibold px-2 py-0.5`}>{status.label}</span>
         )}
@@ -42,21 +42,21 @@ const status = statusConfig[project.status];
   </div>
 
   <div class="flex flex-wrap gap-2 mb-3">
-    <span class="text-xs font-medium px-2.5 py-1 capitalize rounded" style="background-color: rgba(239, 68, 68, 0.15); color: var(--accent);">
+    <span class="text-xs font-semibold px-2.5 py-1 capitalize rounded-full" style="background-color: rgba(232, 112, 26, 0.12); color: var(--accent); border: 1px solid rgba(232, 112, 26, 0.2);">
       {project.category}
     </span>
-    <span class="text-xs font-mono px-2.5 py-1 rounded border border-[var(--border-card)]" style="color: var(--text-muted);">
+    <span class="text-xs font-mono px-2.5 py-1 rounded-full" style="background: var(--bg-primary); color: var(--text-dim); border: 1px solid var(--border-card);">
       {project.version}
     </span>
   </div>
 
-  <p class="text-sm line-clamp-3 mb-4" style="color: var(--text-muted);">{project.description}</p>
+  <p class="text-sm line-clamp-3 mb-5 leading-relaxed" style="color: var(--text-muted);">{project.description}</p>
 
   <div class="flex justify-between items-center text-xs pt-3 border-t border-[var(--border-card)]">
     <div class="flex items-center gap-4" style="color: var(--text-dim);">
-      <span class="flex items-center gap-1"><Icon name="download" size={14} /> {project.downloads}</span>
-      <span class="flex items-center gap-1"><Icon name="clock" size={14} /> {project.lastUpdate}</span>
+      <span class="flex items-center gap-1.5"><Icon name="download" size={13} /> {project.downloads}</span>
+      <span class="flex items-center gap-1.5"><Icon name="clock" size={13} /> {project.lastUpdate}</span>
     </div>
-    <span class="font-semibold inline-flex items-center gap-1" style="color: var(--accent);">View Details <Icon name="arrow-right" size={14} /></span>
+    <span class="font-bold inline-flex items-center gap-1 text-xs transition-all" style="color: var(--accent);">View <Icon name="arrow-right" size={13} /></span>
   </div>
 </div>

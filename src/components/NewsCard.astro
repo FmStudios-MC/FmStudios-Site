@@ -14,45 +14,50 @@ const href = `/news/${post.slug}`;
 ---
 
 {featured ? (
-  <a href={href} class="card block news-card" data-category={post.category}>
+  <a href={href} class="card block news-card group" data-category={post.category}>
     <div class="grid grid-cols-1 lg:grid-cols-2">
-      <div class="aspect-video lg:aspect-auto overflow-hidden">
-        <img src={post.image} alt={post.title} class="w-full h-full object-cover" loading="lazy" />
+      <div class="aspect-video lg:aspect-auto overflow-hidden relative">
+        <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <!-- gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent to-black/20 pointer-events-none lg:hidden"></div>
       </div>
-      <div class="p-6 lg:p-8 flex flex-col justify-center">
-        <div class="flex flex-wrap gap-2 mb-3">
-          <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5`}>{catConfig.label}</span>
-          <span class="text-xs font-semibold px-2 py-0.5" style="background-color: var(--accent); color: #fff;">Featured</span>
+      <div class="p-7 lg:p-10 flex flex-col justify-center">
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class={`${catConfig.badge} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>{catConfig.label}</span>
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full" style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #fff;">Featured</span>
         </div>
-        <h2 class="text-2xl lg:text-3xl font-bold mb-3" style="color: var(--text-primary);">{post.title}</h2>
-        <p class="line-clamp-3 mb-4" style="color: var(--text-muted);">{post.excerpt}</p>
+        <h2 class="text-2xl lg:text-3xl font-black mb-3 leading-tight" style="color: var(--text-primary);">{post.title}</h2>
+        <p class="line-clamp-3 mb-6 leading-relaxed" style="color: var(--text-muted);">{post.excerpt}</p>
         <div class="flex items-center justify-between text-sm" style="color: var(--text-dim);">
           <div class="flex items-center gap-4">
-            <span class="flex items-center gap-1"><Icon name="circle-dot" size={14} />{post.author}</span>
-            <span class="flex items-center gap-1"><Icon name="calendar" size={14} />{post.date}</span>
+            <span class="flex items-center gap-1.5"><Icon name="circle-dot" size={13} />{post.author}</span>
+            <span class="flex items-center gap-1.5"><Icon name="calendar" size={13} />{post.date}</span>
           </div>
-          <span class="font-semibold" style="color: var(--accent);">READ --&gt;</span>
+          <span class="font-bold inline-flex items-center gap-1 transition-colors" style="color: var(--accent);">Read more <Icon name="arrow-right" size={14} /></span>
         </div>
       </div>
     </div>
   </a>
 ) : (
-  <a href={href} class="card block news-card overflow-hidden" data-category={post.category}>
-    <div class="aspect-video overflow-hidden">
-      <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" />
+  <a href={href} class="card block news-card overflow-hidden group" data-category={post.category}>
+    <div class="aspect-video overflow-hidden relative">
+      <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+      <!-- bottom gradient for readability -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
     </div>
     <div class="p-5">
-      <div class="flex flex-wrap gap-2 mb-2">
-        <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5`}>{catConfig.label}</span>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class={`${catConfig.badge} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>{catConfig.label}</span>
       </div>
-      <h3 class="text-lg font-bold line-clamp-2 mb-2" style="color: var(--text-primary);">{post.title}</h3>
-      <p class="text-sm line-clamp-3 mb-4" style="color: var(--text-muted);">{post.excerpt}</p>
+      <h3 class="text-lg font-black line-clamp-2 mb-2 leading-snug" style="color: var(--text-primary);">{post.title}</h3>
+      <p class="text-sm line-clamp-3 mb-4 leading-relaxed" style="color: var(--text-muted);">{post.excerpt}</p>
       <div class="flex items-center justify-between text-xs pt-3 border-t border-[var(--border-card)]">
         <div class="flex items-center gap-3" style="color: var(--text-dim);">
           <span>{post.author}</span>
+          <span>·</span>
           <span>{post.date}</span>
         </div>
-        <span class="font-semibold" style="color: var(--accent);">READ --&gt;</span>
+        <span class="font-bold inline-flex items-center gap-1" style="color: var(--accent);">Read <Icon name="arrow-right" size={12} /></span>
       </div>
     </div>
   </a>
