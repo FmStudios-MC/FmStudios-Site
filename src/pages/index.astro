@@ -14,7 +14,7 @@ const featured = projects.slice(0, 3);
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
   <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-6 pt-28 pb-24 relative overflow-hidden">
+  <section class="max-w-7xl mx-auto px-6 pt-28 pb-24 relative">
     <!-- Dot grid overlay -->
     <div class="absolute inset-0 dot-grid opacity-50 pointer-events-none" aria-hidden="true"></div>
     <!-- Primary glow -->
@@ -22,29 +22,47 @@ const featured = projects.slice(0, 3);
     <!-- Secondary glow -->
     <div class="hero-glow-secondary" aria-hidden="true"></div>
     <ScrollReveal>
-      <div class="max-w-4xl relative z-10">
-        <!-- Eyebrow badge -->
-        <div class="hero-eyebrow">
-          <span aria-hidden="true">▸</span>
-          Minecraft Modpacks &amp; More
+      <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-20">
+        <!-- Text content -->
+        <div class="flex-1 min-w-0">
+          <!-- Eyebrow badge -->
+          <div class="hero-eyebrow">
+            <span aria-hidden="true">▸</span>
+            Minecraft Modpacks &amp; More
+          </div>
+          <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-6">
+            <span class="gradient-text hero-text-reveal">FabiMvurice</span>
+            <br />
+            <span style="color: var(--text-primary);">Interactive</span>
+          </h1>
+          <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style="color: var(--text-muted);">
+            Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a href="/projects" class="btn-primary inline-flex items-center gap-2">
+              <Icon name="package" size={18} />
+              View Projects
+            </a>
+            <a href="/news" class="btn-outline inline-flex items-center gap-2">
+              Latest News
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </div>
         </div>
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-6">
-          <span class="gradient-text hero-text-reveal">FabiMvurice</span>
-          <br />
-          <span style="color: var(--text-primary);">Interactive</span>
-        </h1>
-        <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style="color: var(--text-muted);">
-          Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
-        </p>
-        <div class="flex flex-wrap gap-4">
-          <a href="/projects" class="btn-primary inline-flex items-center gap-2">
-            <Icon name="package" size={18} />
-            View Projects
-          </a>
-          <a href="/news" class="btn-outline inline-flex items-center gap-2">
-            Latest News
-            <Icon name="arrow-right" size={16} />
-          </a>
+
+        <!-- Hero Logo -->
+        <div class="self-center lg:self-auto flex-shrink-0">
+          <div class="hero-logo-container">
+            <div class="hero-logo-glow" aria-hidden="true"></div>
+            <div class="hero-logo-ring" aria-hidden="true"></div>
+            <img
+              src="/images/logoneu.webp"
+              alt="FabiMvurice Interactive"
+              width="220"
+              height="220"
+              class="hero-logo-img"
+            />
+          </div>
         </div>
       </div>
     </ScrollReveal>
@@ -116,6 +134,73 @@ const featured = projects.slice(0, 3);
 
   <!-- Lightbox -->
   <LightboxModal />
+
+  <style>
+    .hero-logo-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Soft ambient glow behind the logo */
+    .hero-logo-glow {
+      position: absolute;
+      inset: -50px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 112, 26, 0.4) 0%, rgba(192, 85, 16, 0.18) 45%, transparent 70%);
+      filter: blur(35px);
+      animation: pulse-glow 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Subtle decorative ring */
+    .hero-logo-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px solid rgba(232, 112, 26, 0.2);
+      background: transparent;
+      pointer-events: none;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-logo-img {
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+      position: relative;
+      z-index: 1;
+      animation: float 6s ease-in-out infinite;
+      filter:
+        drop-shadow(0 0 24px rgba(232, 112, 26, 0.5))
+        drop-shadow(0 16px 48px rgba(0, 0, 0, 0.5));
+      border-radius: 50%;
+    }
+
+    :global(.light-theme) .hero-logo-glow {
+      background: radial-gradient(circle, rgba(212, 94, 16, 0.2) 0%, rgba(175, 70, 15, 0.08) 45%, transparent 70%);
+    }
+
+    :global(.light-theme) .hero-logo-img {
+      filter:
+        drop-shadow(0 0 16px rgba(212, 94, 16, 0.35))
+        drop-shadow(0 12px 32px rgba(0, 0, 0, 0.15));
+    }
+
+    @media (max-width: 1023px) {
+      .hero-logo-container {
+        width: 160px;
+        height: 160px;
+      }
+      .hero-logo-img {
+        width: 160px;
+        height: 160px;
+      }
+    }
+  </style>
 
   <script>
     import { openModal, closeModal } from '../scripts/modal';
