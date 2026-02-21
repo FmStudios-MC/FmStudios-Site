@@ -19,8 +19,8 @@ import { socialLinks } from '../data/social';
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-[var(--border-card)] hover:border-[var(--accent)] transition-all"
-            style="color: var(--text-muted); background-color: var(--bg-card);"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-card)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all text-muted"
+            style="background-color: var(--bg-card);"
             aria-label={`Visit ${link.name}`}
           >
             <Icon name={link.icon} size={16} />

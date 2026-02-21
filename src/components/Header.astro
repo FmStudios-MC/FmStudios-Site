@@ -16,7 +16,7 @@ const navItems = [
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="sticky top-0 z-40 border-b border-[var(--border-card)] bg-[var(--bg-primary)] transition-colors duration-300" style="background-color: var(--bg-primary);">
+<header id="site-header" class="sticky top-0 z-40 border-b border-[var(--border-card)] header-glass transition-colors duration-300">
   <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
     <!-- Brand -->
     <a href="/" class="flex items-center no-underline">
@@ -62,10 +62,11 @@ const currentPath = Astro.url.pathname;
   <!-- Mobile Menu -->
   <nav
     id="mobile-menu"
-    class="hidden lg:hidden border-t border-[var(--border-card)] px-6 pb-4"
+    class="mobile-nav lg:hidden"
+    data-open="false"
     aria-label="Mobile navigation"
   >
-    <div class="flex flex-col gap-1 pt-2">
+    <div class="border-t border-[var(--border-card)] px-6 pb-4 flex flex-col gap-1 pt-2">
       {navItems.map((item) => {
         const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
         return (
@@ -94,11 +95,17 @@ const currentPath = Astro.url.pathname;
 <script>
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
+  const header = document.getElementById('site-header');
   let trapCleanup: (() => void) | null = null;
+
+  // Scroll shadow
+  window.addEventListener('scroll', () => {
+    header?.classList.toggle('header-scrolled', window.scrollY > 8);
+  }, { passive: true });
 
   function openMenu() {
     if (!menu || !btn) return;
-    menu.classList.remove('hidden');
+    menu.setAttribute('data-open', 'true');
     btn.setAttribute('aria-expanded', 'true');
 
     // Lightweight inline focus trap
@@ -133,7 +140,7 @@ const currentPath = Astro.url.pathname;
 
   function closeMenu() {
     if (!menu || !btn) return;
-    menu.classList.add('hidden');
+    menu.setAttribute('data-open', 'false');
     btn.setAttribute('aria-expanded', 'false');
     trapCleanup?.();
     trapCleanup = null;
@@ -141,8 +148,8 @@ const currentPath = Astro.url.pathname;
   }
 
   btn?.addEventListener('click', () => {
-    const isHidden = menu?.classList.contains('hidden');
-    if (isHidden) {
+    const isOpen = menu?.getAttribute('data-open') === 'true';
+    if (!isOpen) {
       openMenu();
     } else {
       closeMenu();

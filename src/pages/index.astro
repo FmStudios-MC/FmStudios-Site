@@ -21,12 +21,11 @@ const featured = projects.slice(0, 3);
     <div class="hero-glow" aria-hidden="true"></div>
     <!-- Secondary glow -->
     <div class="hero-glow-secondary" aria-hidden="true"></div>
-    <ScrollReveal>
-      <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-20">
+    <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-20">
         <!-- Text content -->
         <div class="flex-1 min-w-0">
           <!-- Eyebrow badge -->
-          <div class="hero-eyebrow">
+          <div class="hero-eyebrow hero-enter" style="animation-delay: 0ms;">
             <span aria-hidden="true">▸</span>
             Minecraft Modpacks &amp; More
           </div>
@@ -35,10 +34,10 @@ const featured = projects.slice(0, 3);
             <br />
             <span style="color: var(--text-primary);">Interactive</span>
           </h1>
-          <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style="color: var(--text-muted);">
+          <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl hero-enter" style="color: var(--text-muted); animation-delay: 300ms;">
             Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
           </p>
-          <div class="flex flex-wrap gap-4">
+          <div class="flex flex-wrap gap-4 hero-enter" style="animation-delay: 440ms;">
             <a href="/projects" class="btn-primary inline-flex items-center gap-2">
               <Icon name="package" size={18} />
               View Projects
@@ -51,7 +50,7 @@ const featured = projects.slice(0, 3);
         </div>
 
         <!-- Hero Logo -->
-        <div class="self-center lg:self-auto flex-shrink-0">
+        <div class="self-center lg:self-auto flex-shrink-0 hero-enter" style="animation-delay: 180ms;">
           <div class="hero-logo-container">
             <div class="hero-logo-glow" aria-hidden="true"></div>
             <div class="hero-logo-ring" aria-hidden="true"></div>
@@ -65,7 +64,6 @@ const featured = projects.slice(0, 3);
           </div>
         </div>
       </div>
-    </ScrollReveal>
   </section>
 
   <!-- Section Divider -->
