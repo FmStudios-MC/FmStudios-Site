@@ -4,15 +4,28 @@ import Icon from './Icon.astro';
 
 <button
   id="theme-toggle"
-  class="relative w-10 h-10 flex items-center justify-center border border-[var(--border-card)] bg-[var(--bg-card)] hover:border-[var(--accent)] transition-all cursor-pointer"
+  class="flex items-center justify-center w-8 h-8 rounded-full transition-all"
+  style="color: var(--text-muted);"
   aria-label="Toggle dark/light mode"
   title="Toggle theme"
 >
-  <span class="theme-icon-moon"><Icon name="moon" size={18} /></span>
-  <span class="theme-icon-sun hidden"><Icon name="sun" size={18} /></span>
+  <span class="theme-icon-moon"><Icon name="moon" size={16} /></span>
+  <span class="theme-icon-sun hidden"><Icon name="sun" size={16} /></span>
 </button>
 
 <style>
+  button:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  :global(.light-theme) button:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
   .light-theme .theme-icon-moon { display: none; }
   .light-theme .theme-icon-sun { display: block !important; }
+
+  :global(.light-theme) .theme-icon-moon { display: none; }
+  :global(.light-theme) .theme-icon-sun { display: block !important; }
 </style>

@@ -10,17 +10,112 @@ interface Props {
 const { question, answer, id } = Astro.props;
 ---
 
-<div class="card overflow-hidden">
+<div class="faq-item">
   <button
-    class="faq-toggle w-full p-5 text-left flex justify-between items-center gap-4 hover:bg-[var(--bg-card-hover)] transition-colors"
+    class="faq-toggle"
     data-target={`faq-${id}`}
+    aria-expanded="false"
+    aria-controls={`faq-${id}`}
   >
-    <span class="font-semibold text-sm" style="color: var(--text-primary);">{question}</span>
-    <Icon name="chevron-down" size={18} class="transition-transform flex-shrink-0" style="color: var(--text-dim);" />
+    <div class="faq-dot" aria-hidden="true"></div>
+    <span class="faq-question">{question}</span>
+    <Icon name="chevron-down" size={15} class="faq-chevron flex-shrink-0" />
   </button>
-  <div id={`faq-${id}`} class="accordion-content">
-    <div class="px-5 pb-5 text-sm leading-relaxed" style="color: var(--text-muted);">
-      {answer}
-    </div>
+
+  <div id={`faq-${id}`} class="accordion-content" role="region">
+    <p class="faq-answer">{answer}</p>
   </div>
 </div>
+
+<!-- accordion handled globally by animations.ts -->
+
+<style>
+  .faq-item {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.025);
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .faq-item:has(.faq-toggle[aria-expanded="true"]) {
+    border-color: rgba(232, 112, 26, 0.22);
+    background: rgba(232, 112, 26, 0.04);
+  }
+
+  .faq-toggle {
+    width: 100%;
+    padding: 0.75rem 0.875rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: background 0.15s ease;
+  }
+
+  .faq-toggle:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .faq-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .faq-item:has(.faq-toggle[aria-expanded="true"]) .faq-dot {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(232, 112, 26, 0.5);
+  }
+
+  .faq-question {
+    flex: 1;
+    font-size: 0.825rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+    transition: color 0.2s ease;
+  }
+
+  .faq-chevron {
+    color: var(--text-dim);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .faq-item:has(.faq-toggle[aria-expanded="true"]) .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  .faq-answer {
+    font-size: 0.825rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    padding: 0 0.875rem 0.875rem 2.125rem;
+    margin: 0;
+  }
+
+  /* Light theme */
+  :global(.light-theme) .faq-item {
+    border-color: rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.45);
+  }
+
+  :global(.light-theme) .faq-item:has(.faq-toggle[aria-expanded="true"]) {
+    border-color: rgba(212, 94, 16, 0.22);
+    background: rgba(212, 94, 16, 0.04);
+  }
+
+  :global(.light-theme) .faq-toggle:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+</style>
+

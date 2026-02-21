@@ -8,13 +8,53 @@ const { id } = Astro.props;
 
 <div
   id={id}
-  class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4"
+  class="fixed inset-0 z-60 hidden modal-overlay flex items-center justify-center p-4"
   role="dialog"
   aria-modal="true"
 >
-  <div class="modal-content max-w-5xl w-full max-h-[90vh] overflow-y-auto" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
+  <div
+    class="modal-content modal-glass max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+  >
     <div id={`${id}-content`}>
       <!-- Dynamic content inserted by JS -->
     </div>
   </div>
 </div>
+
+<style>
+  .modal-glass {
+    background: rgba(8, 8, 8, 0.88);
+    backdrop-filter: blur(48px) saturate(1.8);
+    -webkit-backdrop-filter: blur(48px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 0 0 1px rgba(232, 112, 26, 0.07),
+      0 32px 120px rgba(0, 0, 0, 0.70),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Neon top accent line */
+  .modal-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.60), transparent);
+    box-shadow: 0 0 16px rgba(232, 112, 26, 0.35);
+    pointer-events: none;
+  }
+
+  :global(.light-theme) .modal-glass {
+    background: rgba(240, 242, 245, 0.90);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 0 0 1px rgba(212, 94, 16, 0.05),
+      0 32px 80px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+</style>

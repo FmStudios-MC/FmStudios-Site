@@ -3,155 +3,172 @@ import Icon from './Icon.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
 const navItems = [
-  { label: 'Home', href: '/' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'News', href: '/news' },
-  { label: 'Roadmap', href: '/roadmap' },
-  { label: 'Changelog', href: '/changelog' },
-  { label: 'FAQ', href: '/faq' },
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'Hosting', href: '/hosting' },
+  { label: 'Home',      href: '/',          icon: 'home' },
+  { label: 'Projects',  href: '/projects',  icon: 'package' },
+  { label: 'News',      href: '/news',       icon: 'newspaper' },
+  { label: 'Roadmap',   href: '/roadmap',   icon: 'map' },
+  { label: 'Changelog', href: '/changelog', icon: 'list' },
+  { label: 'FAQ',       href: '/faq',       icon: 'help-circle' },
+  { label: 'Gallery',   href: '/gallery',   icon: 'image' },
+  { label: 'Hosting',   href: '/hosting',   icon: 'server' },
 ];
 
 const currentPath = Astro.url.pathname;
 ---
 
-<header id="site-header" class="sticky top-0 z-40 border-b border-[var(--border-card)] header-glass transition-colors duration-300">
-  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+<!-- Floating pill nav -->
+<div class="floating-nav-container" id="floating-nav">
+
+  <!-- Main pill -->
+  <nav class="floating-nav-pill" id="nav-pill" aria-label="Main navigation">
+
     <!-- Brand -->
-    <a href="/" class="flex items-center no-underline">
-      <span class="font-bold text-lg tracking-tight" style="color: var(--text-primary);">FabiMvurice Interactive</span>
+    <a href="/" class="nav-brand-pill" aria-label="FabiMvurice Interactive — home">
+      <span class="nav-brand-text">FabiMvurice Interactive</span>
     </a>
 
-    <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-6" aria-label="Main navigation">
+    <!-- Separator -->
+    <div class="nav-sep hidden lg:block" aria-hidden="true"></div>
+
+    <!-- Desktop nav links -->
+    <div class="hidden lg:flex items-center gap-0.5" role="list">
       {navItems.map((item) => {
-        const isHosting = item.href === '/hosting';
         const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+        const isHosting = item.href === '/hosting';
         return (
           <a
             href={item.href}
-            class:list={[
-              'nav-link text-sm',
-              isHosting && 'hosting-link',
-            ]}
+            class:list={['nav-pill-link', isCurrent && 'active', isHosting && 'hosting-pill']}
             aria-current={isCurrent ? 'page' : undefined}
+            role="listitem"
           >
-            {item.label}
+            <Icon name={item.icon} size={13} />
+            <span>{item.label}</span>
           </a>
         );
       })}
-      <ThemeToggle />
-    </nav>
+    </div>
 
-    <!-- Mobile Controls -->
-    <div class="flex lg:hidden items-center gap-3">
+    <!-- Separator -->
+    <div class="nav-sep" aria-hidden="true"></div>
+
+    <!-- Right controls -->
+    <div class="flex items-center gap-0.5">
       <ThemeToggle />
+      <!-- Mobile hamburger -->
       <button
         id="mobile-menu-btn"
-        class="w-10 h-10 flex items-center justify-center"
-        aria-label="Toggle menu"
+        class="nav-hamburger lg:hidden"
+        aria-label="Open navigation menu"
         aria-expanded="false"
-        style="color: var(--text-primary);"
+        aria-controls="mobile-dropdown"
       >
-        <Icon name="menu" size={22} />
+        <Icon name="menu" size={17} />
       </button>
     </div>
-  </div>
 
-  <!-- Mobile Menu -->
-  <nav
-    id="mobile-menu"
-    class="mobile-nav lg:hidden"
+  </nav>
+
+  <!-- Mobile dropdown (glass panel below pill) -->
+  <div
+    id="mobile-dropdown"
+    class="mobile-nav-dropdown lg:hidden"
     data-open="false"
     aria-label="Mobile navigation"
   >
-    <div class="border-t border-[var(--border-card)] px-6 pb-4 flex flex-col gap-1 pt-2">
-      {navItems.map((item) => {
-        const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
-        return (
-          <a
-            href={item.href}
-            class="py-2 text-sm font-medium transition-colors"
-            style={`color: ${isCurrent ? 'var(--accent)' : 'var(--text-muted)'};`}
-          >
-            {item.label}
-          </a>
-        );
-      })}
-    </div>
-  </nav>
-</header>
+    {navItems.map((item) => {
+      const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+      const isHosting = item.href === '/hosting';
+      return (
+        <a
+          href={item.href}
+          class:list={[
+            'mobile-nav-item',
+            isCurrent && 'active',
+            isHosting && 'hosting-mobile',
+          ]}
+          aria-current={isCurrent ? 'page' : undefined}
+        >
+          <Icon name={item.icon} size={16} />
+          <span>{item.label}</span>
+        </a>
+      );
+    })}
+  </div>
+
+</div>
 
 <style>
-  .hosting-link {
-    color: #0ea5e9 !important;
+  .hosting-mobile {
+    color: #0ea5e9;
   }
-  .hosting-link:hover {
-    color: #00d4ff !important;
+  .hosting-mobile:hover {
+    color: #38bdf8 !important;
+    background: rgba(14, 165, 233, 0.08) !important;
   }
 </style>
 
 <script>
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
-  const header = document.getElementById('site-header');
-  let trapCleanup: (() => void) | null = null;
+  const pill    = document.getElementById('nav-pill');
+  const btn     = document.getElementById('mobile-menu-btn');
+  const dropdown = document.getElementById('mobile-dropdown');
 
-  // Scroll shadow
+  // Scroll — add scrolled class to pill
   window.addEventListener('scroll', () => {
-    header?.classList.toggle('header-scrolled', window.scrollY > 8);
+    pill?.classList.toggle('nav-scrolled', window.scrollY > 8);
   }, { passive: true });
 
+  // Mobile menu toggle
   function openMenu() {
-    if (!menu || !btn) return;
-    menu.setAttribute('data-open', 'true');
+    if (!dropdown || !btn) return;
+    dropdown.setAttribute('data-open', 'true');
     btn.setAttribute('aria-expanded', 'true');
 
-    // Lightweight inline focus trap
-    const focusable = 'a[href], button:not([disabled])';
+    // Lightweight focus trap
     const onKeydown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         closeMenu();
         return;
       }
       if (e.key !== 'Tab') return;
-      const els = Array.from(menu.querySelectorAll<HTMLElement>(focusable));
-      // Include the toggle button in the trap
-      els.unshift(btn as HTMLElement);
-      if (els.length === 0) return;
-      const first = els[0];
-      const last = els[els.length - 1];
+      const focusable = Array.from(
+        dropdown.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      );
+      focusable.unshift(btn as HTMLElement);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
       if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
+        e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
+        e.preventDefault(); first.focus();
       }
     };
     document.addEventListener('keydown', onKeydown);
-    trapCleanup = () => document.removeEventListener('keydown', onKeydown);
+    (openMenu as any)._cleanup = () => document.removeEventListener('keydown', onKeydown);
 
-    // Focus first menu link
-    const firstLink = menu.querySelector<HTMLElement>('a');
-    firstLink?.focus();
+    // Focus first link
+    dropdown.querySelector<HTMLElement>('a')?.focus();
   }
 
   function closeMenu() {
-    if (!menu || !btn) return;
-    menu.setAttribute('data-open', 'false');
+    if (!dropdown || !btn) return;
+    dropdown.setAttribute('data-open', 'false');
     btn.setAttribute('aria-expanded', 'false');
-    trapCleanup?.();
-    trapCleanup = null;
+    (openMenu as any)._cleanup?.();
+    (openMenu as any)._cleanup = null;
     btn.focus();
   }
 
   btn?.addEventListener('click', () => {
-    const isOpen = menu?.getAttribute('data-open') === 'true';
-    if (!isOpen) {
-      openMenu();
-    } else {
+    const isOpen = dropdown?.getAttribute('data-open') === 'true';
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    const nav = document.getElementById('floating-nav');
+    if (nav && !nav.contains(e.target as Node) && dropdown?.getAttribute('data-open') === 'true') {
       closeMenu();
     }
   });

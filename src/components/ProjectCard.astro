@@ -12,7 +12,7 @@ const status = statusConfig[project.status];
 ---
 
 <div
-  class="card cursor-pointer project-card p-5"
+  class="card cursor-pointer project-card p-5 flex flex-col"
   data-project-id={project.id}
   data-category={project.category}
   data-subcategory={project.subcategory || ''}
@@ -20,20 +20,23 @@ const status = statusConfig[project.status];
   data-description={project.description.toLowerCase()}
   data-features={project.features.join(' ').toLowerCase()}
 >
+  <!-- Header row -->
   <div class="flex items-start gap-4 mb-4">
-    <div class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl relative" style="background-color: var(--bg-primary); border: 1px solid var(--border-card);">
+    <!-- Logo with glass bg -->
+    <div class="logo-wrap flex-shrink-0">
       <img
         src={project.logo}
         alt={project.name}
-        width="64"
-        height="64"
-        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+        width="56"
+        height="56"
+        class="w-14 h-14 object-cover rounded-xl transition-transform duration-500 hover:scale-110"
         loading="lazy"
       />
     </div>
+
     <div class="flex-1 min-w-0">
-      <h3 class="text-lg font-bold truncate mb-1" style="color: var(--text-primary);">{project.name}</h3>
-      <div class="flex flex-wrap gap-2">
+      <h3 class="text-base font-bold truncate mb-1.5" style="color: var(--text-primary);">{project.name}</h3>
+      <div class="flex flex-wrap gap-1.5">
         {status && (
           <span class={`${status.badge} text-xs font-semibold px-2 py-0.5`}>{status.label}</span>
         )}
@@ -41,22 +44,65 @@ const status = statusConfig[project.status];
     </div>
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-3">
-    <span class="text-xs font-semibold px-2.5 py-1 capitalize rounded-full" style="background-color: rgba(232, 112, 26, 0.12); color: var(--accent); border: 1px solid rgba(232, 112, 26, 0.2);">
+  <!-- Tags -->
+  <div class="flex flex-wrap gap-1.5 mb-3">
+    <span class="tag-accent capitalize">
       {project.category}
     </span>
-    <span class="text-xs font-mono px-2.5 py-1 rounded-full" style="background: var(--bg-primary); color: var(--text-dim); border: 1px solid var(--border-card);">
+    <span class="tag-mono">
       {project.version}
     </span>
   </div>
 
-  <p class="text-sm line-clamp-3 mb-5 leading-relaxed" style="color: var(--text-muted);">{project.description}</p>
+  <!-- Description -->
+  <p class="text-sm line-clamp-3 mb-5 leading-relaxed flex-1" style="color: var(--text-muted);">{project.description}</p>
 
-  <div class="flex justify-between items-center text-xs pt-3 border-t border-[var(--border-card)]">
+  <!-- Footer stats — inside an inner glass panel -->
+  <div class="glass-panel px-4 py-3 flex justify-between items-center text-xs">
     <div class="flex items-center gap-4" style="color: var(--text-dim);">
-      <span class="flex items-center gap-1.5"><Icon name="download" size={13} /> {project.downloads}</span>
-      <span class="flex items-center gap-1.5"><Icon name="clock" size={13} /> {project.lastUpdate}</span>
+      <span class="flex items-center gap-1.5">
+        <Icon name="download" size={12} />
+        {project.downloads}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <Icon name="clock" size={12} />
+        {project.lastUpdate}
+      </span>
     </div>
-    <span class="font-bold inline-flex items-center gap-1 text-xs transition-all" style="color: var(--accent);">View <Icon name="arrow-right" size={13} /></span>
+    <span class="font-bold inline-flex items-center gap-1 transition-all" style="color: var(--accent);">
+      View <Icon name="arrow-right" size={12} />
+    </span>
   </div>
 </div>
+
+<style>
+  .logo-wrap {
+    background: var(--glass-1);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.875rem;
+    padding: 0.1875rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .tag-accent {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(232, 112, 26, 0.10);
+    color: var(--accent);
+    border: 1px solid rgba(232, 112, 26, 0.22);
+    letter-spacing: 0.01em;
+  }
+
+  .tag-mono {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: var(--glass-1);
+    color: var(--text-dim);
+    border: 1px solid var(--glass-border);
+  }
+</style>

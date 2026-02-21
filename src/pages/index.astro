@@ -8,83 +8,117 @@ import Modal from '../components/Modal.astro';
 import LightboxModal from '../components/LightboxModal.astro';
 import { projects } from '../data/projects';
 
-// Featured: first 3 projects
 const featured = projects.slice(0, 3);
 ---
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
-  <!-- Hero -->
-  <section class="max-w-7xl mx-auto px-6 pt-28 pb-24 relative">
-    <!-- Dot grid overlay -->
-    <div class="absolute inset-0 dot-grid opacity-50 pointer-events-none" aria-hidden="true"></div>
-    <!-- Primary glow -->
+
+  <!-- ── Hero ──────────────────────────────────── -->
+  <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <!-- Extra glow orbs for hero depth -->
     <div class="hero-glow" aria-hidden="true"></div>
-    <!-- Secondary glow -->
     <div class="hero-glow-secondary" aria-hidden="true"></div>
-    <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-20">
-        <!-- Text content -->
-        <div class="flex-1 min-w-0">
-          <!-- Eyebrow badge -->
-          <div class="hero-eyebrow hero-enter" style="animation-delay: 0ms;">
-            <span aria-hidden="true">▸</span>
-            Minecraft Modpacks &amp; More
+    <div class="hero-glow-tertiary" aria-hidden="true"></div>
+
+    <!-- Dot grid overlay -->
+    <div class="absolute inset-0 dot-grid opacity-40 pointer-events-none" aria-hidden="true"></div>
+
+    <!-- Hero glass card -->
+    <div class="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 py-16">
+      <div class="hero-glass-card hero-enter" style="animation-delay: 0ms;">
+
+        <!-- Inner layout: text left, logo right -->
+        <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+
+          <!-- Text side -->
+          <div class="flex-1 min-w-0 text-center lg:text-left">
+
+            <!-- Eyebrow badge -->
+            <div class="inline-flex hero-eyebrow hero-enter" style="animation-delay: 120ms;">
+              <span aria-hidden="true">▸</span>
+              Minecraft Modpacks &amp; More
+            </div>
+
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.9] tracking-tight mb-6">
+              <span class="gradient-text hero-text-reveal block">FabiMvurice</span>
+              <span class="block" style="color: var(--text-primary);">Interactive</span>
+            </h1>
+
+            <p class="text-base sm:text-lg leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0 hero-enter" style="color: var(--text-muted); animation-delay: 300ms;">
+              Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
+            </p>
+
+            <!-- CTAs -->
+            <div class="flex flex-wrap gap-3 justify-center lg:justify-start hero-enter" style="animation-delay: 440ms;">
+              <a href="/projects" class="btn-primary inline-flex items-center gap-2">
+                <Icon name="package" size={17} />
+                View Projects
+              </a>
+              <a href="/news" class="btn-outline inline-flex items-center gap-2">
+                Latest News
+                <Icon name="arrow-right" size={15} />
+              </a>
+            </div>
+
+            <!-- Stats row -->
+            <div class="flex flex-wrap gap-5 mt-10 justify-center lg:justify-start hero-enter" style="animation-delay: 560ms;">
+              <div class="hero-stat-chip">
+                <span class="stat-value gradient-text">{projects.length}</span>
+                <span class="stat-label">Projects</span>
+              </div>
+              <div class="hero-stat-chip">
+                <span class="stat-value gradient-text">2023</span>
+                <span class="stat-label">Since</span>
+              </div>
+              <div class="hero-stat-chip">
+                <span class="stat-value gradient-text">Free</span>
+                <span class="stat-label">Always</span>
+              </div>
+            </div>
           </div>
-          <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.92] tracking-tight mb-6">
-            <span class="gradient-text hero-text-reveal">FabiMvurice</span>
-            <br />
-            <span style="color: var(--text-primary);">Interactive</span>
-          </h1>
-          <p class="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl hero-enter" style="color: var(--text-muted); animation-delay: 300ms;">
-            Creating amazing Minecraft modpacks, mods, and resource packs. From Create-based tech packs to Vanilla+ experiences.
-          </p>
-          <div class="flex flex-wrap gap-4 hero-enter" style="animation-delay: 440ms;">
-            <a href="/projects" class="btn-primary inline-flex items-center gap-2">
-              <Icon name="package" size={18} />
-              View Projects
-            </a>
-            <a href="/news" class="btn-outline inline-flex items-center gap-2">
-              Latest News
-              <Icon name="arrow-right" size={16} />
-            </a>
+
+          <!-- Logo side -->
+          <div class="flex-shrink-0 hero-enter" style="animation-delay: 200ms;">
+            <div class="hero-logo-wrap">
+              <!-- Orbit ring -->
+              <div class="hero-orbit-ring" aria-hidden="true"></div>
+              <!-- Glow -->
+              <div class="hero-logo-glow" aria-hidden="true"></div>
+              <!-- Logo -->
+              <img
+                src="/images/logoneu.webp"
+                alt="FabiMvurice Interactive logo"
+                width="200"
+                height="200"
+                class="hero-logo-img"
+              />
+            </div>
           </div>
+
         </div>
 
-        <!-- Hero Logo -->
-        <div class="self-center lg:self-auto flex-shrink-0 hero-enter" style="animation-delay: 180ms;">
-          <div class="hero-logo-container">
-            <div class="hero-logo-glow" aria-hidden="true"></div>
-            <div class="hero-logo-ring" aria-hidden="true"></div>
-            <img
-              src="/images/logoneu.webp"
-              alt="FabiMvurice Interactive"
-              width="220"
-              height="220"
-              class="hero-logo-img"
-            />
-          </div>
-        </div>
       </div>
+    </div>
   </section>
 
-  <!-- Section Divider -->
-  <div class="max-w-7xl mx-auto px-6" aria-hidden="true">
-    <div class="h-px" style="background: linear-gradient(90deg, transparent, var(--border-card-hover), transparent);"></div>
-  </div>
+  <!-- Neon divider -->
+  <div class="neon-divider" aria-hidden="true"></div>
 
-  <!-- Featured Projects -->
-  <section class="max-w-7xl mx-auto px-6 py-20">
+  <!-- ── Featured Projects ──────────────────────── -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
     <ScrollReveal>
       <div class="flex items-end justify-between mb-10">
         <div>
           <p class="section-eyebrow">Featured</p>
           <h2 class="text-4xl font-black" style="color: var(--text-primary);">Projects</h2>
         </div>
-        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 transition-colors hover:opacity-80" style="color: var(--accent);">
-          View all <Icon name="arrow-right" size={15} />
+        <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 transition-all hover:gap-2.5" style="color: var(--accent);">
+          View all <Icon name="arrow-right" size={14} />
         </a>
       </div>
     </ScrollReveal>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {featured.map((project, i) => (
         <ScrollReveal delay={i * 100}>
           <ProjectCard project={project} />
@@ -93,18 +127,21 @@ const featured = projects.slice(0, 3);
     </div>
   </section>
 
-  <!-- About Blurb -->
-  <section class="max-w-7xl mx-auto px-6 py-12">
+  <!-- ── About Blurb ─────────────────────────────── -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-8">
     <ScrollReveal>
       <div class="card p-8 sm:p-12 relative overflow-hidden">
-        <!-- Subtle dot grid inside card -->
-        <div class="absolute inset-0 dot-grid opacity-30 pointer-events-none" aria-hidden="true"></div>
+        <!-- Inner glass layer for depth -->
+        <div class="absolute inset-0 dot-grid opacity-20 pointer-events-none" aria-hidden="true"></div>
         <!-- Accent glow -->
-        <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(232, 112, 26, 0.1), transparent 70%); filter: blur(40px);"></div>
+        <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(232, 112, 26, 0.12), transparent 70%); filter: blur(50px);" aria-hidden="true"></div>
+        <!-- Neon top border -->
+        <div class="absolute top-0 left-[10%] right-[10%] h-px" style="background: linear-gradient(90deg, transparent, rgba(232,112,26,0.5), transparent); box-shadow: 0 0 12px rgba(232,112,26,0.4);" aria-hidden="true"></div>
+
         <div class="relative z-10 max-w-2xl">
           <p class="section-eyebrow mb-3">About</p>
           <h2 class="text-4xl font-black mb-5" style="color: var(--text-primary);">Who We Are</h2>
-          <p class="text-lg leading-relaxed mb-6" style="color: var(--text-muted);">
+          <p class="text-lg leading-relaxed mb-8" style="color: var(--text-muted);">
             FabiMvurice Interactive is a small creative studio focused on Minecraft content creation. We build modpacks that combine the best community mods into polished, performant experiences — from Create-based automation to Vanilla+ gameplay and resource packs.
           </p>
           <a href="/projects" class="btn-primary inline-flex items-center gap-2">
@@ -116,8 +153,8 @@ const featured = projects.slice(0, 3);
     </ScrollReveal>
   </section>
 
-  <!-- Social Links -->
-  <section class="max-w-7xl mx-auto px-6 pt-16 pb-28">
+  <!-- ── Social Links ───────────────────────────── -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-28">
     <ScrollReveal>
       <div class="text-center mb-8">
         <p class="section-eyebrow justify-center mb-3">Connect</p>
@@ -127,75 +164,153 @@ const featured = projects.slice(0, 3);
     </ScrollReveal>
   </section>
 
-  <!-- Project modal -->
+  <!-- Modals -->
   <Modal id="project-modal" />
-
-  <!-- Lightbox -->
   <LightboxModal />
 
   <style>
-    .hero-logo-container {
+    /* Hero glass card */
+    .hero-glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(40px) saturate(1.8);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 2rem;
+      padding: 3rem 3.5rem;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(232, 112, 26, 0.05),
+        0 32px 120px rgba(0, 0, 0, 0.55),
+        0 8px 40px rgba(232, 112, 26, 0.08);
       position: relative;
-      width: 220px;
-      height: 220px;
+      overflow: hidden;
+    }
+
+    .hero-glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.55), transparent);
+      box-shadow: 0 0 16px rgba(232, 112, 26, 0.35);
+    }
+
+    :global(.light-theme) .hero-glass-card {
+      background: rgba(255, 255, 255, 0.65);
+      border-color: rgba(0, 0, 0, 0.07);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        0 32px 80px rgba(0, 0, 0, 0.10),
+        0 8px 32px rgba(212, 94, 16, 0.06);
+    }
+
+    /* Stat chips */
+    .hero-stat-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.1rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* Logo container */
+    .hero-logo-wrap {
+      position: relative;
+      width: 200px;
+      height: 200px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Soft ambient glow behind the logo */
     .hero-logo-glow {
       position: absolute;
-      inset: -50px;
+      inset: -60px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(232, 112, 26, 0.4) 0%, rgba(192, 85, 16, 0.18) 45%, transparent 70%);
-      filter: blur(35px);
+      background: radial-gradient(circle, rgba(232, 112, 26, 0.45) 0%, rgba(192, 85, 16, 0.20) 45%, transparent 70%);
+      filter: blur(40px);
       animation: pulse-glow 4s ease-in-out infinite;
       pointer-events: none;
     }
 
-    /* Subtle decorative ring */
-    .hero-logo-ring {
+    .hero-orbit-ring {
       position: absolute;
-      inset: -8px;
+      inset: -16px;
       border-radius: 50%;
-      border: 1px solid rgba(232, 112, 26, 0.2);
+      border: 1px solid rgba(232, 112, 26, 0.22);
       background: transparent;
       pointer-events: none;
-      animation: float 6s ease-in-out infinite;
+      animation: float 7s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(232, 112, 26, 0.08);
     }
 
     .hero-logo-img {
-      width: 220px;
-      height: 220px;
+      width: 200px;
+      height: 200px;
       object-fit: contain;
       position: relative;
       z-index: 1;
-      animation: float 6s ease-in-out infinite;
+      animation: float 7s ease-in-out infinite;
       filter:
-        drop-shadow(0 0 24px rgba(232, 112, 26, 0.5))
-        drop-shadow(0 16px 48px rgba(0, 0, 0, 0.5));
+        drop-shadow(0 0 30px rgba(232, 112, 26, 0.55))
+        drop-shadow(0 16px 48px rgba(0, 0, 0, 0.60));
       border-radius: 50%;
     }
 
     :global(.light-theme) .hero-logo-glow {
-      background: radial-gradient(circle, rgba(212, 94, 16, 0.2) 0%, rgba(175, 70, 15, 0.08) 45%, transparent 70%);
+      background: radial-gradient(circle, rgba(212, 94, 16, 0.22) 0%, rgba(175, 70, 15, 0.08) 45%, transparent 70%);
     }
 
     :global(.light-theme) .hero-logo-img {
       filter:
-        drop-shadow(0 0 16px rgba(212, 94, 16, 0.35))
-        drop-shadow(0 12px 32px rgba(0, 0, 0, 0.15));
+        drop-shadow(0 0 18px rgba(212, 94, 16, 0.40))
+        drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
+    }
+
+    /* Neon divider between sections */
+    .neon-divider {
+      height: 1px;
+      max-width: 80rem;
+      margin: 0 auto;
+      background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.35), transparent);
+      box-shadow: 0 0 20px rgba(232, 112, 26, 0.15);
     }
 
     @media (max-width: 1023px) {
-      .hero-logo-container {
+      .hero-glass-card {
+        padding: 2.25rem 1.75rem;
+        border-radius: 1.5rem;
+      }
+      .hero-logo-wrap {
         width: 160px;
         height: 160px;
       }
       .hero-logo-img {
         width: 160px;
         height: 160px;
+      }
+    }
+
+    @media (max-width: 639px) {
+      .hero-glass-card {
+        padding: 2rem 1.25rem;
+        border-radius: 1.25rem;
       }
     }
   </style>
@@ -211,7 +326,6 @@ const featured = projects.slice(0, 3);
       statusConfig: (await import('../data/projects')).statusConfig,
     };
 
-    // Project card click -> open modal
     document.querySelectorAll('.project-card').forEach((card) => {
       card.addEventListener('click', () => {
         const id = Number((card as HTMLElement).dataset.projectId);
@@ -222,12 +336,10 @@ const featured = projects.slice(0, 3);
         const html = renderProjectModalHtml(project, status);
         openModal('project-modal', html);
 
-        // Attach close handler to modal close button
         document.querySelector('#project-modal .modal-close-btn')?.addEventListener('click', () => {
           closeModal('project-modal');
         });
 
-        // Attach lightbox triggers for screenshots
         document.querySelectorAll('#project-modal .lightbox-trigger').forEach((img, i) => {
           img.addEventListener('click', () => {
             const srcs = project.screenshots.map((s, idx) => ({

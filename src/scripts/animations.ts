@@ -52,6 +52,9 @@ function initAccordions() {
       const icon = btn.querySelector('svg:last-child');
       const isOpen = content.classList.contains('open');
 
+      // Sync aria-expanded for CSS :has() selectors
+      (btn as HTMLElement).setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+
       if (content.classList.contains('accordion-content')) {
         if (isOpen) {
           // Close: set explicit height then transition to 0

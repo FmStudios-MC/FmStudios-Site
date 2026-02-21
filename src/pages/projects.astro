@@ -9,23 +9,26 @@ import { projects, categories, modpackTypes } from '../data/projects';
 ---
 
 <Layout title="Projects - FabiMvurice Interactive">
-  <section class="max-w-7xl mx-auto px-6 py-12">
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+
     <!-- Header -->
     <ScrollReveal>
-      <div class="text-center mb-12">
-        <p class="text-sm font-semibold uppercase tracking-widest mb-2" style="color: var(--accent);">Browse</p>
-        <h1 class="text-4xl sm:text-5xl font-black mb-4" style="color: var(--text-primary);">Projects</h1>
-        <p class="max-w-2xl mx-auto" style="color: var(--text-muted);">Explore our Minecraft modpacks, mods, and resource packs.</p>
-        <p class="text-sm font-medium mt-2" style="color: var(--text-dim);">{projects.length} projects available</p>
+      <div class="relative flex items-end justify-between mb-8 pt-2">
+        <div>
+          <p class="section-eyebrow mb-2">Browse</p>
+          <h1 class="text-4xl sm:text-5xl font-black" style="color: var(--text-primary);">Projects</h1>
+          <p class="mt-2 text-sm" style="color: var(--text-dim);">{projects.length} projects available</p>
+        </div>
+        <p class="hidden sm:block max-w-xs text-right text-sm" style="color: var(--text-muted);">Minecraft modpacks, mods &amp; resource packs.</p>
       </div>
     </ScrollReveal>
 
-    <!-- Search & Filters -->
+    <!-- Search & Filters (glass panel) -->
     <ScrollReveal>
       <div class="card p-6 mb-8">
         <!-- Search -->
         <div class="relative max-w-2xl mx-auto mb-6">
-          <Icon name="search" size={18} class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color: var(--text-dim);" />
+          <Icon name="search" size={17} class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color: var(--text-dim);" />
           <input
             type="text"
             id="search-input"
@@ -69,9 +72,9 @@ import { projects, categories, modpackTypes } from '../data/projects';
     </ScrollReveal>
 
     <!-- Projects Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       {projects.map((project, i) => (
-        <ScrollReveal delay={i * 80}>
+        <ScrollReveal delay={i * 70}>
           <ProjectCard project={project} />
         </ScrollReveal>
       ))}
@@ -80,17 +83,14 @@ import { projects, categories, modpackTypes } from '../data/projects';
     <!-- No Results -->
     <div id="no-results" class="text-center py-20" style="display: none;">
       <div class="card p-16 max-w-lg mx-auto">
-        <Icon name="search" size={56} class="mx-auto mb-6" style="color: var(--text-dim);" />
+        <Icon name="search" size={52} class="mx-auto mb-6" style="color: var(--text-dim);" />
         <h3 class="text-2xl font-bold mb-3" style="color: var(--text-primary);">No projects found</h3>
         <p style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
       </div>
     </div>
   </section>
 
-  <!-- Project Modal -->
   <Modal id="project-modal" />
-
-  <!-- Lightbox -->
   <LightboxModal />
 
   <script>
@@ -114,12 +114,10 @@ import { projects, categories, modpackTypes } from '../data/projects';
         const html = renderProjectModalHtml(project, status);
         openModal('project-modal', html);
 
-        // Attach close handler to modal close button
         document.querySelector('#project-modal .modal-close-btn')?.addEventListener('click', () => {
           closeModal('project-modal');
         });
 
-        // Attach lightbox triggers for screenshots
         document.querySelectorAll('#project-modal .lightbox-trigger').forEach((img, i) => {
           img.addEventListener('click', () => {
             const srcs = project.screenshots.map((s, idx) => ({

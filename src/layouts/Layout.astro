@@ -46,24 +46,30 @@ const {
 <body class:list={[kinetic && 'kinetic-page']}>
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Background glow -->
+  <!-- Animated grid overlay (behind everything) -->
+  {!kinetic && <div class="animated-grid" aria-hidden="true"></div>}
+
+  <!-- Ambient background glow -->
   {!kinetic && <div class="bg-glow-red" aria-hidden="true"></div>}
 
+  <!-- Floating pill nav -->
   <Header />
 
-  <main id="main-content" class="relative z-10 min-h-screen">
+  <!-- Page content — pt-24 to clear the floating nav -->
+  <main id="main-content" class="relative z-10 min-h-screen pt-24">
     <slot />
   </main>
 
   <Footer />
 
-  <!-- Scroll to top button -->
+  <!-- Scroll to top -->
   <button
     id="scroll-top"
-    class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 w-10 h-10 flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-all duration-300 bg-[var(--accent)] hover:bg-[var(--accent-deep)] text-white shadow-lg hover:-translate-y-0.5"
+    class="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 w-10 h-10 flex items-center justify-center rounded-full opacity-0 pointer-events-none transition-all duration-300 text-white shadow-xl"
+    style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: 0 4px 20px rgba(232,112,26,0.40);"
     aria-label="Scroll to top"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
   </button>
 
   <!-- Client scripts -->
