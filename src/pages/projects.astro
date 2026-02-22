@@ -3,8 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import Modal from '../components/Modal.astro';
-import LightboxModal from '../components/LightboxModal.astro';
 import { projects, categories, modpackTypes } from '../data/projects';
 ---
 
@@ -90,44 +88,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
     </div>
   </section>
 
-  <Modal id="project-modal" />
-  <LightboxModal />
-
   <script>
-    import { openModal, closeModal } from '../scripts/modal';
-    import { renderProjectModalHtml } from '../scripts/project-modal';
-    import { openLightbox } from '../scripts/lightbox';
     import '../scripts/search';
-
-    const projectData = {
-      projects: (await import('../data/projects')).projects,
-      statusConfig: (await import('../data/projects')).statusConfig,
-    };
-
-    document.querySelectorAll('.project-card').forEach((card) => {
-      card.addEventListener('click', () => {
-        const id = Number((card as HTMLElement).dataset.projectId);
-        const project = projectData.projects.find((p) => p.id === id);
-        if (!project) return;
-
-        const status = projectData.statusConfig[project.status];
-        const html = renderProjectModalHtml(project, status);
-        openModal('project-modal', html);
-
-        document.querySelector('#project-modal .modal-close-btn')?.addEventListener('click', () => {
-          closeModal('project-modal');
-        });
-
-        document.querySelectorAll('#project-modal .lightbox-trigger').forEach((img, i) => {
-          img.addEventListener('click', () => {
-            const srcs = project.screenshots.map((s, idx) => ({
-              src: s,
-              alt: `${project.name} screenshot ${idx + 1}`,
-            }));
-            openLightbox(srcs, i);
-          });
-        });
-      });
-    });
   </script>
 </Layout>

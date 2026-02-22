@@ -1,0 +1,240 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../../components/Icon.astro';
+import LightboxModal from '../../components/LightboxModal.astro';
+import { projects, statusConfig } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const status = statusConfig[project.status];
+---
+
+<Layout
+  title={`${project.name} - FabiMvurice Interactive`}
+  description={project.description}
+>
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+
+    <!-- Back link -->
+    <a
+      href="/projects"
+      class="inline-flex items-center gap-2 mb-8 text-sm font-semibold transition-colors"
+      style="color: var(--accent);"
+    >
+      <Icon name="chevron-right" size={16} class="rotate-180" />
+      Back to Projects
+    </a>
+
+    <!-- Header card -->
+    <div class="card p-6 sm:p-8 mb-5">
+      <div class="flex items-start gap-5">
+        <div class="logo-wrap flex-shrink-0">
+          <img
+            src={project.logo}
+            alt={project.name}
+            width="88"
+            height="88"
+            class="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-xl"
+          />
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl sm:text-4xl font-black gradient-text mb-3 leading-tight">
+            {project.name}
+          </h1>
+          <div class="flex flex-wrap gap-2">
+            {status && (
+              <span class={`${status.badge} text-xs font-semibold px-2 py-0.5`}>
+                {status.label}
+              </span>
+            )}
+            <span class="tag-accent capitalize">{project.category}</span>
+            <span class="tag-mono">{project.version}</span>
+            {project.downloads !== '-' && (
+              <span class="tag-dim">
+                <Icon name="download" size={10} class="inline" /> {project.downloads} downloads
+              </span>
+            )}
+            {project.lastUpdate !== '-' && (
+              <span class="tag-dim">
+                <Icon name="clock" size={10} class="inline" /> {project.lastUpdate}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+      <!-- Left: screenshots + description -->
+      <div class="lg:col-span-2 flex flex-col gap-5">
+
+        {project.screenshots.length > 0 && (
+          <div class="card p-5">
+            <p class="section-label mb-4">Screenshots</p>
+            <div class="grid grid-cols-2 gap-2.5">
+              {project.screenshots.map((s, i) => (
+                <div class="screenshot-wrap">
+                  <img
+                    src={s}
+                    alt={`${project.name} screenshot ${i + 1}`}
+                    class="w-full h-36 object-cover cursor-pointer lightbox-trigger transition-opacity duration-200 hover:opacity-75"
+                    data-src={s}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="card p-5">
+          <p class="section-label mb-4">About</p>
+          <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
+            {project.description}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Right: features + download buttons -->
+      <div class="flex flex-col gap-5">
+
+        <div class="card p-5 flex-1">
+          <p class="section-label mb-4">Features</p>
+          <ul class="space-y-2">
+            {project.features.map((f) => (
+              <li class="flex items-center gap-2.5 text-sm" style="color: var(--text-muted);">
+                <span class="feature-dot" aria-hidden="true"></span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="flex flex-col gap-2.5">
+          {project.downloadUrl !== '#' && (
+            <a
+              href={project.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary w-full flex items-center justify-center gap-2 text-sm py-3"
+            >
+              <Icon name="download" size={16} /> CurseForge
+            </a>
+          )}
+          {project.modrinthUrl && (
+            <a
+              href={project.modrinthUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
+            >
+              Modrinth
+            </a>
+          )}
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <LightboxModal />
+
+  <script>
+    import { openLightbox } from '../../scripts/lightbox';
+
+    const images = document.querySelectorAll<HTMLImageElement>('.lightbox-trigger');
+    const srcs = Array.from(images).map((img) => ({ src: img.src, alt: img.alt }));
+    images.forEach((img, i) => {
+      img.addEventListener('click', () => openLightbox(srcs, i));
+    });
+  </script>
+</Layout>
+
+<style>
+  .logo-wrap {
+    background: var(--glass-1);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.875rem;
+    padding: 0.25rem;
+  }
+
+  .tag-accent {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(232, 112, 26, 0.10);
+    color: var(--accent);
+    border: 1px solid rgba(232, 112, 26, 0.22);
+  }
+
+  .tag-mono {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: var(--glass-1);
+    color: var(--text-dim);
+    border: 1px solid var(--glass-border);
+  }
+
+  .tag-dim {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: var(--glass-1);
+    color: var(--text-dim);
+    border: 1px solid var(--glass-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 2px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  .screenshot-wrap {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--border-card);
+  }
+
+  .feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    flex-shrink: 0;
+  }
+</style>

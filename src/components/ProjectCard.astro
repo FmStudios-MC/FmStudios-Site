@@ -11,7 +11,8 @@ const { project } = Astro.props;
 const status = statusConfig[project.status];
 ---
 
-<div
+<a
+  href={`/projects/${project.slug}`}
   class="card cursor-pointer project-card p-5 flex flex-col"
   data-project-id={project.id}
   data-category={project.category}
@@ -73,7 +74,7 @@ const status = statusConfig[project.status];
       View <Icon name="arrow-right" size={12} />
     </span>
   </div>
-</div>
+</a>
 
 <style>
   .logo-wrap {

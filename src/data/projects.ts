@@ -1,5 +1,6 @@
 export interface Project {
   id: number;
+  slug: string;
   name: string;
   category: 'modpacks' | 'mods' | 'resourcepacks';
   subcategory?: string;
@@ -18,6 +19,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     id: 1,
+    slug: 'create-unbound',
     name: 'Create Unbound',
     category: 'modpacks',
     subcategory: 'tech',
@@ -33,6 +35,7 @@ export const projects: Project[] = [
   },
   {
     id: 2,
+    slug: 'additions',
     name: '{Additions}',
     category: 'modpacks',
     subcategory: 'vanilla+',
@@ -61,6 +64,7 @@ export const projects: Project[] = [
   },
   {
     id: 3,
+    slug: 'create-fm3',
     name: 'Create F&M 3',
     category: 'modpacks',
     subcategory: 'tech',
@@ -87,6 +91,7 @@ export const projects: Project[] = [
   },
   {
     id: 4,
+    slug: 'create-fm2',
     name: 'Create F&M 2',
     category: 'modpacks',
     subcategory: 'tech',
@@ -104,6 +109,7 @@ export const projects: Project[] = [
   },
   {
     id: 5,
+    slug: 'fabis-lootr',
     name: "Fabi's Lootr",
     category: 'resourcepacks',
     status: 'updated',
