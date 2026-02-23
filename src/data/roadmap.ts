@@ -36,13 +36,15 @@ export const roadmapItems: RoadmapItem[] = [
     id: 2,
     title: '{Additions} Rebound',
     description: 'A Vanilla+ modpack',
-    status: 'planned',
+    status: 'in-progress',
     category: 'modpacks',
     priority: 'medium',
-    progress: 0,
+    progress: 5,
     estimatedDate: '2026',
     features: ['Vanilla+ mods'],
-    updates: [],
+    updates: [
+      { date: '2026-02-23', text: 'Created a logo (probably not the final one)' }
+    ],
   },
   {
     id: 3,
