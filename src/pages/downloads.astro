@@ -1,0 +1,208 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { projects, categories } from '../data/projects';
+
+const downloadableProjects = projects.filter((p) => p.downloadUrl && p.downloadUrl !== '#');
+const totalDownloads = projects.reduce((sum, p) => {
+  const num = parseInt(p.downloads.replace(/[^0-9]/g, ''), 10);
+  return sum + (isNaN(num) ? 0 : num * 1000);
+}, 0);
+---
+
+<Layout title="Downloads - FabiMvurice Interactive">
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <!-- Header -->
+    <ScrollReveal>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+        <div>
+          <p class="section-eyebrow mb-2">Download Hub</p>
+          <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+            <span class="gradient-text">Downloads</span>
+          </h1>
+          <p class="mt-3 text-sm max-w-md" style="color: var(--text-muted);">
+            Get all our modpacks and resource packs from one place.
+          </p>
+        </div>
+        <div class="dl-stat-badge">
+          <span class="text-2xl font-black font-display gradient-text" data-count-to={String(Math.round(totalDownloads / 1))}>{Math.round(totalDownloads / 1)}K</span>
+          <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Total Downloads</span>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Search -->
+    <ScrollReveal>
+      <div class="mb-6">
+        <div class="search-input-wrap">
+          <Icon name="search" size={16} class="search-icon" />
+          <input
+            type="text"
+            id="dl-search"
+            placeholder="Search projects..."
+            class="search-input"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Download Strips -->
+    <div class="space-y-3" id="dl-list">
+      {projects.map((project, i) => (
+        <ScrollReveal delay={i * 70}>
+          <div class="depth-card dl-strip" data-name={project.name.toLowerCase()} data-category={project.category}>
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <img
+                src={project.logo}
+                alt={project.name}
+                width="48"
+                height="48"
+                class="dl-logo"
+                loading="lazy"
+              />
+              <div class="min-w-0">
+                <h3 class="text-sm font-bold font-display truncate" style="color: var(--text-primary);">
+                  {project.name}
+                </h3>
+                <div class="flex items-center gap-3 mt-0.5">
+                  <span class="text-xs" style="color: var(--text-dim);">{project.version}</span>
+                  <span class="text-xs" style="color: var(--text-dim);">{project.downloads} downloads</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-shrink-0">
+              {project.downloadUrl && project.downloadUrl !== '#' && (
+                <a
+                  href={project.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="dl-btn"
+                  title="CurseForge"
+                >
+                  <Icon name="curseforge" size={16} />
+                  <span class="hidden sm:inline">CurseForge</span>
+                </a>
+              )}
+              {project.modrinthUrl && (
+                <a
+                  href={project.modrinthUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="dl-btn dl-btn-alt"
+                  title="Modrinth"
+                >
+                  <Icon name="modrinth" size={16} />
+                  <span class="hidden sm:inline">Modrinth</span>
+                </a>
+              )}
+              {(!project.downloadUrl || project.downloadUrl === '#') && (
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                  style="background: var(--bg-layer-2); color: var(--text-dim); border: 1px solid var(--border-subtle);">
+                  Coming Soon
+                </span>
+              )}
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- Empty state -->
+    <div class="hidden text-center py-12" id="dl-empty">
+      <div class="depth-card p-10">
+        <Icon name="search" size={40} class="mx-auto mb-3" style="color: var(--text-dim);" />
+        <p class="font-bold font-display" style="color: var(--text-primary);">No matches found</p>
+        <p class="text-sm mt-1" style="color: var(--text-muted);">Try a different search term.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <script>
+    const searchInput = document.getElementById('dl-search') as HTMLInputElement;
+    const list = document.getElementById('dl-list');
+    const empty = document.getElementById('dl-empty');
+    const strips = list ? Array.from(list.querySelectorAll('.dl-strip')) : [];
+
+    searchInput?.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      let visible = 0;
+      strips.forEach((strip) => {
+        const name = (strip as HTMLElement).dataset.name || '';
+        const match = !q || name.includes(q);
+        (strip.closest('.reveal') as HTMLElement || strip.parentElement!).style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      if (empty) empty.classList.toggle('hidden', visible > 0);
+    });
+  </script>
+</Layout>
+
+<style>
+  .dl-stat-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-inset);
+    flex-shrink: 0;
+  }
+
+  .dl-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+  }
+
+  .dl-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-inset);
+    flex-shrink: 0;
+  }
+
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(232, 112, 26, 0.25);
+  }
+
+  .dl-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(232, 112, 26, 0.35);
+  }
+
+  .dl-btn-alt {
+    background: var(--bg-layer-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-depth-1);
+  }
+
+  .dl-btn-alt:hover {
+    border-color: rgba(232, 112, 26, 0.4);
+    box-shadow: 0 4px 16px rgba(232, 112, 26, 0.15);
+  }
+</style>

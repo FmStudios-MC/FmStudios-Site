@@ -13,39 +13,63 @@ export function getStaticPaths() {
 
 const { project } = Astro.props;
 const status = statusConfig[project.status];
+const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
 ---
 
 <Layout
   title={`${project.name} - FabiMvurice Interactive`}
   description={project.description}
 >
-  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+  <!-- Full-bleed hero -->
+  {project.screenshots.length > 0 && (
+    <div class="hero-bleed relative h-64 sm:h-80 lg:h-96 overflow-hidden">
+      <img
+        src={project.screenshots[0]}
+        alt={`${project.name} hero`}
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0" style="background: linear-gradient(to bottom, transparent 30%, var(--bg-void) 100%);" aria-hidden="true"></div>
+      <!-- Floating logo overlay -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:bottom-8 sm:right-12 z-10">
+        <img
+          src={project.logo}
+          alt=""
+          width="80"
+          height="80"
+          class="w-20 h-20 rounded-2xl object-cover shadow-2xl border border-[var(--border-subtle)]"
+        />
+      </div>
+    </div>
+  )}
 
-    <!-- Back link -->
-    <a
-      href="/projects"
-      class="inline-flex items-center gap-2 mb-8 text-sm font-semibold transition-colors"
-      style="color: var(--accent);"
-    >
-      <Icon name="chevron-right" size={16} class="rotate-180" />
-      Back to Projects
-    </a>
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-8" style={project.screenshots.length > 0 ? 'margin-top: -4rem; position: relative; z-index: 2;' : ''}>
 
-    <!-- Header card -->
-    <div class="card p-6 sm:p-8 mb-5">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb mb-6" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="separator">/</span>
+      <a href="/projects">Projects</a>
+      <span class="separator">/</span>
+      <span style="color: var(--text-primary);">{project.name}</span>
+    </nav>
+
+    <!-- Info depth-card -->
+    <div class="depth-card p-6 sm:p-8 mb-5">
       <div class="flex items-start gap-5">
-        <div class="logo-wrap flex-shrink-0">
-          <img
-            src={project.logo}
-            alt={project.name}
-            width="88"
-            height="88"
-            class="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-xl"
-          />
-        </div>
+        {project.screenshots.length === 0 && (
+          <div class="logo-wrap flex-shrink-0">
+            <img
+              src={project.logo}
+              alt={project.name}
+              width="88"
+              height="88"
+              class="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-xl"
+            />
+          </div>
+        )}
 
         <div class="flex-1 min-w-0">
-          <h1 class="text-3xl sm:text-4xl font-black gradient-text mb-3 leading-tight">
+          <h1 class="text-3xl sm:text-4xl font-black font-display gradient-text mb-3 leading-tight">
             {project.name}
           </h1>
           <div class="flex flex-wrap gap-2">
@@ -71,80 +95,97 @@ const status = statusConfig[project.status];
       </div>
     </div>
 
+    <!-- Horizontal screenshot strip -->
+    {project.screenshots.length > 1 && (
+      <div class="h-scroll-strip mb-5">
+        {project.screenshots.map((s, i) => (
+          <div class="screenshot-card">
+            <img
+              src={s}
+              alt={`${project.name} screenshot ${i + 1}`}
+              class="w-full h-full object-cover cursor-pointer lightbox-trigger transition-opacity duration-200 hover:opacity-75"
+              data-src={s}
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+    )}
+
     <!-- Body grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-      <!-- Left: screenshots + description -->
+      <!-- Left: description -->
       <div class="lg:col-span-2 flex flex-col gap-5">
-
-        {project.screenshots.length > 0 && (
-          <div class="card p-5">
-            <p class="section-label mb-4">Screenshots</p>
-            <div class="grid grid-cols-2 gap-2.5">
-              {project.screenshots.map((s, i) => (
-                <div class="screenshot-wrap">
-                  <img
-                    src={s}
-                    alt={`${project.name} screenshot ${i + 1}`}
-                    class="w-full h-36 object-cover cursor-pointer lightbox-trigger transition-opacity duration-200 hover:opacity-75"
-                    data-src={s}
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div class="card p-5">
+        <div class="depth-card p-5">
           <p class="section-label mb-4">About</p>
           <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
             {project.description}
           </p>
         </div>
 
-      </div>
-
-      <!-- Right: features + download buttons -->
-      <div class="flex flex-col gap-5">
-
-        <div class="card p-5 flex-1">
+        <!-- 2-column feature grid -->
+        <div class="depth-card p-5">
           <p class="section-label mb-4">Features</p>
-          <ul class="space-y-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {project.features.map((f) => (
-              <li class="flex items-center gap-2.5 text-sm" style="color: var(--text-muted);">
+              <div class="flex items-center gap-2.5 text-sm inner-panel px-3 py-2.5" style="color: var(--text-muted);">
                 <span class="feature-dot" aria-hidden="true"></span>
                 {f}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
+      </div>
 
-        <div class="flex flex-col gap-2.5">
-          {project.downloadUrl !== '#' && (
-            <a
-              href={project.downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn-primary w-full flex items-center justify-center gap-2 text-sm py-3"
-            >
-              <Icon name="download" size={16} /> CurseForge
-            </a>
-          )}
-          {project.modrinthUrl && (
-            <a
-              href={project.modrinthUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
-            >
-              Modrinth
-            </a>
-          )}
+      <!-- Right: download panel -->
+      <div class="flex flex-col gap-5">
+        <!-- Recessed download panel -->
+        <div class="depth-section p-5">
+          <p class="section-label mb-4">Download</p>
+          <div class="flex flex-col gap-2.5">
+            {project.downloadUrl !== '#' && (
+              <a
+                href={project.downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-primary w-full flex items-center justify-center gap-2 text-sm py-3"
+              >
+                <Icon name="download" size={16} /> CurseForge
+              </a>
+            )}
+            {project.modrinthUrl && (
+              <a
+                href={project.modrinthUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
+              >
+                Modrinth
+              </a>
+            )}
+          </div>
         </div>
-
       </div>
     </div>
+
+    <!-- Related projects strip -->
+    {relatedProjects.length > 0 && (
+      <div class="mt-12">
+        <h3 class="text-lg font-bold font-display mb-4" style="color: var(--text-primary);">More Projects</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {relatedProjects.map((rp) => (
+            <a href={`/projects/${rp.slug}`} class="depth-card p-4 flex items-center gap-3">
+              <img src={rp.logo} alt="" width="40" height="40" class="w-10 h-10 rounded-lg object-cover" loading="lazy" />
+              <div>
+                <p class="text-sm font-bold" style="color: var(--text-primary);">{rp.name}</p>
+                <p class="text-xs" style="color: var(--text-dim);">{rp.category}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
 
   </section>
 
@@ -163,11 +204,11 @@ const status = statusConfig[project.status];
 
 <style>
   .logo-wrap {
-    background: var(--glass-1);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
     border-radius: 0.875rem;
     padding: 0.25rem;
+    box-shadow: var(--shadow-inset);
   }
 
   .tag-accent {
@@ -185,24 +226,25 @@ const status = statusConfig[project.status];
     font-family: ui-monospace, monospace;
     padding: 0.2rem 0.625rem;
     border-radius: 9999px;
-    background: var(--glass-1);
+    background: var(--bg-layer-2);
     color: var(--text-dim);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-subtle);
   }
 
   .tag-dim {
     font-size: 0.7rem;
     padding: 0.2rem 0.625rem;
     border-radius: 9999px;
-    background: var(--glass-1);
+    background: var(--bg-layer-2);
     color: var(--text-dim);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-subtle);
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
   }
 
   .section-label {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -223,10 +265,14 @@ const status = statusConfig[project.status];
     flex-shrink: 0;
   }
 
-  .screenshot-wrap {
+  .screenshot-card {
+    width: 280px;
+    height: 180px;
     border-radius: 0.75rem;
     overflow: hidden;
-    border: 1px solid var(--border-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-depth-1);
+    flex-shrink: 0;
   }
 
   .feature-dot {
@@ -236,5 +282,17 @@ const status = statusConfig[project.status];
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
     flex-shrink: 0;
+  }
+
+  .hero-bleed {
+    margin-left: calc(-1 * var(--sidebar-width, 0px));
+    width: calc(100% + var(--sidebar-width, 0px));
+  }
+
+  @media (max-width: 767px) {
+    .hero-bleed {
+      margin-left: 0;
+      width: 100%;
+    }
   }
 </style>

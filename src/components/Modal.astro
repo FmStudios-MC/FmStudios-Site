@@ -13,7 +13,7 @@ const { id } = Astro.props;
   aria-modal="true"
 >
   <div
-    class="modal-content modal-glass max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+    class="depth-modal-content modal-depth max-w-5xl w-full max-h-[90vh] overflow-y-auto"
   >
     <div id={`${id}-content`}>
       <!-- Dynamic content inserted by JS -->
@@ -22,22 +22,19 @@ const { id } = Astro.props;
 </div>
 
 <style>
-  .modal-glass {
-    background: rgba(8, 8, 8, 0.88);
-    backdrop-filter: blur(48px) saturate(1.8);
-    -webkit-backdrop-filter: blur(48px) saturate(1.8);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+  .modal-depth {
+    background: var(--bg-layer-1);
+    border: 1px solid var(--border-medium);
     border-radius: 1.5rem;
     box-shadow:
-      0 0 0 1px rgba(232, 112, 26, 0.07),
-      0 32px 120px rgba(0, 0, 0, 0.70),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+      var(--shadow-depth-3),
+      0 0 0 1px rgba(232, 112, 26, 0.07);
     position: relative;
     overflow: hidden;
   }
 
   /* Neon top accent line */
-  .modal-glass::before {
+  .modal-depth::before {
     content: '';
     position: absolute;
     top: 0;
@@ -49,12 +46,9 @@ const { id } = Astro.props;
     pointer-events: none;
   }
 
-  :global(.light-theme) .modal-glass {
-    background: rgba(240, 242, 245, 0.90);
-    border-color: rgba(0, 0, 0, 0.08);
-    box-shadow:
-      0 0 0 1px rgba(212, 94, 16, 0.05),
-      0 32px 80px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  :global(.light-theme) .modal-depth {
+    background: var(--bg-layer-1);
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-depth-3);
   }
 </style>

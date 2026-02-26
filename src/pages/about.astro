@@ -1,0 +1,175 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { teamMembers, milestones, techStack } from '../data/team';
+---
+
+<Layout title="About - FabiMvurice Interactive">
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <!-- Hero / Mission -->
+    <ScrollReveal>
+      <div class="mb-10">
+        <p class="section-eyebrow mb-2">The Studio</p>
+        <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+          About <span class="gradient-text">Us</span>
+        </h1>
+        <p class="mt-3 text-sm max-w-lg" style="color: var(--text-muted);">
+          We're a small indie studio focused on crafting Minecraft modpacks and mods.
+        </p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Mission Card -->
+    <ScrollReveal>
+      <div class="depth-card p-6 sm:p-8 mb-8">
+        <div class="flex flex-col sm:flex-row items-start gap-6">
+          <div class="flex-shrink-0">
+            <img
+              src="/images/logoneu.webp"
+              alt="FabiMvurice Interactive"
+              width="80"
+              height="80"
+              class="about-logo"
+            />
+          </div>
+          <div>
+            <h2 class="text-xl font-black font-display mb-3" style="color: var(--text-primary);">Our Mission</h2>
+            <p class="text-sm leading-relaxed mb-3" style="color: var(--text-muted);">
+              FabiMvurice Interactive creates modpacks that blend curated mod selections with
+              polished experiences. From the Create-powered engineering of the F&M series to the
+              Vanilla+ charm of Additions, every project is built with care and community feedback.
+            </p>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
+              We believe modded Minecraft should be accessible, performant, and fun... whether you're
+              a seasoned engineer or loading your first modpack.
+            </p>
+          </div>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Team -->
+    <ScrollReveal>
+      <div class="mb-7">
+        <p class="section-eyebrow mb-2">The Team</p>
+        <h2 class="text-3xl sm:text-4xl font-black font-display" style="color: var(--text-primary);">
+          Who We Are
+        </h2>
+      </div>
+    </ScrollReveal>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+      {teamMembers.map((member, i) => (
+        <ScrollReveal delay={i * 100}>
+          <div class="tilt-card p-5 h-full text-center">
+            <img
+              src={member.avatar}
+              alt={member.name}
+              width="72"
+              height="72"
+              class="team-avatar mx-auto mb-3"
+            />
+            <h3 class="text-base font-bold font-display mb-1" style="color: var(--text-primary);">
+              {member.name}
+            </h3>
+            <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--accent);">
+              {member.role}
+            </p>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted);">{member.bio}</p>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- Milestones -->
+    <ScrollReveal>
+      <div class="mb-7">
+        <p class="section-eyebrow mb-2">Our Journey</p>
+        <h2 class="text-3xl sm:text-4xl font-black font-display" style="color: var(--text-primary);">
+          Milestones
+        </h2>
+      </div>
+    </ScrollReveal>
+
+    <div class="relative mb-10">
+      <!-- Timeline line -->
+      <div class="timeline-line hidden sm:block" aria-hidden="true"></div>
+
+      <div class="h-scroll-strip gap-4 pb-4 sm:pl-10">
+        {milestones.map((ms, i) => (
+          <ScrollReveal delay={i * 80}>
+            <div class="depth-card p-5 min-w-[260px] max-w-[300px] flex-shrink-0 h-full">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full"
+                  style="background: rgba(232,112,26,0.12); color: var(--accent); border: 1px solid rgba(232,112,26,0.25);">
+                  {ms.year}
+                </span>
+              </div>
+              <h3 class="text-sm font-bold font-display mb-1" style="color: var(--text-primary);">{ms.title}</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--text-muted);">{ms.description}</p>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
+
+    <!-- Tech / Tools -->
+    <ScrollReveal>
+      <div class="mb-7">
+        <p class="section-eyebrow mb-2">Our Stack</p>
+        <h2 class="text-3xl sm:text-4xl font-black font-display" style="color: var(--text-primary);">
+          Tools & Platforms
+        </h2>
+      </div>
+    </ScrollReveal>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      {techStack.map((tech, i) => (
+        <ScrollReveal delay={i * 60}>
+          <div class="depth-card p-4 flex flex-col items-center gap-2 text-center h-full">
+            <div class="tech-icon-wrap">
+              <Icon name={tech.icon} size={22} />
+            </div>
+            <span class="text-xs font-semibold" style="color: var(--text-primary);">{tech.name}</span>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+  </section>
+</Layout>
+
+<style>
+  .about-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 1rem;
+    object-fit: cover;
+    border: 1px solid rgba(232, 112, 26, 0.25);
+    box-shadow: 0 0 20px rgba(232, 112, 26, 0.15);
+  }
+
+  .team-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(232, 112, 26, 0.30);
+    box-shadow: 0 0 16px rgba(232, 112, 26, 0.20);
+  }
+
+  .tech-icon-wrap {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    color: var(--accent);
+    box-shadow: var(--shadow-inset);
+  }
+</style>

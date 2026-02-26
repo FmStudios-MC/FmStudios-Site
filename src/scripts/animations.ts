@@ -1,20 +1,11 @@
-// Intersection Observer for scroll reveals
+// Master animation init — imports all modular animation scripts
 
-function initScrollReveal() {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.1, rootMargin: '50px' }
-  );
-
-  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
-}
+import { initScrollReveal } from './animations/scroll-reveal';
+import { initTiltCards } from './animations/tilt-cards';
+import { initParallax } from './animations/parallax';
+import { initEmberParticles } from './animations/ember-particles';
+import { initCounters } from './animations/counters';
+import { initPageTransition } from './animations/page-transition';
 
 // Scroll to top button
 function initScrollTop() {
@@ -52,19 +43,15 @@ function initAccordions() {
       const icon = btn.querySelector('svg:last-child');
       const isOpen = content.classList.contains('open');
 
-      // Sync aria-expanded for CSS :has() selectors
       (btn as HTMLElement).setAttribute('aria-expanded', isOpen ? 'false' : 'true');
 
       if (content.classList.contains('accordion-content')) {
         if (isOpen) {
-          // Close: set explicit height then transition to 0
           content.style.maxHeight = content.scrollHeight + 'px';
-          // Force reflow
           content.offsetHeight;
           content.style.maxHeight = '0';
           content.classList.remove('open');
         } else {
-          // Open: transition to scrollHeight, then remove inline style
           content.style.maxHeight = content.scrollHeight + 'px';
           content.classList.add('open');
           const onEnd = () => {
@@ -76,17 +63,22 @@ function initAccordions() {
           content.addEventListener('transitionend', onEnd);
         }
       } else {
-        // Simple show/hide
         content.classList.toggle('hidden');
       }
 
       if (icon) {
-        icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        (icon as HTMLElement).style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
       }
     });
   });
 }
 
+// Init all
 initScrollReveal();
+initTiltCards();
+initParallax();
+initEmberParticles();
+initCounters();
+initPageTransition();
 initScrollTop();
 initAccordions();

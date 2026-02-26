@@ -1,0 +1,197 @@
+---
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const navItems = [
+  { label: 'Home',      href: '/',           icon: 'home' },
+  { label: 'Projects',  href: '/projects',   icon: 'package' },
+  { label: 'News',      href: '/news',       icon: 'newspaper' },
+  { label: 'Roadmap',   href: '/roadmap',    icon: 'map' },
+  { label: 'Changelog', href: '/changelog',  icon: 'list' },
+  { label: 'FAQ',       href: '/faq',        icon: 'help-circle' },
+  { label: 'Gallery',   href: '/gallery',    icon: 'image' },
+  { label: 'Downloads', href: '/downloads',  icon: 'download' },
+  { label: 'About',     href: '/about',      icon: 'info' },
+  { label: 'Community', href: '/community',  icon: 'users' },
+  { label: 'Hosting',   href: '/hosting',    icon: 'server' },
+];
+
+// Bottom bar shows first 4 + "More"
+const bottomBarItems = navItems.slice(0, 4);
+const moreItems = navItems.slice(4);
+
+const rawPath = Astro.url.pathname;
+const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
+---
+
+<!-- Desktop/Tablet Sidebar -->
+<nav class="sidebar-nav" id="sidebar-nav" aria-label="Main navigation">
+  <!-- Logo at top -->
+  <a href="/" class="sidebar-logo" aria-label="FabiMvurice Interactive — home">
+    <img
+      src="/images/logoneu.webp"
+      alt=""
+      width="32"
+      height="32"
+      class="sidebar-logo-img"
+    />
+    <span class="nav-label sidebar-brand-text font-display">FabiMvurice</span>
+  </a>
+
+  <!-- Nav links -->
+  <div class="sidebar-links">
+    {navItems.map((item) => {
+      const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
+      return (
+        <a
+          href={item.href}
+          class:list={['nav-icon-wrap', isCurrent && 'active']}
+          aria-current={isCurrent ? 'page' : undefined}
+          title={item.label}
+        >
+          <Icon name={item.icon} size={18} class="nav-icon-svg" />
+          <span class="nav-label">{item.label}</span>
+        </a>
+      );
+    })}
+  </div>
+
+  <!-- Theme toggle at bottom -->
+  <div class="sidebar-bottom">
+    <ThemeToggle />
+  </div>
+</nav>
+
+<!-- Mobile Bottom Bar -->
+<div class="mobile-bottom-bar" id="mobile-bottom-bar">
+  {bottomBarItems.map((item) => {
+    const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
+    return (
+      <a
+        href={item.href}
+        class:list={['bar-item', isCurrent && 'active']}
+        aria-current={isCurrent ? 'page' : undefined}
+      >
+        <Icon name={item.icon} size={20} />
+        <span>{item.label}</span>
+      </a>
+    );
+  })}
+  <button class="bar-item" id="more-btn" aria-label="More pages" aria-expanded="false">
+    <Icon name="menu" size={20} />
+    <span>More</span>
+  </button>
+</div>
+
+<!-- More overflow panel -->
+<div class="more-panel" id="more-panel" aria-label="More navigation">
+  {moreItems.map((item) => {
+    const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
+    return (
+      <a
+        href={item.href}
+        class:list={['more-item', isCurrent && 'active']}
+        aria-current={isCurrent ? 'page' : undefined}
+      >
+        <Icon name={item.icon} size={20} />
+        <span>{item.label}</span>
+      </a>
+    );
+  })}
+  <div class="more-item" style="pointer-events: none; opacity: 0;"><!-- spacer --></div>
+  <div class="more-item theme-toggle-mobile">
+    <ThemeToggle />
+  </div>
+</div>
+
+<style>
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo-img {
+    /* Center the 32px logo within the sidebar-width icon column */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(232, 112, 26, 0.3);
+    box-shadow: 0 0 12px rgba(232, 112, 26, 0.15);
+    margin-left: calc((var(--sidebar-width) - 32px) / 2);
+  }
+
+  .sidebar-brand-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .sidebar-nav:hover .sidebar-brand-text {
+    opacity: 1;
+  }
+
+  .sidebar-links {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.25rem 0;
+  }
+
+  .sidebar-links::-webkit-scrollbar {
+    width: 0;
+  }
+
+  .sidebar-bottom {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-toggle-mobile {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+<script>
+  // Mobile "More" panel toggle
+  const moreBtn = document.getElementById('more-btn');
+  const morePanel = document.getElementById('more-panel');
+
+  moreBtn?.addEventListener('click', () => {
+    const isOpen = morePanel?.classList.contains('open');
+    if (isOpen) {
+      morePanel?.classList.remove('open');
+      moreBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      morePanel?.classList.add('open');
+      moreBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    const target = e.target as Node;
+    if (
+      morePanel?.classList.contains('open') &&
+      !morePanel.contains(target) &&
+      !moreBtn?.contains(target)
+    ) {
+      morePanel.classList.remove('open');
+      moreBtn?.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>

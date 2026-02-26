@@ -1,0 +1,204 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { discordServer, communityGuidelines } from '../data/community';
+import { socialLinks } from '../data/social';
+---
+
+<Layout title="Community - FabiMvurice Interactive">
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <!-- Header -->
+    <ScrollReveal>
+      <div class="mb-8">
+        <p class="section-eyebrow mb-2">The Gathering</p>
+        <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+          Join Our <span class="gradient-text">Community</span>
+        </h1>
+        <p class="mt-3 text-sm max-w-lg" style="color: var(--text-muted);">
+          Connect with fellow players, get help, share builds, and stay updated on everything we're working on.
+        </p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Discord CTA Card -->
+    <ScrollReveal>
+      <div class="depth-card discord-cta-card p-6 sm:p-8 mb-8 relative overflow-hidden">
+        <div class="discord-glow" aria-hidden="true"></div>
+        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <div class="discord-icon-wrap flex-shrink-0">
+            <Icon name="discord" size={32} />
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 class="text-xl font-black font-display mb-2" style="color: var(--text-primary);">
+              {discordServer.name} Discord
+            </h2>
+            <p class="text-sm leading-relaxed mb-1" style="color: var(--text-muted);">
+              {discordServer.description}
+            </p>
+            <p class="text-xs font-semibold" style="color: var(--accent);">
+              {discordServer.members} members
+            </p>
+          </div>
+          <a
+            href={discordServer.inviteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2 flex-shrink-0"
+          >
+            <Icon name="discord" size={16} />
+            Join Server
+          </a>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Social Links -->
+    <ScrollReveal>
+      <div class="mb-7">
+        <p class="section-eyebrow mb-2">Find Us</p>
+        <h2 class="text-3xl sm:text-4xl font-black font-display" style="color: var(--text-primary);">
+          Social Media
+        </h2>
+      </div>
+    </ScrollReveal>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10">
+      {socialLinks.map((link, i) => (
+        <ScrollReveal delay={i * 60}>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-card"
+            title={link.name}
+          >
+            <Icon name={link.icon} size={22} />
+            <span class="text-xs font-semibold mt-1.5">{link.name}</span>
+          </a>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- Community Guidelines -->
+    <ScrollReveal>
+      <div class="mb-7">
+        <p class="section-eyebrow mb-2">Ground Rules</p>
+        <h2 class="text-3xl sm:text-4xl font-black font-display" style="color: var(--text-primary);">
+          Community Guidelines
+        </h2>
+        <p class="mt-2 text-sm max-w-md" style="color: var(--text-muted);">
+          A few simple rules to keep our community welcoming for everyone.
+        </p>
+      </div>
+    </ScrollReveal>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      {communityGuidelines.map((rule, i) => (
+        <ScrollReveal delay={i * 80}>
+          <div class="depth-card p-5 h-full flex gap-4">
+            <div class="guideline-icon flex-shrink-0">
+              <Icon name={rule.icon} size={20} />
+            </div>
+            <div>
+              <h3 class="text-sm font-bold font-display mb-1" style="color: var(--text-primary);">
+                {rule.title}
+              </h3>
+              <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
+                {rule.description}
+              </p>
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- Server Info -->
+    <ScrollReveal>
+      <div class="depth-card p-6 sm:p-8 text-center">
+        <h2 class="text-2xl font-black font-display mb-3" style="color: var(--text-primary);">
+          Ready to Join?
+        </h2>
+        <p class="text-sm mb-6 max-w-md mx-auto" style="color: var(--text-muted);">
+          Whether you need help setting up a modpack, want to share your builds, or just want to hang out.
+        </p>
+        <a
+          href={discordServer.inviteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-base inline-flex items-center gap-2"
+        >
+          <Icon name="discord" size={18} />
+          Join the Community
+        </a>
+      </div>
+    </ScrollReveal>
+
+  </section>
+</Layout>
+
+<style>
+  .discord-cta-card {
+    border-color: rgba(88, 101, 242, 0.25);
+  }
+
+  .discord-glow {
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(88, 101, 242, 0.10), transparent 70%);
+    filter: blur(60px);
+    pointer-events: none;
+  }
+
+  .discord-icon-wrap {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(88, 101, 242, 0.12);
+    border: 1px solid rgba(88, 101, 242, 0.30);
+    border-radius: 1rem;
+    color: #7289da;
+    box-shadow: 0 0 20px rgba(88, 101, 242, 0.15);
+  }
+
+  .guideline-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    color: var(--accent);
+    box-shadow: var(--shadow-inset);
+  }
+
+  .social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 0.75rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    box-shadow: var(--shadow-depth-1);
+    transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .social-card:hover {
+    color: var(--accent);
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-depth-2), 0 0 16px rgba(232, 112, 26, 0.15);
+    transform: translateY(-2px);
+  }
+</style>

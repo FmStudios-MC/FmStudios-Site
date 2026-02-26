@@ -37,7 +37,7 @@ function showImage(index: number) {
 
 function closeLightbox() {
   if (!lightboxEl) return;
-  lightboxEl.classList.add('hidden');
+  lightboxEl.style.display = 'none';
   document.body.style.overflow = '';
   controller?.abort();
   controller = null;
@@ -54,7 +54,7 @@ export function openLightbox(srcs: { src: string; alt: string }[], startIndex: n
   if (!lightboxEl || !lightboxImg) return;
 
   images = srcs;
-  lightboxEl.classList.remove('hidden');
+  lightboxEl.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   showImage(startIndex);
 

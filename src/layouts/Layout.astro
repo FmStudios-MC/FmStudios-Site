@@ -1,5 +1,5 @@
 ---
-import Header from '../components/Header.astro';
+import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
@@ -30,7 +30,7 @@ const {
   <link rel="icon" type="image/webp" href="/images/logoneu.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Prevent flash of wrong theme -->
   <script is:inline>
@@ -46,21 +46,27 @@ const {
 <body class:list={[kinetic && 'kinetic-page']}>
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Animated grid overlay (behind everything) -->
-  {!kinetic && <div class="animated-grid" aria-hidden="true"></div>}
+  <!-- Hex grid background (replaces animated square grid) -->
+  {!kinetic && <div class="hex-grid" aria-hidden="true"></div>}
 
   <!-- Ambient background glow -->
   {!kinetic && <div class="bg-glow-red" aria-hidden="true"></div>}
 
-  <!-- Floating pill nav -->
-  <Header />
+  <!-- Ember particle canvas (injected by JS) -->
+  {!kinetic && <canvas id="ember-canvas" class="ember-canvas" aria-hidden="true"></canvas>}
 
-  <!-- Page content — pt-24 to clear the floating nav -->
-  <main id="main-content" class="relative z-10 min-h-screen pt-24">
-    <slot />
-  </main>
+  <!-- Sidebar navigation -->
+  <NavBar />
 
-  <Footer />
+  <!-- Perspective wrapper for page content -->
+  <div class="page-wrapper" style={`perspective: var(--perspective-page);`}>
+    <!-- Page content — with left margin for sidebar -->
+    <main id="main-content" class="page-content relative z-10 min-h-screen page-transition-enter">
+      <slot />
+    </main>
+
+    <Footer />
+  </div>
 
   <!-- Scroll to top -->
   <button
@@ -79,3 +85,31 @@ const {
   </script>
 </body>
 </html>
+
+<style>
+  .page-content {
+    padding-top: 2rem;
+  }
+
+  /* Desktop: offset for sidebar */
+  @media (min-width: 1024px) {
+    .page-wrapper {
+      margin-left: var(--sidebar-width);
+    }
+  }
+
+  /* Tablet: narrower sidebar */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .page-wrapper {
+      margin-left: 48px;
+    }
+  }
+
+  /* Mobile: offset for bottom bar */
+  @media (max-width: 767px) {
+    .page-wrapper {
+      margin-left: 0;
+      padding-bottom: 56px;
+    }
+  }
+</style>

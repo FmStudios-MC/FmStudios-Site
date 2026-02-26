@@ -4,25 +4,123 @@
 
 <div
   id="lightbox-modal"
-  class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4"
+  class="lightbox-overlay modal-overlay"
+  style="display: none;"
   role="dialog"
   aria-modal="true"
   aria-label="Image lightbox"
 >
-  <div class="modal-content relative max-w-6xl flex items-center">
+  <div class="lightbox-inner modal-content">
     <!-- Counter -->
-    <span id="lightbox-counter" class="absolute top-0 left-0 -translate-y-12 text-sm font-medium text-white/80" aria-live="polite"></span>
+    <span id="lightbox-counter" class="lightbox-counter" aria-live="polite"></span>
     <!-- Close -->
-    <button id="lightbox-close" class="modal-close-btn absolute top-0 right-0 -translate-y-12" aria-label="Close lightbox">&times;</button>
+    <button id="lightbox-close" class="lightbox-close-btn" aria-label="Close lightbox">&times;</button>
     <!-- Prev -->
-    <button id="lightbox-prev" class="absolute left-0 -translate-x-14 max-md:translate-x-2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" aria-label="Previous image">
+    <button id="lightbox-prev" class="lightbox-nav-btn lightbox-prev-btn" aria-label="Previous image">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     </button>
     <!-- Image -->
-    <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] transition-opacity duration-200" />
+    <img id="lightbox-img" src="" alt="" class="lightbox-img" />
     <!-- Next -->
-    <button id="lightbox-next" class="absolute right-0 translate-x-14 max-md:-translate-x-2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" aria-label="Next image">
+    <button id="lightbox-next" class="lightbox-nav-btn lightbox-next-btn" aria-label="Next image">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
     </button>
   </div>
 </div>
+
+<style>
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .lightbox-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-img {
+    max-width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-counter {
+    position: absolute;
+    top: -2rem;
+    left: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .lightbox-close-btn {
+    position: absolute;
+    top: -2rem;
+    right: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-close-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .lightbox-nav-btn {
+    position: absolute;
+    z-index: 10;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .lightbox-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .lightbox-prev-btn {
+    left: -3.5rem;
+  }
+
+  .lightbox-next-btn {
+    right: -3.5rem;
+  }
+
+  @media (max-width: 767px) {
+    .lightbox-prev-btn {
+      left: 0.5rem;
+    }
+    .lightbox-next-btn {
+      right: 0.5rem;
+    }
+  }
+</style>

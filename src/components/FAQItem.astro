@@ -23,24 +23,25 @@ const { question, answer, id } = Astro.props;
   </button>
 
   <div id={`faq-${id}`} class="accordion-content" role="region">
-    <p class="faq-answer">{answer}</p>
+    <div class="faq-answer-panel">
+      <p class="faq-answer">{answer}</p>
+    </div>
   </div>
 </div>
-
-<!-- accordion handled globally by animations.ts -->
 
 <style>
   .faq-item {
     border-radius: 0.75rem;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-layer-2);
     transition: border-color 0.2s ease, background 0.2s ease;
+    box-shadow: var(--shadow-depth-1);
   }
 
   .faq-item:has(.faq-toggle[aria-expanded="true"]) {
-    border-color: rgba(232, 112, 26, 0.22);
-    background: rgba(232, 112, 26, 0.04);
+    border-color: var(--border-accent);
+    background: var(--bg-layer-1);
   }
 
   .faq-toggle {
@@ -57,7 +58,7 @@ const { question, answer, id } = Astro.props;
   }
 
   .faq-toggle:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
   }
 
   .faq-dot {
@@ -81,12 +82,11 @@ const { question, answer, id } = Astro.props;
     font-weight: 600;
     line-height: 1.4;
     color: var(--text-primary);
-    transition: color 0.2s ease;
   }
 
   .faq-chevron {
     color: var(--text-dim);
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+    transition: transform 0.3s var(--ease-spring), color 0.2s ease;
     flex-shrink: 0;
   }
 
@@ -95,27 +95,33 @@ const { question, answer, id } = Astro.props;
     color: var(--accent);
   }
 
+  /* Recessed answer panel */
+  .faq-answer-panel {
+    background: var(--bg-layer-2);
+    border-top: 1px solid var(--border-subtle);
+    margin: 0 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-inset);
+  }
+
   .faq-answer {
     font-size: 0.825rem;
     line-height: 1.75;
     color: var(--text-muted);
-    padding: 0 0.875rem 0.875rem 2.125rem;
+    padding: 0.75rem 0.875rem;
     margin: 0;
   }
 
-  /* Light theme */
   :global(.light-theme) .faq-item {
-    border-color: rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.45);
+    border-color: var(--border-subtle);
+    background: var(--bg-layer-2);
   }
 
   :global(.light-theme) .faq-item:has(.faq-toggle[aria-expanded="true"]) {
-    border-color: rgba(212, 94, 16, 0.22);
-    background: rgba(212, 94, 16, 0.04);
+    border-color: var(--border-accent);
   }
 
   :global(.light-theme) .faq-toggle:hover {
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(0, 0, 0, 0.02);
   }
 </style>
-

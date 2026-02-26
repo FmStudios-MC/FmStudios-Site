@@ -9,15 +9,14 @@ import { socialLinks, platformLinks } from '../data/social';
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-card)] hover:border-[var(--accent)] transition-all"
-      style="color: var(--text-muted); background-color: var(--bg-card);"
+      class="social-cube"
       aria-label={`Visit ${link.name}`}
+      title={link.name}
     >
-      <Icon name={link.icon} size={16} />
-      <span>{link.name}</span>
+      <Icon name={link.icon} size={18} />
     </a>
   ))}
-  <div class="hidden sm:block w-px h-8 mx-2 self-center" style="background-color: var(--border-card);" aria-hidden="true"></div>
+  <div class="hidden sm:block w-px h-8 mx-2 self-center" style="background-color: var(--border-subtle);" aria-hidden="true"></div>
   {platformLinks.map((link) => (
     <a
       href={link.url}

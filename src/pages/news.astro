@@ -15,13 +15,13 @@ const otherPosts = blogPosts.slice(1);
     <!-- Header -->
     <ScrollReveal>
       <div class="mb-6 pt-2">
-        <p class="section-eyebrow mb-2">Stay Updated</p>
-        <h1 class="text-4xl sm:text-5xl font-black mb-2" style="color: var(--text-primary);">Latest News</h1>
+        <p class="section-eyebrow mb-2">Dispatches</p>
+        <h1 class="text-page-title font-black font-display mb-2" style="color: var(--text-primary);">Latest News</h1>
         <p class="text-sm max-w-xl" style="color: var(--text-muted);">Announcements, updates, and community news.</p>
       </div>
     </ScrollReveal>
 
-    <!-- Filters -->
+    <!-- Segmented filters -->
     <ScrollReveal>
       <div class="flex flex-wrap gap-2 justify-center mb-10">
         {newsFilters.map((filter, i) => (
@@ -43,7 +43,7 @@ const otherPosts = blogPosts.slice(1);
       </div>
     </ScrollReveal>
 
-    <!-- News Grid -->
+    <!-- Alternating cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {otherPosts.map((post, i) => (
         <ScrollReveal delay={i * 80}>
@@ -52,11 +52,10 @@ const otherPosts = blogPosts.slice(1);
       ))}
     </div>
 
-    <!-- No Posts -->
     <div id="no-posts" class="text-center py-16 hidden">
-      <div class="card p-12">
+      <div class="depth-card p-12">
         <Icon name="info" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
-        <h3 class="text-xl font-bold mb-2" style="color: var(--text-primary);">No posts found</h3>
+        <h3 class="text-xl font-bold font-display mb-2" style="color: var(--text-primary);">No posts found</h3>
         <p style="color: var(--text-muted);">Check back later for updates.</p>
       </div>
     </div>

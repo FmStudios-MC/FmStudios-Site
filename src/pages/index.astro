@@ -7,39 +7,37 @@ import ProjectCard from '../components/ProjectCard.astro';
 import Modal from '../components/Modal.astro';
 import LightboxModal from '../components/LightboxModal.astro';
 import { projects } from '../data/projects';
+import { blogPosts } from '../data/news';
+import { blogCategoryConfig } from '../data/news';
 
 const featured = projects.slice(0, 3);
+const latestNews = blogPosts.slice(0, 3);
 ---
 
 <Layout title="FabiMvurice Interactive - Minecraft Projects">
 
-  <!-- ── Hero ──────────────────────────────────── -->
+  <!-- ══ SCENE 1: Hero Portal ══════════════════════ -->
   <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-    <!-- Extra glow orbs for hero depth -->
-    <div class="hero-glow" aria-hidden="true"></div>
-    <div class="hero-glow-secondary" aria-hidden="true"></div>
-    <div class="hero-glow-tertiary" aria-hidden="true"></div>
+    <!-- Parallax depth layers -->
+    <div class="hero-glow" aria-hidden="true" data-parallax="-0.15"></div>
+    <div class="hero-glow-secondary" aria-hidden="true" data-parallax="-0.08"></div>
+    <div class="hero-glow-tertiary" aria-hidden="true" data-parallax="-0.05"></div>
 
-    <!-- Dot grid overlay -->
-    <div class="absolute inset-0 dot-grid opacity-40 pointer-events-none" aria-hidden="true"></div>
-
-    <!-- Hero glass card -->
+    <!-- Hero content -->
     <div class="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 py-16">
-      <div class="hero-glass-card hero-enter" style="animation-delay: 0ms;">
+      <div class="hero-card hero-enter" style="animation-delay: 0ms;">
 
-        <!-- Inner layout: text left, logo right -->
         <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
           <!-- Text side -->
           <div class="flex-1 min-w-0 text-center lg:text-left">
 
-            <!-- Eyebrow badge -->
             <div class="inline-flex hero-eyebrow hero-enter" style="animation-delay: 120ms;">
               <span aria-hidden="true">▸</span>
               Minecraft Modpacks &amp; More
             </div>
 
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.9] tracking-tight mb-6">
+            <h1 class="text-hero font-black font-display leading-[0.9] tracking-tight mb-6">
               <span class="gradient-text hero-text-reveal block">FabiMvurice</span>
               <span class="block" style="color: var(--text-primary);">Interactive</span>
             </h1>
@@ -62,16 +60,16 @@ const featured = projects.slice(0, 3);
 
             <!-- Stats row -->
             <div class="flex flex-wrap gap-5 mt-10 justify-center lg:justify-start hero-enter" style="animation-delay: 560ms;">
-              <div class="hero-stat-chip">
-                <span class="stat-value gradient-text">{projects.length}</span>
+              <div class="stat-counter" style="padding: 0.75rem 1.25rem;">
+                <span class="stat-value gradient-text" style="font-size: 1.5rem;" data-count-to={String(projects.length)}>{projects.length}</span>
                 <span class="stat-label">Projects</span>
               </div>
-              <div class="hero-stat-chip">
-                <span class="stat-value gradient-text">2023</span>
+              <div class="stat-counter" style="padding: 0.75rem 1.25rem;">
+                <span class="stat-value gradient-text" style="font-size: 1.5rem;">2023</span>
                 <span class="stat-label">Since</span>
               </div>
-              <div class="hero-stat-chip">
-                <span class="stat-value gradient-text">Free</span>
+              <div class="stat-counter" style="padding: 0.75rem 1.25rem;">
+                <span class="stat-value gradient-text" style="font-size: 1.5rem;">Free</span>
                 <span class="stat-label">Always</span>
               </div>
             </div>
@@ -80,11 +78,8 @@ const featured = projects.slice(0, 3);
           <!-- Logo side -->
           <div class="flex-shrink-0 hero-enter" style="animation-delay: 200ms;">
             <div class="hero-logo-wrap">
-              <!-- Orbit ring -->
               <div class="hero-orbit-ring" aria-hidden="true"></div>
-              <!-- Glow -->
               <div class="hero-logo-glow" aria-hidden="true"></div>
-              <!-- Logo -->
               <img
                 src="/images/logoneu.webp"
                 alt="FabiMvurice Interactive logo"
@@ -104,13 +99,13 @@ const featured = projects.slice(0, 3);
   <!-- Neon divider -->
   <div class="neon-divider" aria-hidden="true"></div>
 
-  <!-- ── Featured Projects ──────────────────────── -->
+  <!-- ══ SCENE 2: Featured Projects ══════════════════ -->
   <section class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
     <ScrollReveal>
       <div class="flex items-end justify-between mb-10">
         <div>
-          <p class="section-eyebrow">Featured</p>
-          <h2 class="text-4xl font-black" style="color: var(--text-primary);">Projects</h2>
+          <p class="section-eyebrow">The Armory</p>
+          <h2 class="text-page-title font-black font-display" style="color: var(--text-primary);">Featured Projects</h2>
         </div>
         <a href="/projects" class="text-sm font-semibold inline-flex items-center gap-1.5 transition-all hover:gap-2.5" style="color: var(--accent);">
           View all <Icon name="arrow-right" size={14} />
@@ -118,49 +113,112 @@ const featured = projects.slice(0, 3);
       </div>
     </ScrollReveal>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <!-- Horizontal split cards -->
+    <div class="space-y-5">
       {featured.map((project, i) => (
-        <ScrollReveal delay={i * 100}>
-          <ProjectCard project={project} />
+        <ScrollReveal delay={i * 120}>
+          <a href={`/projects/${project.slug}`} class="featured-split-card group">
+            <div class:list={['grid grid-cols-1 lg:grid-cols-2 gap-0', i % 2 === 1 && 'lg-reverse']}>
+              <!-- Info side -->
+              <div class="p-8 lg:p-10 flex flex-col justify-center">
+                <div class="flex items-center gap-3 mb-4">
+                  <img src={project.logo} alt="" width="48" height="48" class="w-12 h-12 object-cover rounded-xl" loading="lazy" />
+                  <div>
+                    <h3 class="text-xl font-bold font-display" style="color: var(--text-primary);">{project.name}</h3>
+                    <span class="text-xs" style="color: var(--text-dim);">{project.version}</span>
+                  </div>
+                </div>
+                <p class="text-sm leading-relaxed mb-5 line-clamp-3" style="color: var(--text-muted);">{project.description}</p>
+                <span class="text-sm font-bold inline-flex items-center gap-1.5 transition-all group-hover:gap-2.5" style="color: var(--accent);">
+                  View Project <Icon name="arrow-right" size={14} />
+                </span>
+              </div>
+              <!-- Screenshot side -->
+              <div class="aspect-video lg:aspect-auto overflow-hidden relative">
+                {project.screenshots.length > 0 ? (
+                  <img
+                    src={project.screenshots[0]}
+                    alt={`${project.name} screenshot`}
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center" style="background: var(--bg-layer-2);">
+                    <Icon name="image" size={48} class="opacity-20" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </a>
         </ScrollReveal>
       ))}
     </div>
   </section>
 
-  <!-- ── About Blurb ─────────────────────────────── -->
-  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+  <!-- ══ SCENE 3: Latest News ══════════════════════ -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
     <ScrollReveal>
-      <div class="card p-8 sm:p-12 relative overflow-hidden">
-        <!-- Inner glass layer for depth -->
-        <div class="absolute inset-0 dot-grid opacity-20 pointer-events-none" aria-hidden="true"></div>
-        <!-- Accent glow -->
-        <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(232, 112, 26, 0.12), transparent 70%); filter: blur(50px);" aria-hidden="true"></div>
-        <!-- Neon top border -->
-        <div class="absolute top-0 left-[10%] right-[10%] h-px" style="background: linear-gradient(90deg, transparent, rgba(232,112,26,0.5), transparent); box-shadow: 0 0 12px rgba(232,112,26,0.4);" aria-hidden="true"></div>
-
-        <div class="relative z-10 max-w-2xl">
-          <p class="section-eyebrow mb-3">About</p>
-          <h2 class="text-4xl font-black mb-5" style="color: var(--text-primary);">Who We Are</h2>
-          <p class="text-lg leading-relaxed mb-8" style="color: var(--text-muted);">
-            FabiMvurice Interactive is a small creative studio focused on Minecraft content creation. We build modpacks that combine the best community mods into polished, performant experiences — from Create-based automation to Vanilla+ gameplay and resource packs.
-          </p>
-          <a href="/projects" class="btn-primary inline-flex items-center gap-2">
-            <Icon name="package" size={16} />
-            Explore Projects
-          </a>
+      <div class="flex items-end justify-between mb-10">
+        <div>
+          <p class="section-eyebrow">Dispatches</p>
+          <h2 class="text-page-title font-black font-display" style="color: var(--text-primary);">Latest News</h2>
         </div>
+        <a href="/news" class="text-sm font-semibold inline-flex items-center gap-1.5 transition-all hover:gap-2.5" style="color: var(--accent);">
+          All posts <Icon name="arrow-right" size={14} />
+        </a>
       </div>
     </ScrollReveal>
+
+    <div class="depth-section">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {latestNews.map((post, i) => {
+          const catConfig = blogCategoryConfig[post.category];
+          return (
+            <ScrollReveal delay={i * 100}>
+              <a href={`/news/${post.slug}`} class="block depth-card overflow-hidden group h-full">
+                <div class="aspect-video overflow-hidden relative">
+                  <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                  <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5 rounded-full`}>{catConfig.label}</span>
+                  <h3 class="text-base font-bold font-display mt-2 mb-1 line-clamp-2" style="color: var(--text-primary);">{post.title}</h3>
+                  <p class="text-xs" style="color: var(--text-dim);">{post.date}</p>
+                </div>
+              </a>
+            </ScrollReveal>
+          );
+        })}
+      </div>
+    </div>
   </section>
 
-  <!-- ── Social Links ───────────────────────────── -->
+  <!-- ══ SCENE 4: Community CTA ══════════════════════ -->
   <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-28">
     <ScrollReveal>
-      <div class="text-center mb-8">
-        <p class="section-eyebrow justify-center mb-3">Connect</p>
-        <h2 class="text-4xl font-black" style="color: var(--text-primary);">Join the Community</h2>
+      <div class="text-center mb-10">
+        <p class="section-eyebrow justify-center mb-3">The Gathering</p>
+        <h2 class="text-page-title font-black font-display" style="color: var(--text-primary);">Join the Community</h2>
+        <p class="text-base mt-3 max-w-md mx-auto" style="color: var(--text-muted);">
+          Connect with us across platforms, share your builds, and stay updated.
+        </p>
       </div>
+    </ScrollReveal>
+    <ScrollReveal delay={100}>
       <SocialBar />
+    </ScrollReveal>
+    <ScrollReveal delay={200}>
+      <div class="mt-10 text-center">
+        <a
+          href="https://discord.gg/x9jsed8qyR"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-lg px-8 py-4 inline-flex items-center gap-2"
+        >
+          <Icon name="discord" size={20} />
+          Join Discord
+        </a>
+      </div>
     </ScrollReveal>
   </section>
 
@@ -169,25 +227,26 @@ const featured = projects.slice(0, 3);
   <LightboxModal />
 
   <style>
-    /* Hero glass card */
-    .hero-glass-card {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(40px) saturate(1.8);
-      -webkit-backdrop-filter: blur(40px) saturate(1.8);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+    /* Hero depth card */
+    .hero-card {
+      background: var(--bg-layer-1);
+      border: 1px solid var(--border-subtle);
       border-radius: 2rem;
-      padding: 3rem 3.5rem;
+      padding: 3rem 2.5rem;
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.10),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(232, 112, 26, 0.05),
-        0 32px 120px rgba(0, 0, 0, 0.55),
-        0 8px 40px rgba(232, 112, 26, 0.08);
+        var(--shadow-depth-3),
+        inset 0 1px 0 var(--edge-top);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
 
-    .hero-glass-card::before {
+    @media (max-width: 639px) {
+      .hero-card {
+        padding: 2rem 1.25rem;
+      }
+    }
+
+    .hero-card::before {
       content: '';
       position: absolute;
       top: 0;
@@ -198,35 +257,9 @@ const featured = projects.slice(0, 3);
       box-shadow: 0 0 16px rgba(232, 112, 26, 0.35);
     }
 
-    :global(.light-theme) .hero-glass-card {
-      background: rgba(255, 255, 255, 0.65);
-      border-color: rgba(0, 0, 0, 0.07);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        0 32px 80px rgba(0, 0, 0, 0.10),
-        0 8px 32px rgba(212, 94, 16, 0.06);
-    }
-
-    /* Stat chips */
-    .hero-stat-chip {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.1rem;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
+    :global(.light-theme) .hero-card {
+      background: var(--bg-layer-1);
+      box-shadow: var(--shadow-depth-3), inset 0 1px 0 var(--edge-top);
     }
 
     /* Logo container */
@@ -254,7 +287,6 @@ const featured = projects.slice(0, 3);
       inset: -16px;
       border-radius: 50%;
       border: 1px solid rgba(232, 112, 26, 0.22);
-      background: transparent;
       pointer-events: none;
       animation: float 7s ease-in-out infinite;
       box-shadow: 0 0 20px rgba(232, 112, 26, 0.08);
@@ -278,12 +310,10 @@ const featured = projects.slice(0, 3);
     }
 
     :global(.light-theme) .hero-logo-img {
-      filter:
-        drop-shadow(0 0 18px rgba(212, 94, 16, 0.40))
-        drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
+      filter: drop-shadow(0 0 18px rgba(212, 94, 16, 0.40)) drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
     }
 
-    /* Neon divider between sections */
+    /* Neon divider */
     .neon-divider {
       height: 1px;
       max-width: 80rem;
@@ -292,26 +322,39 @@ const featured = projects.slice(0, 3);
       box-shadow: 0 0 20px rgba(232, 112, 26, 0.15);
     }
 
+    /* Featured split cards */
+    .featured-split-card {
+      display: block;
+      background: var(--bg-layer-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-depth-2), inset 0 1px 0 var(--edge-top);
+      transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+    }
+
+    .featured-split-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-depth-3), 0 12px 40px rgba(232, 112, 26, 0.10);
+    }
+
+    .lg-reverse {
+      direction: rtl;
+    }
+    .lg-reverse > * {
+      direction: ltr;
+    }
+
     @media (max-width: 1023px) {
-      .hero-glass-card {
-        padding: 2.25rem 1.75rem;
-        border-radius: 1.5rem;
-      }
-      .hero-logo-wrap {
-        width: 160px;
-        height: 160px;
-      }
-      .hero-logo-img {
-        width: 160px;
-        height: 160px;
-      }
+      .hero-card { padding: 2.25rem 1.75rem; border-radius: 1.5rem; }
+      .hero-logo-wrap { width: 160px; height: 160px; }
+      .hero-logo-img { width: 160px; height: 160px; }
+      .lg-reverse { direction: ltr; }
     }
 
     @media (max-width: 639px) {
-      .hero-glass-card {
-        padding: 2rem 1.25rem;
-        border-radius: 1.25rem;
-      }
+      .hero-card { padding: 2rem 1.25rem; border-radius: 1.25rem; }
     }
   </style>
 
@@ -327,7 +370,8 @@ const featured = projects.slice(0, 3);
     };
 
     document.querySelectorAll('.project-card').forEach((card) => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
         const id = Number((card as HTMLElement).dataset.projectId);
         const project = projectData.projects.find((p) => p.id === id);
         if (!project) return;

@@ -13,18 +13,18 @@ import { projects, categories, modpackTypes } from '../data/projects';
     <ScrollReveal>
       <div class="relative flex items-end justify-between mb-8 pt-2">
         <div>
-          <p class="section-eyebrow mb-2">Browse</p>
-          <h1 class="text-4xl sm:text-5xl font-black" style="color: var(--text-primary);">Projects</h1>
+          <p class="section-eyebrow mb-2">The Armory</p>
+          <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">Projects</h1>
           <p class="mt-2 text-sm" style="color: var(--text-dim);">{projects.length} projects available</p>
         </div>
         <p class="hidden sm:block max-w-xs text-right text-sm" style="color: var(--text-muted);">Minecraft modpacks, mods &amp; resource packs.</p>
       </div>
     </ScrollReveal>
 
-    <!-- Search & Filters (glass panel) -->
+    <!-- Search & Filters -->
     <ScrollReveal>
-      <div class="card p-6 mb-8">
-        <!-- Search -->
+      <div class="depth-card p-6 mb-8">
+        <!-- Recessed search bar -->
         <div class="relative max-w-2xl mx-auto mb-6">
           <Icon name="search" size={17} class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color: var(--text-dim);" />
           <input
@@ -36,7 +36,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
           />
         </div>
 
-        <!-- Category Filters -->
+        <!-- Segmented filters -->
         <div class="flex flex-wrap gap-2 justify-center mb-4">
           {categories.map((cat, i) => (
             <button
@@ -69,7 +69,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
       </div>
     </ScrollReveal>
 
-    <!-- Projects Grid -->
+    <!-- Projects Grid (2-col with tilt cards) -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       {projects.map((project, i) => (
         <ScrollReveal delay={i * 70}>
@@ -80,9 +80,9 @@ import { projects, categories, modpackTypes } from '../data/projects';
 
     <!-- No Results -->
     <div id="no-results" class="text-center py-20" style="display: none;">
-      <div class="card p-16 max-w-lg mx-auto">
+      <div class="depth-card p-16 max-w-lg mx-auto">
         <Icon name="search" size={52} class="mx-auto mb-6" style="color: var(--text-dim);" />
-        <h3 class="text-2xl font-bold mb-3" style="color: var(--text-primary);">No projects found</h3>
+        <h3 class="text-2xl font-bold font-display mb-3" style="color: var(--text-primary);">No projects found</h3>
         <p style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
       </div>
     </div>
