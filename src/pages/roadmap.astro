@@ -28,6 +28,13 @@ const overallProgress = stats.total > 0
   ? Math.round(roadmapItems.reduce((sum, i) => sum + i.progress, 0) / stats.total)
   : 0;
 
+// Find most recent update date across all items
+const allUpdateDates = roadmapItems
+  .flatMap((i) => i.updates.map((u) => u.date))
+  .sort()
+  .reverse();
+const lastUpdated = allUpdateDates.length > 0 ? allUpdateDates[0] : null;
+
 const statusIcons: Record<string, string> = {
   'in-progress': 'zap',
   planned: 'target',
@@ -35,32 +42,52 @@ const statusIcons: Record<string, string> = {
   completed: 'check',
 };
 
-const statusColors: Record<string, { bg: string; border: string; glow: string; text: string }> = {
+const statusColors: Record<string, { bg: string; border: string; glow: string; text: string; accent: string }> = {
   'in-progress': {
     bg: 'rgba(30, 64, 175, 0.08)',
     border: 'rgba(96, 165, 250, 0.20)',
     glow: 'rgba(96, 165, 250, 0.06)',
     text: '#93bbfd',
+    accent: '#60a5fa',
   },
   planned: {
     bg: 'rgba(88, 28, 135, 0.08)',
     border: 'rgba(192, 132, 252, 0.20)',
     glow: 'rgba(192, 132, 252, 0.06)',
     text: '#d8b4fe',
+    accent: '#c084fc',
   },
   onhold: {
     bg: 'rgba(146, 64, 14, 0.08)',
     border: 'rgba(253, 230, 138, 0.20)',
     glow: 'rgba(253, 230, 138, 0.06)',
     text: '#fde68a',
+    accent: '#fde68a',
   },
   completed: {
     bg: 'rgba(22, 101, 52, 0.08)',
     border: 'rgba(134, 239, 172, 0.20)',
     glow: 'rgba(134, 239, 172, 0.06)',
     text: '#bbf7d0',
+    accent: '#86efac',
   },
 };
+
+// Filter options
+const statusFilters = [
+  { id: 'all', label: 'All', icon: 'layers' },
+  { id: 'in-progress', label: 'In Progress', icon: 'zap' },
+  { id: 'planned', label: 'Planned', icon: 'target' },
+  { id: 'onhold', label: 'On Hold', icon: 'pause' },
+  { id: 'completed', label: 'Completed', icon: 'check' },
+];
+
+const priorityFilters = [
+  { id: 'all', label: 'Any Priority' },
+  { id: 'high', label: 'High' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'low', label: 'Low' },
+];
 
 // Group columns: show only columns that have items
 const columns = [
@@ -84,12 +111,18 @@ const columns = [
         <p class="mt-2 text-sm max-w-lg" style="color: var(--text-muted);">
           What we're building and what's coming next. Track our progress in real time.
         </p>
+        {lastUpdated && (
+          <p class="mt-1.5 text-xs" style="color: var(--text-dim);">
+            <Icon name="calendar" size={12} class="inline-block mr-1 -mt-px" />
+            Last updated: {lastUpdated}
+          </p>
+        )}
       </div>
     </ScrollReveal>
 
     <!-- Stats Row -->
     <ScrollReveal>
-      <div class="roadmap-stats-row mb-8">
+      <div class="roadmap-stats-row mb-6">
         <div class="roadmap-overall-progress">
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-dim);">Overall Progress</span>
@@ -115,21 +148,60 @@ const columns = [
       </div>
     </ScrollReveal>
 
+    <!-- Filter Bar -->
+    <ScrollReveal>
+      <div class="roadmap-filter-bar mb-6">
+        <div class="roadmap-filter-group">
+          <span class="text-[10px] font-semibold uppercase tracking-widest" style="color: var(--text-dim);">Status</span>
+          <div class="roadmap-filter-scroll">
+            {statusFilters.map((f) => (
+              <button
+                class="filter-btn roadmap-status-filter-btn"
+                data-filter={f.id}
+                aria-pressed={f.id === 'all' ? 'true' : 'false'}
+              >
+                <Icon name={f.icon} size={13} />
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div class="roadmap-filter-group">
+          <span class="text-[10px] font-semibold uppercase tracking-widest" style="color: var(--text-dim);">Priority</span>
+          <div class="roadmap-filter-scroll">
+            {priorityFilters.map((f) => (
+              <button
+                class="filter-btn roadmap-priority-filter-btn"
+                data-filter={f.id}
+                aria-pressed={f.id === 'all' ? 'true' : 'false'}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </ScrollReveal>
+
     <!-- Kanban Columns -->
-    <div class="roadmap-columns">
+    <div class="roadmap-columns" id="roadmap-columns">
       {columns.map((col, colIdx) => {
         const colors = statusColors[col.key];
         const icon = statusIcons[col.key];
         return (
           <ScrollReveal delay={colIdx * 100}>
-            <div class="roadmap-column" style={`--col-bg: ${colors.bg}; --col-border: ${colors.border}; --col-glow: ${colors.glow}; --col-text: ${colors.text};`}>
+            <div
+              class="roadmap-column"
+              data-column-status={col.key}
+              style={`--col-bg: ${colors.bg}; --col-border: ${colors.border}; --col-glow: ${colors.glow}; --col-text: ${colors.text}; --col-accent: ${colors.accent};`}
+            >
               <!-- Column Header -->
               <div class="roadmap-col-header">
                 <div class="roadmap-col-icon">
                   <Icon name={icon} size={16} />
                 </div>
                 <h2 class="text-sm font-bold font-display">{col.label}</h2>
-                <span class="roadmap-col-count">{col.items.length}</span>
+                <span class="roadmap-col-count" data-count-status={col.key}>{col.items.length}</span>
               </div>
 
               <!-- Column Items -->
@@ -137,13 +209,19 @@ const columns = [
                 {col.items.map((item, i) => {
                   const priorityInfo = priorityConfig[item.priority];
                   return (
-                    <div class="roadmap-item" style={`animation-delay: ${(colIdx * 100) + (i * 60)}ms`}>
+                    <div
+                      class="roadmap-item"
+                      data-status={item.status}
+                      data-priority={item.priority}
+                      style={`animation-delay: ${(colIdx * 100) + (i * 60)}ms`}
+                    >
                       <!-- Title + Priority -->
                       <div class="flex items-start justify-between gap-2 mb-2">
                         <h3 class="text-sm font-bold font-display leading-tight" style="color: var(--text-primary);">
                           {item.title}
                         </h3>
-                        <span class={`${priorityInfo.badge} text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0`}>
+                        <span class={`roadmap-priority-badge ${item.priority === 'high' ? 'priority-high' : ''} text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0`}>
+                          {item.priority === 'high' && <span class="priority-pulse-dot"></span>}
                           {item.priority}
                         </span>
                       </div>
@@ -177,10 +255,10 @@ const columns = [
 
                       <!-- Features -->
                       {item.features.length > 0 && (
-                        <div class="mb-2">
+                        <div class="roadmap-features mb-2">
                           {item.features.map((feat) => (
-                            <div class="flex items-start gap-1.5 text-xs py-0.5" style="color: var(--text-muted);">
-                              <Icon name="chevron-right" size={12} class="flex-shrink-0 mt-0.5" style="color: var(--accent);" />
+                            <div class="roadmap-feature-item">
+                              <Icon name="chevron-right" size={12} class="flex-shrink-0 mt-0.5" style="color: var(--col-accent);" />
                               <span>{feat}</span>
                             </div>
                           ))}
@@ -198,15 +276,20 @@ const columns = [
                             <span class="text-xs font-semibold" style="color: var(--text-muted);">
                               Updates ({item.updates.length})
                             </span>
-                            <Icon name="chevron-down" size={14} class="transition-transform" />
+                            <Icon name="chevron-down" size={14} class="roadmap-toggle-chevron transition-transform" />
                           </button>
-                          <div id={`updates-${item.id}`} class="hidden mt-2 space-y-1.5">
-                            {item.updates.slice().reverse().map((update) => (
-                              <div class="roadmap-update-entry">
-                                <span class="text-[10px] font-semibold" style="color: var(--text-dim);">{update.date}</span>
-                                <span class="text-xs" style="color: var(--text-muted);">{update.text}</span>
-                              </div>
-                            ))}
+                          <div id={`updates-${item.id}`} class="accordion-content roadmap-updates-content">
+                            <div class="roadmap-updates-list">
+                              {item.updates.slice().reverse().map((update) => (
+                                <div class="roadmap-update-entry">
+                                  <div class="roadmap-update-dot"></div>
+                                  <div class="roadmap-update-body">
+                                    <span class="text-[10px] font-semibold" style="color: var(--text-dim);">{update.date}</span>
+                                    <span class="text-xs" style="color: var(--text-muted);">{update.text}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -218,6 +301,13 @@ const columns = [
           </ScrollReveal>
         );
       })}
+    </div>
+
+    <!-- No Results Empty State -->
+    <div id="roadmap-no-results" class="roadmap-no-results" style="display: none;">
+      <Icon name="search" size={32} />
+      <p class="text-sm font-semibold font-display mt-3" style="color: var(--text-primary);">No items match your filters</p>
+      <p class="text-xs mt-1" style="color: var(--text-muted);">Try adjusting the status or priority filters</p>
     </div>
 
   </section>
@@ -272,6 +362,53 @@ const columns = [
     min-width: 56px;
   }
 
+  /* Filter Bar */
+  .roadmap-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--bg-layer-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-depth-1);
+  }
+
+  @media (min-width: 640px) {
+    .roadmap-filter-bar {
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
+    }
+  }
+
+  .roadmap-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .roadmap-filter-scroll {
+    display: flex;
+    gap: 0.375rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .roadmap-filter-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .roadmap-filter-scroll .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   /* Kanban Columns */
   .roadmap-columns {
     display: grid;
@@ -298,6 +435,11 @@ const columns = [
     padding: 0;
     overflow: hidden;
     box-shadow: 0 0 24px var(--col-glow);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .roadmap-column.column-hidden {
+    display: none;
   }
 
   .roadmap-col-header {
@@ -307,6 +449,11 @@ const columns = [
     padding: 0.875rem 1rem;
     border-bottom: 1px solid var(--col-border);
     color: var(--col-text);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .roadmap-col-header:hover {
+    box-shadow: inset 0 -2px 12px var(--col-glow);
   }
 
   .roadmap-col-icon {
@@ -343,14 +490,57 @@ const columns = [
   .roadmap-item {
     background: var(--bg-layer-1);
     border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--col-accent, var(--border-subtle));
     border-radius: 0.75rem;
     padding: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.25s ease;
   }
 
   .roadmap-item:hover {
     border-color: var(--col-border);
     box-shadow: 0 4px 16px var(--col-glow);
+    transform: translateY(-2px);
+  }
+
+  .roadmap-item.card-hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+  }
+
+  /* Priority Badge */
+  .roadmap-priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+  }
+
+  .roadmap-priority-badge.priority-high {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+  }
+
+  .priority-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    display: inline-block;
+    animation: priority-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes priority-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .priority-pulse-dot {
+      animation: none;
+    }
   }
 
   .roadmap-meta-chip {
@@ -366,6 +556,25 @@ const columns = [
     color: var(--text-dim);
   }
 
+  /* Features list */
+  .roadmap-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .roadmap-feature-item {
+    display: flex;
+    align-items: start;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0;
+    color: var(--text-muted);
+    border-left: 2px solid var(--border-subtle);
+    padding-left: 0.5rem;
+    margin-left: 0.125rem;
+  }
+
   /* Updates section */
   .roadmap-updates-section {
     border-top: 1px solid var(--border-subtle);
@@ -373,18 +582,66 @@ const columns = [
     margin-top: 0.25rem;
   }
 
+  .roadmap-updates-toggle:hover {
+    opacity: 0.8;
+  }
+
+  .roadmap-updates-toggle[aria-expanded="true"] .roadmap-toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  .roadmap-updates-content {
+    margin-top: 0.5rem;
+  }
+
+  .roadmap-updates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 2px solid var(--col-accent, var(--border-subtle));
+    margin-left: 0.375rem;
+    padding-left: 0;
+  }
+
   .roadmap-update-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+    position: relative;
+  }
+
+  .roadmap-update-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--col-accent, var(--accent));
+    border: 2px solid var(--bg-layer-1);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+    margin-left: -1.125rem;
+  }
+
+  .roadmap-update-body {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    padding: 0.5rem 0.625rem;
     background: var(--bg-layer-2);
     border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
+    padding: 0.5rem 0.625rem;
     box-shadow: var(--shadow-inset);
+    flex: 1;
   }
 
-  /* Mobile: stack stat chips in 2x2 grid */
+  /* No Results */
+  .roadmap-no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-dim);
+  }
+
+  /* Mobile: stack stat chips in 4-col grid */
   @media (max-width: 639px) {
     .roadmap-stat-chips {
       display: grid;

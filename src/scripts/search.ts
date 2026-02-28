@@ -281,34 +281,76 @@ function initNewsFilter() {
 
 // Roadmap filter
 function initRoadmapFilter() {
-  const roadmapCards = document.querySelectorAll('.roadmap-card');
+  const roadmapItems = document.querySelectorAll('.roadmap-item');
+  const columns = document.querySelectorAll('.roadmap-column');
+  const noResults = document.getElementById('roadmap-no-results');
 
-  initFilterGroup('.roadmap-filter-btn', 'filter', (filter) => {
-    roadmapCards.forEach((card) => {
+  let currentStatus = 'all';
+  let currentPriority = 'all';
+
+  function applyRoadmapFilters() {
+    let visibleCount = 0;
+
+    roadmapItems.forEach((card) => {
       const el = card as HTMLElement;
       const status = el.dataset.status || '';
       const priority = el.dataset.priority || '';
-      let show = filter === 'all' || status === filter || (filter === 'high' && priority === 'high');
-      el.style.display = show ? '' : 'none';
+
+      const matchesStatus = currentStatus === 'all' || status === currentStatus;
+      const matchesPriority = currentPriority === 'all' || priority === currentPriority;
+      const show = matchesStatus && matchesPriority;
+
+      if (show) {
+        el.classList.remove('card-hidden');
+        el.style.display = '';
+        visibleCount++;
+      } else {
+        el.classList.add('card-hidden');
+        setTimeout(() => {
+          if (el.classList.contains('card-hidden')) {
+            el.style.display = 'none';
+          }
+        }, 250);
+      }
     });
 
-    setParams({ filter });
+    // Hide columns with no visible items
+    columns.forEach((col) => {
+      const colEl = col as HTMLElement;
+      const items = colEl.querySelectorAll('.roadmap-item');
+      const hasVisible = Array.from(items).some(
+        (item) => !(item as HTMLElement).classList.contains('card-hidden')
+      );
+      colEl.classList.toggle('column-hidden', !hasVisible);
+    });
+
+    // Show/hide no results
+    if (noResults) {
+      noResults.style.display = visibleCount === 0 ? '' : 'none';
+    }
+
+    setParams({ status: currentStatus, priority: currentPriority });
+  }
+
+  // Status filter group
+  currentStatus = initFilterGroup('.roadmap-status-filter-btn', 'status', (filter) => {
+    currentStatus = filter;
+    applyRoadmapFilters();
   });
 
-  // Apply initial filter
-  const savedFilter = getParam('filter') || 'all';
-  if (savedFilter !== 'all') {
-    roadmapCards.forEach((card) => {
-      const el = card as HTMLElement;
-      const status = el.dataset.status || '';
-      const priority = el.dataset.priority || '';
-      let show = savedFilter === 'all' || status === savedFilter || (savedFilter === 'high' && priority === 'high');
-      el.style.display = show ? '' : 'none';
-    });
+  // Priority filter group
+  currentPriority = initFilterGroup('.roadmap-priority-filter-btn', 'priority', (filter) => {
+    currentPriority = filter;
+    applyRoadmapFilters();
+  });
+
+  // Apply initial filters
+  if (currentStatus !== 'all' || currentPriority !== 'all') {
+    applyRoadmapFilters();
   }
 }
 
 // Initialize based on what's on the page
 if (document.querySelector('.project-card')) initSearch();
 if (document.querySelector('.news-filter-btn')) initNewsFilter();
-if (document.querySelector('.roadmap-filter-btn')) initRoadmapFilter();
+if (document.querySelector('.roadmap-status-filter-btn')) initRoadmapFilter();
