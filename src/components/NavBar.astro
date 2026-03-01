@@ -22,6 +22,7 @@ const moreItems = navItems.slice(4);
 
 const rawPath = Astro.url.pathname;
 const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
+const isOnMorePage = moreItems.some((item) => currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/')));
 ---
 
 <!-- Desktop/Tablet Sidebar -->
@@ -77,14 +78,17 @@ const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, 
       </a>
     );
   })}
-  <button class="bar-item" id="more-btn" aria-label="More pages" aria-expanded="false">
+  <button class:list={['bar-item', isOnMorePage && 'more-has-active']} id="more-btn" aria-label="More pages" aria-expanded="false">
     <Icon name="menu" size={20} />
     <span>More</span>
   </button>
 </div>
 
+<!-- More backdrop overlay -->
+<div class="more-backdrop" id="more-backdrop" aria-hidden="true"></div>
+
 <!-- More overflow panel -->
-<div class="more-panel" id="more-panel" aria-label="More navigation">
+<div class="more-panel" id="more-panel" role="dialog" aria-modal="true" aria-label="More navigation">
   {moreItems.map((item) => {
     const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
     return (
@@ -98,7 +102,6 @@ const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, 
       </a>
     );
   })}
-  <div class="more-item" style="pointer-events: none; opacity: 0;"><!-- spacer --></div>
   <div class="more-item theme-toggle-mobile">
     <ThemeToggle />
   </div>
@@ -167,31 +170,83 @@ const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, 
 </style>
 
 <script>
-  // Mobile "More" panel toggle
+  import { trapFocus } from '../scripts/focus-trap';
+
   const moreBtn = document.getElementById('more-btn');
   const morePanel = document.getElementById('more-panel');
+  const moreBackdrop = document.getElementById('more-backdrop');
+  let releaseFocusTrap: (() => void) | null = null;
 
+  function isOpen() {
+    return morePanel?.classList.contains('open') ?? false;
+  }
+
+  function openMore() {
+    if (!morePanel || !moreBackdrop || !moreBtn) return;
+    morePanel.classList.add('open');
+    moreBackdrop.classList.add('open');
+    moreBtn.setAttribute('aria-expanded', 'true');
+    releaseFocusTrap = trapFocus(morePanel);
+  }
+
+  function closeMore() {
+    if (!morePanel || !moreBackdrop || !moreBtn) return;
+    morePanel.classList.remove('open');
+    moreBackdrop.classList.remove('open');
+    moreBtn.setAttribute('aria-expanded', 'false');
+    if (releaseFocusTrap) {
+      releaseFocusTrap();
+      releaseFocusTrap = null;
+    }
+    moreBtn.focus();
+  }
+
+  // Toggle on More button click
   moreBtn?.addEventListener('click', () => {
-    const isOpen = morePanel?.classList.contains('open');
-    if (isOpen) {
-      morePanel?.classList.remove('open');
-      moreBtn.setAttribute('aria-expanded', 'false');
+    if (isOpen()) {
+      closeMore();
     } else {
-      morePanel?.classList.add('open');
-      moreBtn.setAttribute('aria-expanded', 'true');
+      openMore();
     }
   });
+
+  // Close on backdrop click
+  moreBackdrop?.addEventListener('click', closeMore);
 
   // Close on outside click
   document.addEventListener('click', (e) => {
     const target = e.target as Node;
     if (
-      morePanel?.classList.contains('open') &&
-      !morePanel.contains(target) &&
-      !moreBtn?.contains(target)
+      isOpen() &&
+      !morePanel?.contains(target) &&
+      !moreBtn?.contains(target) &&
+      !moreBackdrop?.contains(target)
     ) {
-      morePanel.classList.remove('open');
-      moreBtn?.setAttribute('aria-expanded', 'false');
+      closeMore();
     }
   });
+
+  // Escape key closes panel
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      closeMore();
+    }
+  });
+
+  // Swipe-down gesture to dismiss
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  morePanel?.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  morePanel?.addEventListener('touchend', (e) => {
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    const deltaTime = Date.now() - touchStartTime;
+    if (deltaY > 50 && deltaTime < 300) {
+      closeMore();
+    }
+  }, { passive: true });
 </script>
