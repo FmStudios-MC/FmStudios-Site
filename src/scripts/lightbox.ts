@@ -84,11 +84,30 @@ export function openLightbox(srcs: { src: string; alt: string }[], startIndex: n
 
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
-    if (!lightboxEl || lightboxEl.classList.contains('hidden')) return;
+    if (!lightboxEl || lightboxEl.style.display === 'none') return;
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft' && currentIndex > 0) showImage(currentIndex - 1);
     if (e.key === 'ArrowRight' && currentIndex < images.length - 1) showImage(currentIndex + 1);
   }, { signal });
+
+  // Touch swipe gestures
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  lightboxEl.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { signal, passive: true });
+
+  lightboxEl.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Only trigger if horizontal swipe is dominant and > 50px
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && currentIndex < images.length - 1) showImage(currentIndex + 1);
+      if (dx > 0 && currentIndex > 0) showImage(currentIndex - 1);
+    }
+  }, { signal, passive: true });
 }
 
 export function openSingleImage(src: string, alt: string = '') {

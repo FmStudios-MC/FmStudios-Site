@@ -129,7 +129,7 @@ const columns = [
             <span class="text-sm font-black font-display gradient-text">{overallProgress}%</span>
           </div>
           <div class="progress-bar-track">
-            <div class="progress-bar-fill" style={`width: ${Math.max(overallProgress, 2)}%`}></div>
+            <div class="progress-bar-fill" style={`--progress: ${Math.max(overallProgress, 2)}%`}></div>
           </div>
         </div>
         <div class="roadmap-stat-chips">
@@ -239,7 +239,7 @@ const columns = [
                             <span class="text-[10px] font-bold" style="color: var(--accent);">{item.progress}%</span>
                           </div>
                           <div class="progress-bar-track" style="height: 6px;">
-                            <div class="progress-bar-fill" style={`width: ${Math.max(item.progress, 2)}%; height: 100%;`}></div>
+                            <div class="progress-bar-fill" style={`--progress: ${Math.max(item.progress, 2)}%; height: 100%;`}></div>
                           </div>
                         </div>
                       )}

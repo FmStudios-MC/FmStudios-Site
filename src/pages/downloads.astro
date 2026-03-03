@@ -5,10 +5,17 @@ import ScrollReveal from '../components/ScrollReveal.astro';
 import { projects, categories } from '../data/projects';
 
 const downloadableProjects = projects.filter((p) => p.downloadUrl && p.downloadUrl !== '#');
-const totalDownloads = projects.reduce((sum, p) => {
-  const num = parseInt(p.downloads.replace(/[^0-9]/g, ''), 10);
-  return sum + (isNaN(num) ? 0 : num * 1000);
+// Sum raw numbers from download strings (e.g. "15K+" → 15, "1.2K+" → 1.2)
+const totalDownloadsK = projects.reduce((sum, p) => {
+  const cleaned = p.downloads.replace(/[^0-9.]/g, '');
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return sum;
+  // If original string contains "K", num is already in thousands
+  if (p.downloads.toLowerCase().includes('k')) return sum + num;
+  // Otherwise treat as raw count, convert to thousands
+  return sum + num / 1000;
 }, 0);
+const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
 ---
 
 <Layout title="Downloads - FabiMvurice Interactive">
@@ -27,7 +34,7 @@ const totalDownloads = projects.reduce((sum, p) => {
           </p>
         </div>
         <div class="dl-stat-badge">
-          <span class="text-2xl font-black font-display gradient-text" data-count-to={String(Math.round(totalDownloads / 1))}>{Math.round(totalDownloads / 1)}K</span>
+          <span class="text-2xl font-black font-display gradient-text">{totalDownloadsLabel}</span>
           <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Total Downloads</span>
         </div>
       </div>

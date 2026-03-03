@@ -14,7 +14,7 @@
   /* Text */
   --text-primary: #f0f0f0;
   --text-muted: #909090;
-  --text-dim: #525252;
+  --text-dim: #6b6b6b;
 
   /* Orange accent (flame palette) */
   --accent: #e8701a;
@@ -299,6 +299,8 @@
 
   /* ── Depth Card System ─────────────────── */
   .depth-card {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
     background: var(--bg-layer-1);
     border: 1px solid var(--border-subtle);
     border-radius: 1rem;
@@ -316,13 +318,16 @@
   .depth-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.4), transparent);
+    inset: 0;
+    background: radial-gradient(
+      400px circle at var(--mouse-x) var(--mouse-y),
+      rgba(232, 112, 26, 0.10),
+      transparent 60%
+    );
     opacity: 0;
     transition: opacity 0.4s var(--ease-spring);
+    pointer-events: none;
+    z-index: 1;
   }
 
   .depth-card:hover {
@@ -879,6 +884,13 @@
   }
 
   /* ── Accordion / FAQ ─────────────────────── */
+  .accordion-chevron,
+  .roadmap-toggle-chevron,
+  .faq-toggle svg:last-child,
+  .changelog-toggle svg:last-child {
+    transition: transform 0.4s var(--ease-spring);
+  }
+
   .accordion-content {
     max-height: 0;
     overflow: hidden;
@@ -899,10 +911,16 @@
     background: linear-gradient(90deg, var(--accent-deep), var(--accent));
     height: 100%;
     border-radius: 4px;
-    transition: width 0.5s ease;
+    width: 0;
+    transition: width 0.8s var(--ease-spring);
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 12px rgba(232, 112, 26, 0.40);
+  }
+
+  .visible .progress-bar-fill,
+  .reveal.visible .progress-bar-fill {
+    width: var(--progress) !important;
   }
 
   /* Flame tip glow at fill end */

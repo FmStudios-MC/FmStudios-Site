@@ -32,10 +32,12 @@ const galleryItems = projects.flatMap((project) =>
     <div class="gallery-grid">
       {galleryItems.map((item, i) => (
         <ScrollReveal delay={i * 50}>
-          <div
-            class="tilt-card overflow-hidden cursor-pointer gallery-item group"
+          <button
+            type="button"
+            class="tilt-card overflow-hidden cursor-pointer gallery-item group gallery-btn"
             data-src={item.src}
             data-alt={item.alt}
+            aria-label={`View ${item.alt}`}
           >
             <div class="aspect-video overflow-hidden">
               <img
@@ -50,7 +52,7 @@ const galleryItems = projects.flatMap((project) =>
               <span class="text-xs font-medium" style="color: var(--text-primary);">{item.projectName}</span>
               <Icon name="image" size={13} class="opacity-60" />
             </div>
-          </div>
+          </button>
         </ScrollReveal>
       ))}
     </div>
@@ -104,6 +106,18 @@ const galleryItems = projects.flatMap((project) =>
     background: linear-gradient(to top, rgba(3,3,3,0.8), transparent);
     transform: translateY(100%);
     transition: transform 0.3s var(--ease-spring);
+  }
+
+  .gallery-btn {
+    appearance: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    width: 100%;
   }
 
   .gallery-item {

@@ -7,10 +7,23 @@ import { initEmberParticles } from './animations/ember-particles';
 import { initCounters } from './animations/counters';
 import { initPageTransition } from './animations/page-transition';
 
+// Card hover glow — track mouse position via CSS custom properties
+function initCardGlow() {
+  document.querySelectorAll<HTMLElement>('.depth-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    });
+  });
+}
+
 // Scroll to top button
 function initScrollTop() {
   const btn = document.getElementById('scroll-top');
   if (!btn) return;
+
+  btn.style.transform = 'scale(0.8)';
 
   window.addEventListener(
     'scroll',
@@ -18,9 +31,11 @@ function initScrollTop() {
       if (window.scrollY > 300) {
         btn.style.opacity = '1';
         btn.style.pointerEvents = 'auto';
+        btn.style.transform = 'scale(1)';
       } else {
         btn.style.opacity = '0';
         btn.style.pointerEvents = 'none';
+        btn.style.transform = 'scale(0.8)';
       }
     },
     { passive: true }
@@ -82,3 +97,4 @@ initCounters();
 initPageTransition();
 initScrollTop();
 initAccordions();
+initCardGlow();

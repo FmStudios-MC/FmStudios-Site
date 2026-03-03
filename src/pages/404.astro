@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Layout title="Page Not Found - FabiMvurice Interactive">
+  <section class="min-h-[70vh] flex items-center justify-center px-5">
+    <div class="text-center max-w-md">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6"
+        style="background: var(--bg-layer-2); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-depth-2);">
+        <Icon name="alert-triangle" size={36} class="opacity-60" style="color: var(--accent);" />
+      </div>
+      <h1 class="text-page-title font-black font-display mb-3" style="color: var(--text-primary);">
+        <span class="gradient-text">404</span>
+      </h1>
+      <p class="text-lg font-semibold mb-2" style="color: var(--text-primary);">Page Not Found</p>
+      <p class="text-sm mb-8" style="color: var(--text-muted);">
+        This page has been lost to the void. It may have been moved, deleted, or never existed.
+      </p>
+      <a href="/" class="btn-primary inline-flex items-center gap-2">
+        <Icon name="arrow-left" size={16} />
+        Back to Home
+      </a>
+    </div>
+  </section>
+</Layout>

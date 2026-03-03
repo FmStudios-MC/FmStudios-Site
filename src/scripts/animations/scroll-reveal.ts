@@ -1,8 +1,10 @@
 // 3D rotateX unfold scroll reveal via IntersectionObserver
 
 export function initScrollReveal() {
+  const selector = '.reveal, .reveal-scale';
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('.reveal').forEach((el) => {
+    document.querySelectorAll(selector).forEach((el) => {
       el.classList.add('visible');
     });
     return;
@@ -20,5 +22,5 @@ export function initScrollReveal() {
     { threshold: 0.08, rootMargin: '60px' }
   );
 
-  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  document.querySelectorAll(selector).forEach((el) => observer.observe(el));
 }

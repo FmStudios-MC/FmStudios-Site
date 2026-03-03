@@ -66,6 +66,15 @@ export function initEmberParticles() {
 
   draw();
 
+  // Pause when tab is backgrounded to save resources
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(animId);
+    } else {
+      draw();
+    }
+  });
+
   window.addEventListener('resize', () => {
     w = window.innerWidth;
     h = window.innerHeight;

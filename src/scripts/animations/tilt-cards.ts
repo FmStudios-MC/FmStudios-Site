@@ -21,8 +21,8 @@ export function initTiltCards() {
     });
 
     card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
       card.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+      card.style.transform = '';
       setTimeout(() => {
         card.style.transition = '';
       }, 500);
