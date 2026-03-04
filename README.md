@@ -27,9 +27,9 @@
 
 ## About
 
-This is the source code for the **FabiMvurice Interactive** website — a central hub for our Minecraft projects, news, changelogs, roadmap, and downloads.
+This is the source code for the **FabiMvurice Interactive** website a central hub for our Minecraft projects, news, changelogs, roadmap, and downloads.
 
-The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur — just solid layers with fire-themed accents.
+The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur just solid layers with fire-themed accents.
 
 ## Projects
 
@@ -54,7 +54,7 @@ Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interac
 | **Fonts** | Inter (body) + Space Grotesk (display) |
 | **Hosting** | GitHub Pages |
 
-Zero runtime dependencies. No React, Vue, or Svelte — pure Astro components with vanilla JS.
+Zero runtime dependencies. No React, Vue, or Svelte... pure Astro components with vanilla JS.
 
 ## Getting Started
 
