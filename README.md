@@ -12,7 +12,7 @@
   <a href="https://www.fabimvurice-interactive.de"><img src="https://img.shields.io/badge/website-live-success.svg" alt="Website" /></a>
   <img src="https://img.shields.io/badge/Astro-5.3-BC52EE.svg" alt="Astro" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38BDF8.svg" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/license-proprietary-red.svg" alt="License" />
 </p>
 
 <p align="center">
@@ -118,4 +118,4 @@ src/
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+Proprietary — all rights reserved by FabiMvurice Interactive. See [LICENSE](LICENSE) for details.
