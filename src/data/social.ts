@@ -10,7 +10,6 @@ export const socialLinks: SocialLink[] = [
   { name: 'Discord', url: 'https://discord.gg/x9jsed8qyR', icon: 'discord' },
   { name: 'Instagram', url: 'https://www.instagram.com/fabimvurice.interactive', icon: 'instagram' },
   { name: 'TikTok', url: 'https://www.tiktok.com/@fabimvurice.interactive', icon: 'music' },
-  { name: 'Bluesky', url: 'https://bsky.app/profile/fmstudios.bsky.social', icon: 'cloud' },
 ];
 
 export interface PlatformLink {
