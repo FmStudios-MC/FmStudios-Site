@@ -1,121 +1,121 @@
-# FabiMvurice Interactive Website
+<p align="center">
+  <img src="public/images/logoneu.webp" alt="FabiMvurice Interactive" width="120" />
+</p>
 
-![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Astro](https://img.shields.io/badge/Astro-5.3-BC52EE.svg)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38BDF8.svg)
+<h1 align="center">FabiMvurice Interactive</h1>
 
-Welcome to the official repository for the **FmStudios (FabiMvurice Interactive)** website. This site serves as the central hub and portfolio for our Minecraft modpacks, mods, resource packs, news, and project updates.
+<p align="center">
+  Creating Minecraft modpacks, mods, and resource packs since 2023.
+</p>
 
-Creating amazing Minecraft modpacks, mods, and resource packs since 2023.
+<p align="center">
+  <a href="https://www.fabimvurice-interactive.de"><img src="https://img.shields.io/badge/website-live-success.svg" alt="Website" /></a>
+  <img src="https://img.shields.io/badge/Astro-5.3-BC52EE.svg" alt="Astro" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38BDF8.svg" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+</p>
 
-**Live Website:** [https://www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
+<p align="center">
+  <a href="https://discord.gg/x9jsed8qyR">Discord</a> &middot;
+  <a href="https://x.com/famvinteractive">X / Twitter</a> &middot;
+  <a href="https://www.youtube.com/@fm-studios-mc">YouTube</a> &middot;
+  <a href="https://www.instagram.com/fabimvurice.interactive">Instagram</a> &middot;
+  <a href="https://www.tiktok.com/@fabimvurice.interactive">TikTok</a>
+</p>
+
+---
 
 ## About
 
-This project contains the source code for the FmStudios website. The goal is to provide a clean, accessible interface for users to discover our projects, view changelogs, read news, and access download links on CurseForge and Modrinth.
+This is the source code for the **FabiMvurice Interactive** website — a central hub for our Minecraft projects, news, changelogs, roadmap, and downloads.
 
-### Key Features
+The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur — just solid layers with fire-themed accents.
 
-* **Project Showcase:** Detailed overviews of modpacks, mods, and resource packs with screenshots, features, and download links.
-* **Search & Filtering:** Full-text search and category/type filters across projects and news.
-* **News & Updates:** Blog-style announcements with category filtering and featured posts.
-* **Changelog Tracking:** Version history with detailed change logs for each project.
-* **Development Roadmap:** Progress tracking with priorities, status indicators, and timeline estimates.
-* **FAQ Section:** Organized Q&A covering general questions and modpack troubleshooting.
-* **Screenshot Gallery:** Responsive image gallery with lightbox navigation.
-* **Dark/Light Mode:** Theme toggle with persistent user preference.
-* **Hosting Partnership:** Dedicated Kinetic Hosting partnership page.
-* **Responsive Design:** Mobile-first layout with scroll animations.
+## Projects
 
-## Featured Projects
+| Project | Type | Status | Downloads |
+|---------|------|--------|-----------|
+| **Create Unbound** | Modpack (Tech) | Coming Soon | — |
+| **{Additions}** | Modpack (Vanilla+) | Active | 8K+ |
+| **Fabi's Lootr** | Resource Pack | Active | 15K+ |
+| **Create F&M 3** | Modpack (Tech) | Discontinued | 15K+ |
+| **Create F&M 2** | Modpack (Tech) | Discontinued | 2K+ |
 
-| Project | Category | Status | Loader | Downloads |
-|---------|----------|--------|--------|-----------|
-| **Create Unbound** | Modpack (Tech) | Coming Soon | NeoForge | - |
-| **{Additions}** | Modpack (Vanilla+) | Active | Fabric 1.21.1+ | 8K+ |
-| **Fabi's Lootr** | Resource Pack | Active | 1.20.1+ | 15K+ |
-| **Create F&M 3** | Modpack (Tech) | Discontinued | NeoForge 1.21.1 | 15K+ |
-| **Create F&M 2** | Modpack (Tech) | Discontinued | Forge 1.20.1 | 2K+ |
+Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interactive/projects) and [Modrinth](https://modrinth.com/user/FabiMvurice_Interactive).
 
-## Technology Stack
+## Tech Stack
 
-* **Framework:** [Astro](https://astro.build/) 5.3
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/) 4.0
-* **Language:** TypeScript
-* **Icons:** Lucide Icons
-* **Fonts:** Google Fonts (Inter)
-* **Hosting:** GitHub Pages (via GitHub Actions)
+| | |
+|---|---|
+| **Framework** | [Astro](https://astro.build/) 5.3 (static output) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) 4.0 via `@tailwindcss/vite` |
+| **Language** | TypeScript |
+| **SEO** | `@astrojs/sitemap` for auto-generated sitemaps |
+| **Fonts** | Inter (body) + Space Grotesk (display) |
+| **Hosting** | GitHub Pages |
+
+Zero runtime dependencies. No React, Vue, or Svelte — pure Astro components with vanilla JS.
 
 ## Getting Started
 
-### Prerequisites
+**Prerequisites:** Node.js 18+, Git
 
-* [Node.js](https://nodejs.org/) (v18 or later)
-* A code editor (VS Code recommended)
-* Git
+```bash
+# Clone
+git clone https://github.com/FmStudios-MC/FmStudios-Site.git
+cd FmStudios-Site
 
-### Installation
+# Install
+npm install
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/FmStudios-MC/FmStudios-Site.git
-    ```
+# Develop
+npm run dev
 
-2.  **Navigate to the project directory:**
-    ```bash
-    cd FmStudios-Site
-    ```
+# Build
+npm run build
 
-3.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-4.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
-
-5.  **Build for production:**
-    ```bash
-    npm run build
-    ```
+# Preview production build
+npm run preview
+```
 
 ## Pages
 
-| Page | Description |
-|------|-------------|
-| Home | Hero section, featured projects, about blurb, community links |
-| Projects | Full project showcase with search and filtering |
-| News | Announcements and updates with category filtering |
-| Changelog | Version history and update details |
-| Roadmap | Development progress tracking and statistics |
-| FAQ | Frequently asked questions by topic |
-| Gallery | Screenshot gallery with lightbox viewer |
-| Hosting | Kinetic Hosting partnership page |
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage with hero, featured projects, news, and community CTA |
+| `/projects` | Project showcase with search and category filters |
+| `/projects/[slug]` | Individual project detail pages |
+| `/news` | Announcements with category filtering |
+| `/news/[slug]` | Individual news articles |
+| `/roadmap` | Development roadmap with progress tracking |
+| `/changelog` | Version history per project |
+| `/gallery` | Screenshot gallery with lightbox viewer |
+| `/faq` | Two-column FAQ accordion |
+| `/downloads` | Centralized download hub |
+| `/about` | Studio info, team, and milestones |
+| `/community` | Discord and social links |
+| `/hosting` | Kinetic Hosting partnership page |
+| `/404` | Custom "Page Not Found" |
+
+## Project Structure
+
+```
+src/
+├── components/     Astro components (NavBar, Footer, Icon, modals, cards)
+├── data/           TypeScript data files (projects, news, roadmap, etc.)
+├── layouts/        Layout with sidebar nav, SEO meta, hex grid, embers
+├── pages/          14 pages (see table above)
+├── scripts/        Client-side TS (animations, lightbox, modals, search, theme)
+└── styles/         Design tokens and component styles (global.css)
+```
 
 ## Contributing
 
-Contributions are welcome! If you find a bug or have a suggestion:
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes
+4. Push and open a Pull Request
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Connect With Us
-
-* **Website:** [fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
-* **GitHub:** [FmStudios-MC](https://github.com/FmStudios-MC)
-* **Discord:** [Join our server](https://discord.gg/x9jsed8qyR)
-* **Twitter/X:** [@famvinteractive](https://twitter.com/famvinteractive)
-* **YouTube:** [@fm-studios-mc](https://youtube.com/@fm-studios-mc)
-* **Instagram:** [@fabimvurice.interactive](https://instagram.com/fabimvurice.interactive)
-* **TikTok:** [@fabimvurice.interactive](https://tiktok.com/@fabimvurice.interactive)
-* **Bluesky:** [@fmstudios.bsky.social](https://bsky.app/profile/fmstudios.bsky.social)
+MIT — see [LICENSE](LICENSE) for details.
