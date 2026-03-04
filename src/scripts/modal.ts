@@ -20,7 +20,7 @@ export function openModal(modalId: string, html: string) {
   modalControllers.set(modalId, controller);
 
   content.innerHTML = html;
-  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
   // Trap focus within modal
@@ -37,7 +37,7 @@ export function openModal(modalId: string, html: string) {
 export function closeModal(modalId: string) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
-  modal.classList.add('hidden');
+  modal.style.display = 'none';
   document.body.style.overflow = '';
 
   // Clean up focus trap
@@ -64,11 +64,11 @@ document.addEventListener('keydown', (e) => {
   const projectModal = document.getElementById('project-modal');
   const blogModal = document.getElementById('blog-modal');
 
-  if (lightbox && !lightbox.classList.contains('hidden')) {
+  if (lightbox && lightbox.style.display !== 'none') {
     closeModal('lightbox-modal');
-  } else if (blogModal && !blogModal.classList.contains('hidden')) {
+  } else if (blogModal && blogModal.style.display !== 'none') {
     closeModal('blog-modal');
-  } else if (projectModal && !projectModal.classList.contains('hidden')) {
+  } else if (projectModal && projectModal.style.display !== 'none') {
     closeModal('project-modal');
   }
 });

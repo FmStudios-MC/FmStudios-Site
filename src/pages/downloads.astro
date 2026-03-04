@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
-import { projects, categories } from '../data/projects';
+import { projects } from '../data/projects';
 
 const downloadableProjects = projects.filter((p) => p.downloadUrl && p.downloadUrl !== '#');
 // Sum raw numbers from download strings (e.g. "15K+" → 15, "1.2K+" → 1.2)

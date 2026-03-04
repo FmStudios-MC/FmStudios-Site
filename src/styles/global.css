@@ -830,7 +830,7 @@
   .badge-beta { background-color: rgba(146, 64, 14, 0.5); color: #fde68a; border: 1px solid rgba(253, 230, 138, 0.15); }
   .badge-soon { background-color: rgba(88, 28, 135, 0.5); color: #e9d5ff; border: 1px solid rgba(233, 213, 255, 0.15); }
   .badge-active { background-color: rgba(22, 101, 52, 0.5); color: #bbf7d0; border: 1px solid rgba(187, 247, 208, 0.15); }
-  .badge-updated { background-color: rgba(153, 27, 27, 0.5); color: #fecaca; border: 1px solid rgba(254, 202, 202, 0.15); }
+  .badge-updated { background-color: rgba(30, 64, 175, 0.5); color: #bfdbfe; border: 1px solid rgba(191, 219, 254, 0.15); }
   .badge-in-progress { background-color: rgba(30, 64, 175, 0.5); color: #bfdbfe; border: 1px solid rgba(191, 219, 254, 0.15); }
   .badge-planned { background-color: rgba(88, 28, 135, 0.5); color: #e9d5ff; border: 1px solid rgba(233, 213, 255, 0.15); }
   .badge-onhold { background-color: rgba(146, 64, 14, 0.5); color: #fde68a; border: 1px solid rgba(253, 230, 138, 0.15); }

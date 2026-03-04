@@ -242,12 +242,16 @@ function clearHighlights() {
 function initNewsFilter() {
   const newsCards = document.querySelectorAll('.news-card');
   const featuredPost = document.getElementById('featured-post');
+  const noPosts = document.getElementById('no-posts');
 
-  initFilterGroup('.news-filter-btn', 'filter', (filter) => {
+  function applyNewsFilter(filter: string) {
+    let visible = 0;
     newsCards.forEach((card) => {
       const el = card as HTMLElement;
       const category = el.dataset.category || '';
-      el.style.display = filter === 'all' || category === filter ? '' : 'none';
+      const match = filter === 'all' || category === filter;
+      el.style.display = match ? '' : 'none';
+      if (match) visible++;
     });
 
     if (featuredPost) {
@@ -258,24 +262,20 @@ function initNewsFilter() {
       }
     }
 
+    if (noPosts) {
+      noPosts.style.display = visible === 0 ? '' : 'none';
+    }
+  }
+
+  initFilterGroup('.news-filter-btn', 'filter', (filter) => {
+    applyNewsFilter(filter);
     setParams({ filter });
   });
 
   // Apply initial filter
   const savedFilter = getParam('filter') || 'all';
   if (savedFilter !== 'all') {
-    newsCards.forEach((card) => {
-      const el = card as HTMLElement;
-      const category = el.dataset.category || '';
-      el.style.display = savedFilter === 'all' || category === savedFilter ? '' : 'none';
-    });
-    if (featuredPost) {
-      const featuredCard = featuredPost.querySelector('.news-card') as HTMLElement;
-      if (featuredCard) {
-        const category = featuredCard.dataset.category || '';
-        featuredPost.style.display = savedFilter === 'all' || category === savedFilter ? '' : 'none';
-      }
-    }
+    applyNewsFilter(savedFilter);
   }
 }
 

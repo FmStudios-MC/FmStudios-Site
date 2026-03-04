@@ -63,8 +63,9 @@ function initAccordions() {
       if (content.classList.contains('accordion-content')) {
         if (isOpen) {
           content.style.maxHeight = content.scrollHeight + 'px';
-          content.offsetHeight;
-          content.style.maxHeight = '0';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = '0';
+          });
           content.classList.remove('open');
         } else {
           content.style.maxHeight = content.scrollHeight + 'px';
