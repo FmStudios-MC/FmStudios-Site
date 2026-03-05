@@ -27,6 +27,8 @@ const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
         src={project.screenshots[0]}
         alt={`${project.name} hero`}
         class="w-full h-full object-cover"
+        width="1920"
+        height="1080"
       />
       <div class="absolute inset-0" style="background: linear-gradient(to bottom, transparent 30%, var(--bg-void) 100%);" aria-hidden="true"></div>
       <!-- Floating logo overlay -->
@@ -105,6 +107,8 @@ const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
               alt={`${project.name} screenshot ${i + 1}`}
               class="w-full h-full object-cover cursor-pointer lightbox-trigger transition-opacity duration-200 hover:opacity-75"
               data-src={s}
+              width="280"
+              height="180"
               loading="lazy"
             />
           </div>

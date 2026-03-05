@@ -88,6 +88,27 @@ const ogImage = new URL('/images/logoneu.webp', Astro.site);
   <script>
     import '../scripts/theme';
     import '../scripts/animations';
+
+    // Search clear buttons
+    document.querySelectorAll('.search-clear-btn').forEach((btn) => {
+      const inputId = (btn as HTMLElement).dataset.clear;
+      if (!inputId) return;
+      const input = document.getElementById(inputId) as HTMLInputElement | null;
+      if (!input) return;
+
+      function updateVisibility() {
+        btn.classList.toggle('visible', input!.value.length > 0);
+      }
+
+      input.addEventListener('input', updateVisibility);
+      updateVisibility();
+
+      btn.addEventListener('click', () => {
+        input!.value = '';
+        input!.dispatchEvent(new Event('input', { bubbles: true }));
+        input!.focus();
+      });
+    });
   </script>
 </body>
 </html>

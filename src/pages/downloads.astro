@@ -52,6 +52,9 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
             class="search-input"
             autocomplete="off"
           />
+          <button type="button" class="search-clear-btn" data-clear="dl-search" aria-label="Clear search">
+            <Icon name="x" size={12} />
+          </button>
         </div>
       </div>
     </ScrollReveal>
@@ -126,6 +129,20 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
         <p class="text-sm mt-1" style="color: var(--text-muted);">Try a different search term.</p>
       </div>
     </div>
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Need help installing?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Our Discord community can walk you through the setup.</p>
+        </div>
+        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
 
   </section>
 

@@ -31,9 +31,12 @@ import { projects, categories, modpackTypes } from '../data/projects';
             type="text"
             id="search-input"
             placeholder="Search projects, features, versions..."
-            class="search-input w-full pl-12 pr-4 py-3.5 text-sm"
+            class="search-input w-full pl-12 pr-10 py-3.5 text-sm"
             aria-label="Search projects"
           />
+          <button type="button" class="search-clear-btn" data-clear="search-input" aria-label="Clear search">
+            <Icon name="x" size={12} />
+          </button>
         </div>
 
         <!-- Segmented filters -->
@@ -86,6 +89,20 @@ import { projects, categories, modpackTypes } from '../data/projects';
         <p style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
       </div>
     </div>
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Want to suggest a project?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Join our Discord and share your ideas with the community.</p>
+        </div>
+        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
   </section>
 
   <script>

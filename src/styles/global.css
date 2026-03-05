@@ -458,6 +458,26 @@
     opacity: 1;
   }
 
+  .light-theme .tilt-card {
+    background: var(--bg-layer-1);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 var(--edge-top);
+  }
+
+  .light-theme .tilt-card::before {
+    background: linear-gradient(90deg, transparent, rgba(212, 94, 16, 0.3), transparent);
+  }
+
+  .light-theme .tilt-card:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.08),
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 var(--edge-top),
+      0 0 0 1px rgba(212, 94, 16, 0.08);
+  }
+
   /* ── Buttons ──────────────────────────── */
   .btn-primary {
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
@@ -883,6 +903,40 @@
     color: var(--text-dim);
   }
 
+  .search-input {
+    padding-right: 2.5rem;
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-layer-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    color: var(--text-dim);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .search-clear-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .search-clear-btn:hover {
+    color: var(--accent);
+    border-color: var(--border-accent);
+  }
+
   /* ── Accordion / FAQ ─────────────────────── */
   .accordion-chevron,
   .roadmap-toggle-chevron,
@@ -1304,6 +1358,11 @@
     margin-top: 0.25rem;
   }
 
+  .light-theme .stat-counter {
+    background: var(--bg-layer-1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0 #fff;
+  }
+
   /* ── Timeline Connector (glowing line) ─── */
   .timeline-line {
     position: absolute;
@@ -1399,6 +1458,18 @@
   .breadcrumb .separator {
     color: var(--text-dim);
     font-size: 0.7rem;
+  }
+
+  .light-theme .breadcrumb {
+    color: var(--text-dim);
+  }
+
+  .light-theme .breadcrumb a {
+    color: var(--text-muted);
+  }
+
+  .light-theme .breadcrumb a:hover {
+    color: var(--accent);
   }
 
   /* ── Lightbox updated ────────────────── */

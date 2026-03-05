@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import ChangelogBlock from '../components/ChangelogBlock.astro';
 import { changelogs } from '../data/changelog';
@@ -31,5 +32,19 @@ const changelogEntries = Object.entries(changelogs);
         ))}
       </div>
     </div>
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Found a bug?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Report issues on our Discord and help us improve.</p>
+        </div>
+        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
   </section>
 </Layout>
