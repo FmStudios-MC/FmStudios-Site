@@ -2,16 +2,25 @@
 import Layout from '../../layouts/Layout.astro';
 import Icon from '../../components/Icon.astro';
 import { blogPosts, blogCategoryConfig } from '../../data/news';
+import { relativeDate, readingTime, formatDate } from '../../data/utils';
 
 export function getStaticPaths() {
-  return blogPosts.map((post) => ({
+  return blogPosts.map((post, i) => ({
     params: { slug: post.slug },
-    props: { post },
+    props: {
+      post,
+      prevPost: i < blogPosts.length - 1 ? blogPosts[i + 1] : null,
+      nextPost: i > 0 ? blogPosts[i - 1] : null,
+    },
   }));
 }
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost } = Astro.props;
 const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
+const readMin = readingTime(post.content);
+const relDate = relativeDate(post.date);
+const fmtDate = formatDate(post.date);
+const postUrl = `https://fabimvurice.com/news/${post.slug}`;
 ---
 
 <Layout title={`${post.title} - FabiMvurice Interactive`} description={post.excerpt}>
@@ -52,17 +61,56 @@ const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
         <!-- Meta -->
         <div class="flex items-center gap-4 text-sm mb-8 pb-6 border-b border-[var(--border-subtle)]" style="color: var(--text-dim);">
           <span class="flex items-center gap-1"><Icon name="circle-dot" size={14} />{post.author}</span>
-          <span class="flex items-center gap-1"><Icon name="calendar" size={14} />{post.date}</span>
+          <span class="flex items-center gap-1"><Icon name="calendar" size={14} />{fmtDate}</span>
+          <span class="flex items-center gap-1" title={relDate}><Icon name="clock" size={14} />{relDate}</span>
+          <span class="flex items-center gap-1"><Icon name="book-open" size={14} />{readMin} min read</span>
         </div>
 
         <!-- Content -->
         <div class="blog-content" set:html={post.content} />
 
-        <!-- Footer -->
+        <!-- Share -->
         <div class="mt-10 pt-6 border-t border-[var(--border-subtle)]">
+          <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color: var(--text-dim);">Share this post</p>
+          <div class="flex flex-wrap gap-2">
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`} target="_blank" rel="noopener noreferrer" class="btn-outline text-sm inline-flex items-center gap-2 !py-2 !px-3">
+              <Icon name="twitter" size={14} />
+              Post on X
+            </a>
+            <button id="copy-link-btn" class="btn-outline text-sm inline-flex items-center gap-2 !py-2 !px-3" data-url={postUrl}>
+              <Icon name="copy" size={14} />
+              <span id="copy-link-label">Copy Link</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Prev/Next nav -->
+        <div class="mt-8 pt-6 border-t border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {prevPost ? (
+            <a href={`/news/${prevPost.slug}`} class="depth-card p-4 group flex items-center gap-3">
+              <Icon name="chevron-right" size={16} class="rotate-180 flex-shrink-0" style="color: var(--text-dim);" />
+              <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-dim);">Older</p>
+                <p class="text-sm font-semibold truncate" style="color: var(--text-primary);">{prevPost.title}</p>
+              </div>
+            </a>
+          ) : <div />}
+          {nextPost ? (
+            <a href={`/news/${nextPost.slug}`} class="depth-card p-4 group flex items-center gap-3 sm:text-right sm:flex-row-reverse">
+              <Icon name="chevron-right" size={16} class="flex-shrink-0" style="color: var(--text-dim);" />
+              <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-dim);">Newer</p>
+                <p class="text-sm font-semibold truncate" style="color: var(--text-primary);">{nextPost.title}</p>
+              </div>
+            </a>
+          ) : <div />}
+        </div>
+
+        <!-- Back to News -->
+        <div class="mt-6 text-center">
           <a href="/news" class="btn-primary inline-flex items-center gap-2">
             <Icon name="chevron-right" size={16} class="rotate-180" />
-            Back to News
+            All News
           </a>
         </div>
       </div>
@@ -78,6 +126,23 @@ const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
         const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
         bar.style.width = `${Math.min(progress, 100)}%`;
       }, { passive: true });
+    }
+
+    // Copy link button
+    const copyBtn = document.getElementById('copy-link-btn');
+    const copyLabel = document.getElementById('copy-link-label');
+    if (copyBtn && copyLabel) {
+      copyBtn.addEventListener('click', async () => {
+        const url = (copyBtn as HTMLElement).dataset.url || window.location.href;
+        try {
+          await navigator.clipboard.writeText(url);
+          copyLabel.textContent = 'Copied!';
+          setTimeout(() => { copyLabel.textContent = 'Copy Link'; }, 2000);
+        } catch {
+          copyLabel.textContent = 'Failed';
+          setTimeout(() => { copyLabel.textContent = 'Copy Link'; }, 2000);
+        }
+      });
     }
   </script>
 </Layout>

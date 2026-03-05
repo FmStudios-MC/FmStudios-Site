@@ -1273,7 +1273,7 @@
     left: 15%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(120, 46, 8, 0.12), transparent 70%);
+    background: radial-gradient(circle, rgba(106, 45, 145, 0.12), transparent 70%);
     filter: blur(80px);
     pointer-events: none;
     animation: hero-glow-float 11s ease-in-out 2s infinite;

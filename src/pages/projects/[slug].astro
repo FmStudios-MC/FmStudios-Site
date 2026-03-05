@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Icon from '../../components/Icon.astro';
 import LightboxModal from '../../components/LightboxModal.astro';
 import { projects, statusConfig } from '../../data/projects';
+import { relativeDate, formatDate } from '../../data/utils';
 
 export function getStaticPaths() {
   return projects.map((project) => ({
@@ -14,6 +15,8 @@ export function getStaticPaths() {
 const { project } = Astro.props;
 const status = statusConfig[project.status];
 const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
+const lastUpdateRel = project.lastUpdate !== '-' ? relativeDate(project.lastUpdate) : null;
+const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate) : null;
 ---
 
 <Layout
@@ -87,9 +90,9 @@ const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
                 <Icon name="download" size={10} class="inline" /> {project.downloads} downloads
               </span>
             )}
-            {project.lastUpdate !== '-' && (
-              <span class="tag-dim">
-                <Icon name="clock" size={10} class="inline" /> {project.lastUpdate}
+            {lastUpdateFmt && (
+              <span class="tag-dim" title={lastUpdateFmt}>
+                <Icon name="clock" size={10} class="inline" /> {lastUpdateFmt} ({lastUpdateRel})
               </span>
             )}
           </div>

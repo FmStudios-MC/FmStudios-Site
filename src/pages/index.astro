@@ -8,6 +8,7 @@ import Modal from '../components/Modal.astro';
 import LightboxModal from '../components/LightboxModal.astro';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/news';
+import { relativeDate } from '../data/utils';
 import { blogCategoryConfig } from '../data/news';
 
 const featured = projects.slice(0, 3);
@@ -183,7 +184,7 @@ const latestNews = blogPosts.slice(0, 3);
                 <div class="p-5">
                   <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5 rounded-full`}>{catConfig.label}</span>
                   <h3 class="text-base font-bold font-display mt-2 mb-1 line-clamp-2" style="color: var(--text-primary);">{post.title}</h3>
-                  <p class="text-xs" style="color: var(--text-dim);">{post.date}</p>
+                  <p class="text-xs" style="color: var(--text-dim);">{relativeDate(post.date)}</p>
                 </div>
               </a>
             </ScrollReveal>

@@ -2,6 +2,7 @@
 import Icon from './Icon.astro';
 import type { BlogPost } from '../data/news';
 import { blogCategoryConfig } from '../data/news';
+import { relativeDate, readingTime, formatDate } from '../data/utils';
 
 interface Props {
   post: BlogPost;
@@ -11,6 +12,9 @@ interface Props {
 const { post, featured = false } = Astro.props;
 const catConfig = blogCategoryConfig[post.category] || blogCategoryConfig.news;
 const href = `/news/${post.slug}`;
+const relDate = relativeDate(post.date);
+const readMin = readingTime(post.content);
+const fmtDate = formatDate(post.date);
 ---
 
 {featured ? (
@@ -30,7 +34,9 @@ const href = `/news/${post.slug}`;
         <div class="flex items-center justify-between text-sm" style="color: var(--text-dim);">
           <div class="flex items-center gap-4">
             <span class="flex items-center gap-1.5"><Icon name="circle-dot" size={13} />{post.author}</span>
-            <span class="flex items-center gap-1.5"><Icon name="calendar" size={13} />{post.date}</span>
+            <span class="flex items-center gap-1.5"><Icon name="calendar" size={13} />{fmtDate}</span>
+            <span class="flex items-center gap-1.5"><Icon name="clock" size={13} />{relDate}</span>
+            <span class="flex items-center gap-1.5"><Icon name="book-open" size={13} />{readMin} min</span>
           </div>
           <span class="font-bold inline-flex items-center gap-1 transition-colors" style="color: var(--accent);">Read more <Icon name="arrow-right" size={14} /></span>
         </div>
@@ -53,7 +59,9 @@ const href = `/news/${post.slug}`;
         <div class="flex items-center gap-3" style="color: var(--text-dim);">
           <span>{post.author}</span>
           <span>·</span>
-          <span>{post.date}</span>
+          <span>{relDate}</span>
+          <span>·</span>
+          <span>{readMin} min read</span>
         </div>
         <span class="font-bold inline-flex items-center gap-1" style="color: var(--accent);">Read <Icon name="arrow-right" size={12} /></span>
       </div>
