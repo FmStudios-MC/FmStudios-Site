@@ -1,4 +1,4 @@
-// Lightweight canvas ember particle system (~40 floating orange dots)
+// Lightweight canvas ember particle system (~40 floating red-magenta dots)
 
 interface Ember {
   x: number;
@@ -57,7 +57,7 @@ export function initEmberParticles() {
 
       ctx!.beginPath();
       ctx!.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-      ctx!.fillStyle = `rgba(232, 112, 26, ${e.opacity})`;
+      ctx!.fillStyle = `rgba(224, 64, 80, ${e.opacity})`;
       ctx!.fill();
     }
 
