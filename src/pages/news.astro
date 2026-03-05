@@ -21,7 +21,20 @@ const otherPosts = blogPosts.slice(1);
       </div>
     </ScrollReveal>
 
-    <!-- Segmented filters -->
+    <!-- Search + filters -->
+    <ScrollReveal>
+      <div class="search-input-wrap mb-6 max-w-md">
+        <Icon name="search" size={16} class="search-icon" />
+        <input
+          type="text"
+          id="news-search-input"
+          placeholder="Search news..."
+          class="search-input"
+          aria-label="Search news"
+        />
+      </div>
+    </ScrollReveal>
+
     <ScrollReveal>
       <div class="flex flex-wrap gap-2 justify-center mb-10">
         {newsFilters.map((filter, i) => (

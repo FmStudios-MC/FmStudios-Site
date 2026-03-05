@@ -243,22 +243,39 @@ function initNewsFilter() {
   const newsCards = document.querySelectorAll('.news-card');
   const featuredPost = document.getElementById('featured-post');
   const noPosts = document.getElementById('no-posts');
+  const newsSearchInput = document.getElementById('news-search-input') as HTMLInputElement | null;
 
-  function applyNewsFilter(filter: string) {
+  let currentFilter = 'all';
+  let newsSearchQuery = getParam('q') || '';
+
+  if (newsSearchInput && newsSearchQuery) {
+    newsSearchInput.value = newsSearchQuery;
+  }
+
+  function applyNewsFilters() {
     let visible = 0;
     newsCards.forEach((card) => {
       const el = card as HTMLElement;
       const category = el.dataset.category || '';
-      const match = filter === 'all' || category === filter;
-      el.style.display = match ? '' : 'none';
-      if (match) visible++;
+      const title = el.dataset.title || '';
+      const excerpt = el.dataset.excerpt || '';
+      const author = el.dataset.author || '';
+
+      let show = currentFilter === 'all' || category === currentFilter;
+
+      if (show && newsSearchQuery) {
+        const q = newsSearchQuery.toLowerCase();
+        if (!title.includes(q) && !excerpt.includes(q) && !author.includes(q)) show = false;
+      }
+
+      el.style.display = show ? '' : 'none';
+      if (show) visible++;
     });
 
     if (featuredPost) {
       const featuredCard = featuredPost.querySelector('.news-card') as HTMLElement;
       if (featuredCard) {
-        const category = featuredCard.dataset.category || '';
-        featuredPost.style.display = filter === 'all' || category === filter ? '' : 'none';
+        featuredPost.style.display = featuredCard.style.display;
       }
     }
 
@@ -267,15 +284,25 @@ function initNewsFilter() {
     }
   }
 
-  initFilterGroup('.news-filter-btn', 'filter', (filter) => {
-    applyNewsFilter(filter);
-    setParams({ filter });
+  currentFilter = initFilterGroup('.news-filter-btn', 'filter', (filter) => {
+    currentFilter = filter;
+    applyNewsFilters();
+    setParams({ filter: currentFilter, q: newsSearchQuery });
   });
 
-  // Apply initial filter
-  const savedFilter = getParam('filter') || 'all';
-  if (savedFilter !== 'all') {
-    applyNewsFilter(savedFilter);
+  let newsSearchTimeout: number;
+  newsSearchInput?.addEventListener('input', () => {
+    clearTimeout(newsSearchTimeout);
+    newsSearchTimeout = window.setTimeout(() => {
+      newsSearchQuery = newsSearchInput.value;
+      applyNewsFilters();
+      setParams({ filter: currentFilter, q: newsSearchQuery });
+    }, 300);
+  });
+
+  // Apply initial filters
+  if (currentFilter !== 'all' || newsSearchQuery) {
+    applyNewsFilters();
   }
 }
 

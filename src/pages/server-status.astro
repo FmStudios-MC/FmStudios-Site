@@ -1,0 +1,267 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { servers } from '../data/servers';
+---
+
+<Layout title="Server Status - FabiMvurice Interactive">
+  <section class="max-w-4xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <ScrollReveal>
+      <div class="mb-8">
+        <p class="section-eyebrow mb-2">Live Status</p>
+        <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+          Server <span class="gradient-text">Status</span>
+        </h1>
+        <p class="mt-3 text-sm max-w-lg" style="color: var(--text-muted);">
+          Check the status of our game servers before joining.
+        </p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Server cards -->
+    <div class="flex flex-col gap-5">
+      {servers.map((server, i) => (
+        <ScrollReveal delay={i * 100}>
+          <div class="depth-card server-card p-0 overflow-hidden">
+            <div class="server-header px-6 py-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="server-icon-wrap">
+                    <Icon name="server" size={20} />
+                  </div>
+                  <div>
+                    <h2 class="text-base font-bold font-display" style="color: var(--text-primary);">
+                      {server.name}
+                    </h2>
+                    <p class="text-xs mt-0.5" style="color: var(--text-dim);">{server.game}</p>
+                  </div>
+                </div>
+                <div class:list={['status-badge', `status-${server.status}`]}>
+                  <span class="status-dot" aria-hidden="true"></span>
+                  {server.status === 'online' ? 'Online' : server.status === 'maintenance' ? 'Maintenance' : 'Offline'}
+                </div>
+              </div>
+            </div>
+
+            <div class="server-divider" aria-hidden="true"></div>
+
+            <div class="px-6 py-5">
+              <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted);">
+                {server.description}
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Address -->
+                <div class="server-info-block">
+                  <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Address</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <code class="server-address">{server.address}{server.port ? `:${server.port}` : ''}</code>
+                    <button
+                      type="button"
+                      class="copy-btn"
+                      data-copy={`${server.address}${server.port ? `:${server.port}` : ''}`}
+                      aria-label="Copy server address"
+                      title="Copy"
+                    >
+                      <Icon name="copy" size={13} />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Version -->
+                <div class="server-info-block">
+                  <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Version</span>
+                  <span class="text-sm font-medium mt-1" style="color: var(--text-primary);">{server.version}</span>
+                </div>
+
+                <!-- Players -->
+                <div class="server-info-block">
+                  <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Max Players</span>
+                  <span class="text-sm font-medium mt-1" style="color: var(--text-primary);">{server.maxPlayers || 'Unlimited'}</span>
+                </div>
+              </div>
+
+              {server.modpack && (
+                <div class="mt-4 pt-4" style="border-top: 1px solid var(--border-subtle);">
+                  <span class="text-xs" style="color: var(--text-dim);">Modpack: </span>
+                  <a href={`/projects/${server.modpack}`} class="text-xs font-bold" style="color: var(--accent);">
+                    View Modpack →
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    {servers.length === 0 && (
+      <div class="text-center py-16">
+        <div class="depth-card p-12">
+          <Icon name="server" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
+          <h3 class="text-xl font-bold font-display mb-2" style="color: var(--text-primary);">No servers yet</h3>
+          <p style="color: var(--text-muted);">Check back later for server announcements.</p>
+        </div>
+      </div>
+    )}
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Looking for players?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Join our Discord to find people to play with.</p>
+        </div>
+        <a
+          href="https://discord.gg/x9jsed8qyR"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2"
+        >
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
+
+  </section>
+
+  <script>
+    // Copy server address to clipboard
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = (btn as HTMLElement).dataset.copy || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.classList.add('copied');
+          setTimeout(() => btn.classList.remove('copied'), 1500);
+        } catch {
+          // Fallback: do nothing
+        }
+      });
+    });
+  </script>
+</Layout>
+
+<style>
+  .server-header {
+    background: var(--bg-layer-2);
+  }
+
+  .server-icon-wrap {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-layer-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    color: var(--accent);
+    box-shadow: var(--shadow-inset);
+  }
+
+  .server-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.25), transparent);
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .status-online {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .status-online .status-dot {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .status-offline {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .status-offline .status-dot {
+    background: #f87171;
+  }
+
+  .status-maintenance {
+    background: rgba(250, 204, 21, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(250, 204, 21, 0.3);
+  }
+
+  .status-maintenance .status-dot {
+    background: #fbbf24;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .server-info-block {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+  }
+
+  .server-address {
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: var(--accent);
+    background: var(--bg-layer-3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .copy-btn {
+    appearance: none;
+    border: none;
+    background: var(--bg-layer-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.25rem;
+    padding: 0.3rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .copy-btn:hover {
+    color: var(--accent);
+    border-color: var(--border-accent);
+  }
+
+  .copy-btn.copied {
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+</style>

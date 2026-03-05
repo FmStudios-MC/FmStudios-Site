@@ -14,7 +14,7 @@ const href = `/news/${post.slug}`;
 ---
 
 {featured ? (
-  <a href={href} class="depth-card block news-card group" data-category={post.category}>
+  <a href={href} class="depth-card block news-card group" data-category={post.category} data-title={post.title.toLowerCase()} data-excerpt={post.excerpt.toLowerCase()} data-author={post.author.toLowerCase()}>
     <div class="grid grid-cols-1 lg:grid-cols-2">
       <!-- Angled clip-path image -->
       <div class="aspect-video lg:aspect-auto overflow-hidden relative featured-image-wrap">
@@ -38,7 +38,7 @@ const href = `/news/${post.slug}`;
     </div>
   </a>
 ) : (
-  <a href={href} class="depth-card block news-card overflow-hidden group" data-category={post.category}>
+  <a href={href} class="depth-card block news-card overflow-hidden group" data-category={post.category} data-title={post.title.toLowerCase()} data-excerpt={post.excerpt.toLowerCase()} data-author={post.author.toLowerCase()}>
     <div class="aspect-video overflow-hidden relative">
       <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>

@@ -1,0 +1,274 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { guides, guideCategories } from '../data/guides';
+---
+
+<Layout title="Guides - FabiMvurice Interactive">
+  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <ScrollReveal>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+        <div>
+          <p class="section-eyebrow mb-2">Knowledge Base</p>
+          <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+            Project <span class="gradient-text">Guides</span>
+          </h1>
+          <p class="mt-3 text-sm max-w-md" style="color: var(--text-muted);">
+            Step-by-step guides to get the most out of our modpacks and resource packs.
+          </p>
+        </div>
+        <div class="guide-count-badge">
+          <span class="text-2xl font-black font-display gradient-text">{guides.length}</span>
+          <span class="text-xs uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Guides</span>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Category filters -->
+    <ScrollReveal>
+      <div class="flex flex-wrap gap-2 justify-center mb-8">
+        {guideCategories.map((cat, i) => (
+          <button
+            class:list={['filter-btn guide-filter-btn', i === 0 && 'active']}
+            data-filter={cat.id}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    </ScrollReveal>
+
+    <!-- Search -->
+    <ScrollReveal>
+      <div class="search-input-wrap mb-8 max-w-md mx-auto">
+        <Icon name="search" size={16} class="search-icon" />
+        <input
+          type="text"
+          id="guide-search-input"
+          placeholder="Search guides..."
+          class="search-input"
+          aria-label="Search guides"
+        />
+      </div>
+    </ScrollReveal>
+
+    <!-- Guides grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="guides-grid">
+      {guides.map((guide, i) => (
+        <ScrollReveal delay={i * 80}>
+          <div
+            class="depth-card guide-card p-0 overflow-hidden"
+            data-category={guide.category}
+            data-project={guide.projectSlug}
+            data-title={guide.title.toLowerCase()}
+            data-description={guide.description.toLowerCase()}
+          >
+            <!-- Header -->
+            <div class="guide-header px-5 py-4">
+              <div class="flex items-center gap-3">
+                <div class="guide-icon-wrap">
+                  <Icon name={guide.icon} size={18} />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h2 class="text-sm font-bold font-display truncate" style="color: var(--text-primary);">
+                    {guide.title}
+                  </h2>
+                  <p class="text-xs mt-0.5" style="color: var(--text-dim);">{guide.projectName}</p>
+                </div>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                  style="background: rgba(232,112,26,0.10); color: var(--accent); border: 1px solid rgba(232,112,26,0.22);">
+                  {guide.steps.length} steps
+                </span>
+              </div>
+            </div>
+
+            <div class="guide-divider" aria-hidden="true"></div>
+
+            <div class="px-5 py-4">
+              <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted);">
+                {guide.description}
+              </p>
+
+              <!-- Collapsible steps -->
+              <div class="guide-steps">
+                {guide.steps.map((step, si) => (
+                  <div class="guide-step">
+                    <div class="flex items-start gap-3">
+                      <div class="step-number">{si + 1}</div>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-bold mb-1" style="color: var(--text-primary);">
+                          {step.title}
+                        </h3>
+                        <p class="text-xs leading-relaxed" style="color: var(--text-muted);" set:html={step.content} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+
+    <!-- No results -->
+    <div id="guide-no-results" class="text-center py-16" style="display: none;">
+      <div class="depth-card p-12">
+        <Icon name="book-open" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
+        <h3 class="text-xl font-bold font-display mb-2" style="color: var(--text-primary);">No guides found</h3>
+        <p style="color: var(--text-muted);">Try a different search or category.</p>
+      </div>
+    </div>
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Need more help?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Join our Discord for live support from the community.</p>
+        </div>
+        <a
+          href="https://discord.gg/x9jsed8qyR"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2"
+        >
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
+
+  </section>
+
+  <script>
+    // Guide filtering and search
+    const filterBtns = document.querySelectorAll('.guide-filter-btn');
+    const searchInput = document.getElementById('guide-search-input') as HTMLInputElement | null;
+    const cards = document.querySelectorAll('.guide-card');
+    const noResults = document.getElementById('guide-no-results');
+
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    function applyFilters() {
+      let visible = 0;
+
+      cards.forEach((card) => {
+        const el = card as HTMLElement;
+        const category = el.dataset.category || '';
+        const title = el.dataset.title || '';
+        const description = el.dataset.description || '';
+
+        let show = true;
+        if (currentCategory !== 'all' && category !== currentCategory) show = false;
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          if (!title.includes(q) && !description.includes(q)) show = false;
+        }
+
+        const wrapper = el.closest('.reveal, .reveal-scale') || el.parentElement;
+        if (wrapper) {
+          (wrapper as HTMLElement).style.display = show ? '' : 'none';
+        }
+        if (show) visible++;
+      });
+
+      if (noResults) {
+        noResults.style.display = visible === 0 ? '' : 'none';
+      }
+    }
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentCategory = (btn as HTMLElement).dataset.filter || 'all';
+        filterBtns.forEach((b) => {
+          b.classList.remove('active');
+          (b as HTMLElement).setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        (btn as HTMLElement).setAttribute('aria-pressed', 'true');
+        applyFilters();
+      });
+    });
+
+    let searchTimeout: number;
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = window.setTimeout(() => {
+        searchQuery = searchInput.value;
+        applyFilters();
+      }, 300);
+    });
+  </script>
+</Layout>
+
+<style>
+  .guide-count-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-inset);
+    flex-shrink: 0;
+  }
+
+  .guide-header {
+    background: var(--bg-layer-2);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .guide-icon-wrap {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(232, 112, 26, 0.12), rgba(232, 112, 26, 0.04));
+    border: 1px solid rgba(232, 112, 26, 0.22);
+    border-radius: 0.625rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .guide-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 112, 26, 0.25), transparent);
+  }
+
+  .guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .guide-step {
+    padding: 0.75rem;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+  }
+
+  .step-number {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    box-shadow: 0 0 10px rgba(232, 112, 26, 0.3);
+  }
+</style>

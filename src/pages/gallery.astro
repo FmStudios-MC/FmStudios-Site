@@ -10,21 +10,41 @@ const galleryItems = projects.flatMap((project) =>
     src,
     alt: `${project.name} - Screenshot ${i + 1}`,
     projectName: project.name,
-    projectId: project.id,
+    projectSlug: project.slug,
   }))
 );
+
+const projectFilters = [
+  { id: 'all', label: 'All Projects' },
+  ...projects.map((p) => ({ id: p.slug, label: p.name })),
+];
 ---
 
 <Layout title="Gallery - FabiMvurice Interactive">
   <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-6 pb-10">
 
     <ScrollReveal>
-      <div class="flex items-end justify-between mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
           <p class="section-eyebrow mb-2">The Vault</p>
           <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">Gallery</h1>
         </div>
-        <p class="text-sm" style="color: var(--text-dim);">{galleryItems.length} images</p>
+        <p class="text-sm" style="color: var(--text-dim);"><span id="gallery-count">{galleryItems.length}</span> images</p>
+      </div>
+    </ScrollReveal>
+
+    <!-- Project filter -->
+    <ScrollReveal>
+      <div class="flex flex-wrap gap-2 justify-center mb-8">
+        {projectFilters.map((filter, i) => (
+          <button
+            class:list={['filter-btn gallery-filter-btn', i === 0 && 'active']}
+            data-filter={filter.id}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
     </ScrollReveal>
 
@@ -37,6 +57,7 @@ const galleryItems = projects.flatMap((project) =>
             class="tilt-card overflow-hidden cursor-pointer gallery-item group gallery-btn"
             data-src={item.src}
             data-alt={item.alt}
+            data-project={item.projectSlug}
             aria-label={`View ${item.alt}`}
           >
             <div class="aspect-video overflow-hidden">
@@ -73,15 +94,55 @@ const galleryItems = projects.flatMap((project) =>
   <script>
     import { openLightbox } from '../scripts/lightbox';
 
-    const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+    const allItems = Array.from(document.querySelectorAll('.gallery-item'));
+    const filterBtns = document.querySelectorAll('.gallery-filter-btn');
+    const countEl = document.getElementById('gallery-count');
+    let currentFilter = 'all';
 
-    galleryItems.forEach((item, i) => {
+    function getVisibleItems() {
+      return allItems.filter((el) => {
+        const project = (el as HTMLElement).dataset.project || '';
+        return currentFilter === 'all' || project === currentFilter;
+      });
+    }
+
+    function applyGalleryFilter() {
+      let visible = 0;
+      allItems.forEach((item) => {
+        const el = item as HTMLElement;
+        const project = el.dataset.project || '';
+        const show = currentFilter === 'all' || project === currentFilter;
+        const wrapper = el.closest('.reveal, .reveal-scale') || el.parentElement;
+        if (wrapper) {
+          (wrapper as HTMLElement).style.display = show ? '' : 'none';
+        }
+        if (show) visible++;
+      });
+      if (countEl) countEl.textContent = String(visible);
+    }
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentFilter = (btn as HTMLElement).dataset.filter || 'all';
+        filterBtns.forEach((b) => {
+          b.classList.remove('active');
+          (b as HTMLElement).setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        (btn as HTMLElement).setAttribute('aria-pressed', 'true');
+        applyGalleryFilter();
+      });
+    });
+
+    allItems.forEach((item) => {
       item.addEventListener('click', () => {
-        const srcs = galleryItems.map((el) => ({
+        const visibleItems = getVisibleItems();
+        const srcs = visibleItems.map((el) => ({
           src: (el as HTMLElement).dataset.src || '',
           alt: (el as HTMLElement).dataset.alt || '',
         }));
-        openLightbox(srcs, i);
+        const idx = visibleItems.indexOf(item);
+        openLightbox(srcs, idx >= 0 ? idx : 0);
       });
     });
   </script>
