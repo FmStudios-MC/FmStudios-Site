@@ -27,9 +27,9 @@
 
 ## About
 
-This is the source code for the **FabiMvurice Interactive** website a central hub for our Minecraft projects, news, changelogs, roadmap, and downloads.
+This is the source code for the **FabiMvurice Interactive** website — a central hub for our Minecraft projects, news, changelogs, roadmap, guides, and downloads.
 
-The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur just solid layers with fire-themed accents.
+The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur — just solid layers with red-magenta-purple accents.
 
 ## Projects
 
@@ -82,20 +82,22 @@ npm run preview
 
 | Route | Description |
 |-------|-------------|
-| `/` | Homepage with hero, featured projects, news, and community CTA |
+| `/` | Homepage with hero, featured projects, latest news, and community CTA |
 | `/projects` | Project showcase with search and category filters |
-| `/projects/[slug]` | Individual project detail pages |
-| `/news` | Announcements with category filtering |
-| `/news/[slug]` | Individual news articles |
-| `/roadmap` | Development roadmap with progress tracking |
-| `/changelog` | Version history per project |
-| `/gallery` | Screenshot gallery with lightbox viewer |
-| `/faq` | Two-column FAQ accordion |
-| `/downloads` | Centralized download hub |
-| `/about` | Studio info, team, and milestones |
-| `/community` | Discord and social links |
+| `/projects/[slug]` | Individual project detail pages with screenshots and downloads |
+| `/news` | News listing with search and category filters |
+| `/news/[slug]` | News articles with reading time, share buttons, and prev/next nav |
+| `/roadmap` | Kanban-style development roadmap with progress tracking |
+| `/changelog` | Version history per project with project filter |
+| `/guides` | Step-by-step project guides with category filter and search |
+| `/gallery` | Screenshot gallery with lightbox viewer and project filter |
+| `/faq` | Two-column FAQ accordion with search |
+| `/downloads` | Centralized download hub for all projects |
+| `/about` | Studio info, team, milestones, and tech stack |
+| `/community` | Discord CTA, social links, and community guidelines |
+| `/server-status` | Game server status with address copy-to-clipboard |
 | `/hosting` | Kinetic Hosting partnership page |
-| `/404` | Custom "Page Not Found" |
+| `/404` | Custom "Page Not Found" with Forge styling |
 
 ## Project Structure
 
@@ -104,7 +106,7 @@ src/
 ├── components/     Astro components (NavBar, Footer, Icon, modals, cards)
 ├── data/           TypeScript data files (projects, news, roadmap, etc.)
 ├── layouts/        Layout with sidebar nav, SEO meta, hex grid, embers
-├── pages/          14 pages (see table above)
+├── pages/          16 pages (see table above)
 ├── scripts/        Client-side TS (animations, lightbox, modals, search, theme)
 └── styles/         Design tokens and component styles (global.css)
 ```
