@@ -27,7 +27,7 @@
 
 ## About
 
-This is the source code for the **FabiMvurice Interactive** website — a central hub for our Minecraft projects, news, changelogs, roadmap, guides, and downloads.
+This is the source code for the **FabiMvurice Interactive** website a central hub for our Minecraft projects, news, changelogs, roadmap, guides, and downloads.
 
 The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur — just solid layers with red-magenta-purple accents.
 
