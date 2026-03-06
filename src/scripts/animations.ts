@@ -84,8 +84,43 @@ function initAccordions() {
           };
           content.addEventListener('transitionend', onEnd);
         }
+      } else if (content.classList.contains('changelog-content')) {
+        // Changelog: animated expand/collapse
+        if (isOpen) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.style.overflow = 'hidden';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = '0';
+          });
+          content.classList.remove('open');
+          const onEnd = () => {
+            if (!content.classList.contains('open')) {
+              content.style.display = 'none';
+            }
+            content.removeEventListener('transitionend', onEnd);
+          };
+          content.addEventListener('transitionend', onEnd);
+        } else {
+          content.style.display = '';
+          content.style.overflow = 'hidden';
+          content.style.maxHeight = '0';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = content.scrollHeight + 'px';
+          });
+          content.classList.add('open');
+          const onEnd = () => {
+            if (content.classList.contains('open')) {
+              content.style.maxHeight = 'none';
+              content.style.overflow = '';
+            }
+            content.removeEventListener('transitionend', onEnd);
+          };
+          content.addEventListener('transitionend', onEnd);
+        }
       } else {
-        content.classList.toggle('hidden');
+        // Fallback: display toggling (no hidden class)
+        const isVisible = content.style.display !== 'none';
+        content.style.display = isVisible ? 'none' : '';
       }
 
       if (icon) {

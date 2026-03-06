@@ -68,11 +68,11 @@ const latestNews = blogPosts.slice(0, 3);
               </div>
               <div class="stat-counter" style="padding: 0.75rem 1.25rem;">
                 <span class="stat-value gradient-text" style="font-size: 1.5rem;">2023</span>
-                <span class="stat-label">Since</span>
+                <span class="stat-label">Est.</span>
               </div>
               <div class="stat-counter" style="padding: 0.75rem 1.25rem;">
-                <span class="stat-value gradient-text" style="font-size: 1.5rem;">Free</span>
-                <span class="stat-label">Always</span>
+                <span class="stat-value gradient-text" style="font-size: 1.5rem;">100%</span>
+                <span class="stat-label">Free</span>
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ const latestNews = blogPosts.slice(0, 3);
       {featured.map((project, i) => (
         <ScrollReveal delay={i * 120}>
           <a href={`/projects/${project.slug}`} class="featured-split-card group">
-            <div class:list={['grid grid-cols-1 lg:grid-cols-2 gap-0', i % 2 === 1 && 'lg-reverse']}>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
               <!-- Info side -->
               <div class="p-8 lg:p-10 flex flex-col justify-center">
                 <div class="flex items-center gap-3 mb-4">
@@ -136,7 +136,7 @@ const latestNews = blogPosts.slice(0, 3);
                 </span>
               </div>
               <!-- Screenshot side -->
-              <div class="aspect-video lg:aspect-auto overflow-hidden relative">
+              <div class:list={['aspect-video lg:aspect-auto overflow-hidden relative', i % 2 === 1 && 'lg:order-first']}>
                 {project.screenshots.length > 0 ? (
                   <img
                     src={project.screenshots[0]}
@@ -341,18 +341,10 @@ const latestNews = blogPosts.slice(0, 3);
       box-shadow: var(--shadow-depth-3), 0 12px 40px rgba(224, 64, 80, 0.10);
     }
 
-    .lg-reverse {
-      direction: rtl;
-    }
-    .lg-reverse > * {
-      direction: ltr;
-    }
-
     @media (max-width: 1023px) {
       .hero-card { padding: 2.25rem 1.75rem; border-radius: 1.5rem; }
       .hero-logo-wrap { width: 160px; height: 160px; }
       .hero-logo-img { width: 160px; height: 160px; }
-      .lg-reverse { direction: ltr; }
     }
 
     @media (max-width: 639px) {

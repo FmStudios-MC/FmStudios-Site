@@ -31,11 +31,11 @@ const fmtDate = formatDate(post.date);
         </div>
         <h2 class="text-2xl lg:text-3xl font-black font-display mb-3 leading-tight" style="color: var(--text-primary);">{post.title}</h2>
         <p class="line-clamp-3 mb-6 leading-relaxed" style="color: var(--text-muted);">{post.excerpt}</p>
-        <div class="flex items-center justify-between text-sm" style="color: var(--text-dim);">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-sm" style="color: var(--text-dim);">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span class="flex items-center gap-1.5"><Icon name="circle-dot" size={13} />{post.author}</span>
             <span class="flex items-center gap-1.5"><Icon name="calendar" size={13} />{fmtDate}</span>
-            <span class="flex items-center gap-1.5"><Icon name="clock" size={13} />{relDate}</span>
+            <span class="flex items-center gap-1.5 hidden sm:flex"><Icon name="clock" size={13} />{relDate}</span>
             <span class="flex items-center gap-1.5"><Icon name="book-open" size={13} />{readMin} min</span>
           </div>
           <span class="font-bold inline-flex items-center gap-1 transition-colors" style="color: var(--accent);">Read more <Icon name="arrow-right" size={14} /></span>

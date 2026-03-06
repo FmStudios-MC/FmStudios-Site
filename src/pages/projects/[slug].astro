@@ -217,12 +217,13 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
         <h3 class="text-lg font-bold font-display mb-4" style="color: var(--text-primary);">More Projects</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {relatedProjects.map((rp) => (
-            <a href={`/projects/${rp.slug}`} class="depth-card p-4 flex items-center gap-3">
+            <a href={`/projects/${rp.slug}`} class="related-card p-4 flex items-center gap-3">
               <img src={rp.logo} alt="" width="40" height="40" class="w-10 h-10 rounded-lg object-cover" loading="lazy" />
-              <div>
+              <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold" style="color: var(--text-primary);">{rp.name}</p>
                 <p class="text-xs" style="color: var(--text-dim);">{rp.category}</p>
               </div>
+              <span class="text-xs font-semibold" style="color: var(--accent);">→</span>
             </a>
           ))}
         </div>
@@ -324,6 +325,20 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
     flex-shrink: 0;
+  }
+
+  .related-card {
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-depth-1);
+    transition: transform 0.3s var(--ease-spring), border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .related-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-depth-2), 0 0 12px rgba(224, 64, 80, 0.08);
   }
 
   .hero-bleed {

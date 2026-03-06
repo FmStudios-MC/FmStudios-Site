@@ -123,12 +123,12 @@
 
 .light-theme ::selection {
   background: rgba(200, 56, 72, 0.30);
-  color: #1a0a00;
+  color: #1a1a1a;
 }
 
 .light-theme ::-moz-selection {
   background: rgba(200, 56, 72, 0.30);
-  color: #1a0a00;
+  color: #1a1a1a;
 }
 
 ::-webkit-scrollbar {
@@ -161,6 +161,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: var(--bg-void);
   }
 
   body {
@@ -168,6 +169,8 @@
     background-color: var(--bg-void);
     color: var(--text-primary);
     min-height: 100vh;
+    margin: 0;
+    border: none;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
@@ -251,10 +254,9 @@
   /* ── Ambient background glow ─────────── */
   .bg-glow-red {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: -5%;
+    width: 110%;
+    height: 110%;
     pointer-events: none;
     z-index: 0;
     background:
@@ -959,6 +961,10 @@
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
+  }
+
+  .changelog-content {
+    transition: max-height 0.35s var(--ease-spring);
   }
 
   /* ── Progress Bar ───────────────────────── */
