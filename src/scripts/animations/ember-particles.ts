@@ -75,11 +75,15 @@ export function initEmberParticles() {
     }
   });
 
+  let resizeTimer: number;
   window.addEventListener('resize', () => {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    }, 150);
   });
 
   // Clean up if page transitions happen

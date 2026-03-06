@@ -1,3 +1,6 @@
+/** Canonical Discord invite URL — import this instead of hardcoding */
+export const DISCORD_URL = 'https://discord.gg/x9jsed8qyR';
+
 export interface SocialLink {
   name: string;
   url: string;
@@ -7,7 +10,7 @@ export interface SocialLink {
 export const socialLinks: SocialLink[] = [
   { name: 'X (Twitter)', url: 'https://x.com/famvinteractive', icon: 'twitter' },
   { name: 'YouTube', url: 'https://www.youtube.com/@fm-studios-mc', icon: 'youtube' },
-  { name: 'Discord', url: 'https://discord.gg/x9jsed8qyR', icon: 'discord' },
+  { name: 'Discord', url: DISCORD_URL, icon: 'discord' },
   { name: 'Instagram', url: 'https://www.instagram.com/fabimvurice.interactive', icon: 'instagram' },
   { name: 'TikTok', url: 'https://www.tiktok.com/@fabimvurice.interactive', icon: 'music' },
 ];

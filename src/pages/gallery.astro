@@ -4,6 +4,7 @@ import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import LightboxModal from '../components/LightboxModal.astro';
 import { projects } from '../data/projects';
+import { DISCORD_URL } from '../data/social';
 
 const galleryItems = projects.flatMap((project) =>
   project.screenshots.map((src, i) => ({
@@ -29,7 +30,7 @@ const projectFilters = [
           <p class="section-eyebrow mb-2">The Vault</p>
           <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">Gallery</h1>
         </div>
-        <p class="text-sm" style="color: var(--text-dim);"><span id="gallery-count">{galleryItems.length}</span> of {galleryItems.length} images</p>
+        <p class="text-sm" style="color: var(--text-dim);" role="status" aria-live="polite" aria-atomic="true"><span id="gallery-count">{galleryItems.length}</span> of {galleryItems.length} images</p>
       </div>
     </ScrollReveal>
 
@@ -96,7 +97,7 @@ const projectFilters = [
           <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Share your builds!</p>
           <p class="text-sm" style="color: var(--text-muted);">Post screenshots of your creations on our Discord.</p>
         </div>
-        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
           <Icon name="discord" size={16} />
           Join Discord
         </a>

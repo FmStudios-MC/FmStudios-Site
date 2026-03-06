@@ -4,8 +4,10 @@ import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import ChangelogBlock from '../components/ChangelogBlock.astro';
 import { changelogs } from '../data/changelog';
+import { DISCORD_URL } from '../data/social';
 
 const changelogEntries = Object.entries(changelogs);
+const projectNames = changelogEntries.map(([name]) => name);
 ---
 
 <Layout title="Changelog - FabiMvurice Interactive">
@@ -19,15 +21,29 @@ const changelogEntries = Object.entries(changelogs);
       </div>
     </ScrollReveal>
 
+    <!-- Project filter -->
+    {projectNames.length > 1 && (
+      <ScrollReveal>
+        <div class="flex flex-wrap gap-2 justify-center mb-6">
+          <button class="filter-btn changelog-filter-btn active" data-filter="all" aria-pressed="true">All Projects</button>
+          {projectNames.map((name) => (
+            <button class="filter-btn changelog-filter-btn" data-filter={name} aria-pressed="false">{name}</button>
+          ))}
+        </div>
+      </ScrollReveal>
+    )}
+
     <!-- Vertical connected strips -->
     <div class="relative">
-      <!-- Orange accent line connecting strips -->
+      <!-- Accent line connecting strips -->
       <div class="absolute left-6 top-0 bottom-0 w-0.5 hidden sm:block" style="background: linear-gradient(180deg, var(--accent), var(--accent-deep), transparent); box-shadow: 0 0 8px rgba(224,64,80,0.2);" aria-hidden="true"></div>
 
       <div class="space-y-4 sm:pl-10">
         {changelogEntries.map(([name, entries], i) => (
           <ScrollReveal delay={i * 80}>
-            <ChangelogBlock projectName={name} entries={entries} />
+            <div class="changelog-project-block" data-project={name}>
+              <ChangelogBlock projectName={name} entries={entries} />
+            </div>
           </ScrollReveal>
         ))}
       </div>
@@ -40,11 +56,38 @@ const changelogEntries = Object.entries(changelogs);
           <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Found a bug?</p>
           <p class="text-sm" style="color: var(--text-muted);">Report issues on our Discord and help us improve.</p>
         </div>
-        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
           <Icon name="discord" size={16} />
           Join Discord
         </a>
       </div>
     </ScrollReveal>
   </section>
+
+  <script>
+    const filterBtns = document.querySelectorAll('.changelog-filter-btn');
+    const blocks = document.querySelectorAll<HTMLElement>('.changelog-project-block');
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = (btn as HTMLElement).dataset.filter || 'all';
+
+        filterBtns.forEach((b) => {
+          b.classList.remove('active');
+          (b as HTMLElement).setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        (btn as HTMLElement).setAttribute('aria-pressed', 'true');
+
+        blocks.forEach((block) => {
+          const project = block.dataset.project || '';
+          const show = filter === 'all' || project === filter;
+          const wrapper = block.closest('.reveal') || block.parentElement;
+          if (wrapper) {
+            (wrapper as HTMLElement).style.display = show ? '' : 'none';
+          }
+        });
+      });
+    });
+  </script>
 </Layout>

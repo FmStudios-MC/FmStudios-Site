@@ -1,3 +1,5 @@
+import { DISCORD_URL } from './social';
+
 export interface CommunityServer {
   name: string;
   inviteUrl: string;
@@ -7,7 +9,7 @@ export interface CommunityServer {
 
 export const discordServer: CommunityServer = {
   name: 'FabiMvurice Interactive',
-  inviteUrl: 'https://discord.gg/x9jsed8qyR',
+  inviteUrl: DISCORD_URL,
   members: '200+',
   description:
     'Our official Discord server. Get help with modpacks, share builds, report bugs, and hang out with the community.',

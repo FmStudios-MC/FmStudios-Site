@@ -4,6 +4,7 @@ import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { projects, categories, modpackTypes } from '../data/projects';
+import { DISCORD_URL } from '../data/social';
 ---
 
 <Layout title="Projects - FabiMvurice Interactive">
@@ -67,7 +68,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
 
         <!-- Results count -->
         <div class="mt-4 text-center">
-          <span id="results-count" class="text-xs" style="color: var(--text-dim);"></span>
+          <span id="results-count" class="text-xs" style="color: var(--text-dim);" role="status" aria-live="polite" aria-atomic="true"></span>
         </div>
       </div>
     </ScrollReveal>
@@ -97,7 +98,7 @@ import { projects, categories, modpackTypes } from '../data/projects';
           <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Want to suggest a project?</p>
           <p class="text-sm" style="color: var(--text-muted);">Join our Discord and share your ideas with the community.</p>
         </div>
-        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
           <Icon name="discord" size={16} />
           Join Discord
         </a>

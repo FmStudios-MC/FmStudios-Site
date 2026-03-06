@@ -187,6 +187,16 @@
     font: inherit;
     color: inherit;
   }
+
+  /* Focus-visible outlines for keyboard accessibility */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 /* ============================================

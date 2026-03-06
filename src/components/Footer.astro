@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { socialLinks, platformLinks, supportLinks } from '../data/social';
+import { socialLinks, platformLinks, supportLinks, DISCORD_URL } from '../data/social';
 ---
 
 <footer class="relative z-10 mt-20">
@@ -75,7 +75,7 @@ import { socialLinks, platformLinks, supportLinks } from '../data/social';
             ))}
           </div>
           <a
-            href="https://discord.gg/x9jsed8qyR"
+            href={DISCORD_URL}
             target="_blank"
             rel="noopener noreferrer"
             class="footer-discord-btn"

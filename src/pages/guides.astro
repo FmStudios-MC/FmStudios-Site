@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import { guides, guideCategories } from '../data/guides';
+import { DISCORD_URL } from '../data/social';
 ---
 
 <Layout title="Guides - FabiMvurice Interactive">
@@ -134,7 +135,7 @@ import { guides, guideCategories } from '../data/guides';
           <p class="text-sm" style="color: var(--text-muted);">Join our Discord for live support from the community.</p>
         </div>
         <a
-          href="https://discord.gg/x9jsed8qyR"
+          href={DISCORD_URL}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2"

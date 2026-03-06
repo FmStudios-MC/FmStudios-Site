@@ -10,6 +10,7 @@ import { projects } from '../data/projects';
 import { blogPosts } from '../data/news';
 import { relativeDate } from '../data/utils';
 import { blogCategoryConfig } from '../data/news';
+import { DISCORD_URL } from '../data/social';
 
 const featured = projects.slice(0, 3);
 const latestNews = blogPosts.slice(0, 3);
@@ -211,7 +212,7 @@ const latestNews = blogPosts.slice(0, 3);
     <ScrollReveal delay={200}>
       <div class="mt-10 text-center">
         <a
-          href="https://discord.gg/x9jsed8qyR"
+          href={DISCORD_URL}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary text-lg px-8 py-4 inline-flex items-center gap-2"

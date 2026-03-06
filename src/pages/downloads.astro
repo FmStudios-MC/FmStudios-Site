@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import { projects } from '../data/projects';
+import { DISCORD_URL } from '../data/social';
 
 const downloadableProjects = projects.filter((p) => p.downloadUrl && p.downloadUrl !== '#');
 // Sum raw numbers from download strings (e.g. "15K+" → 15, "1.2K+" → 1.2)
@@ -137,7 +138,7 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
           <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Need help installing?</p>
           <p class="text-sm" style="color: var(--text-muted);">Our Discord community can walk you through the setup.</p>
         </div>
-        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
           <Icon name="discord" size={16} />
           Join Discord
         </a>

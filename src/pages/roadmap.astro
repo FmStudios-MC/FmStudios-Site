@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import { roadmapItems, roadmapStatusConfig, priorityConfig, roadmapFilters } from '../data/roadmap';
+import { DISCORD_URL } from '../data/social';
 
 const sortedItems = [...roadmapItems].sort((a, b) => {
   const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -317,7 +318,7 @@ const columns = [
           <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Have a feature request?</p>
           <p class="text-sm" style="color: var(--text-muted);">Let us know on Discord what you'd like to see next.</p>
         </div>
-        <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
           <Icon name="discord" size={16} />
           Join Discord
         </a>

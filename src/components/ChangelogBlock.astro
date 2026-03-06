@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import type { ChangelogEntry } from '../data/changelog';
+import { formatDate } from '../data/utils';
 
 interface Props {
   projectName: string;
@@ -33,7 +34,7 @@ const safeId = projectName.replace(/\s+/g, '-').replace(/[{}]/g, '');
           <div>
             <h4 class="text-base font-bold font-display" style="color: var(--text-primary);">Version {entry.version}</h4>
             <span class="text-xs flex items-center gap-1 mt-1" style="color: var(--text-dim);">
-              <Icon name="calendar" size={12} /> {entry.date}
+              <Icon name="calendar" size={12} /> {formatDate(entry.date)}
             </span>
           </div>
           <span class="text-xs font-semibold px-2 py-0.5 self-start" style="background-color: var(--accent); color: #fff;">

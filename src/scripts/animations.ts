@@ -7,13 +7,19 @@ import { initEmberParticles } from './animations/ember-particles';
 import { initCounters } from './animations/counters';
 import { initPageTransition } from './animations/page-transition';
 
-// Card hover glow — track mouse position via CSS custom properties
+// Card hover glow — track mouse position via CSS custom properties (throttled to 60fps)
 function initCardGlow() {
   document.querySelectorAll<HTMLElement>('.depth-card').forEach((card) => {
+    let ticking = false;
     card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        ticking = false;
+      });
     });
   });
 }

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import { servers } from '../data/servers';
+import { DISCORD_URL } from '../data/social';
 ---
 
 <Layout title="Server Status - FabiMvurice Interactive">
@@ -115,7 +116,7 @@ import { servers } from '../data/servers';
           <p class="text-sm" style="color: var(--text-muted);">Join our Discord to find people to play with.</p>
         </div>
         <a
-          href="https://discord.gg/x9jsed8qyR"
+          href={DISCORD_URL}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2"
