@@ -7,16 +7,18 @@ interface Props {
   title: string;
   description?: string;
   kinetic?: boolean;
+  ogImage?: string;
 }
 
 const {
   title,
   description = 'Discover amazing Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive.',
   kinetic = false,
+  ogImage: ogImageProp,
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL('/images/logoneu.webp', Astro.site);
+const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/images/logoneu.webp', Astro.site);
 ---
 
 <!doctype html>
@@ -107,6 +109,40 @@ const ogImage = new URL('/images/logoneu.webp', Astro.site);
         input!.value = '';
         input!.dispatchEvent(new Event('input', { bubbles: true }));
         input!.focus();
+      });
+    });
+
+    // Favorites system
+    const FAVORITES_KEY = 'fmi-favorites';
+    function getFavorites(): string[] {
+      try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); }
+      catch { return []; }
+    }
+    function setFavorites(favs: string[]) {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+    }
+    document.querySelectorAll<HTMLButtonElement>('.favorite-btn').forEach((btn) => {
+      const slug = btn.dataset.slug;
+      if (!slug) return;
+      if (getFavorites().includes(slug)) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+      }
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const favs = getFavorites();
+        const idx = favs.indexOf(slug);
+        if (idx >= 0) {
+          favs.splice(idx, 1);
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        } else {
+          favs.push(slug);
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+        }
+        setFavorites(favs);
       });
     });
   </script>

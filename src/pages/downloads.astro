@@ -73,6 +73,7 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
                 height="48"
                 class="dl-logo"
                 loading="lazy"
+                decoding="async"
               />
               <div class="min-w-0">
                 <h3 class="text-sm font-bold font-display truncate" style="color: var(--text-primary);">
@@ -123,11 +124,15 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
     </div>
 
     <!-- Empty state -->
-    <div class="hidden text-center py-12" id="dl-empty">
+    <div class="text-center py-12" id="dl-empty" style="display: none;">
       <div class="depth-card p-10">
         <Icon name="search" size={40} class="mx-auto mb-3" style="color: var(--text-dim);" />
         <p class="font-bold font-display" style="color: var(--text-primary);">No matches found</p>
-        <p class="text-sm mt-1" style="color: var(--text-muted);">Try a different search term.</p>
+        <p class="text-sm mt-1 mb-3" style="color: var(--text-muted);">Try a different search term.</p>
+        <button type="button" id="clear-dl-search" class="btn-outline text-sm inline-flex items-center gap-2">
+          <Icon name="x" size={14} />
+          Clear search
+        </button>
       </div>
     </div>
 
@@ -162,7 +167,14 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
         (strip.closest('.reveal') as HTMLElement || strip.parentElement!).style.display = match ? '' : 'none';
         if (match) visible++;
       });
-      if (empty) empty.classList.toggle('hidden', visible > 0);
+      if (empty) empty.style.display = visible > 0 ? 'none' : '';
+    });
+
+    document.getElementById('clear-dl-search')?.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     });
   </script>
 </Layout>

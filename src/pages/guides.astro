@@ -100,14 +100,15 @@ import { DISCORD_URL } from '../data/social';
               <div class="guide-steps">
                 {guide.steps.map((step, si) => (
                   <div class="guide-step">
-                    <div class="flex items-start gap-3">
+                    <button type="button" class="guide-step-toggle flex items-center gap-3 w-full text-left cursor-pointer" aria-expanded={si === 0 ? 'true' : 'false'}>
                       <div class="step-number">{si + 1}</div>
-                      <div class="flex-1 min-w-0">
-                        <h3 class="text-sm font-bold mb-1" style="color: var(--text-primary);">
-                          {step.title}
-                        </h3>
-                        <p class="text-xs leading-relaxed" style="color: var(--text-muted);" set:html={step.content} />
-                      </div>
+                      <h3 class="text-sm font-bold flex-1 min-w-0" style="color: var(--text-primary);">
+                        {step.title}
+                      </h3>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="guide-step-chevron flex-shrink-0" style="color: var(--text-dim);"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="guide-step-content" style={si === 0 ? '' : 'max-height: 0; overflow: hidden;'}>
+                      <p class="text-xs leading-relaxed pt-2 pl-[34px]" style="color: var(--text-muted);" set:html={step.content} />
                     </div>
                   </div>
                 ))}
@@ -123,7 +124,11 @@ import { DISCORD_URL } from '../data/social';
       <div class="depth-card p-12">
         <Icon name="book-open" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
         <h3 class="text-xl font-bold font-display mb-2" style="color: var(--text-primary);">No guides found</h3>
-        <p style="color: var(--text-muted);">Try a different search or category.</p>
+        <p class="mb-4" style="color: var(--text-muted);">Try a different search or category.</p>
+        <button type="button" id="clear-guide-filters" class="btn-outline text-sm inline-flex items-center gap-2">
+          <Icon name="x" size={14} />
+          Clear all filters
+        </button>
       </div>
     </div>
 
@@ -207,6 +212,41 @@ import { DISCORD_URL } from '../data/social';
         applyFilters();
       }, 300);
     });
+
+    // Clear all filters button
+    document.getElementById('clear-guide-filters')?.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const allBtn = document.querySelector('.guide-filter-btn[data-filter="all"]') as HTMLElement;
+      allBtn?.click();
+    });
+
+    // Collapsible guide steps
+    document.querySelectorAll<HTMLButtonElement>('.guide-step-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const content = btn.nextElementSibling as HTMLElement;
+        if (!content) return;
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+
+        if (expanded) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = '0';
+          });
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.addEventListener('transitionend', () => {
+            if (btn.getAttribute('aria-expanded') === 'true') {
+              content.style.maxHeight = '';
+            }
+          }, { once: true });
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
   </script>
 </Layout>
 
@@ -274,5 +314,26 @@ import { DISCORD_URL } from '../data/social';
     flex-shrink: 0;
     margin-top: 1px;
     box-shadow: 0 0 10px rgba(224, 64, 80, 0.3);
+  }
+
+  .guide-step-toggle {
+    appearance: none;
+    background: none;
+    border: none;
+    font: inherit;
+    padding: 0;
+  }
+
+  .guide-step-content {
+    overflow: hidden;
+    transition: max-height 0.35s var(--ease-spring);
+  }
+
+  .guide-step-chevron {
+    transition: transform 0.4s var(--ease-spring);
+  }
+
+  .guide-step-toggle[aria-expanded="true"] .guide-step-chevron {
+    transform: rotate(180deg);
   }
 </style>

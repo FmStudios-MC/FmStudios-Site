@@ -32,6 +32,7 @@ const status = statusConfig[project.status];
         height="56"
         class="w-14 h-14 object-cover rounded-xl transition-transform duration-500 hover:scale-110"
         loading="lazy"
+        decoding="async"
       />
     </div>
 
@@ -43,6 +44,16 @@ const status = statusConfig[project.status];
         )}
       </div>
     </div>
+
+    <button
+      type="button"
+      class="favorite-btn"
+      data-slug={project.slug}
+      aria-label="Toggle favorite"
+      aria-pressed="false"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="favorite-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+    </button>
   </div>
 
   <!-- Tags -->
@@ -90,6 +101,39 @@ const status = statusConfig[project.status];
     color: var(--accent);
     border: 1px solid rgba(224, 64, 80, 0.22);
     letter-spacing: 0.01em;
+  }
+
+  .project-card {
+    position: relative;
+  }
+
+  .favorite-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-layer-2);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .favorite-btn:hover {
+    transform: scale(1.1);
+    background: rgba(224, 64, 80, 0.1);
+    border-color: rgba(224, 64, 80, 0.3);
+  }
+
+  .favorite-btn.active {
+    color: var(--accent);
+  }
+
+  .favorite-btn.active .favorite-icon {
+    fill: var(--accent);
   }
 
   .tag-mono {

@@ -87,7 +87,11 @@ import { DISCORD_URL } from '../data/social';
       <div class="depth-card p-16 max-w-lg mx-auto">
         <Icon name="search" size={52} class="mx-auto mb-6" style="color: var(--text-dim);" />
         <h3 class="text-2xl font-bold font-display mb-3" style="color: var(--text-primary);">No projects found</h3>
-        <p style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
+        <p class="mb-4" style="color: var(--text-muted);">Try adjusting your search or filter criteria.</p>
+        <button type="button" id="clear-project-filters" class="btn-outline text-sm inline-flex items-center gap-2">
+          <Icon name="x" size={14} />
+          Clear all filters
+        </button>
       </div>
     </div>
 
@@ -108,5 +112,16 @@ import { DISCORD_URL } from '../data/social';
 
   <script>
     import '../scripts/search';
+  </script>
+  <script>
+    document.getElementById('clear-project-filters')?.addEventListener('click', () => {
+      const searchInput = document.getElementById('search-input') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const allBtn = document.querySelector('.category-filter-btn[data-filter="all"]') as HTMLElement;
+      allBtn?.click();
+    });
   </script>
 </Layout>

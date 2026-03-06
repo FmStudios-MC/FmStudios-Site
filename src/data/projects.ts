@@ -14,6 +14,9 @@ export interface Project {
   modrinthUrl?: string;
   downloads: string;
   lastUpdate: string;
+  modList?: string[];
+  minimumRam?: string;
+  recommendedRam?: string;
 }
 
 export const projects: Project[] = [
@@ -32,6 +35,8 @@ export const projects: Project[] = [
     downloadUrl: '#',
     downloads: '-',
     lastUpdate: '-',
+    minimumRam: '6 GB',
+    recommendedRam: '8 GB',
   },
   {
     id: 2,
@@ -59,8 +64,19 @@ export const projects: Project[] = [
     ],
     modrinthUrl: 'https://modrinth.com/modpack/additions-fabric',
     downloadUrl: 'https://www.curseforge.com/minecraft/modpacks/fabis-additions',
-    downloads: '8K+',
+    downloads: '10K+',
     lastUpdate: '2025-07-31',
+    modList: [
+      "Biomes O' Plenty",
+      "Farmer's Delight",
+      'Supplementaries',
+      "Macaw's Furniture",
+      'Sodium',
+      'Iris Shaders',
+      "Xaero's Minimap",
+    ],
+    minimumRam: '4 GB',
+    recommendedRam: '6 GB',
   },
   {
     id: 3,
@@ -86,8 +102,17 @@ export const projects: Project[] = [
       'https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png',
     ],
     downloadUrl: 'https://www.curseforge.com/minecraft/modpacks/create-fm3',
-    downloads: '15K+',
+    downloads: '19K+',
     lastUpdate: '2025-07-22',
+    modList: [
+      'Create',
+      'Create: Diesel Generators',
+      'FTB Quests',
+      'Sophisticated Backpacks',
+      'and more',
+    ],
+    minimumRam: '6 GB',
+    recommendedRam: '8 GB',
   },
   {
     id: 4,
@@ -104,8 +129,17 @@ export const projects: Project[] = [
     screenshots: ['https://media.forgecdn.net/attachments/907/43/2024-07-03_16.png'],
     downloadUrl: 'https://www.curseforge.com/minecraft/modpacks/create-f-m-2',
     modrinthUrl: 'https://modrinth.com/modpack/create-fm-2',
-    downloads: '2K+',
+    downloads: '2,7K+',
     lastUpdate: '2024-07-03',
+    modList: [
+      'Create',
+      'Immersive Aircraft',
+      "Farmer's Delight",
+      "Macaw's Bridges",
+      "Xaero's Minimap",
+    ],
+    minimumRam: '4 GB',
+    recommendedRam: '6 GB',
   },
   {
     id: 5,
@@ -123,7 +157,7 @@ export const projects: Project[] = [
     ],
     downloadUrl: 'https://www.curseforge.com/minecraft/texture-packs/fabi-s-lootr',
     modrinthUrl: 'https://modrinth.com/resourcepack/fabis-lootr',
-    downloads: '15K+',
+    downloads: '21K+',
     lastUpdate: '2025-07-15',
   },
 ];
