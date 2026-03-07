@@ -10,8 +10,8 @@
 
 <p align="center">
   <a href="https://www.fabimvurice-interactive.de"><img src="https://img.shields.io/badge/website-live-success.svg" alt="Website" /></a>
-  <img src="https://img.shields.io/badge/Astro-5.3-BC52EE.svg" alt="Astro" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38BDF8.svg" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Astro-5.18-BC52EE.svg" alt="Astro" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.2-38BDF8.svg" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/license-proprietary-red.svg" alt="License" />
 </p>
 
@@ -29,17 +29,18 @@
 
 This is the source code for the **FabiMvurice Interactive** website a central hub for our Minecraft projects, news, changelogs, roadmap, guides, and downloads.
 
-The site uses a custom depth-based design system called **"The Forge"**: opaque layered surfaces, multi-layer box-shadows, 3D perspective transforms, ember particle effects, and a hex grid background. No glass or blur just solid layers with red-magenta-purple accents.
+The site uses a glassmorphism design system called **"Nebula"**: translucent glass cards with backdrop blur over deep blue-black backgrounds, neon accent glows, noise texture, animated grid lines, and ember particle effects. Red-magenta-purple accents throughout.
 
 ## Projects
 
 | Project | Type | Status | Downloads |
 |---------|------|--------|-----------|
 | **Create Unbound** | Modpack (Tech) | Coming Soon | — |
-| **{Additions}** | Modpack (Vanilla+) | Active | 8K+ |
-| **Fabi's Lootr** | Resource Pack | Active | 15K+ |
-| **Create F&M 3** | Modpack (Tech) | Discontinued | 15K+ |
-| **Create F&M 2** | Modpack (Tech) | Discontinued | 2K+ |
+| **Fabi's Lootr** | Resource Pack | Active | 21K+ |
+| **{Additions}** | Modpack (Vanilla+) | Discontinued | 10K+ |
+| **Create F&M 3** | Modpack (Tech) | Discontinued | 19K+ |
+| **Create F&M 2** | Modpack (Tech) | Discontinued | 2.7K+ |
+| **Create F&M** | Modpack (Tech) | Discontinued | 275 |
 
 Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interactive/projects) and [Modrinth](https://modrinth.com/user/FabiMvurice_Interactive).
 
@@ -47,8 +48,8 @@ Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interac
 
 | | |
 |---|---|
-| **Framework** | [Astro](https://astro.build/) 5.3 (static output) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) 4.0 via `@tailwindcss/vite` |
+| **Framework** | [Astro](https://astro.build/) 5.18 (static output) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) 4.2 via `@tailwindcss/vite` |
 | **Language** | TypeScript |
 | **SEO** | `@astrojs/sitemap` for auto-generated sitemaps |
 | **Fonts** | Inter (body) + Space Grotesk (display) |
@@ -97,7 +98,7 @@ npm run preview
 | `/community` | Discord CTA, social links, and community guidelines |
 | `/server-status` | Game server status with address copy-to-clipboard |
 | `/hosting` | Kinetic Hosting partnership page |
-| `/404` | Custom "Page Not Found" with Forge styling |
+| `/404` | Custom "Page Not Found" with Nebula styling |
 
 ## Project Structure
 
@@ -105,7 +106,7 @@ npm run preview
 src/
 ├── components/     Astro components (NavBar, Footer, Icon, modals, cards)
 ├── data/           TypeScript data files (projects, news, roadmap, etc.)
-├── layouts/        Layout with sidebar nav, SEO meta, hex grid, embers
+├── layouts/        Layout with top nav, SEO meta, grid lines, noise overlay, embers
 ├── pages/          16 pages (see table above)
 ├── scripts/        Client-side TS (animations, lightbox, modals, search, theme)
 └── styles/         Design tokens and component styles (global.css)
