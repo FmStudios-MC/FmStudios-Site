@@ -34,14 +34,16 @@ const { question, answer, id } = Astro.props;
     border-radius: 0.75rem;
     overflow: hidden;
     border: 1px solid var(--border-subtle);
-    background: var(--bg-layer-2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     transition: border-color 0.2s ease, background 0.2s ease;
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-sm);
   }
 
   .faq-item:has(.faq-toggle[aria-expanded="true"]) {
     border-color: var(--border-accent);
-    background: var(--bg-layer-1);
+    background: var(--bg-card-hover);
   }
 
   .faq-toggle {
@@ -97,11 +99,10 @@ const { question, answer, id } = Astro.props;
 
   /* Recessed answer panel */
   .faq-answer-panel {
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border-top: 1px solid var(--border-subtle);
     margin: 0 0.5rem 0.5rem;
     border-radius: 0.5rem;
-    box-shadow: var(--shadow-inset);
   }
 
   .faq-answer {
@@ -114,7 +115,7 @@ const { question, answer, id } = Astro.props;
 
   :global(.light-theme) .faq-item {
     border-color: var(--border-subtle);
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
   }
 
   :global(.light-theme) .faq-item:has(.faq-toggle[aria-expanded="true"]) {

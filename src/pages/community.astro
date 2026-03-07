@@ -173,11 +173,10 @@ import { socialLinks } from '../data/social';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
     color: var(--accent);
-    box-shadow: var(--shadow-inset);
   }
 
   .social-card {
@@ -186,19 +185,21 @@ import { socialLinks } from '../data/social';
     align-items: center;
     justify-content: center;
     padding: 1.25rem 0.75rem;
-    background: var(--bg-layer-2);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 0.75rem;
     color: var(--text-muted);
     text-decoration: none;
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-sm);
     transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
   }
 
   .social-card:hover {
     color: var(--accent);
     border-color: var(--border-accent);
-    box-shadow: var(--shadow-depth-2), 0 0 16px rgba(224, 64, 80, 0.15);
+    box-shadow: var(--shadow-md), 0 0 16px rgba(224, 64, 80, 0.15);
     transform: translateY(-2px);
   }
 </style>

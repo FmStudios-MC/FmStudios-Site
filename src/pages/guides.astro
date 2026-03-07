@@ -257,15 +257,16 @@ import { DISCORD_URL } from '../data/social';
     align-items: flex-end;
     gap: 0.1rem;
     padding: 0.75rem 1.25rem;
-    background: var(--bg-layer-2);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 1rem;
-    box-shadow: var(--shadow-inset);
     flex-shrink: 0;
   }
 
   .guide-header {
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border-bottom: 1px solid var(--border-subtle);
   }
 
@@ -295,7 +296,7 @@ import { DISCORD_URL } from '../data/social';
 
   .guide-step {
     padding: 0.75rem;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
   }

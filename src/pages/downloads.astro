@@ -113,7 +113,7 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
               )}
               {(!project.downloadUrl || project.downloadUrl === '#') && (
                 <span class="text-xs font-semibold px-3 py-1.5 rounded-lg"
-                  style="background: var(--bg-layer-2); color: var(--text-dim); border: 1px solid var(--border-subtle);">
+                  style="background: var(--bg-card); color: var(--text-dim); border: 1px solid var(--border-subtle);">
                   Coming Soon
                 </span>
               )}
@@ -186,10 +186,11 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
     align-items: flex-end;
     gap: 0.1rem;
     padding: 0.75rem 1.25rem;
-    background: var(--bg-layer-2);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 1rem;
-    box-shadow: var(--shadow-inset);
     flex-shrink: 0;
   }
 
@@ -206,9 +207,8 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
     height: 48px;
     border-radius: 0.75rem;
     object-fit: cover;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-inset);
     flex-shrink: 0;
   }
 
@@ -232,10 +232,10 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
   }
 
   .dl-btn-alt {
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     color: var(--text-primary);
     border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-sm);
   }
 
   .dl-btn-alt:hover {

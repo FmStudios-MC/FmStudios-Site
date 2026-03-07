@@ -351,11 +351,13 @@ const columns = [
   .roadmap-overall-progress {
     flex: 1;
     min-width: 0;
-    background: var(--bg-layer-1);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 1rem;
     padding: 1rem 1.25rem;
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-md);
   }
 
   .roadmap-stat-chips {
@@ -370,10 +372,12 @@ const columns = [
     align-items: center;
     gap: 0.125rem;
     padding: 0.625rem 0.875rem;
-    background: var(--bg-layer-1);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 0.75rem;
-    box-shadow: var(--shadow-inset);
+    box-shadow: var(--shadow-sm);
     min-width: 56px;
   }
 
@@ -382,11 +386,13 @@ const columns = [
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    background: var(--bg-layer-1);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 1rem;
     padding: 1rem 1.25rem;
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-md);
   }
 
   @media (min-width: 640px) {
@@ -477,7 +483,7 @@ const columns = [
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--col-border);
     border-radius: 0.5rem;
     flex-shrink: 0;
@@ -487,7 +493,7 @@ const columns = [
     margin-left: auto;
     font-size: 0.7rem;
     font-weight: 700;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--col-border);
     color: var(--col-text);
     padding: 0.125rem 0.5rem;
@@ -503,8 +509,10 @@ const columns = [
 
   /* Individual Item Cards */
   .roadmap-item {
-    background: var(--bg-layer-1);
-    border: 1px solid var(--border-subtle);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
     border-left: 3px solid var(--col-accent, var(--border-subtle));
     border-radius: 0.75rem;
     padding: 1rem;
@@ -528,7 +536,7 @@ const columns = [
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     color: var(--text-muted);
   }
@@ -565,7 +573,7 @@ const columns = [
     font-size: 0.625rem;
     font-weight: 600;
     padding: 0.125rem 0.5rem;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 999px;
     color: var(--text-dim);
@@ -631,7 +639,7 @@ const columns = [
     height: 8px;
     border-radius: 50%;
     background: var(--col-accent, var(--accent));
-    border: 2px solid var(--bg-layer-1);
+    border: 2px solid var(--bg-surface);
     flex-shrink: 0;
     margin-top: 0.25rem;
     margin-left: -1.125rem;
@@ -641,11 +649,11 @@ const columns = [
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
     padding: 0.5rem 0.625rem;
-    box-shadow: var(--shadow-inset);
+    box-shadow: var(--shadow-sm);
     flex: 1;
   }
 

@@ -247,11 +247,10 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
 
 <style>
   .logo-wrap {
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.875rem;
     padding: 0.25rem;
-    box-shadow: var(--shadow-inset);
   }
 
   .tag-accent {
@@ -269,7 +268,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     font-family: ui-monospace, monospace;
     padding: 0.2rem 0.625rem;
     border-radius: 9999px;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     color: var(--text-dim);
     border: 1px solid var(--border-subtle);
   }
@@ -278,7 +277,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     font-size: 0.7rem;
     padding: 0.2rem 0.625rem;
     border-radius: 9999px;
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     color: var(--text-dim);
     border: 1px solid var(--border-subtle);
     display: inline-flex;
@@ -314,7 +313,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     border-radius: 0.75rem;
     overflow: hidden;
     border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0;
   }
 
@@ -328,17 +327,17 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
   }
 
   .related-card {
-    background: var(--bg-layer-2);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
-    box-shadow: var(--shadow-depth-1);
+    box-shadow: var(--shadow-sm);
     transition: transform 0.3s var(--ease-spring), border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .related-card:hover {
     transform: translateY(-2px);
     border-color: var(--border-accent);
-    box-shadow: var(--shadow-depth-2), 0 0 12px rgba(224, 64, 80, 0.08);
+    box-shadow: var(--shadow-md), 0 0 12px rgba(224, 64, 80, 0.08);
   }
 
   .hero-bleed {

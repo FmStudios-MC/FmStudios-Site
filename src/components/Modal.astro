@@ -24,11 +24,13 @@ const { id } = Astro.props;
 
 <style>
   .modal-depth {
-    background: var(--bg-layer-1);
-    border: 1px solid var(--border-medium);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: 1.5rem;
     box-shadow:
-      var(--shadow-depth-3),
+      var(--shadow-lg),
       0 0 0 1px rgba(224, 64, 80, 0.07);
     position: relative;
     overflow: hidden;
@@ -48,8 +50,8 @@ const { id } = Astro.props;
   }
 
   :global(.light-theme) .modal-depth {
-    background: var(--bg-layer-1);
+    background: var(--bg-card);
     border-color: var(--border-medium);
-    box-shadow: var(--shadow-depth-3);
+    box-shadow: var(--shadow-lg);
   }
 </style>

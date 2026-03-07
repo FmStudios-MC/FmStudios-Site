@@ -44,7 +44,7 @@ export const projects: Project[] = [
     name: '{Additions}',
     category: 'modpacks',
     subcategory: 'vanilla+',
-    status: 'updated',
+    status: 'discontinued',
     logo: 'https://cdn.modrinth.com/data/62BJPui0/b9c7d20546212d230ce6dbc228d87abe1f5d5247_96.webp',
     description:
       'Are you ready for the ultimate Vanilla+ Experience? Additions is the perfect Vanilla+ Modpack for you! It has great performance, Overhauled Biomes, Overhauled Nether + END, Over 150+ New Food and Crops, New Mobs and more...',
@@ -146,7 +146,7 @@ export const projects: Project[] = [
     slug: 'fabis-lootr',
     name: "Fabi's Lootr",
     category: 'resourcepacks',
-    status: 'updated',
+    status: 'active',
     logo: 'https://media.forgecdn.net/attachments/1206/422/lootr-png.png',
     description: 'New textures for the Lootr mod.',
     version: '1.20.1+',

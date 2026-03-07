@@ -18,50 +18,74 @@ const navItems = [
   { label: 'Hosting',   href: '/hosting',    icon: 'server' },
 ];
 
+// Top bar shows first 5 links, rest go in "More" dropdown
+const topBarItems = navItems.slice(0, 5);
+const moreItems = navItems.slice(5);
+
 // Bottom bar shows first 4 + "More"
 const bottomBarItems = navItems.slice(0, 4);
-const moreItems = navItems.slice(4);
 
 const rawPath = Astro.url.pathname;
 const currentPath = rawPath.endsWith('/') && rawPath !== '/' ? rawPath.slice(0, -1) : rawPath;
 const isOnMorePage = moreItems.some((item) => currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/')));
 ---
 
-<!-- Desktop/Tablet Sidebar -->
-<nav class="sidebar-nav" id="sidebar-nav" aria-label="Main navigation">
-  <!-- Logo at top -->
-  <a href="/" class="sidebar-logo" aria-label="FabiMvurice Interactive — home">
-    <img
-      src="/images/logoneu.webp"
-      alt=""
-      width="32"
-      height="32"
-      class="sidebar-logo-img"
-    />
-    <span class="nav-label sidebar-brand-text font-display">FabiMvurice</span>
+<!-- Desktop/Tablet Top Navigation Bar -->
+<nav class="top-nav" id="top-nav" aria-label="Main navigation">
+  <!-- Brand -->
+  <a href="/" class="nav-brand" aria-label="FabiMvurice Interactive — home">
+    <img src="/images/logoneu.webp" alt="" width="32" height="32" />
+    <span class="nav-brand-text font-display">FabiMvurice</span>
   </a>
 
   <!-- Nav links -->
-  <div class="sidebar-links">
-    {navItems.map((item) => {
+  <div class="nav-links">
+    {topBarItems.map((item) => {
       const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
       return (
         <a
           href={item.href}
-          class:list={['nav-icon-wrap', isCurrent && 'active']}
+          class:list={['nav-link', isCurrent && 'active']}
           aria-current={isCurrent ? 'page' : undefined}
-          title={item.label}
         >
-          <Icon name={item.icon} size={18} class="nav-icon-svg" />
-          <span class="nav-label">{item.label}</span>
+          {item.label}
         </a>
       );
     })}
+
+    <!-- More dropdown trigger -->
+    <button
+      class:list={['nav-more-btn', isOnMorePage && 'has-active']}
+      id="nav-more-btn"
+      aria-expanded="false"
+      aria-haspopup="true"
+    >
+      More
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
   </div>
 
-  <!-- Theme toggle at bottom -->
-  <div class="sidebar-bottom">
+  <!-- Right side -->
+  <div class="nav-right">
     <ThemeToggle />
+  </div>
+
+  <!-- Dropdown panel -->
+  <div class="nav-dropdown" id="nav-dropdown" role="menu">
+    {moreItems.map((item) => {
+      const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href + '/'));
+      return (
+        <a
+          href={item.href}
+          class:list={[isCurrent && 'active']}
+          role="menuitem"
+          aria-current={isCurrent ? 'page' : undefined}
+        >
+          <Icon name={item.icon} size={16} />
+          {item.label}
+        </a>
+      );
+    })}
   </div>
 </nav>
 
@@ -109,71 +133,58 @@ const isOnMorePage = moreItems.some((item) => currentPath === item.href || (item
   </div>
 </div>
 
-<style>
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0;
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-  }
-
-  .sidebar-logo-img {
-    /* Center the 32px logo within the sidebar-width icon column */
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid rgba(224, 64, 80, 0.3);
-    box-shadow: 0 0 12px rgba(224, 64, 80, 0.15);
-    margin-left: calc((var(--sidebar-width) - 32px) / 2);
-  }
-
-  .sidebar-brand-text {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .sidebar-nav:hover .sidebar-brand-text {
-    opacity: 1;
-  }
-
-  .sidebar-links {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.25rem 0;
-  }
-
-  .sidebar-links::-webkit-scrollbar {
-    width: 0;
-  }
-
-  .sidebar-bottom {
-    padding: 0.5rem 0;
-    border-top: 1px solid var(--border-subtle);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .theme-toggle-mobile {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-</style>
-
 <script>
   import { trapFocus } from '../scripts/focus-trap';
 
+  // --- Desktop dropdown ---
+  const navMoreBtn = document.getElementById('nav-more-btn');
+  const navDropdown = document.getElementById('nav-dropdown');
+
+  navMoreBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = navDropdown?.classList.contains('open');
+    if (isOpen) {
+      navDropdown?.classList.remove('open');
+      navMoreBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      navDropdown?.classList.add('open');
+      navMoreBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!navDropdown?.contains(e.target as Node) && !navMoreBtn?.contains(e.target as Node)) {
+      navDropdown?.classList.remove('open');
+      navMoreBtn?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navDropdown?.classList.contains('open')) {
+      navDropdown.classList.remove('open');
+      navMoreBtn?.setAttribute('aria-expanded', 'false');
+      navMoreBtn?.focus();
+    }
+  });
+
+  // --- Top nav scroll effect ---
+  const topNav = document.getElementById('top-nav');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (window.scrollY > 20) {
+          topNav?.classList.add('scrolled');
+        } else {
+          topNav?.classList.remove('scrolled');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // --- Mobile more panel ---
   const moreBtn = document.getElementById('more-btn');
   const morePanel = document.getElementById('more-panel');
   const moreBackdrop = document.getElementById('more-backdrop');
@@ -203,39 +214,24 @@ const isOnMorePage = moreItems.some((item) => currentPath === item.href || (item
     moreBtn.focus();
   }
 
-  // Toggle on More button click
   moreBtn?.addEventListener('click', () => {
-    if (isOpen()) {
-      closeMore();
-    } else {
-      openMore();
-    }
+    if (isOpen()) closeMore();
+    else openMore();
   });
 
-  // Close on backdrop click
   moreBackdrop?.addEventListener('click', closeMore);
 
-  // Close on outside click
   document.addEventListener('click', (e) => {
     const target = e.target as Node;
-    if (
-      isOpen() &&
-      !morePanel?.contains(target) &&
-      !moreBtn?.contains(target) &&
-      !moreBackdrop?.contains(target)
-    ) {
+    if (isOpen() && !morePanel?.contains(target) && !moreBtn?.contains(target) && !moreBackdrop?.contains(target)) {
       closeMore();
     }
   });
 
-  // Escape key closes panel
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen()) {
-      closeMore();
-    }
+    if (e.key === 'Escape' && isOpen()) closeMore();
   });
 
-  // Swipe-down gesture to dismiss
   let touchStartY = 0;
   let touchStartTime = 0;
 
@@ -247,8 +243,6 @@ const isOnMorePage = moreItems.some((item) => currentPath === item.href || (item
   morePanel?.addEventListener('touchend', (e) => {
     const deltaY = e.changedTouches[0].clientY - touchStartY;
     const deltaTime = Date.now() - touchStartTime;
-    if (deltaY > 50 && deltaTime < 300) {
-      closeMore();
-    }
+    if (deltaY > 50 && deltaTime < 300) closeMore();
   }, { passive: true });
 </script>

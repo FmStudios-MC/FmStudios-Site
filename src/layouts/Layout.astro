@@ -54,21 +54,23 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
 <body class:list={[kinetic && 'kinetic-page']}>
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Hex grid background (replaces animated square grid) -->
+  <!-- Grid background -->
   {!kinetic && <div class="hex-grid" aria-hidden="true"></div>}
+
+  <!-- Noise texture -->
+  {!kinetic && <div class="noise-overlay" aria-hidden="true"></div>}
 
   <!-- Ambient background glow -->
   {!kinetic && <div class="bg-glow-red" aria-hidden="true"></div>}
 
-  <!-- Ember particle canvas (injected by JS) -->
+  <!-- Ember particle canvas -->
   {!kinetic && <canvas id="ember-canvas" class="ember-canvas" aria-hidden="true"></canvas>}
 
-  <!-- Sidebar navigation -->
+  <!-- Top navigation -->
   <NavBar />
 
-  <!-- Perspective wrapper for page content -->
-  <div class="page-wrapper" style={`perspective: var(--perspective-page);`}>
-    <!-- Page content — with left margin for sidebar -->
+  <!-- Page content -->
+  <div class="page-wrapper">
     <main id="main-content" class="page-content relative z-10 min-h-screen page-transition-enter">
       <slot />
     </main>
@@ -79,8 +81,8 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
   <!-- Scroll to top -->
   <button
     id="scroll-top"
-    class="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 w-11 h-11 flex items-center justify-center rounded-full opacity-0 pointer-events-none text-white shadow-xl scroll-top-btn"
-    style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: 0 4px 20px rgba(224,64,80,0.40); transition: opacity 0.3s var(--ease-spring), transform 0.4s var(--ease-spring), box-shadow 0.3s ease, pointer-events 0s;"
+    class="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 w-11 h-11 flex items-center justify-center rounded-full opacity-0 pointer-events-none text-white scroll-top-btn"
+    style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: 0 4px 24px rgba(224,64,80,0.40); transition: opacity 0.3s var(--ease-spring), transform 0.4s var(--ease-spring), box-shadow 0.3s ease, pointer-events 0s;"
     aria-label="Scroll to top"
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
@@ -151,7 +153,7 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
 
 <style>
   .page-content {
-    padding-top: 2rem;
+    padding-top: calc(var(--nav-height) + 1.5rem);
   }
 
   .scroll-top-btn:hover {
@@ -159,24 +161,9 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
     transform: translateY(-2px);
   }
 
-  /* Desktop: offset for sidebar */
-  @media (min-width: 1024px) {
-    .page-wrapper {
-      margin-left: var(--sidebar-width);
-    }
-  }
-
-  /* Tablet: narrower sidebar */
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .page-wrapper {
-      margin-left: 48px;
-    }
-  }
-
   /* Mobile: offset for bottom bar */
   @media (max-width: 767px) {
     .page-wrapper {
-      margin-left: 0;
       padding-bottom: 56px;
     }
   }
