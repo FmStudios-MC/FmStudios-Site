@@ -121,6 +121,7 @@ export const projects: Project[] = [
       'https://media.forgecdn.net/attachments/1159/442/create_stuff-png.png',
     ],
     downloadUrl: 'https://www.curseforge.com/minecraft/modpacks/create-fm3',
+    modrinthUrl: 'https://modrinth.com/modpack/create-fm3',
     downloads: '19K+',
     lastUpdate: '2025-07-22',
     modList: [
