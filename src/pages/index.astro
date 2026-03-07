@@ -171,27 +171,25 @@ const latestNews = blogPosts.slice(0, 3);
       </div>
     </ScrollReveal>
 
-    <div class="depth-section">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {latestNews.map((post, i) => {
-          const catConfig = blogCategoryConfig[post.category];
-          return (
-            <ScrollReveal delay={i * 100}>
-              <a href={`/news/${post.slug}`} class="block depth-card overflow-hidden group h-full">
-                <div class="aspect-video overflow-hidden relative">
-                  <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
-                </div>
-                <div class="p-5">
-                  <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5 rounded-full`}>{catConfig.label}</span>
-                  <h3 class="text-base font-bold font-display mt-2 mb-1 line-clamp-2" style="color: var(--text-primary);">{post.title}</h3>
-                  <p class="text-xs" style="color: var(--text-dim);">{relativeDate(post.date)}</p>
-                </div>
-              </a>
-            </ScrollReveal>
-          );
-        })}
-      </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {latestNews.map((post, i) => {
+        const catConfig = blogCategoryConfig[post.category];
+        return (
+          <ScrollReveal delay={i * 100}>
+            <a href={`/news/${post.slug}`} class="block depth-card overflow-hidden group h-full">
+              <div class="aspect-video overflow-hidden relative">
+                <img src={post.image} alt={post.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+              </div>
+              <div class="p-5">
+                <span class={`${catConfig.badge} text-xs font-semibold px-2 py-0.5 rounded-full`}>{catConfig.label}</span>
+                <h3 class="text-base font-bold font-display mt-2 mb-1 line-clamp-2" style="color: var(--text-primary);">{post.title}</h3>
+                <p class="text-xs" style="color: var(--text-dim);">{relativeDate(post.date)}</p>
+              </div>
+            </a>
+          </ScrollReveal>
+        );
+      })}
     </div>
   </section>
 
@@ -320,8 +318,8 @@ const latestNews = blogPosts.slice(0, 3);
       height: 1px;
       max-width: 80rem;
       margin: 0 auto;
-      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.35), transparent);
-      box-shadow: 0 0 20px rgba(224, 64, 80, 0.15);
+      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.45), rgba(176, 53, 117, 0.35), transparent);
+      box-shadow: 0 0 24px rgba(224, 64, 80, 0.18), 0 0 8px rgba(224, 64, 80, 0.10);
     }
 
     /* Featured split cards */
@@ -333,12 +331,29 @@ const latestNews = blogPosts.slice(0, 3);
       overflow: hidden;
       box-shadow: var(--shadow-depth-2), inset 0 1px 0 var(--edge-top);
       transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+      position: relative;
+    }
+
+    .featured-split-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
 
     .featured-split-card:hover {
       transform: translateY(-4px);
       border-color: var(--border-accent);
-      box-shadow: var(--shadow-depth-3), 0 12px 40px rgba(224, 64, 80, 0.10);
+      box-shadow: var(--shadow-depth-3), 0 16px 48px rgba(224, 64, 80, 0.12);
+    }
+
+    .featured-split-card:hover::after {
+      opacity: 1;
     }
 
     @media (max-width: 1023px) {
