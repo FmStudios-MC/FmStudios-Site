@@ -55,7 +55,7 @@ export const projects: Project[] = [
     downloadUrl: 'https://www.curseforge.com/minecraft/texture-packs/fabi-s-lootr',
     modrinthUrl: 'https://modrinth.com/resourcepack/fabis-lootr',
     downloads: '21K+',
-    lastUpdate: '2025-07-15',
+    lastUpdate: '2026-01-09',
   },
   {
     id: 2,
