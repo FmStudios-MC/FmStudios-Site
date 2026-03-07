@@ -293,9 +293,10 @@
     pointer-events: none;
     z-index: 0;
     background:
-      radial-gradient(ellipse 800px 600px at 15% 20%, rgba(224, 64, 80, 0.08), transparent),
-      radial-gradient(ellipse 600px 500px at 85% 75%, rgba(106, 45, 145, 0.06), transparent),
-      radial-gradient(ellipse 500px 400px at 50% 50%, rgba(176, 53, 117, 0.04), transparent);
+      radial-gradient(ellipse 900px 700px at 12% 18%, rgba(224, 64, 80, 0.12), transparent),
+      radial-gradient(ellipse 700px 550px at 88% 72%, rgba(106, 45, 145, 0.09), transparent),
+      radial-gradient(ellipse 600px 500px at 50% 45%, rgba(176, 53, 117, 0.06), transparent),
+      radial-gradient(ellipse 400px 400px at 70% 15%, rgba(138, 69, 181, 0.05), transparent);
     animation: glow-drift 30s ease-in-out infinite alternate;
   }
 
@@ -327,11 +328,14 @@
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.3;
+    opacity: 0.35;
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 80px 80px;
+    animation: grid-shift 60s linear infinite;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
   }
 
   .light-theme .hex-grid {
@@ -342,10 +346,12 @@
 
   /* ── Gradient Text ───────────────────── */
   .gradient-text {
-    background: linear-gradient(135deg, #e04050 0%, #b03575 50%, #8a45b5 100%);
+    background: linear-gradient(135deg, #e04050 0%, #b03575 40%, #8a45b5 70%, #e04050 100%);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: gradient-shift 6s ease-in-out infinite;
   }
 
   .gradient-text-white {
@@ -386,9 +392,23 @@
     inset: 0;
     background: radial-gradient(
       600px circle at var(--mouse-x) var(--mouse-y),
-      rgba(224, 64, 80, 0.08),
-      transparent 55%
+      rgba(224, 64, 80, 0.10),
+      transparent 50%
     );
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-spring);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .depth-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.40), transparent);
     opacity: 0;
     transition: opacity 0.4s var(--ease-spring);
     pointer-events: none;
@@ -405,6 +425,10 @@
   }
 
   .depth-card:hover::before {
+    opacity: 1;
+  }
+
+  .depth-card:hover::after {
     opacity: 1;
   }
 
@@ -501,11 +525,11 @@
   }
 
   .tilt-card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.14);
     box-shadow:
       var(--shadow-lg),
-      0 0 0 1px rgba(224, 64, 80, 0.06),
-      0 0 48px rgba(224, 64, 80, 0.10);
+      0 0 0 1px rgba(224, 64, 80, 0.08),
+      0 0 60px rgba(224, 64, 80, 0.14);
   }
 
   .tilt-card:hover::before {
@@ -610,26 +634,30 @@
   }
 
   .filter-btn {
-    background: transparent;
-    border: none;
+    background: var(--bg-card);
+    border: 1px solid transparent;
     color: var(--text-muted);
     padding: 0.5rem 1.25rem;
-    border-radius: 0.625rem;
+    border-radius: 9999px;
     font-weight: 500;
     font-size: 0.875rem;
-    transition: all 0.2s var(--ease-spring);
+    transition: all 0.25s var(--ease-spring);
     cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .filter-btn:hover {
     color: var(--text-primary);
     background: var(--bg-card-hover);
+    border-color: var(--border-subtle);
   }
 
   .filter-btn.active {
     background: linear-gradient(135deg, var(--accent), var(--accent-deep));
     color: #fff;
-    box-shadow: 0 2px 12px rgba(224, 64, 80, 0.40);
+    border-color: transparent;
+    box-shadow: 0 2px 16px rgba(224, 64, 80, 0.45), 0 0 0 1px rgba(224, 64, 80, 0.15);
   }
 
   /* ── Top Navigation ──────────────────── */
@@ -677,6 +705,7 @@
     border-radius: 50%;
     border: 1px solid rgba(224, 64, 80, 0.3);
     box-shadow: 0 0 12px rgba(224, 64, 80, 0.15);
+    animation: nav-logo-pulse 4s ease-in-out infinite;
   }
 
   .nav-brand-text {
@@ -961,12 +990,14 @@
   .reveal {
     opacity: 0;
     transform: translateY(32px);
-    transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
+    filter: blur(4px);
+    transition: opacity 0.7s var(--ease-spring), transform 0.7s var(--ease-spring), filter 0.7s var(--ease-spring);
   }
 
   .reveal.visible {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 
   .reveal-delay-1 { transition-delay: 0.1s; }
@@ -1343,6 +1374,7 @@
     border-radius: 1px;
     flex-shrink: 0;
     box-shadow: 0 0 10px rgba(224, 64, 80, 0.45);
+    animation: eyebrow-pulse 3s ease-in-out infinite;
   }
 
   /* ── Hero eyebrow pill ──────────────────── */
@@ -1551,9 +1583,9 @@
     position: fixed;
     top: 0;
     left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent-deep), var(--accent));
-    box-shadow: 0 0 8px rgba(224, 64, 80, 0.5);
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent-deep), var(--accent));
+    box-shadow: 0 0 12px rgba(224, 64, 80, 0.6), 0 0 24px rgba(224, 64, 80, 0.3);
     z-index: 100;
     transition: width 0.1s linear;
   }
@@ -1834,6 +1866,21 @@
   to { transform: rotate(360deg) translateX(140px) rotate(-360deg); }
 }
 
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes nav-logo-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(224, 64, 80, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(224, 64, 80, 0.35), 0 0 40px rgba(224, 64, 80, 0.10); }
+}
+
+@keyframes eyebrow-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(224, 64, 80, 0.45); width: 2rem; }
+  50% { box-shadow: 0 0 18px rgba(224, 64, 80, 0.65); width: 2.5rem; }
+}
+
 /* ============================================
    Reduced Motion
    ============================================ */
@@ -1851,6 +1898,7 @@
   .reveal-scale {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
   }
 
   .hero-glow, .hero-glow-secondary, .hero-glow-tertiary {
