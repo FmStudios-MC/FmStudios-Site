@@ -50,7 +50,7 @@ export const roadmapItems: RoadmapItem[] = [
     id: 3,
     title: 'Project Leuna - Reborn (Roblox)',
     description: 'A Roblox roleplay game',
-    status: 'in-progress',
+    status: 'onhold',
     category: 'roblox',
     priority: 'low',
     progress: 2,
