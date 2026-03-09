@@ -7,20 +7,34 @@ export function initTiltCards() {
   if (window.innerWidth < 768) return; // skip on mobile
 
   document.querySelectorAll<HTMLElement>('.tilt-card').forEach((card) => {
+    let ticking = false;
+    let lastX = 0;
+    let lastY = 0;
+
     card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+      lastX = e.clientX;
+      lastY = e.clientY;
 
-      const rotateY = ((x - centerX) / centerX) * MAX_TILT;
-      const rotateX = ((centerY - y) / centerY) * MAX_TILT;
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = lastX - rect.left;
+          const y = lastY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
 
-      card.style.transform = `perspective(${800}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+          const rotateY = ((x - centerX) / centerX) * MAX_TILT;
+          const rotateX = ((centerY - y) / centerY) * MAX_TILT;
+
+          card.style.transform = `perspective(${800}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+          ticking = false;
+        });
+      }
     });
 
     card.addEventListener('mouseleave', () => {
+      ticking = false;
       card.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
       card.style.transform = '';
       setTimeout(() => {

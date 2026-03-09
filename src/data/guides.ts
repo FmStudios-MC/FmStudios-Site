@@ -26,7 +26,7 @@ export const guides: Guide[] = [
     steps: [
       {
         title: 'Install a Launcher',
-        content: 'Download and install a Minecraft launcher that supports modpacks. We recommend <strong>CurseForge App</strong> or <strong>Modrinth App</strong> for the easiest experience.',
+        content: 'Download and install a Minecraft launcher that supports modpacks. We recommend <strong>ATLauncher</strong> for the best experience. <strong>CurseForge App</strong> and <strong>Modrinth App</strong> also work great.',
       },
       {
         title: 'Search for {Additions}',
@@ -79,8 +79,8 @@ export const guides: Guide[] = [
     category: 'getting-started',
     steps: [
       {
-        title: 'Install via CurseForge',
-        content: 'Create F&M 3 is available on <strong>CurseForge</strong>. Install the CurseForge App, search for "Create F&M 3", and click Install.',
+        title: 'Install via CurseForge or Modrinth',
+        content: 'Create F&M 3 is available on both <strong>CurseForge</strong> and <strong>Modrinth</strong>. Use the CurseForge App, Modrinth App, or <strong>ATLauncher</strong> (our recommended launcher), search for "Create F&M 3", and click Install.',
       },
       {
         title: 'System Requirements',

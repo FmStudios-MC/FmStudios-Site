@@ -1,4 +1,4 @@
-// Lightweight canvas ember particle system (~40 floating red-magenta dots)
+// Lightweight canvas ember particle system (~35 floating red-magenta dots)
 
 interface Ember {
   x: number;
@@ -20,12 +20,25 @@ export function initEmberParticles() {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  // Cap pixel ratio to avoid massive canvas on 4K/5K displays
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
   let w = window.innerWidth;
   let h = window.innerHeight;
-  canvas.width = w;
-  canvas.height = h;
 
-  const PARTICLE_COUNT = 35;
+  function resizeCanvas() {
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  resizeCanvas();
+
+  // Fewer particles on very high-res to save fillrate
+  const isHighRes = w * dpr > 3000;
+  const PARTICLE_COUNT = isHighRes ? 20 : 35;
   const embers: Ember[] = [];
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -81,8 +94,7 @@ export function initEmberParticles() {
     resizeTimer = window.setTimeout(() => {
       w = window.innerWidth;
       h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
+      resizeCanvas();
     }, 150);
   });
 

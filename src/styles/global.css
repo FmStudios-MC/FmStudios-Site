@@ -292,6 +292,8 @@
     height: 110%;
     pointer-events: none;
     z-index: 0;
+    contain: strict;
+    will-change: transform;
     background:
       radial-gradient(ellipse 900px 700px at 12% 18%, rgba(224, 64, 80, 0.12), transparent),
       radial-gradient(ellipse 700px 550px at 88% 72%, rgba(106, 45, 145, 0.09), transparent),
@@ -313,6 +315,7 @@
     pointer-events: none;
     z-index: 0;
     opacity: 0.015;
+    contain: strict;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 256px 256px;
@@ -329,6 +332,7 @@
     pointer-events: none;
     z-index: 0;
     opacity: 0.35;
+    contain: strict;
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
@@ -668,14 +672,15 @@
     right: 0;
     height: var(--nav-height);
     background: var(--glass-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--glass-border);
     z-index: 50;
     display: flex;
     align-items: center;
     padding: 0 1.5rem;
     transition: background 0.3s ease, box-shadow 0.3s ease;
+    contain: layout style;
   }
 
   .top-nav.scrolled {
@@ -704,8 +709,7 @@
     height: 32px;
     border-radius: 50%;
     border: 1px solid rgba(224, 64, 80, 0.3);
-    box-shadow: 0 0 12px rgba(224, 64, 80, 0.15);
-    animation: nav-logo-pulse 4s ease-in-out infinite;
+    box-shadow: 0 0 16px rgba(224, 64, 80, 0.25);
   }
 
   .nav-brand-text {
@@ -1425,6 +1429,8 @@
     background: radial-gradient(circle, rgba(224, 64, 80, 0.18), transparent 70%);
     filter: blur(120px);
     pointer-events: none;
+    will-change: transform;
+    contain: layout style;
     animation: hero-glow-float 9s ease-in-out infinite;
     transform: translate(-50%, -50%);
   }
@@ -1438,6 +1444,8 @@
     background: radial-gradient(circle, rgba(106, 45, 145, 0.12), transparent 70%);
     filter: blur(90px);
     pointer-events: none;
+    will-change: transform;
+    contain: layout style;
     animation: hero-glow-float 14s ease-in-out infinite reverse;
   }
 
@@ -1450,6 +1458,8 @@
     background: radial-gradient(circle, rgba(176, 53, 117, 0.10), transparent 70%);
     filter: blur(80px);
     pointer-events: none;
+    will-change: transform;
+    contain: layout style;
     animation: hero-glow-float 11s ease-in-out 2s infinite;
   }
 
@@ -1757,6 +1767,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 1;
+    contain: strict;
   }
 
   /* ── Horizontal Scroll Strip ────────── */

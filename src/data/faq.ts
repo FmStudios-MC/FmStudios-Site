@@ -40,7 +40,7 @@ export const faqSections: FAQSection[] = [
       {
         question: 'What launcher should I use?',
         answer:
-          'We recommend using CurseForge App, Prism Launcher, or Modrinth App. All of them support one-click modpack installation.',
+          'We recommend ATLauncher — it supports both CurseForge and Modrinth packs with one-click installation. CurseForge App, Modrinth App, and Prism Launcher are also great options.',
       },
       {
         question: 'How much RAM do I need?',

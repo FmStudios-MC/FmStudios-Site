@@ -1,0 +1,901 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import FAQItem from '../components/FAQItem.astro';
+import { guides, guideCategories } from '../data/guides';
+import { faqSections } from '../data/faq';
+import { DISCORD_URL } from '../data/social';
+
+const totalGuides = guides.length;
+const totalQuestions = faqSections.reduce((sum, s) => sum + s.items.length, 0);
+const totalArticles = totalGuides + totalQuestions;
+
+// Build sidebar tree
+const guideCats = guideCategories.filter(c => c.id !== 'all');
+---
+
+<Layout title="Wiki - FabiMvurice Interactive">
+  <div class="wiki-layout max-w-7xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+
+    <!-- ══ Hero ══════════════════════════════════ -->
+    <ScrollReveal>
+      <div class="wiki-hero mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+          <div>
+            <p class="section-eyebrow mb-2">Knowledge Base</p>
+            <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+              <span class="gradient-text">Wiki</span>
+            </h1>
+            <p class="mt-3 text-sm max-w-lg" style="color: var(--text-muted);">
+              Guides, tutorials, and answers to common questions — everything you need to get the most out of our projects.
+            </p>
+          </div>
+          <div class="wiki-stats">
+            <div class="wiki-stat">
+              <span class="text-xl font-black font-display gradient-text">{totalGuides}</span>
+              <span class="text-[0.65rem] uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Guides</span>
+            </div>
+            <div class="wiki-stat-divider" aria-hidden="true"></div>
+            <div class="wiki-stat">
+              <span class="text-xl font-black font-display gradient-text">{totalQuestions}</span>
+              <span class="text-[0.65rem] uppercase tracking-widest font-semibold" style="color: var(--text-dim);">FAQ</span>
+            </div>
+            <div class="wiki-stat-divider" aria-hidden="true"></div>
+            <div class="wiki-stat">
+              <span class="text-xl font-black font-display gradient-text">{totalArticles}</span>
+              <span class="text-[0.65rem] uppercase tracking-widest font-semibold" style="color: var(--text-dim);">Total</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="mt-6">
+          <div class="search-input-wrap">
+            <Icon name="search" size={16} class="search-icon" />
+            <input
+              type="text"
+              id="wiki-search"
+              class="search-input"
+              placeholder="Search guides & questions..."
+              autocomplete="off"
+              aria-label="Search wiki"
+            />
+            <button id="wiki-search-clear" class="search-clear-btn" aria-label="Clear search">
+              <Icon name="x" size={12} />
+            </button>
+          </div>
+          <p id="wiki-search-status" class="text-xs mt-2 text-center" style="color: var(--text-dim); display: none;" role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- ══ Main Layout: Sidebar + Content ══════ -->
+    <div class="wiki-body">
+
+      <!-- Sidebar (desktop) -->
+      <aside class="wiki-sidebar" id="wiki-sidebar">
+        <nav aria-label="Wiki navigation">
+
+          <!-- Tab switcher for mobile -->
+          <div class="wiki-mobile-tabs" id="wiki-mobile-tabs">
+            <button class="wiki-tab active" data-tab="guides" aria-pressed="true">
+              <Icon name="book-open" size={14} />
+              Guides
+            </button>
+            <button class="wiki-tab" data-tab="faq" aria-pressed="false">
+              <Icon name="help-circle" size={14} />
+              FAQ
+            </button>
+          </div>
+
+          <!-- Guides nav -->
+          <div class="wiki-nav-section" id="sidebar-guides">
+            <div class="wiki-nav-heading">
+              <Icon name="book-open" size={14} />
+              <span>Guides</span>
+            </div>
+            {guideCats.map((cat) => {
+              const catGuides = guides.filter(g => g.category === cat.id);
+              if (catGuides.length === 0) return null;
+              return (
+                <div class="wiki-nav-group">
+                  <div class="wiki-nav-cat">{cat.label}</div>
+                  {catGuides.map((guide) => (
+                    <a href={`#guide-${guide.slug}`} class="wiki-nav-link" data-target={`guide-${guide.slug}`}>
+                      <Icon name={guide.icon} size={13} />
+                      <span>{guide.title}</span>
+                    </a>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+
+          <!-- FAQ nav -->
+          <div class="wiki-nav-section" id="sidebar-faq">
+            <div class="wiki-nav-heading">
+              <Icon name="help-circle" size={14} />
+              <span>FAQ</span>
+            </div>
+            {faqSections.map((section) => (
+              <div class="wiki-nav-group">
+                <a href={`#faq-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`} class="wiki-nav-link wiki-nav-link--faq" data-target={`faq-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Icon name="help-circle" size={13} />
+                  <span>{section.title}</span>
+                  <span class="wiki-nav-count">{section.items.length}</span>
+                </a>
+              </div>
+            ))}
+          </div>
+
+        </nav>
+      </aside>
+
+      <!-- Content area -->
+      <main class="wiki-content" id="wiki-content">
+
+        <!-- ═ Guides Section ═══════════════════ -->
+        <section class="wiki-section" id="wiki-guides-section" data-section="guides">
+          <div class="wiki-section-header">
+            <div class="flex items-center gap-3">
+              <div class="wiki-section-icon">
+                <Icon name="book-open" size={18} />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold font-display" style="color: var(--text-primary);">Guides</h2>
+                <p class="text-xs" style="color: var(--text-dim);">Step-by-step tutorials for our projects</p>
+              </div>
+            </div>
+            <span class="wiki-article-count">{totalGuides} articles</span>
+          </div>
+
+          <div class="wiki-articles" id="wiki-guides-list">
+            {guides.map((guide, i) => (
+              <ScrollReveal delay={i * 60}>
+                <article
+                  class="wiki-article wiki-guide-article depth-card p-0 overflow-hidden"
+                  id={`guide-${guide.slug}`}
+                  data-category={guide.category}
+                  data-project={guide.projectSlug}
+                  data-searchable={`${guide.title.toLowerCase()} ${guide.description.toLowerCase()} ${guide.steps.map(s => s.title.toLowerCase() + ' ' + s.content.toLowerCase()).join(' ')}`}
+                >
+                  <!-- Article header -->
+                  <div class="wiki-article-header">
+                    <div class="flex items-center gap-3">
+                      <div class="wiki-article-icon">
+                        <Icon name={guide.icon} size={16} />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-bold font-display truncate" style="color: var(--text-primary);">
+                          {guide.title}
+                        </h3>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="wiki-tag wiki-tag-project">{guide.projectName}</span>
+                          <span class="wiki-tag wiki-tag-cat">{guideCategories.find(c => c.id === guide.category)?.label}</span>
+                        </div>
+                      </div>
+                      <span class="wiki-step-count">
+                        {guide.steps.length} steps
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="wiki-article-divider" aria-hidden="true"></div>
+
+                  <div class="px-5 py-4">
+                    <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted);">
+                      {guide.description}
+                    </p>
+
+                    <!-- Steps -->
+                    <div class="wiki-steps">
+                      {guide.steps.map((step, si) => (
+                        <div class="wiki-step">
+                          <button type="button" class="wiki-step-toggle" aria-expanded={si === 0 ? 'true' : 'false'}>
+                            <div class="wiki-step-num">{si + 1}</div>
+                            <h4 class="text-sm font-bold flex-1 min-w-0" style="color: var(--text-primary);">
+                              {step.title}
+                            </h4>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="wiki-step-chevron flex-shrink-0" style="color: var(--text-dim);"><path d="m6 9 6 6 6-6"/></svg>
+                          </button>
+                          <div class="wiki-step-content" style={si === 0 ? '' : 'max-height: 0; overflow: hidden;'}>
+                            <div class="wiki-step-body" set:html={step.content} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+
+        <!-- Neon section divider -->
+        <div class="wiki-divider" aria-hidden="true"></div>
+
+        <!-- ═ FAQ Section ══════════════════════ -->
+        <section class="wiki-section" id="wiki-faq-section" data-section="faq">
+          <div class="wiki-section-header">
+            <div class="flex items-center gap-3">
+              <div class="wiki-section-icon wiki-section-icon--faq">
+                <Icon name="help-circle" size={18} />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold font-display" style="color: var(--text-primary);">FAQ</h2>
+                <p class="text-xs" style="color: var(--text-dim);">Frequently asked questions</p>
+              </div>
+            </div>
+            <span class="wiki-article-count">{totalQuestions} questions</span>
+          </div>
+
+          <div class="wiki-articles" id="wiki-faq-list">
+            {faqSections.map((section, si) => (
+              <ScrollReveal delay={si * 80}>
+                <div
+                  class="wiki-faq-block"
+                  id={`faq-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  data-faq-section={section.title.toLowerCase()}
+                >
+                  <div class="wiki-faq-section-header">
+                    <div class="flex items-center gap-3">
+                      <div class="wiki-faq-num">{si + 1}</div>
+                      <h3 class="text-base font-bold font-display" style="color: var(--text-primary);">{section.title}</h3>
+                    </div>
+                    <span class="wiki-step-count">{section.items.length}</span>
+                  </div>
+
+                  <div class="wiki-faq-divider" aria-hidden="true"></div>
+
+                  <div class="p-3 flex flex-col gap-1.5">
+                    {section.items.map((item, qi) => (
+                      <div class="wiki-faq-item" data-question={item.question.toLowerCase()} data-answer={item.answer.toLowerCase()}>
+                        <FAQItem question={item.question} answer={item.answer} id={`wiki-${si}-${qi}`} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+
+        <!-- No results -->
+        <div id="wiki-no-results" class="text-center py-16" style="display: none;">
+          <div class="depth-card p-12">
+            <Icon name="search" size={48} class="mx-auto mb-4" style="color: var(--text-dim);" />
+            <h3 class="text-xl font-bold font-display mb-2" style="color: var(--text-primary);">No results found</h3>
+            <p class="mb-4" style="color: var(--text-muted);">Try a different search term.</p>
+            <button type="button" id="wiki-clear-search" class="btn-outline text-sm inline-flex items-center gap-2">
+              <Icon name="x" size={14} />
+              Clear search
+            </button>
+          </div>
+        </div>
+
+        <!-- Discord CTA -->
+        <ScrollReveal>
+          <div class="mt-8 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Can't find what you need?</p>
+              <p class="text-sm" style="color: var(--text-muted);">Join our Discord — the community is happy to help.</p>
+            </div>
+            <a
+              href={DISCORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2"
+            >
+              <Icon name="discord" size={16} />
+              Join Discord
+            </a>
+          </div>
+        </ScrollReveal>
+      </main>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Wiki search ──
+    const searchInput = document.getElementById('wiki-search') as HTMLInputElement;
+    const clearBtn = document.getElementById('wiki-search-clear');
+    const statusEl = document.getElementById('wiki-search-status');
+    const noResults = document.getElementById('wiki-no-results');
+
+    // Article elements
+    const guideArticles = document.querySelectorAll<HTMLElement>('.wiki-guide-article');
+    const faqItems = document.querySelectorAll<HTMLElement>('.wiki-faq-item');
+    const faqBlocks = document.querySelectorAll<HTMLElement>('.wiki-faq-block');
+    const guidesSection = document.getElementById('wiki-guides-section');
+    const faqSection = document.getElementById('wiki-faq-section');
+    const divider = document.querySelector('.wiki-divider') as HTMLElement;
+
+    let debounceTimer: number;
+
+    function filterWiki() {
+      const query = searchInput?.value.toLowerCase().trim() || '';
+      let visibleGuides = 0;
+      let visibleFaq = 0;
+
+      // Filter guides
+      guideArticles.forEach((article) => {
+        const searchable = article.dataset.searchable || '';
+        const match = !query || searchable.includes(query);
+        const wrapper = article.closest('.reveal, .reveal-scale') || article;
+        (wrapper as HTMLElement).style.display = match ? '' : 'none';
+        if (match) visibleGuides++;
+      });
+
+      // Filter FAQ items
+      faqItems.forEach((item) => {
+        const q = item.dataset.question || '';
+        const a = item.dataset.answer || '';
+        const match = !query || q.includes(query) || a.includes(query);
+        item.style.display = match ? '' : 'none';
+        if (match) visibleFaq++;
+      });
+
+      // Hide FAQ blocks with no visible items
+      faqBlocks.forEach((block) => {
+        const visibleItems = block.querySelectorAll('.wiki-faq-item:not([style*="display: none"])');
+        const wrapper = block.closest('.reveal, .reveal-scale') || block;
+        (wrapper as HTMLElement).style.display = visibleItems.length > 0 ? '' : 'none';
+      });
+
+      // Hide sections with no visible content
+      if (guidesSection) guidesSection.style.display = visibleGuides > 0 ? '' : 'none';
+      if (faqSection) faqSection.style.display = visibleFaq > 0 ? '' : 'none';
+      if (divider) divider.style.display = (visibleGuides > 0 && visibleFaq > 0) ? '' : 'none';
+
+      // No results state
+      const totalVisible = visibleGuides + visibleFaq;
+      if (noResults) noResults.style.display = (query && totalVisible === 0) ? '' : 'none';
+
+      // Clear button
+      if (clearBtn) clearBtn.classList.toggle('visible', query.length > 0);
+
+      // Status
+      if (statusEl) {
+        if (query) {
+          statusEl.style.display = '';
+          statusEl.textContent = `${totalVisible} result${totalVisible !== 1 ? 's' : ''} found`;
+        } else {
+          statusEl.style.display = 'none';
+        }
+      }
+    }
+
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(filterWiki, 200);
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      filterWiki();
+      searchInput?.focus();
+    });
+
+    document.getElementById('wiki-clear-search')?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      filterWiki();
+      searchInput?.focus();
+    });
+
+    // ── Mobile tab switching ──
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.wiki-tab');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        tabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-pressed', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-pressed', 'true');
+
+        // Show/hide sections
+        if (guidesSection) guidesSection.style.display = (target === 'guides' || target === 'all') ? '' : 'none';
+        if (faqSection) faqSection.style.display = (target === 'faq' || target === 'all') ? '' : 'none';
+        if (divider) divider.style.display = (target === 'all') ? '' : 'none';
+
+        // Show/hide sidebar sections
+        const sidebarGuides = document.getElementById('sidebar-guides');
+        const sidebarFaq = document.getElementById('sidebar-faq');
+        if (sidebarGuides) sidebarGuides.style.display = (target === 'guides' || target === 'all') ? '' : 'none';
+        if (sidebarFaq) sidebarFaq.style.display = (target === 'faq' || target === 'all') ? '' : 'none';
+      });
+    });
+
+    // ── Sidebar active tracking ──
+    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.wiki-nav-link');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) => link.classList.remove('active'));
+          const target = entry.target.id;
+          const activeLink = document.querySelector(`.wiki-nav-link[data-target="${target}"]`);
+          activeLink?.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 });
+
+    document.querySelectorAll<HTMLElement>('.wiki-article, .wiki-faq-block').forEach((el) => {
+      observer.observe(el);
+    });
+
+    // Smooth scroll for sidebar links
+    navLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href')?.slice(1);
+        if (targetId) {
+          const target = document.getElementById(targetId);
+          target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ── Collapsible guide steps ──
+    document.querySelectorAll<HTMLButtonElement>('.wiki-step-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const content = btn.nextElementSibling as HTMLElement;
+        if (!content) return;
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+
+        if (expanded) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = '0';
+          });
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.addEventListener('transitionend', () => {
+            if (btn.getAttribute('aria-expanded') === 'true') {
+              content.style.maxHeight = '';
+            }
+          }, { once: true });
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  </script>
+</Layout>
+
+<style>
+  /* ── Wiki Layout ── */
+  .wiki-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .wiki-body {
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+    }
+  }
+
+  /* ── Hero ── */
+  .wiki-hero {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 1.25rem;
+    padding: 2rem 2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wiki-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.45), rgba(176, 53, 117, 0.30), transparent);
+    pointer-events: none;
+  }
+
+  /* ── Stats row ── */
+  .wiki-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    flex-shrink: 0;
+  }
+
+  .wiki-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+  }
+
+  .wiki-stat-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border-subtle);
+  }
+
+  /* ── Sidebar ── */
+  .wiki-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .wiki-sidebar {
+      display: block;
+      position: sticky;
+      top: calc(var(--nav-height) + 1.5rem);
+      max-height: calc(100vh - var(--nav-height) - 3rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+      scrollbar-width: thin;
+    }
+  }
+
+  .wiki-nav-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .wiki-nav-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .wiki-nav-group {
+    margin-bottom: 0.25rem;
+  }
+
+  .wiki-nav-cat {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 0.375rem 0.5rem 0.25rem;
+  }
+
+  .wiki-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.15s ease, background 0.15s ease;
+    text-decoration: none;
+    line-height: 1.3;
+  }
+
+  .wiki-nav-link span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wiki-nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-card-hover);
+  }
+
+  .wiki-nav-link.active {
+    color: var(--accent);
+    background: rgba(224, 64, 80, 0.08);
+  }
+
+  .wiki-nav-count {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.1rem 0.4rem;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ── Mobile tabs ── */
+  .wiki-mobile-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    .wiki-mobile-tabs {
+      display: none;
+    }
+  }
+
+  .wiki-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-spring);
+  }
+
+  .wiki-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-card-hover);
+    border-color: var(--border-medium);
+  }
+
+  .wiki-tab.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 16px rgba(224, 64, 80, 0.35);
+  }
+
+  /* ── Section headers ── */
+  .wiki-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .wiki-section-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(224, 64, 80, 0.15), rgba(176, 53, 117, 0.08));
+    border: 1px solid rgba(224, 64, 80, 0.25);
+    border-radius: 0.75rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wiki-section-icon--faq {
+    background: linear-gradient(135deg, rgba(106, 45, 145, 0.15), rgba(176, 53, 117, 0.08));
+    border-color: rgba(106, 45, 145, 0.25);
+    color: var(--accent-dark);
+  }
+
+  :root .wiki-section-icon--faq {
+    color: #c084fc;
+  }
+
+  .wiki-article-count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-dim);
+  }
+
+  /* ── Articles list ── */
+  .wiki-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* ── Article card ── */
+  .wiki-article-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 1rem 1.25rem;
+  }
+
+  .wiki-article-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(224, 64, 80, 0.12), rgba(224, 64, 80, 0.04));
+    border: 1px solid rgba(224, 64, 80, 0.22);
+    border-radius: 0.625rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wiki-article-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.25), transparent);
+  }
+
+  .wiki-tag {
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+  }
+
+  .wiki-tag-project {
+    background: var(--bg-card);
+    color: var(--text-dim);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .wiki-tag-cat {
+    background: rgba(224, 64, 80, 0.08);
+    color: var(--accent);
+    border: 1px solid rgba(224, 64, 80, 0.18);
+  }
+
+  .wiki-step-count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(224, 64, 80, 0.10);
+    color: var(--accent);
+    border: 1px solid rgba(224, 64, 80, 0.22);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Guide steps ── */
+  .wiki-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .wiki-step {
+    padding: 0.625rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.625rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .wiki-step:has(.wiki-step-toggle[aria-expanded="true"]) {
+    border-color: var(--border-accent);
+  }
+
+  .wiki-step-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    background: none;
+    border: none;
+    font: inherit;
+    padding: 0;
+  }
+
+  .wiki-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(224, 64, 80, 0.3);
+  }
+
+  .wiki-step-chevron {
+    transition: transform 0.4s var(--ease-spring);
+  }
+
+  .wiki-step-toggle[aria-expanded="true"] .wiki-step-chevron {
+    transform: rotate(180deg);
+  }
+
+  .wiki-step-content {
+    overflow: hidden;
+    transition: max-height 0.35s var(--ease-spring);
+  }
+
+  .wiki-step-body {
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    padding: 0.5rem 0 0 2.125rem;
+  }
+
+  .wiki-step-body :global(strong) {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* ── FAQ blocks ── */
+  .wiki-faq-block {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+
+  .wiki-faq-section-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0.875rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .wiki-faq-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8a45b5, var(--accent-dark));
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(138, 69, 181, 0.35);
+  }
+
+  .wiki-faq-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(138, 69, 181, 0.25), transparent);
+  }
+
+  /* ── Section divider ── */
+  .wiki-divider {
+    height: 1px;
+    margin: 2rem 0;
+    background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.30), rgba(176, 53, 117, 0.20), transparent);
+    box-shadow: 0 0 16px rgba(224, 64, 80, 0.08);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 639px) {
+    .wiki-hero {
+      padding: 1.5rem 1.25rem 1.25rem;
+    }
+
+    .wiki-stats {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
