@@ -13,6 +13,21 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    id: 4,
+    title: 'Hytale Community Server is closed',
+    slug: 'hytale-server-closing',
+    category: 'announcement',
+    date: '2026-03-09',
+    author: 'Itzz_Fabi',
+    excerpt: 'Our Hytale Server closed...',
+    content: `
+      <h3>The Server closed</h3>
+      <p>Due to no intrest from the Community, the server closed.</p>
+    `,
+    image: '/images/news/hytalered.webp',
+    tags: ['News', 'Community', 'Hytale'],
+  },
+  {
     id: 3,
     title: '"Project Leuna - Reborn" Progress',
     slug: 'prleunapr0226',
