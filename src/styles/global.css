@@ -293,19 +293,16 @@
     pointer-events: none;
     z-index: 0;
     contain: strict;
-    will-change: transform;
     background:
-      radial-gradient(ellipse 900px 700px at 12% 18%, rgba(224, 64, 80, 0.12), transparent),
-      radial-gradient(ellipse 700px 550px at 88% 72%, rgba(106, 45, 145, 0.09), transparent),
-      radial-gradient(ellipse 600px 500px at 50% 45%, rgba(176, 53, 117, 0.06), transparent),
-      radial-gradient(ellipse 400px 400px at 70% 15%, rgba(138, 69, 181, 0.05), transparent);
-    animation: glow-drift 30s ease-in-out infinite alternate;
+      radial-gradient(ellipse 600px 500px at 12% 18%, rgba(224, 64, 80, 0.12), transparent),
+      radial-gradient(ellipse 500px 400px at 88% 72%, rgba(106, 45, 145, 0.09), transparent),
+      radial-gradient(ellipse 400px 350px at 50% 45%, rgba(176, 53, 117, 0.06), transparent);
   }
 
   .light-theme .bg-glow-red {
     background:
-      radial-gradient(ellipse 800px 600px at 15% 20%, rgba(200, 56, 72, 0.04), transparent),
-      radial-gradient(ellipse 600px 500px at 85% 75%, rgba(90, 37, 120, 0.03), transparent);
+      radial-gradient(ellipse 500px 400px at 15% 20%, rgba(200, 56, 72, 0.04), transparent),
+      radial-gradient(ellipse 400px 350px at 85% 75%, rgba(90, 37, 120, 0.03), transparent);
   }
 
   /* ── Noise texture overlay ─────────── */
@@ -337,7 +334,6 @@
       linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 80px 80px;
-    animation: grid-shift 60s linear infinite;
     mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
     -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
   }
@@ -351,11 +347,10 @@
   /* ── Gradient Text ───────────────────── */
   .gradient-text {
     background: linear-gradient(135deg, #e04050 0%, #b03575 40%, #8a45b5 70%, #e04050 100%);
-    background-size: 200% 100%;
+    background-size: 100% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-shift 6s ease-in-out infinite;
   }
 
   .gradient-text-white {
@@ -377,14 +372,13 @@
     --mouse-x: 50%;
     --mouse-y: 50%;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 1rem;
     box-shadow: var(--shadow-md);
     transition:
       transform 0.4s var(--ease-spring),
-      box-shadow 0.4s var(--ease-spring),
       border-color 0.4s var(--ease-spring);
     position: relative;
     overflow: hidden;
@@ -450,14 +444,13 @@
   /* Legacy .card alias */
   .card {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 1rem;
     box-shadow: var(--shadow-md);
     transition:
       transform 0.4s var(--ease-spring),
-      box-shadow 0.4s var(--ease-spring),
       border-color 0.4s var(--ease-spring);
     position: relative;
     overflow: hidden;
@@ -502,13 +495,12 @@
   /* ── Tilt Card (3D mouse-tracking) ─────── */
   .tilt-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 1rem;
     box-shadow: var(--shadow-md);
     transition:
-      box-shadow 0.4s var(--ease-spring),
       border-color 0.4s var(--ease-spring);
     position: relative;
     overflow: hidden;
@@ -560,7 +552,7 @@
     font-weight: 700;
     padding: 0.75rem 1.75rem;
     border-radius: 0.75rem;
-    transition: all 0.25s var(--ease-spring);
+    transition: transform 0.25s var(--ease-spring), opacity 0.25s var(--ease-spring);
     display: inline-block;
     box-shadow:
       0 4px 20px rgba(224, 64, 80, 0.35),
@@ -608,10 +600,8 @@
     font-weight: 600;
     padding: 0.75rem 1.75rem;
     border-radius: 0.75rem;
-    transition: all 0.25s var(--ease-spring);
+    transition: border-color 0.25s var(--ease-spring), color 0.25s var(--ease-spring), background 0.25s var(--ease-spring);
     display: inline-block;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
   }
 
   .btn-outline:hover {
@@ -633,8 +623,6 @@
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
     padding: 3px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 
   .filter-btn {
@@ -645,10 +633,8 @@
     border-radius: 9999px;
     font-weight: 500;
     font-size: 0.875rem;
-    transition: all 0.25s var(--ease-spring);
+    transition: color 0.25s var(--ease-spring), background 0.25s var(--ease-spring), border-color 0.25s var(--ease-spring);
     cursor: pointer;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
   }
 
   .filter-btn:hover {
@@ -902,8 +888,6 @@
     left: 0;
     right: 0;
     background: var(--bg-layer-2);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid rgba(224, 64, 80, 0.12);
     border-radius: 1.25rem 1.25rem 0 0;
     padding: 1rem;
@@ -1063,8 +1047,6 @@
   .search-input {
     width: 100%;
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
     color: var(--text-primary);
@@ -1378,7 +1360,6 @@
     border-radius: 1px;
     flex-shrink: 0;
     box-shadow: 0 0 10px rgba(224, 64, 80, 0.45);
-    animation: eyebrow-pulse 3s ease-in-out infinite;
   }
 
   /* ── Hero eyebrow pill ──────────────────── */
@@ -1397,8 +1378,6 @@
     text-transform: uppercase;
     margin-bottom: 1.5rem;
     box-shadow: 0 0 24px rgba(224, 64, 80, 0.10);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
   }
 
   /* ── Reveal animation ───────────────────── */
@@ -1424,14 +1403,12 @@
     position: absolute;
     top: 50%;
     left: 30%;
-    width: 900px;
-    height: 900px;
+    width: 600px;
+    height: 600px;
     background: radial-gradient(circle, rgba(224, 64, 80, 0.18), transparent 70%);
-    filter: blur(120px);
+    filter: blur(60px);
     pointer-events: none;
-    will-change: transform;
-    contain: layout style;
-    animation: hero-glow-float 9s ease-in-out infinite;
+    contain: strict;
     transform: translate(-50%, -50%);
   }
 
@@ -1439,28 +1416,24 @@
     position: absolute;
     top: 20%;
     right: 8%;
-    width: 500px;
-    height: 500px;
+    width: 350px;
+    height: 350px;
     background: radial-gradient(circle, rgba(106, 45, 145, 0.12), transparent 70%);
-    filter: blur(90px);
+    filter: blur(50px);
     pointer-events: none;
-    will-change: transform;
-    contain: layout style;
-    animation: hero-glow-float 14s ease-in-out infinite reverse;
+    contain: strict;
   }
 
   .hero-glow-tertiary {
     position: absolute;
     bottom: -100px;
     left: 15%;
-    width: 400px;
-    height: 400px;
+    width: 280px;
+    height: 280px;
     background: radial-gradient(circle, rgba(176, 53, 117, 0.10), transparent 70%);
-    filter: blur(80px);
+    filter: blur(40px);
     pointer-events: none;
-    will-change: transform;
-    contain: layout style;
-    animation: hero-glow-float 11s ease-in-out 2s infinite;
+    contain: strict;
   }
 
   .light-theme .hero-glow {
@@ -1524,13 +1497,11 @@
   /* ── Stat Counter ─────────────────────── */
   .stat-counter {
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
     padding: 1.25rem;
     text-align: center;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease;
   }
 
   .stat-counter:hover {
@@ -1608,19 +1579,16 @@
     width: 44px;
     height: 44px;
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-subtle);
     border-radius: 0.75rem;
     color: var(--text-muted);
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s var(--ease-spring);
+    transition: color 0.3s var(--ease-spring), border-color 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
   }
 
   .social-cube:hover {
     color: var(--accent);
     border-color: var(--border-accent);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
     transform: translateY(-3px) scale(1.05);
   }
 
@@ -1757,8 +1725,6 @@
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: 0.875rem;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 
   /* ── Ember Particles Canvas ─────────── */

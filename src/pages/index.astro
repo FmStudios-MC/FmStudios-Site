@@ -230,8 +230,8 @@ const latestNews = blogPosts.slice(0, 3);
     /* Hero glass card */
     .hero-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 1.5rem;
       padding: 3rem 2.5rem;
@@ -283,15 +283,9 @@ const latestNews = blogPosts.slice(0, 3);
       inset: -70px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(224, 64, 80, 0.50) 0%, rgba(176, 53, 117, 0.25) 40%, transparent 70%);
-      filter: blur(45px);
-      will-change: opacity;
-      animation: logo-glow-pulse 4s ease-in-out infinite;
+      filter: blur(30px);
+      opacity: 0.85;
       pointer-events: none;
-    }
-
-    @keyframes logo-glow-pulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
     }
 
     .hero-orbit-ring {
@@ -300,7 +294,6 @@ const latestNews = blogPosts.slice(0, 3);
       border-radius: 50%;
       border: 1px solid rgba(224, 64, 80, 0.25);
       pointer-events: none;
-      animation: float 7s ease-in-out infinite;
       box-shadow: 0 0 28px rgba(224, 64, 80, 0.12);
     }
 
@@ -351,13 +344,13 @@ const latestNews = blogPosts.slice(0, 3);
     .featured-split-card {
       display: block;
       background: var(--glass-bg);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 1.25rem;
       overflow: hidden;
       box-shadow: var(--shadow-md);
-      transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+      transition: transform 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
       position: relative;
     }
 
