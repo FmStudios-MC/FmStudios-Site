@@ -90,9 +90,8 @@ npm run preview
 | `/news/[slug]` | News articles with reading time, share buttons, and prev/next nav |
 | `/roadmap` | Kanban-style development roadmap with progress tracking |
 | `/changelog` | Version history per project with project filter |
-| `/guides` | Step-by-step project guides with category filter and search |
+| `/wiki` | Guides, tutorials, and FAQ knowledge base with search |
 | `/gallery` | Screenshot gallery with lightbox viewer and project filter |
-| `/faq` | Two-column FAQ accordion with search |
 | `/downloads` | Centralized download hub for all projects |
 | `/about` | Studio info, team, milestones, and tech stack |
 | `/community` | Discord CTA, social links, and community guidelines |
@@ -107,7 +106,7 @@ src/
 ├── components/     Astro components (NavBar, Footer, Icon, modals, cards)
 ├── data/           TypeScript data files (projects, news, roadmap, etc.)
 ├── layouts/        Layout with top nav, SEO meta, grid lines, noise overlay, embers
-├── pages/          16 pages (see table above)
+├── pages/          15 pages (see table above)
 ├── scripts/        Client-side TS (animations, lightbox, modals, search, theme)
 └── styles/         Design tokens and component styles (global.css)
 ```
