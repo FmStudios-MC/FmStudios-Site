@@ -1,9 +1,10 @@
 ---
 interface Props {
   id: string;
+  label?: string;
 }
 
-const { id } = Astro.props;
+const { id, label } = Astro.props;
 ---
 
 <div
@@ -12,6 +13,7 @@ const { id } = Astro.props;
   style="display: none;"
   role="dialog"
   aria-modal="true"
+  aria-label={label || "Dialog"}
 >
   <div
     class="depth-modal-content modal-depth max-w-5xl w-full max-h-[90vh] overflow-y-auto"

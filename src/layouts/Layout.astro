@@ -33,12 +33,37 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
   <meta property="og:image" content={ogImage.href} />
   <meta property="og:url" content={canonicalUrl.href} />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage.href} />
+  <meta name="twitter:site" content="@famvinteractive" />
+  <meta name="theme-color" content="#060810" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f3f7" media="(prefers-color-scheme: light)" />
   <link rel="canonical" href={canonicalUrl.href} />
   <title>{title}</title>
   <link rel="icon" type="image/webp" href="/images/logoneu.webp" />
+  <link rel="apple-touch-icon" href="/images/logoneu.webp" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Structured data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "FabiMvurice Interactive",
+    "url": "https://fabimvurice-interactive.de",
+    "logo": new URL('/images/logoneu.webp', Astro.site).href,
+    "description": "Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive.",
+    "sameAs": [
+      "https://discord.gg/x9jsed8qyR",
+      "https://x.com/famvinteractive",
+      "https://www.youtube.com/@fm-studios-mc",
+      "https://www.instagram.com/fabimvurice.interactive",
+      "https://www.tiktok.com/@fabimvurice.interactive"
+    ]
+  })} />
 
   <!-- Prevent flash of wrong theme -->
   <script is:inline>

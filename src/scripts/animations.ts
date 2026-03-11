@@ -7,8 +7,15 @@ import { initEmberParticles } from './animations/ember-particles';
 import { initCounters } from './animations/counters';
 import { initPageTransition } from './animations/page-transition';
 
+let cardGlowController: AbortController | null = null;
+let scrollTopController: AbortController | null = null;
+
 // Card hover glow — track mouse position via CSS custom properties (throttled to 60fps)
 function initCardGlow() {
+  cardGlowController?.abort();
+  cardGlowController = new AbortController();
+  const signal = cardGlowController.signal;
+
   document.querySelectorAll<HTMLElement>('.depth-card').forEach((card) => {
     let ticking = false;
     card.addEventListener('mousemove', (e) => {
@@ -20,7 +27,7 @@ function initCardGlow() {
         card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
         ticking = false;
       });
-    });
+    }, { signal });
   });
 }
 
@@ -28,6 +35,10 @@ function initCardGlow() {
 function initScrollTop() {
   const btn = document.getElementById('scroll-top');
   if (!btn) return;
+
+  scrollTopController?.abort();
+  scrollTopController = new AbortController();
+  const signal = scrollTopController.signal;
 
   btn.style.transform = 'scale(0.8)';
 
@@ -44,12 +55,12 @@ function initScrollTop() {
         btn.style.transform = 'scale(0.8)';
       }
     },
-    { passive: true }
+    { passive: true, signal }
   );
 
   btn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  }, { signal });
 }
 
 // Accordion toggles (changelog, FAQ, roadmap updates)
@@ -76,13 +87,11 @@ function initAccordions() {
         } else {
           content.style.maxHeight = content.scrollHeight + 'px';
           content.classList.add('open');
-          const onEnd = () => {
+          content.addEventListener('transitionend', () => {
             if (content.classList.contains('open')) {
               content.style.maxHeight = 'none';
             }
-            content.removeEventListener('transitionend', onEnd);
-          };
-          content.addEventListener('transitionend', onEnd);
+          }, { once: true });
         }
       } else if (content.classList.contains('changelog-content')) {
         // Changelog: animated expand/collapse
@@ -93,13 +102,11 @@ function initAccordions() {
             content.style.maxHeight = '0';
           });
           content.classList.remove('open');
-          const onEnd = () => {
+          content.addEventListener('transitionend', () => {
             if (!content.classList.contains('open')) {
               content.style.display = 'none';
             }
-            content.removeEventListener('transitionend', onEnd);
-          };
-          content.addEventListener('transitionend', onEnd);
+          }, { once: true });
         } else {
           content.style.display = '';
           content.style.overflow = 'hidden';
@@ -108,14 +115,12 @@ function initAccordions() {
             content.style.maxHeight = content.scrollHeight + 'px';
           });
           content.classList.add('open');
-          const onEnd = () => {
+          content.addEventListener('transitionend', () => {
             if (content.classList.contains('open')) {
               content.style.maxHeight = 'none';
               content.style.overflow = '';
             }
-            content.removeEventListener('transitionend', onEnd);
-          };
-          content.addEventListener('transitionend', onEnd);
+          }, { once: true });
         }
       } else {
         // Fallback: display toggling (no hidden class)
@@ -140,3 +145,9 @@ initPageTransition();
 initScrollTop();
 initAccordions();
 initCardGlow();
+
+// Clean up on page transitions
+document.addEventListener('astro:before-swap', () => {
+  cardGlowController?.abort();
+  scrollTopController?.abort();
+}, { once: true });

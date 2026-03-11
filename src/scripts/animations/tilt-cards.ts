@@ -6,6 +6,9 @@ export function initTiltCards() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.innerWidth < 768) return; // skip on mobile
 
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   document.querySelectorAll<HTMLElement>('.tilt-card').forEach((card) => {
     let ticking = false;
     let lastX = 0;
@@ -31,7 +34,7 @@ export function initTiltCards() {
           ticking = false;
         });
       }
-    });
+    }, { signal });
 
     card.addEventListener('mouseleave', () => {
       ticking = false;
@@ -40,6 +43,10 @@ export function initTiltCards() {
       setTimeout(() => {
         card.style.transition = '';
       }, 500);
-    });
+    }, { signal });
   });
+
+  document.addEventListener('astro:before-swap', () => {
+    controller.abort();
+  }, { once: true });
 }

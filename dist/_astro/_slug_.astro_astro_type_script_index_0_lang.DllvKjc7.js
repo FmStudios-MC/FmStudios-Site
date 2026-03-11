@@ -1,1 +1,0 @@
-import{o as c}from"./lightbox.DmR49ypE.js";const o=document.querySelectorAll(".lightbox-trigger"),e=Array.from(o).map(r=>({src:r.src,alt:r.alt}));o.forEach((r,t)=>{r.addEventListener("click",()=>c(e,t))});

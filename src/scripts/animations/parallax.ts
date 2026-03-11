@@ -8,6 +8,9 @@ export function initParallax() {
   const layers = document.querySelectorAll<HTMLElement>('[data-parallax]');
   if (layers.length === 0) return;
 
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   let ticking = false;
 
   function updateParallax() {
@@ -25,5 +28,9 @@ export function initParallax() {
       requestAnimationFrame(updateParallax);
       ticking = true;
     }
-  }, { passive: true });
+  }, { passive: true, signal });
+
+  document.addEventListener('astro:before-swap', () => {
+    controller.abort();
+  }, { once: true });
 }

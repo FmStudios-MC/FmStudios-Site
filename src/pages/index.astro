@@ -124,7 +124,7 @@ const latestNews = blogPosts.slice(0, 3);
               <!-- Info side -->
               <div class="p-8 lg:p-10 flex flex-col justify-center">
                 <div class="flex items-center gap-3 mb-4">
-                  <img src={project.logo} alt="" width="48" height="48" class="w-12 h-12 object-cover rounded-xl" loading="lazy" />
+                  <img src={project.logo} alt={`${project.name} logo`} width="48" height="48" class="w-12 h-12 object-cover rounded-xl" loading="lazy" />
                   <div>
                     <h3 class="text-xl font-bold font-display" style="color: var(--text-primary);">{project.name}</h3>
                     <span class="text-xs" style="color: var(--text-dim);">{project.version}</span>
@@ -223,7 +223,7 @@ const latestNews = blogPosts.slice(0, 3);
   </section>
 
   <!-- Modals -->
-  <Modal id="project-modal" />
+  <Modal id="project-modal" label="Project details" />
   <LightboxModal />
 
   <style>

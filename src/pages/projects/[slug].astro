@@ -41,7 +41,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
       <div class="absolute bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:bottom-8 sm:right-12 z-10">
         <img
           src={project.logo}
-          alt=""
+          alt={`${project.name} logo`}
           width="80"
           height="80"
           class="w-20 h-20 rounded-2xl object-cover shadow-2xl border border-[var(--border-subtle)]"
@@ -218,7 +218,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {relatedProjects.map((rp) => (
             <a href={`/projects/${rp.slug}`} class="related-card p-4 flex items-center gap-3">
-              <img src={rp.logo} alt="" width="40" height="40" class="w-10 h-10 rounded-lg object-cover" loading="lazy" />
+              <img src={rp.logo} alt={`${rp.name} logo`} width="40" height="40" class="w-10 h-10 rounded-lg object-cover" loading="lazy" />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold" style="color: var(--text-primary);">{rp.name}</p>
                 <p class="text-xs" style="color: var(--text-dim);">{rp.category}</p>

@@ -20,6 +20,9 @@ export function initEmberParticles() {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   // Cap pixel ratio to avoid massive canvas on 4K/5K displays
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -86,7 +89,7 @@ export function initEmberParticles() {
     } else {
       draw();
     }
-  });
+  }, { signal });
 
   let resizeTimer: number;
   window.addEventListener('resize', () => {
@@ -96,10 +99,11 @@ export function initEmberParticles() {
       h = window.innerHeight;
       resizeCanvas();
     }, 150);
-  });
+  }, { signal });
 
   // Clean up if page transitions happen
   document.addEventListener('astro:before-swap', () => {
     cancelAnimationFrame(animId);
-  });
+    controller.abort();
+  }, { once: true });
 }

@@ -1,5 +1,7 @@
 // Unified lightbox module with keyboard nav, prev/next, counter, click-outside
 
+import { trapFocus } from './focus-trap';
+
 let lightboxEl: HTMLElement | null = null;
 let lightboxImg: HTMLImageElement | null = null;
 let prevBtn: HTMLElement | null = null;
@@ -10,6 +12,7 @@ let counterEl: HTMLElement | null = null;
 let images: { src: string; alt: string }[] = [];
 let currentIndex = 0;
 let controller: AbortController | null = null;
+let focusTrapCleanup: (() => void) | null = null;
 
 function showImage(index: number) {
   if (!lightboxImg || index < 0 || index >= images.length) return;
@@ -39,6 +42,8 @@ function closeLightbox() {
   if (!lightboxEl) return;
   lightboxEl.style.display = 'none';
   document.body.style.overflow = '';
+  focusTrapCleanup?.();
+  focusTrapCleanup = null;
   controller?.abort();
   controller = null;
 }
@@ -57,6 +62,10 @@ export function openLightbox(srcs: { src: string; alt: string }[], startIndex: n
   lightboxEl.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   showImage(startIndex);
+
+  // Trap focus within lightbox
+  focusTrapCleanup?.();
+  focusTrapCleanup = trapFocus(lightboxEl);
 
   // Clean up previous listeners
   controller?.abort();

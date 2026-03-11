@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://fabimvurice.github.io',
+  site: 'https://fabimvurice-interactive.de',
   base: '/',
   output: 'static',
   integrations: [sitemap()],

@@ -1,0 +1,16 @@
+{
+  "name": "FabiMvurice Interactive",
+  "short_name": "FMI",
+  "description": "Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060810",
+  "theme_color": "#e04050",
+  "icons": [
+    {
+      "src": "/images/logoneu.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}
