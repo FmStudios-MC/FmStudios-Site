@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import FAQItem from '../components/FAQItem.astro';
 import { guides, guideCategories } from '../data/guides';
 import { faqSections } from '../data/faq';
@@ -14,6 +15,7 @@ const guideCats = guideCategories.filter(c => c.id !== 'all');
 
 <Layout title="Wiki - FabiMvurice Interactive">
   <div class="max-w-7xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+    <Breadcrumb items={[{ label: 'Wiki' }]} class="mb-4" />
 
     <!-- ══ Hero ══════════════════════════════ -->
     <ScrollReveal>

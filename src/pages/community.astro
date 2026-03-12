@@ -2,12 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import { discordServer, communityGuidelines } from '../data/community';
 import { socialLinks } from '../data/social';
 ---
 
 <Layout title="Community - FabiMvurice Interactive">
   <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+    <Breadcrumb items={[{ label: 'Community' }]} class="mb-4" />
 
     <!-- Header -->
     <ScrollReveal>

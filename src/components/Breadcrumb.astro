@@ -1,0 +1,48 @@
+---
+import Icon from './Icon.astro';
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+
+const fullTrail: BreadcrumbItem[] = [
+  { label: 'Home', href: '/' },
+  ...items,
+];
+---
+
+<nav class:list={['breadcrumb', className]} aria-label="Breadcrumb">
+  {fullTrail.map((item, i) => (
+    <>
+      {i > 0 && (
+        <Icon name="chevron-right" size={12} class="separator" />
+      )}
+      {item.href && i < fullTrail.length - 1 ? (
+        <a href={item.href}>{item.label}</a>
+      ) : (
+        <span class:list={[i === fullTrail.length - 1 && 'current', i === fullTrail.length - 1 && 'truncate']}>
+          {item.label}
+        </span>
+      )}
+    </>
+  ))}
+</nav>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: fullTrail.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    ...(item.href && i < fullTrail.length - 1 ? { item: `https://fabimvurice-interactive.de${item.href}` } : {}),
+  })),
+})} />

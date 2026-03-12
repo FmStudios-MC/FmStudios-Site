@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Icon from '../../components/Icon.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import LightboxModal from '../../components/LightboxModal.astro';
 import { projects, statusConfig } from '../../data/projects';
 import { relativeDate, formatDate } from '../../data/utils';
@@ -52,14 +53,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
 
   <section class="max-w-5xl mx-auto px-5 sm:px-8 py-8" style={project.screenshots.length > 0 ? 'margin-top: -4rem; position: relative; z-index: 2;' : ''}>
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb mb-6" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <span class="separator">/</span>
-      <a href="/projects">Projects</a>
-      <span class="separator">/</span>
-      <span style="color: var(--text-primary);">{project.name}</span>
-    </nav>
+    <Breadcrumb items={[{ label: 'Projects', href: '/projects' }, { label: project.name }]} class="mb-6" />
 
     <!-- Info depth-card -->
     <div class="depth-card p-6 sm:p-8 mb-5">

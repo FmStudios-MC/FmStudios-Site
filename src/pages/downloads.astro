@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import { projects } from '../data/projects';
 import { DISCORD_URL } from '../data/social';
 
@@ -21,6 +22,7 @@ const totalDownloadsLabel = `${Math.round(totalDownloadsK)}K+`;
 
 <Layout title="Downloads - FabiMvurice Interactive">
   <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-6 pb-12">
+    <Breadcrumb items={[{ label: 'Downloads' }]} class="mb-4" />
 
     <!-- Header -->
     <ScrollReveal>
