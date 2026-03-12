@@ -75,6 +75,18 @@ export const roadmapItems: RoadmapItem[] = [
     features: ['Advanced Create automation with magic'],
     updates: [],
   },
+  {
+    id: 5,
+    title: 'A Minecraft Legacy Modpack',
+    description: 'A Minecraft Modpack in the Legacy Console style',
+    status: 'planned',
+    category: 'modpacks',
+    priority: 'medium',
+    progress: 0,
+    estimatedDate: '2026',
+    features: ['Legacy Edition Content'],
+    updates: [],
+  },
 ];
 
 export const roadmapStatusConfig: Record<string, { label: string; badge: string }> = {
