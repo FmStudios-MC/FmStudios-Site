@@ -149,7 +149,9 @@ const postUrl = `https://fabimvurice.com/news/${post.slug}`;
             script.setAttribute('data-reactions-enabled', '1');
             script.setAttribute('data-emit-metadata', '0');
             script.setAttribute('data-input-position', 'bottom');
-            script.setAttribute('data-theme', document.documentElement.classList.contains('light-theme') ? 'light' : 'dark_dimmed');
+            const isLight = document.documentElement.classList.contains('light-theme');
+            const baseUrl = 'https://fabimvurice-interactive.de';
+            script.setAttribute('data-theme', isLight ? `${baseUrl}/giscus-nebula-light.css` : `${baseUrl}/giscus-nebula.css`);
             script.setAttribute('data-lang', 'en');
             script.setAttribute('crossorigin', 'anonymous');
             script.async = true;
@@ -163,7 +165,8 @@ const postUrl = `https://fabimvurice.com/news/${post.slug}`;
       const themeObserver = new MutationObserver(() => {
         const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
         if (iframe) {
-          const theme = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark_dimmed';
+          const baseUrl = 'https://fabimvurice-interactive.de';
+          const theme = document.documentElement.classList.contains('light-theme') ? `${baseUrl}/giscus-nebula-light.css` : `${baseUrl}/giscus-nebula.css`;
           iframe.contentWindow?.postMessage(
             { giscus: { setConfig: { theme } } },
             'https://giscus.app'
