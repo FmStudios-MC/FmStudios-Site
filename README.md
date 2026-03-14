@@ -10,8 +10,8 @@
 
 <p align="center">
   <a href="https://www.fabimvurice-interactive.de"><img src="https://img.shields.io/badge/website-live-success.svg" alt="Website" /></a>
-  <img src="https://img.shields.io/badge/Astro-5.18-BC52EE.svg" alt="Astro" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.2-38BDF8.svg" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Astro-6.0-BC52EE.svg" alt="Astro" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.2.1-38BDF8.svg" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/license-proprietary-red.svg" alt="License" />
 </p>
 
@@ -48,8 +48,8 @@ Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interac
 
 | | |
 |---|---|
-| **Framework** | [Astro](https://astro.build/) 5.18 (static output) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) 4.2 via `@tailwindcss/vite` |
+| **Framework** | [Astro](https://astro.build/) 6.0 (static output) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) 4.2.1 via `@tailwindcss/vite` |
 | **Language** | TypeScript |
 | **SEO** | `@astrojs/sitemap` for auto-generated sitemaps |
 | **Fonts** | Inter (body) + Space Grotesk (display) |
@@ -59,7 +59,7 @@ Zero runtime dependencies. No React, Vue, or Svelte... pure Astro components wit
 
 ## Getting Started
 
-**Prerequisites:** Node.js 18+, Git
+**Prerequisites:** Node.js 22.12+, Git
 
 ```bash
 # Clone
