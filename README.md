@@ -56,29 +56,6 @@ Available on [CurseForge](https://www.curseforge.com/members/fabimvurice_interac
 | **Hosting** | GitHub Pages |
 
 Zero runtime dependencies. No React, Vue, or Svelte... pure Astro components with vanilla JS.
-
-## Getting Started
-
-**Prerequisites:** Node.js 22.12+, Git
-
-```bash
-# Clone
-git clone https://github.com/FmStudios-MC/FmStudios-Site.git
-cd FmStudios-Site
-
-# Install
-npm install
-
-# Develop
-npm run dev
-
-# Build
-npm run build
-
-# Preview production build
-npm run preview
-```
-
 ## Pages
 
 | Route | Description |
