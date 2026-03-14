@@ -100,6 +100,15 @@ const postUrl = `https://fabimvurice.com/news/${post.slug}`;
           ) : <div />}
         </div>
 
+        <!-- Comments -->
+        <div class="mt-10 pt-6 border-t border-[var(--border-subtle)]">
+          <p class="text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2" style="color: var(--text-dim);">
+            <Icon name="message-circle" size={14} />
+            Comments
+          </p>
+          <div id="giscus-container"></div>
+        </div>
+
         <!-- Back to News -->
         <div class="mt-6 text-center">
           <a href="/news" class="btn-primary inline-flex items-center gap-2">
@@ -120,6 +129,48 @@ const postUrl = `https://fabimvurice.com/news/${post.slug}`;
         const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
         bar.style.width = `${Math.min(progress, 100)}%`;
       }, { passive: true });
+    }
+
+    // Lazy-load Giscus comments when scrolled into view
+    const giscusContainer = document.getElementById('giscus-container');
+    if (giscusContainer) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            const script = document.createElement('script');
+            script.src = 'https://giscus.app/client.js';
+            script.setAttribute('data-repo', 'FmStudios-MC/FmStudios-Site');
+            script.setAttribute('data-repo-id', 'R_kgDOOyHu7g');
+            script.setAttribute('data-category', 'General');
+            script.setAttribute('data-category-id', 'DIC_kwDOOyHu7s4C4Zb5');
+            script.setAttribute('data-mapping', 'pathname');
+            script.setAttribute('data-strict', '0');
+            script.setAttribute('data-reactions-enabled', '1');
+            script.setAttribute('data-emit-metadata', '0');
+            script.setAttribute('data-input-position', 'bottom');
+            script.setAttribute('data-theme', document.documentElement.classList.contains('light-theme') ? 'light' : 'dark_dimmed');
+            script.setAttribute('data-lang', 'en');
+            script.setAttribute('crossorigin', 'anonymous');
+            script.async = true;
+            giscusContainer.appendChild(script);
+          }
+        });
+      }, { rootMargin: '200px' });
+      observer.observe(giscusContainer);
+
+      // Sync theme when user toggles light/dark
+      const themeObserver = new MutationObserver(() => {
+        const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+        if (iframe) {
+          const theme = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark_dimmed';
+          iframe.contentWindow?.postMessage(
+            { giscus: { setConfig: { theme } } },
+            'https://giscus.app'
+          );
+        }
+      });
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
 
     // Copy link button
