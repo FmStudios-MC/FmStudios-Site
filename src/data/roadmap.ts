@@ -16,11 +16,11 @@ export const roadmapItems: RoadmapItem[] = [
     id: 1,
     title: 'Create Unbound - Full Release',
     description:
-      'The ultimate Create mod experience with new features and performance optimizations.',
+      'The ultimate Create mod experience with new features and performance optimizations. Currently waiting for 26.1 release of Minecraft and the mod.',
     status: 'in-progress',
     category: 'modpacks',
     priority: 'high',
-    progress: 0,
+    progress: 10,
     estimatedDate: 'Q2 2026',
     features: [
       'Advanced Create automation chains',
@@ -55,7 +55,7 @@ export const roadmapItems: RoadmapItem[] = [
     priority: 'low',
     progress: 2,
     estimatedDate: '2026/2027',
-    features: ['Roleplay Elements', 'Replica of the german city Leuna'],
+    features: ['Roleplay Elements', 'Replica of the german city "Leuna"'],
     updates: [
       { date: '2026-01-28', text: 'Started work on the game again since 2024' },
       { date: '2026-01-29', text: 'Added Stamina System' },
@@ -67,7 +67,7 @@ export const roadmapItems: RoadmapItem[] = [
     id: 4,
     title: 'Create: Project Arcane',
     description: 'A Create Modpack based on create and magic mods',
-    status: 'onhold',
+    status: 'planned',
     category: 'modpacks',
     priority: 'low',
     progress: 0,
@@ -77,15 +77,17 @@ export const roadmapItems: RoadmapItem[] = [
   },
   {
     id: 5,
-    title: 'A Minecraft Legacy Modpack',
-    description: 'A Minecraft Modpack in the Legacy Console style',
-    status: 'planned',
+    title: 'SMP for "Simply Legacy" Modpack',
+    description: 'We want to make a community Server for the Simply Legacy Modpack.',
+    status: 'in-progress',
     category: 'modpacks',
     priority: 'medium',
-    progress: 0,
+    progress: 40,
     estimatedDate: '2026',
-    features: ['Legacy Edition Content'],
-    updates: [],
+    features: ['Legacy Edition Content','https://modrinth.com/modpack/simply-legacy'],
+    updates: [
+      { date: '2026-03-14', text: 'Starting setting up the server' }
+    ],
   },
 ];
 
