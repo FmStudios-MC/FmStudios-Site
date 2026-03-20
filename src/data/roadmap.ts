@@ -79,10 +79,10 @@ export const roadmapItems: RoadmapItem[] = [
     id: 5,
     title: 'SMP for "Simply Legacy" Modpack',
     description: 'We want to make a community Server for the Simply Legacy Modpack.',
-    status: 'in-progress',
+    status: 'completed',
     category: 'modpacks',
     priority: 'high',
-    progress: 40,
+    progress: 100,
     estimatedDate: '2026',
     features: ['Legacy Edition Content','https://modrinth.com/modpack/simply-legacy'],
     updates: [

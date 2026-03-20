@@ -6,6 +6,7 @@ import LightboxModal from '../../components/LightboxModal.astro';
 import { projects, statusConfig } from '../../data/projects';
 import { DISCORD_URL } from '../../data/social';
 import { relativeDate, formatDate } from '../../data/utils';
+import { servers } from '../../data/servers';
 
 export function getStaticPaths() {
   return projects.map((project) => ({
@@ -20,6 +21,7 @@ const isServer = project.category === 'servers';
 const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
 const lastUpdateRel = project.lastUpdate !== '-' ? relativeDate(project.lastUpdate) : null;
 const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate) : null;
+const serverEntry = isServer ? servers.find(s => s.address !== '/') : null;
 ---
 
 <Layout
@@ -127,7 +129,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     )}
 
     {isServer && (
-      <div class="server-address-banner depth-card server-info-panel p-5 sm:p-6 mb-5">
+      <div class="server-address-banner depth-card server-info-panel p-5 sm:p-6 mb-5" data-server-software={serverEntry?.software || ''}>
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="flex-1 min-w-0">
             <p class="section-label server-label mb-2">Server Address</p>
@@ -140,10 +142,38 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
             <p class="text-xs mt-1.5" style="color: var(--text-dim);" id="server-copy-feedback"></p>
           </div>
           <div class="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
-            <span class="server-status-badge">
-              <span class="server-status-indicator" aria-hidden="true"></span>
-              {project.status === 'active' ? 'Online' : project.status === 'soon' ? 'Coming Soon' : 'Offline'}
+            <span class="server-status-badge" id="live-status-badge">
+              <span class="server-status-indicator" id="live-status-dot" aria-hidden="true"></span>
+              <span id="live-status-text">Checking...</span>
             </span>
+          </div>
+        </div>
+
+        <!-- Live server stats -->
+        <div class="live-server-stats mt-4 pt-4" id="live-server-stats" style="border-top: 1px solid rgba(74, 222, 128, 0.10); display: none;">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="live-stat-block">
+              <span class="live-stat-label">Players</span>
+              <span class="live-stat-value" id="live-players">—</span>
+            </div>
+            <div class="live-stat-block">
+              <span class="live-stat-label">Version</span>
+              <span class="live-stat-value" id="live-version">—</span>
+            </div>
+            <div class="live-stat-block">
+              <span class="live-stat-label">Latency</span>
+              <span class="live-stat-value" id="live-latency">—</span>
+            </div>
+            <div class="live-stat-block">
+              <span class="live-stat-label">Software</span>
+              <span class="live-stat-value" id="live-software">—</span>
+            </div>
+          </div>
+
+          <!-- Player list -->
+          <div id="live-player-list-wrap" style="display: none;" class="mt-3">
+            <p class="text-xs font-semibold mb-2" style="color: var(--text-dim);">Online Players</p>
+            <div id="live-player-list" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
       </div>
@@ -386,6 +416,101 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
           setTimeout(() => { feedback.textContent = ''; }, 2000);
         }
       });
+    }
+
+    // Live server status check
+    const statusBadge = document.getElementById('live-status-badge');
+    const statusDot = document.getElementById('live-status-dot');
+    const statusText = document.getElementById('live-status-text');
+    const statsPanel = document.getElementById('live-server-stats');
+
+    if (statusBadge && statusText) {
+      const address = document.querySelector('.server-address-text')?.textContent?.trim();
+      if (address && address !== '/') {
+        const startTime = performance.now();
+
+        fetch(`https://api.mcsrvstat.us/3/${address}`)
+          .then(res => res.json())
+          .then(data => {
+            const latency = Math.round(performance.now() - startTime);
+
+            if (data.online) {
+              statusText.textContent = 'Online';
+              if (statusDot) {
+                statusDot.style.background = '#4ade80';
+                statusDot.style.boxShadow = '0 0 8px #4ade80';
+              }
+
+              // Show stats panel
+              if (statsPanel) {
+                statsPanel.style.display = '';
+
+                const playersEl = document.getElementById('live-players');
+                const versionEl = document.getElementById('live-version');
+                const latencyEl = document.getElementById('live-latency');
+                const softwareEl = document.getElementById('live-software');
+
+                if (playersEl) {
+                  playersEl.textContent = `${data.players?.online ?? 0} / ${data.players?.max ?? '?'}`;
+                }
+                if (versionEl) {
+                  versionEl.textContent = data.version || '—';
+                }
+                if (latencyEl) {
+                  latencyEl.textContent = `${latency}ms`;
+                }
+                if (softwareEl) {
+                  const banner = document.querySelector('.server-address-banner');
+                  const knownSoftware = banner?.getAttribute('data-server-software');
+                  softwareEl.textContent = knownSoftware || data.software || 'Vanilla';
+                }
+
+                // Player list
+                const playerListWrap = document.getElementById('live-player-list-wrap');
+                const playerList = document.getElementById('live-player-list');
+                if (playerListWrap && playerList && data.players?.list && data.players.list.length > 0) {
+                  playerListWrap.style.display = '';
+                  for (const player of data.players.list) {
+                    const name = typeof player === 'string' ? player : player.name;
+                    const uuid = typeof player === 'string' ? null : player.uuid;
+                    const tag = document.createElement('div');
+                    tag.className = 'player-tag';
+                    if (uuid) {
+                      const img = document.createElement('img');
+                      img.src = `https://mc-heads.net/avatar/${uuid}/16`;
+                      img.alt = '';
+                      img.width = 16;
+                      img.height = 16;
+                      img.className = 'player-avatar';
+                      img.loading = 'lazy';
+                      tag.appendChild(img);
+                    }
+                    const span = document.createElement('span');
+                    span.textContent = name;
+                    tag.appendChild(span);
+                    playerList.appendChild(tag);
+                  }
+                }
+              }
+            } else {
+              statusText.textContent = 'Offline';
+              statusBadge.classList.add('status-offline-live');
+              if (statusDot) {
+                statusDot.style.background = '#f87171';
+                statusDot.style.boxShadow = 'none';
+                statusDot.style.animation = 'none';
+              }
+            }
+          })
+          .catch(() => {
+            statusText.textContent = 'Unknown';
+            if (statusDot) {
+              statusDot.style.background = '#fbbf24';
+              statusDot.style.boxShadow = 'none';
+              statusDot.style.animation = 'none';
+            }
+          });
+      }
     }
   </script>
 </Layout>
@@ -781,5 +906,65 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
 
   .light-theme .server-download-btn {
     box-shadow: 0 4px 20px rgba(22, 163, 74, 0.20), 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── Live Server Status ── */
+  .live-stat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.625rem 0.875rem;
+    background: var(--bg-card);
+    border: 1px solid rgba(74, 222, 128, 0.08);
+    border-radius: 0.625rem;
+  }
+
+  .live-stat-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+
+  .live-stat-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: ui-monospace, monospace;
+  }
+
+  .player-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    background: var(--bg-card);
+    border: 1px solid rgba(74, 222, 128, 0.10);
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .player-avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    image-rendering: pixelated;
+  }
+
+  .status-offline-live {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+  }
+
+  .light-theme .live-stat-block {
+    border-color: rgba(22, 163, 74, 0.10);
+  }
+
+  .light-theme .player-tag {
+    border-color: rgba(22, 163, 74, 0.12);
   }
 </style>

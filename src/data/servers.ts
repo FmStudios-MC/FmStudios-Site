@@ -8,6 +8,7 @@ export interface Server {
   description: string;
   status: 'online' | 'offline' | 'maintenance';
   maxPlayers?: number;
+  software?: string;
 }
 
 export const servers: Server[] = [
@@ -18,6 +19,7 @@ export const servers: Server[] = [
     version: '1.21.10',
     description: 'Our SMP for the Simply Legacy Modpack',
     status: 'online',
+    software: 'Fabric',
   },
     {
     name: 'Create Unbound Server',
