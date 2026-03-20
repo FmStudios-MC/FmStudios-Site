@@ -41,19 +41,25 @@ function initScrollTop() {
   const signal = scrollTopController.signal;
 
   btn.style.transform = 'scale(0.8)';
+  let scrollTicking = false;
 
   window.addEventListener(
     'scroll',
     () => {
-      if (window.scrollY > 300) {
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
-        btn.style.transform = 'scale(1)';
-      } else {
-        btn.style.opacity = '0';
-        btn.style.pointerEvents = 'none';
-        btn.style.transform = 'scale(0.8)';
-      }
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        if (window.scrollY > 300) {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+          btn.style.transform = 'scale(1)';
+        } else {
+          btn.style.opacity = '0';
+          btn.style.pointerEvents = 'none';
+          btn.style.transform = 'scale(0.8)';
+        }
+        scrollTicking = false;
+      });
     },
     { passive: true, signal }
   );

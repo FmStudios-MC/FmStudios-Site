@@ -64,7 +64,17 @@ export function initEmberParticles() {
   const emberG = styles.getPropertyValue('--ember-g').trim() || '64';
   const emberB = styles.getPropertyValue('--ember-b').trim() || '80';
 
-  function draw() {
+  // Throttle to ~30fps — particles move slowly so 60fps is wasted
+  const FRAME_INTERVAL = 1000 / 30;
+  let lastFrameTime = 0;
+
+  function draw(now: number) {
+    animId = requestAnimationFrame(draw);
+
+    const delta = now - lastFrameTime;
+    if (delta < FRAME_INTERVAL) return;
+    lastFrameTime = now - (delta % FRAME_INTERVAL);
+
     ctx!.clearRect(0, 0, w, h);
 
     for (const e of embers) {
@@ -82,18 +92,17 @@ export function initEmberParticles() {
       ctx!.fillStyle = `rgba(${emberR}, ${emberG}, ${emberB}, ${e.opacity})`;
       ctx!.fill();
     }
-
-    animId = requestAnimationFrame(draw);
   }
 
-  draw();
+  animId = requestAnimationFrame(draw);
 
   // Pause when tab is backgrounded to save resources
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       cancelAnimationFrame(animId);
     } else {
-      draw();
+      lastFrameTime = performance.now();
+      animId = requestAnimationFrame(draw);
     }
   }, { signal });
 

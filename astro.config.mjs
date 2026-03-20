@@ -7,7 +7,16 @@ export default defineConfig({
   base: '/',
   output: 'static',
   integrations: [sitemap()],
+  compressHTML: true,
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      cssMinify: 'lightningcss',
+      rollupOptions: {
+        output: {
+          assetFileNames: 'assets/[hash][extname]',
+        },
+      },
+    },
   },
 });

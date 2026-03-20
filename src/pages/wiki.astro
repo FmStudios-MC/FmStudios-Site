@@ -435,14 +435,13 @@ const guideCats = guideCategories.filter(c => c.id !== 'all');
     border: 1px solid var(--glass-border);
     border-radius: 1rem;
     cursor: pointer;
-    transition: all 0.3s var(--ease-spring);
+    transition: border-color 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
     text-align: left;
   }
 
   .wiki-qn-card:hover {
     border-color: rgba(224, 64, 80, 0.20);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md), 0 0 24px rgba(224, 64, 80, 0.06);
   }
 
   .wiki-qn-icon {
@@ -736,7 +735,7 @@ const guideCats = guideCategories.filter(c => c.id !== 'all');
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .wiki-step:has(.wiki-step-toggle[aria-expanded="true"]) .wiki-step-dot {

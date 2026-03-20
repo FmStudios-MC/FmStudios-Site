@@ -88,6 +88,8 @@ const latestNews = blogPosts.slice(0, 3);
                 width="200"
                 height="200"
                 class="hero-logo-img"
+                fetchpriority="high"
+                decoding="async"
               />
             </div>
           </div>
@@ -230,8 +232,6 @@ const latestNews = blogPosts.slice(0, 3);
     /* Hero glass card */
     .hero-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 1.5rem;
       padding: 3rem 2.5rem;
@@ -344,8 +344,6 @@ const latestNews = blogPosts.slice(0, 3);
     .featured-split-card {
       display: block;
       background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 1.25rem;
       overflow: hidden;

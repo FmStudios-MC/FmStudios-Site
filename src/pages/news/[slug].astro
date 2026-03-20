@@ -35,7 +35,7 @@ const postUrl = `https://fabimvurice.com/news/${post.slug}`;
 
   <!-- Parallax cover -->
   <div class="relative h-64 sm:h-80 lg:h-96 overflow-hidden">
-    <img src={post.image} alt={post.title} class="w-full h-full object-cover" data-parallax="0.2" width="1920" height="1080" />
+    <img src={post.image} alt={post.title} class="w-full h-full object-cover" data-parallax="0.2" width="1920" height="1080" fetchpriority="high" decoding="async" />
     <div class="absolute inset-0" style="background: linear-gradient(to bottom, transparent 40%, var(--bg-void) 100%);" aria-hidden="true"></div>
   </div>
 
