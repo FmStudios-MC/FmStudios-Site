@@ -1,0 +1,146 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+---
+
+<Layout title="Privacy Policy - FabiMvurice Interactive" description="Privacy Policy for the FabiMvurice Interactive website.">
+  <section class="max-w-4xl mx-auto px-5 sm:px-8 pt-6 pb-16">
+    <Breadcrumb items={[{ label: 'Privacy Policy' }]} class="mb-4" />
+
+    <ScrollReveal>
+      <div class="mb-10">
+        <p class="section-eyebrow mb-2">Legal</p>
+        <h1 class="text-page-title font-black font-display" style="color: var(--text-primary);">
+          Privacy <span class="gradient-text">Policy</span>
+        </h1>
+        <p class="mt-3 text-sm" style="color: var(--text-dim);">Last updated: March 15, 2026</p>
+      </div>
+    </ScrollReveal>
+
+    <div class="depth-card p-6 sm:p-8 privacy-content">
+      <ScrollReveal>
+        <h2>1. Introduction</h2>
+        <p>Welcome to the FabiMvurice Interactive website. We respect your privacy and are committed to protecting any personal data that may be collected through your use of our website at <strong>www.fabimvurice-interactive.de</strong>.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>2. Information We Collect</h2>
+        <p>This website is a static site hosted on GitHub Pages. We do <strong>not</strong> collect, store, or process personal data directly. However, the following third-party services may collect data:</p>
+        <ul>
+          <li><strong>GitHub Pages</strong> — Our hosting provider may collect basic server logs (IP addresses, browser information) as part of standard web hosting. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub's Privacy Statement</a>.</li>
+          <li><strong>Google Fonts</strong> — We load fonts from Google Fonts, which may collect usage data. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy</a>.</li>
+          <li><strong>Giscus</strong> — Our comment system on news articles is powered by Giscus (GitHub Discussions). Interacting with comments requires a GitHub account and is subject to <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub's Privacy Statement</a>.</li>
+          <li><strong>YouTube</strong> — Embedded videos may set cookies and collect data. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy</a>.</li>
+        </ul>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>3. Cookies & Local Storage</h2>
+        <p>Our website uses <strong>localStorage</strong> (not cookies) to store:</p>
+        <ul>
+          <li><strong>Theme preference</strong> — Your dark/light mode choice (key: <code>theme</code>)</li>
+          <li><strong>Favorites</strong> — Your favorited projects (key: <code>fmi-favorites</code>)</li>
+        </ul>
+        <p>This data stays in your browser and is never transmitted to any server.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>4. External Links</h2>
+        <p>Our website contains links to external sites (CurseForge, Modrinth, Discord, YouTube, etc.). We are not responsible for the privacy practices or content of these third-party sites. We encourage you to review their privacy policies.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>5. Analytics</h2>
+        <p>We do <strong>not</strong> use any analytics or tracking tools on this website.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>6. Children's Privacy</h2>
+        <p>Our website is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>7. Changes to This Policy</h2>
+        <p>We may update this privacy policy from time to time. Any changes will be reflected on this page with an updated date.</p>
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <h2>8. Contact</h2>
+        <p>If you have questions about this privacy policy, you can reach us through our <a href="https://discord.gg/x9jsed8qyR" target="_blank" rel="noopener noreferrer">Discord server</a>.</p>
+      </ScrollReveal>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .privacy-content h2 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-content h2:first-child {
+    margin-top: 0;
+  }
+
+  .privacy-content p {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .privacy-content li {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .privacy-content li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  .privacy-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: opacity 0.2s ease;
+  }
+
+  .privacy-content a:hover {
+    opacity: 0.8;
+  }
+
+  .privacy-content code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+</style>

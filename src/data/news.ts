@@ -1,3 +1,10 @@
+export interface ThemeColor {
+  accent: string;      // primary accent, e.g. '#4ade80'
+  accentDeep: string;  // deeper variant, e.g. '#22c55e'
+  accentDark: string;  // darkest variant, e.g. '#16a34a'
+  rgb: string;         // comma-separated RGB for ember particles, e.g. '74, 222, 128'
+}
+
 export interface BlogPost {
   id: number;
   title: string;
@@ -9,9 +16,51 @@ export interface BlogPost {
   content: string;
   image: string;
   tags: string[];
+  themeColor?: ThemeColor;
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    id: 5,
+    title: 'Simply Legacy SMP launched!',
+    slug: 'simply-legacy-smp-launch',
+    category: 'news',
+    date: '',
+    author: 'Itzz_Fabi',
+    excerpt: 'Our new SMP for the Simply Legacy Modpack just launched!',
+    content: `
+      <h3>Our Simply Legacy SMP just launched</h3>
+      <p>Due to some recent things that happend (Source Code Leaks) we wanted the legacy feeling of the old console versions back.</p>
+      <h3>What is Simply Legacy?</h3>
+      <p>Simply Legacy is a modpack designed to bring the experience of Minecraft's Legacy Console Edition to a more up-to-date version of the game, acting as a vision of what the game would've looked like if it continued to get content updates to this day.</p>
+      <h3>How to join the server</h3>
+      <ul>
+        <li><strong>Install the Modpack</strong> — Use Modrinth or other launchers that support Modrinth and install the Modpack. You can find the download on our Projects Site!</li>
+        <li><strong>Start the game</strong> — Start the game </li>
+        <li><strong>Click on play</strong></li>
+        <li><strong>Click on join</strong></li>
+        <li><strong>Click on add Server</strong></li>
+        <li><strong>Set a name</strong> — The name can be anything </li>
+        <li><strong>Put in the IP</strong> — Add the IP adress of the server: <strong>fmi-legacy.kinetichosting.gg</strong> </li>
+      </ul>
+
+      <h3>Recommendations</h3>
+      <p>To get og feelings activate the "Classic Texture Pack". New textures of newer updates now have pre 1.14 texutre styles.</p>
+      <ul>
+        <li><strong>Open the Settings</strong></li>
+        <li><strong>Click on Graphics</strong></li>
+        <li><strong>Use the Classic Texture Pack</strong></li>
+      </ul>
+    `,
+    image: '/images/projects/d314800e52950835032a0d6b68ca63bf2859bccd.webp',
+    tags: ['News', 'Community', 'Hytale'],
+    themeColor: {
+      accent: '#4ade80',
+      accentDeep: '#22c55e',
+      accentDark: '#16a34a',
+      rgb: '74, 222, 128',
+    },
+  },
   {
     id: 4,
     title: 'Hytale Community Server is closed',
@@ -26,6 +75,12 @@ export const blogPosts: BlogPost[] = [
     `,
     image: '/images/news/hytalered.webp',
     tags: ['News', 'Community', 'Hytale'],
+    themeColor: {
+      accent: '#f70505',
+      accentDeep: '#a70606',
+      accentDark: '#7c0404',
+      rgb: '247, 5, 5',
+    },
   },
   {
     id: 3,
@@ -54,12 +109,18 @@ export const blogPosts: BlogPost[] = [
     `,
     image: '/images/news/projectleunalogo.webp',
     tags: ['Updates', 'Community', '2026'],
+    themeColor: {
+      accent: '#facc15',
+      accentDeep: '#eab308',
+      accentDark: '#ca8a04',
+      rgb: '250, 204, 21',
+    },
   },
   {
     id: 1,
     title: 'Hytale Community Server is now open!',
     slug: 'hytale-server-opening',
-    category: 'announcement',
+    category: 'news',
     date: '2026-02-03',
     author: 'Itzz_Fabi',
     excerpt: 'Our Hytale community server is now open!',
@@ -76,6 +137,12 @@ export const blogPosts: BlogPost[] = [
     `,
     image: '/images/news/hytale.webp',
     tags: ['News', 'Community', 'Hytale'],
+    themeColor: {
+      accent: '#0582f7',
+      accentDeep: '#064ba7',
+      accentDark: '#042a7c',
+      rgb: '5, 130, 247',
+    },
   },
   {
     id: 2,

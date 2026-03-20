@@ -136,7 +136,7 @@ const latestNews = blogPosts.slice(0, 3);
                 </span>
               </div>
               <!-- Screenshot side -->
-              <div class:list={['aspect-video lg:aspect-auto overflow-hidden relative', i % 2 === 1 && 'lg:order-first']}>
+              <div class:list={['featured-img-wrap overflow-hidden relative', i % 2 === 1 && 'lg:order-first']}>
                 {project.screenshots.length > 0 ? (
                   <img
                     src={project.screenshots[0]}
@@ -374,6 +374,18 @@ const latestNews = blogPosts.slice(0, 3);
 
     .featured-split-card:hover::after {
       opacity: 1;
+    }
+
+    .featured-img-wrap {
+      aspect-ratio: 16 / 9;
+      max-height: 260px;
+    }
+
+    @media (min-width: 1024px) {
+      .featured-img-wrap {
+        aspect-ratio: auto;
+        max-height: 280px;
+      }
     }
 
     @media (max-width: 1023px) {

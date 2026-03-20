@@ -24,7 +24,12 @@ const fmtDate = formatDate(post.date);
 const postUrl = `https://fabimvurice.com/news/${post.slug}`;
 ---
 
-<Layout title={`${post.title} - FabiMvurice Interactive`} description={post.excerpt} ogImage={post.image}>
+<Layout
+  title={`${post.title} - FabiMvurice Interactive`}
+  description={post.excerpt}
+  ogImage={post.image}
+  accentOverride={post.themeColor}
+>
   <!-- Reading progress bar -->
   <div id="reading-progress" class="reading-progress" style="width: 0%;"></div>
 

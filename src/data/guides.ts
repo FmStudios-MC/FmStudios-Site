@@ -16,6 +16,41 @@ export interface Guide {
 
 export const guides: Guide[] = [
   {
+    slug: 'simply-legacy-getting-started',
+    projectSlug: 'simply-legacy-smp',
+    projectName: 'Simply Legacy SMP',
+    title: 'How to join our Simple Legacy SMP',
+    description: 'How to join our community Simple Legacy SMP',
+    icon: 'rocket',
+    category: 'getting-started',
+    steps: [
+      {
+        title: 'Install a Launcher',
+        content: 'Download and install a Minecraft launcher that supports modpacks. We recommend <strong>ATLauncher</strong> for the best experience. <strong>Modrinth App</strong> also works great.',
+      },
+      {
+        title: 'Search for Simply Legacy',
+        content: 'Open your launcher, go to the modpack browser, and search for <strong>"Simple Legacy"</strong> or go to our project site and get the download link there.',
+      },
+      {
+        title: 'Install the Modpack',
+        content: 'Click <strong>Install</strong> and wait for all mods to download. The pack uses <strong>Fabric 1.21.10</strong>, so the launcher will set that up automatically.',
+      },
+      {
+        title: 'Allocate RAM',
+        content: 'For the best performance, allocate at least <strong>4-6 GB of RAM</strong> in your launcher settings. Go to Settings → Java → Memory and set the maximum.',
+      },
+      {
+        title: 'Launch',
+        content: 'Hit Play!',
+      },
+      {
+        title: 'Join the Server',
+        content: 'Click on play -> Join Server -> Add Server -> Set a Name -> Enter the IP adress <strong>fmi-legacy.kinetichosting.gg</strong> -> Join the Server',
+      },
+    ],
+  },
+  {
     slug: 'additions-getting-started',
     projectSlug: 'additions',
     projectName: '{Additions}',
@@ -89,6 +124,21 @@ export const guides: Guide[] = [
       {
         title: 'First Steps In-Game',
         content: 'Start by gathering basic resources. The <strong>Create mod</strong> progression begins with Andesite Alloy. Check the quest book (key: L) for guided progression.',
+      },
+    ],
+  },
+  {
+    slug: 'simply-legacy-tips',
+    projectSlug: 'simply-legacy-smp',
+    projectName: 'Simply Legacy SMP',
+    title: 'Tips for the Simple Legacy SMP',
+    description: 'Tips for the best experience on the SMP',
+    icon: 'zap',
+    category: 'tips',
+    steps: [
+      {
+        title: 'Choose the right texture pack',
+        content: 'The Modpack features many classic texutre packs. If you want the pre 1.14 experience use the "Classic Minecraft Texturepack". New Blocks after 1.13 also got the classic style.',
       },
     ],
   },

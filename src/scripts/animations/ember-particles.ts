@@ -58,6 +58,12 @@ export function initEmberParticles() {
 
   let animId: number;
 
+  // Read ember color from CSS custom properties (fallback to red accent)
+  const styles = getComputedStyle(document.documentElement);
+  const emberR = styles.getPropertyValue('--ember-r').trim() || '224';
+  const emberG = styles.getPropertyValue('--ember-g').trim() || '64';
+  const emberB = styles.getPropertyValue('--ember-b').trim() || '80';
+
   function draw() {
     ctx!.clearRect(0, 0, w, h);
 
@@ -73,7 +79,7 @@ export function initEmberParticles() {
 
       ctx!.beginPath();
       ctx!.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-      ctx!.fillStyle = `rgba(224, 64, 80, ${e.opacity})`;
+      ctx!.fillStyle = `rgba(${emberR}, ${emberG}, ${emberB}, ${e.opacity})`;
       ctx!.fill();
     }
 

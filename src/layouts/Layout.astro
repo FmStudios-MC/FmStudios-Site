@@ -3,10 +3,19 @@ import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
+interface AccentOverride {
+  accent: string;
+  accentDeep: string;
+  accentDark: string;
+  rgb: string;
+}
+
 interface Props {
   title: string;
   description?: string;
   kinetic?: boolean;
+  serverTheme?: boolean;
+  accentOverride?: AccentOverride;
   ogImage?: string;
 }
 
@@ -14,15 +23,35 @@ const {
   title,
   description = 'Discover amazing Minecraft modpacks, mods, and resource packs by FabiMvurice Interactive.',
   kinetic = false,
+  serverTheme = false,
+  accentOverride,
   ogImage: ogImageProp,
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/images/logoneu.webp', Astro.site);
+
+// Build inline CSS variable overrides for custom accent themes
+const accentStyle = accentOverride ? [
+  `--accent: ${accentOverride.accent}`,
+  `--accent-deep: ${accentOverride.accentDeep}`,
+  `--accent-dark: ${accentOverride.accentDark}`,
+  `--accent-glow: rgba(${accentOverride.rgb}, 0.20)`,
+  `--accent-neon: rgba(${accentOverride.rgb}, 0.55)`,
+  `--shadow-glow: 0 0 20px rgba(${accentOverride.rgb}, 0.15)`,
+  `--shadow-glow-strong: 0 0 40px rgba(${accentOverride.rgb}, 0.25)`,
+  `--edge-accent: rgba(${accentOverride.rgb}, 0.15)`,
+  `--border-accent: rgba(${accentOverride.rgb}, 0.30)`,
+  `--scrollbar-thumb: ${accentOverride.accent}`,
+  `--scrollbar-thumb-hover: ${accentOverride.accentDeep}`,
+  `--ember-r: ${accentOverride.rgb.split(',')[0].trim()}`,
+  `--ember-g: ${accentOverride.rgb.split(',')[1].trim()}`,
+  `--ember-b: ${accentOverride.rgb.split(',')[2].trim()}`,
+].join('; ') + ';' : undefined;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class:list={[serverTheme && 'server-theme', accentOverride && 'custom-accent']} style={accentStyle}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -107,7 +136,7 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
   <button
     id="scroll-top"
     class="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-40 w-11 h-11 flex items-center justify-center rounded-full opacity-0 pointer-events-none text-white scroll-top-btn"
-    style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: 0 4px 24px rgba(224,64,80,0.40); transition: opacity 0.3s var(--ease-spring), transform 0.4s var(--ease-spring), box-shadow 0.3s ease, pointer-events 0s;"
+    style="background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: var(--shadow-glow-strong); transition: opacity 0.3s var(--ease-spring), transform 0.4s var(--ease-spring), box-shadow 0.3s ease, pointer-events 0s;"
     aria-label="Scroll to top"
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
@@ -182,7 +211,7 @@ const ogImage = ogImageProp ? new URL(ogImageProp, Astro.site) : new URL('/image
   }
 
   .scroll-top-btn:hover {
-    box-shadow: 0 6px 28px rgba(224, 64, 80, 0.55), 0 0 12px rgba(224, 64, 80, 0.25) !important;
+    box-shadow: var(--shadow-glow-strong), 0 0 12px var(--accent-glow) !important;
     transform: translateY(-2px);
   }
 

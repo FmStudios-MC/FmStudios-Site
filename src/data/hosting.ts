@@ -50,4 +50,34 @@ export const kineticHosting = {
   ],
   whyWeChose:
     "We partnered with Kinetic Hosting because they understand modded Minecraft. Their servers handle our Create modpacks flawlessly, and their support team actually knows what they're doing. When our community members have issues, they get real help - not automated responses.",
+  whyBullets: [
+    'Handles 200+ mod modpacks without lag',
+    'One-click installer for our modpacks',
+    'Real human support that knows modded MC',
+    'Competitive pricing for high-RAM plans',
+  ],
+  plans: [
+    { ram: '4 GB',  price: '$3.48/mo', recommended: 'Additions', best: false },
+    { ram: '6 GB',  price: '$5.22/mo', recommended: 'Create F&M', best: false },
+    { ram: '8 GB',  price: '$6.96/mo', recommended: 'Create Unbound', best: true },
+    { ram: '16 GB', price: '$13.92/mo', recommended: 'Large Communities', best: false },
+  ],
+  faq: [
+    {
+      question: 'Can I install FabiMvurice modpacks on Kinetic?',
+      answer: 'Yes! Kinetic Hosting supports one-click installation for popular modpacks. You can also upload any custom modpack via their file manager.',
+    },
+    {
+      question: 'How much RAM do I need?',
+      answer: 'It depends on your modpack. Vanilla+ packs like Additions run great on 4 GB. Create-based packs need 6-8 GB. For large servers with many players, consider 16 GB+.',
+    },
+    {
+      question: 'Does using the affiliate link cost me more?',
+      answer: 'No! Using our affiliate link costs you nothing extra. You get the same prices as everyone else, and it helps support FabiMvurice Interactive.',
+    },
+    {
+      question: 'Can I switch modpacks later?',
+      answer: 'Yes, you can change your modpack at any time through the control panel. Your world data is preserved when switching between compatible versions.',
+    },
+  ],
 };

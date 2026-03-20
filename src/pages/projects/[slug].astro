@@ -4,6 +4,7 @@ import Icon from '../../components/Icon.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import LightboxModal from '../../components/LightboxModal.astro';
 import { projects, statusConfig } from '../../data/projects';
+import { DISCORD_URL } from '../../data/social';
 import { relativeDate, formatDate } from '../../data/utils';
 
 export function getStaticPaths() {
@@ -15,6 +16,7 @@ export function getStaticPaths() {
 
 const { project } = Astro.props;
 const status = statusConfig[project.status];
+const isServer = project.category === 'servers';
 const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 3);
 const lastUpdateRel = project.lastUpdate !== '-' ? relativeDate(project.lastUpdate) : null;
 const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate) : null;
@@ -24,6 +26,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
   title={`${project.name} - FabiMvurice Interactive`}
   description={project.description}
   ogImage={project.screenshots.length > 0 ? project.screenshots[0] : project.logo}
+  serverTheme={isServer}
 >
   <!-- Full-bleed hero -->
   {project.screenshots.length > 0 && (
@@ -71,7 +74,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
         )}
 
         <div class="flex-1 min-w-0">
-          <h1 class="text-3xl sm:text-4xl font-black font-display gradient-text mb-3 leading-tight">
+          <h1 class:list={['text-3xl sm:text-4xl font-black font-display mb-3 leading-tight', isServer ? 'server-gradient-text' : 'gradient-text']}>
             {project.name}
           </h1>
           <div class="flex flex-wrap gap-2">
@@ -80,16 +83,21 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
                 {status.label}
               </span>
             )}
-            <span class="tag-accent capitalize">{project.category}</span>
+            <span class:list={[isServer ? 'tag-server' : 'tag-accent', 'capitalize']}>{isServer ? 'Server' : project.category}</span>
             <span class="tag-mono">{project.version}</span>
-            {project.downloads !== '-' && (
+            {!isServer && project.downloads !== '-' && (
               <span class="tag-dim">
                 <Icon name="download" size={10} class="inline" /> {project.downloads} downloads
               </span>
             )}
-            {lastUpdateFmt && (
+            {!isServer && lastUpdateFmt && (
               <span class="tag-dim" title={lastUpdateFmt}>
                 <Icon name="clock" size={10} class="inline" /> {lastUpdateFmt} ({lastUpdateRel})
+              </span>
+            )}
+            {isServer && (
+              <span class="tag-dim">
+                <Icon name="globe" size={10} class="inline" /> Java Edition
               </span>
             )}
           </div>
@@ -118,13 +126,36 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
       </div>
     )}
 
+    {isServer && (
+      <div class="server-address-banner depth-card server-info-panel p-5 sm:p-6 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="section-label server-label mb-2">Server Address</p>
+            <div class="server-address-block">
+              <code class="server-address-text">fmi-legacy.kinetichosting.gg</code>
+              <button type="button" class="server-copy-btn" id="copy-server-address" aria-label="Copy server address">
+                <Icon name="copy" size={14} />
+              </button>
+            </div>
+            <p class="text-xs mt-1.5" style="color: var(--text-dim);" id="server-copy-feedback"></p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+            <span class="server-status-badge">
+              <span class="server-status-indicator" aria-hidden="true"></span>
+              {project.status === 'active' ? 'Online' : project.status === 'soon' ? 'Coming Soon' : 'Offline'}
+            </span>
+          </div>
+        </div>
+      </div>
+    )}
+
     <!-- Body grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
       <!-- Left: description -->
       <div class="lg:col-span-2 flex flex-col gap-5">
         <div class="depth-card p-5">
-          <p class="section-label mb-4">About</p>
+          <p class:list={['section-label mb-4', isServer && 'server-label']}>{isServer ? 'About This Server' : 'About'}</p>
           <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
             {project.description}
           </p>
@@ -132,16 +163,31 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
 
         <!-- 2-column feature grid -->
         <div class="depth-card p-5">
-          <p class="section-label mb-4">Features</p>
+          <p class:list={['section-label mb-4', isServer && 'server-label']}>Features</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {project.features.map((f) => (
               <div class="flex items-center gap-2.5 text-sm inner-panel px-3 py-2.5" style="color: var(--text-muted);">
-                <span class="feature-dot" aria-hidden="true"></span>
+                <span class:list={[isServer ? 'server-dot' : 'feature-dot']} aria-hidden="true"></span>
                 {f}
               </div>
             ))}
           </div>
         </div>
+
+        {project.trailerUrl && (
+          <div class="depth-card p-5">
+            <p class:list={['section-label mb-4', isServer && 'server-label']}>Trailer</p>
+            <div class="trailer-embed">
+              <iframe
+                src={project.trailerUrl}
+                title={`${project.name} Trailer`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        )}
 
         {project.modList && project.modList.length > 0 && (
           <div class="depth-card p-5">
@@ -158,36 +204,106 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
         )}
       </div>
 
-      <!-- Right: download panel -->
+      <!-- Right: download panel / server info -->
       <div class="flex flex-col gap-5">
-        <!-- Recessed download panel -->
-        <div class="depth-section p-5">
-          <p class="section-label mb-4">Download</p>
-          <div class="flex flex-col gap-2.5">
-            {project.downloadUrl !== '#' && (
-              <a
-                href={project.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn-primary w-full flex items-center justify-center gap-2 text-sm py-3"
-              >
-                <Icon name="download" size={16} /> CurseForge
-              </a>
-            )}
-            {project.modrinthUrl && (
-              <a
-                href={project.modrinthUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
-              >
-                Modrinth
-              </a>
-            )}
+        {isServer && (
+          <div class="depth-section server-info-panel p-5">
+            <p class="section-label server-label mb-4">Server Info</p>
+            <div class="flex flex-col gap-2">
+              <div class="inner-panel px-3 py-2.5 flex justify-between items-center text-sm">
+                <span class="flex items-center gap-1.5" style="color: var(--text-dim);"><Icon name="server" size={12} /> Platform</span>
+                <span class="font-semibold" style="color: var(--text-primary);">Minecraft</span>
+              </div>
+              <div class="inner-panel px-3 py-2.5 flex justify-between items-center text-sm">
+                <span class="flex items-center gap-1.5" style="color: var(--text-dim);"><Icon name="cpu" size={12} /> Version</span>
+                <span class="font-semibold" style="color: var(--text-primary);">{project.version}</span>
+              </div>
+              <div class="inner-panel px-3 py-2.5 flex justify-between items-center text-sm">
+                <span class="flex items-center gap-1.5" style="color: var(--text-dim);"><Icon name="users" size={12} /> Type</span>
+                <span class="font-semibold" style="color: var(--text-primary);">Open</span>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {project.minimumRam && (
+        {isServer && (
+          <div class="depth-section server-info-panel p-5">
+            <p class="section-label server-label mb-4">Quick Links</p>
+            <div class="flex flex-col gap-2.5">
+              <a
+                href="/news/simply-legacy-smp-launch"
+                class="server-link-btn w-full flex items-center gap-2 text-sm py-2.5 px-3"
+              >
+                <Icon name="newspaper" size={16} /> Read the Announcement
+              </a>
+              <a
+                href="/wiki"
+                class="server-link-btn w-full flex items-center gap-2 text-sm py-2.5 px-3"
+              >
+                <Icon name="book-open" size={16} /> Wiki & Guides
+              </a>
+            </div>
+          </div>
+        )}
+
+        {isServer && (
+          <div class="depth-section server-info-panel p-5">
+            <p class="section-label server-label mb-4">Resources</p>
+            <div class="flex flex-col gap-2.5">
+              {project.downloadUrl !== '#' && (
+                <a
+                  href={project.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="server-download-btn w-full flex items-center justify-center gap-2 text-sm py-3"
+                >
+                  <Icon name="download" size={16} /> Download Modpack
+                </a>
+              )}
+              {project.modrinthUrl && (
+                <a
+                  href={project.modrinthUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
+                >
+                  <Icon name="modrinth" size={16} /> Modrinth
+                </a>
+              )}
+            </div>
+            <p class="text-xs mt-3" style="color: var(--text-dim);">Download the required modpack to connect to the server.</p>
+          </div>
+        )}
+
+        {!isServer && (
+          <div class="depth-section p-5">
+            <p class="section-label mb-4">Download</p>
+            <div class="flex flex-col gap-2.5">
+              {project.downloadUrl !== '#' && (
+                <a
+                  href={project.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-primary w-full flex items-center justify-center gap-2 text-sm py-3"
+                >
+                  <Icon name="download" size={16} /> CurseForge
+                </a>
+              )}
+              {project.modrinthUrl && (
+                <a
+                  href={project.modrinthUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-outline w-full flex items-center justify-center gap-2 text-sm py-3"
+                >
+                  Modrinth
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!isServer && project.minimumRam && (
           <div class="depth-section p-5">
             <p class="section-label mb-4">System Requirements</p>
             <div class="flex flex-col gap-2">
@@ -204,6 +320,23 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
         )}
       </div>
     </div>
+
+    {isServer && (
+      <div class="server-join-section depth-card server-info-panel p-5 sm:p-6 mt-5">
+        <p class="section-label server-label mb-4">How to Join</p>
+        <p class="text-sm leading-relaxed mb-4" style="color: var(--text-muted);">
+          Check out our announcement post and wiki for a full step-by-step guide on how to join the server.
+        </p>
+        <div class="flex flex-wrap gap-2.5">
+          <a href="/news/simply-legacy-smp-launch" class="server-link-btn inline-flex items-center gap-2 text-sm py-2.5 px-4">
+            <Icon name="newspaper" size={16} /> Read the Announcement
+          </a>
+          <a href="/wiki" class="server-link-btn inline-flex items-center gap-2 text-sm py-2.5 px-4">
+            <Icon name="book-open" size={16} /> Wiki & Guides
+          </a>
+        </div>
+      </div>
+    )}
 
     <!-- Related projects strip -->
     {relatedProjects.length > 0 && (
@@ -236,6 +369,24 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     images.forEach((img, i) => {
       img.addEventListener('click', () => openLightbox(srcs, i));
     });
+
+    // Copy server address
+    const copyBtn = document.getElementById('copy-server-address');
+    const feedback = document.getElementById('server-copy-feedback');
+    if (copyBtn && feedback) {
+      copyBtn.addEventListener('click', async () => {
+        const address = document.querySelector('.server-address-text')?.textContent || '';
+        try {
+          await navigator.clipboard.writeText(address);
+          feedback.textContent = 'Copied to clipboard!';
+          feedback.style.color = '#4ade80';
+          setTimeout(() => { feedback.textContent = ''; }, 2000);
+        } catch {
+          feedback.textContent = 'Failed to copy';
+          setTimeout(() => { feedback.textContent = ''; }, 2000);
+        }
+      });
+    }
   </script>
 </Layout>
 
@@ -252,9 +403,9 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
     font-weight: 700;
     padding: 0.2rem 0.625rem;
     border-radius: 9999px;
-    background: rgba(224, 64, 80, 0.10);
+    background: var(--accent-glow);
     color: var(--accent);
-    border: 1px solid rgba(224, 64, 80, 0.22);
+    border: 1px solid var(--border-accent);
   }
 
   .tag-mono {
@@ -331,7 +482,7 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
   .related-card:hover {
     transform: translateY(-2px);
     border-color: var(--border-accent);
-    box-shadow: var(--shadow-md), 0 0 12px rgba(224, 64, 80, 0.08);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
   }
 
   .hero-bleed {
@@ -344,5 +495,291 @@ const lastUpdateFmt = project.lastUpdate !== '-' ? formatDate(project.lastUpdate
       margin-left: 0;
       width: 100%;
     }
+  }
+
+  /* ── Server Detail Theme ── */
+  .trailer-embed {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .trailer-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .server-gradient-text {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 40%, #16a34a 100%);
+    background-size: 100% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .server-download-btn {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.25), 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s var(--ease-spring), opacity 0.25s var(--ease-spring);
+    text-decoration: none;
+    display: inline-flex;
+  }
+
+  .server-download-btn:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+
+  .server-download-btn:active {
+    transform: scale(0.97);
+  }
+
+  .tag-server {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(74, 222, 128, 0.08);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.18);
+  }
+
+  .server-label {
+    color: #4ade80 !important;
+  }
+
+  .server-label::before {
+    background: linear-gradient(to right, #4ade80, transparent) !important;
+  }
+
+  .server-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
+    flex-shrink: 0;
+  }
+
+  .server-info-panel {
+    border-color: rgba(74, 222, 128, 0.10);
+  }
+
+  .server-address-block {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .server-address-text {
+    flex: 1;
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4ade80;
+    letter-spacing: 0.02em;
+  }
+
+  .server-copy-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    color: #4ade80;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .server-copy-btn:hover {
+    background: rgba(74, 222, 128, 0.15);
+    transform: scale(1.05);
+  }
+
+  .server-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    background: rgba(74, 222, 128, 0.08);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.18);
+    white-space: nowrap;
+  }
+
+  .server-status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+  }
+
+  .server-join-step {
+    background: var(--bg-card);
+    border: 1px solid rgba(74, 222, 128, 0.08);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .server-join-step:hover {
+    border-color: rgba(74, 222, 128, 0.20);
+  }
+
+  .server-step-num {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.10);
+    border: 1px solid rgba(74, 222, 128, 0.20);
+    color: #4ade80;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .server-link-btn {
+    background: var(--bg-card);
+    border: 1px solid rgba(74, 222, 128, 0.12);
+    border-radius: 0.75rem;
+    color: #4ade80;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+
+  .server-link-btn:hover {
+    border-color: rgba(74, 222, 128, 0.25);
+    background: rgba(74, 222, 128, 0.06);
+  }
+
+  .server-discord-btn {
+    background: #5865F2;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 4px 16px rgba(88, 101, 242, 0.25);
+    transition: transform 0.25s var(--ease-spring), opacity 0.25s ease;
+    text-decoration: none;
+  }
+
+  .server-discord-btn:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+
+  /* Light theme overrides */
+  .light-theme .tag-server {
+    background: rgba(22, 163, 74, 0.08);
+    color: #16a34a;
+    border-color: rgba(22, 163, 74, 0.20);
+  }
+
+  .light-theme .server-label {
+    color: #16a34a !important;
+  }
+
+  .light-theme .server-label::before {
+    background: linear-gradient(to right, #16a34a, transparent) !important;
+  }
+
+  .light-theme .server-dot {
+    background: #16a34a;
+    box-shadow: 0 0 6px #16a34a;
+  }
+
+  .light-theme .server-info-panel {
+    border-color: rgba(22, 163, 74, 0.12);
+  }
+
+  .light-theme .server-address-block {
+    border-color: rgba(22, 163, 74, 0.18);
+  }
+
+  .light-theme .server-address-text {
+    color: #16a34a;
+  }
+
+  .light-theme .server-copy-btn {
+    background: rgba(22, 163, 74, 0.08);
+    border-color: rgba(22, 163, 74, 0.18);
+    color: #16a34a;
+  }
+
+  .light-theme .server-copy-btn:hover {
+    background: rgba(22, 163, 74, 0.15);
+  }
+
+  .light-theme .server-step-num {
+    background: rgba(22, 163, 74, 0.10);
+    border-color: rgba(22, 163, 74, 0.22);
+    color: #16a34a;
+  }
+
+  .light-theme .server-status-badge {
+    background: rgba(22, 163, 74, 0.08);
+    color: #16a34a;
+    border-color: rgba(22, 163, 74, 0.20);
+  }
+
+  .light-theme .server-status-indicator {
+    background: #16a34a;
+    box-shadow: 0 0 8px #16a34a;
+  }
+
+  .light-theme .server-join-step {
+    border-color: rgba(22, 163, 74, 0.10);
+  }
+
+  .light-theme .server-join-step:hover {
+    border-color: rgba(22, 163, 74, 0.22);
+  }
+
+  .light-theme .server-link-btn {
+    border-color: rgba(22, 163, 74, 0.15);
+    color: #16a34a;
+  }
+
+  .light-theme .server-link-btn:hover {
+    border-color: rgba(22, 163, 74, 0.28);
+    background: rgba(22, 163, 74, 0.06);
+  }
+
+  .light-theme .server-gradient-text {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 40%, #166534 100%);
+    background-size: 100% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .light-theme .server-download-btn {
+    box-shadow: 0 4px 20px rgba(22, 163, 74, 0.20), 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 </style>

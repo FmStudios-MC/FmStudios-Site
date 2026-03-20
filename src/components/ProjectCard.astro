@@ -9,11 +9,12 @@ interface Props {
 
 const { project } = Astro.props;
 const status = statusConfig[project.status];
+const isServer = project.category === 'servers';
 ---
 
 <a
   href={`/projects/${project.slug}`}
-  class="tilt-card cursor-pointer project-card p-5 flex flex-col"
+  class:list={['tilt-card cursor-pointer project-card p-5 flex flex-col', isServer && 'server-card']}
   data-project-id={project.id}
   data-category={project.category}
   data-subcategory={project.subcategory || ''}
@@ -24,7 +25,7 @@ const status = statusConfig[project.status];
   <!-- Header row -->
   <div class="flex items-start gap-4 mb-4">
     <!-- Logo -->
-    <div class="logo-wrap flex-shrink-0">
+    <div class:list={['logo-wrap flex-shrink-0', isServer && 'server-logo-wrap']}>
       <img
         src={project.logo}
         alt={project.name}
@@ -34,6 +35,11 @@ const status = statusConfig[project.status];
         loading="lazy"
         decoding="async"
       />
+      {isServer && (
+        <span class="server-status-dot" title="Server">
+          <Icon name="wifi" size={8} />
+        </span>
+      )}
     </div>
 
     <div class="flex-1 min-w-0">
@@ -58,27 +64,46 @@ const status = statusConfig[project.status];
 
   <!-- Tags -->
   <div class="flex flex-wrap gap-1.5 mb-3">
-    <span class="tag-accent capitalize">{project.category}</span>
+    <span class:list={['capitalize', isServer ? 'tag-server' : 'tag-accent']}>{isServer ? 'Server' : project.category}</span>
     <span class="tag-mono">{project.version}</span>
+    {isServer && (
+      <span class="tag-server-feature">
+        <Icon name="users" size={10} />
+        Community
+      </span>
+    )}
   </div>
 
   <!-- Description -->
   <p class="text-sm line-clamp-3 mb-5 leading-relaxed flex-1 project-card-desc" style="color: var(--text-muted);">{project.description}</p>
 
   <!-- Footer stats — recessed panel -->
-  <div class="inner-panel px-4 py-3 flex justify-between items-center text-xs">
-    <div class="flex items-center gap-4" style="color: var(--text-dim);">
-      <span class="flex items-center gap-1.5">
-        <Icon name="download" size={12} />
-        {project.downloads}
-      </span>
-      <span class="flex items-center gap-1.5">
-        <Icon name="clock" size={12} />
-        {project.lastUpdate}
-      </span>
-    </div>
-    <span class="font-bold inline-flex items-center gap-1 transition-all" style="color: var(--accent);">
-      View <Icon name="arrow-right" size={12} />
+  <div class:list={['inner-panel px-4 py-3 flex justify-between items-center text-xs', isServer && 'server-footer']}>
+    {isServer ? (
+      <div class="flex items-center gap-4" style="color: var(--text-dim);">
+        <span class="flex items-center gap-1.5">
+          <Icon name="server" size={12} />
+          Minecraft
+        </span>
+        <span class="flex items-center gap-1.5">
+          <Icon name="globe" size={12} />
+          Java Edition
+        </span>
+      </div>
+    ) : (
+      <div class="flex items-center gap-4" style="color: var(--text-dim);">
+        <span class="flex items-center gap-1.5">
+          <Icon name="download" size={12} />
+          {project.downloads}
+        </span>
+        <span class="flex items-center gap-1.5">
+          <Icon name="clock" size={12} />
+          {project.lastUpdate}
+        </span>
+      </div>
+    )}
+    <span class:list={['font-bold inline-flex items-center gap-1 transition-all', isServer ? 'server-view-link' : '']} style={isServer ? '' : 'color: var(--accent);'}>
+      {isServer ? 'Details' : 'View'} <Icon name="arrow-right" size={12} />
     </span>
   </div>
 </a>
@@ -143,5 +168,94 @@ const status = statusConfig[project.status];
     background: var(--bg-card);
     color: var(--text-dim);
     border: 1px solid var(--border-subtle);
+  }
+
+  /* ── Server Card Theme ── */
+  .server-card {
+    border-color: rgba(74, 222, 128, 0.10);
+  }
+
+  .server-card:hover {
+    border-color: rgba(74, 222, 128, 0.25);
+  }
+
+  .server-logo-wrap {
+    position: relative;
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
+  .server-status-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.15);
+    border: 2px solid var(--bg-surface, #0c0e18);
+    color: #4ade80;
+  }
+
+  .tag-server {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: rgba(74, 222, 128, 0.08);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.18);
+    letter-spacing: 0.01em;
+  }
+
+  .tag-server-feature {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    color: var(--text-dim);
+    border: 1px solid var(--border-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .server-footer {
+    border-color: rgba(74, 222, 128, 0.08);
+  }
+
+  .server-view-link {
+    color: #4ade80;
+  }
+
+  .light-theme .server-card {
+    border-color: rgba(22, 163, 74, 0.12);
+  }
+
+  .light-theme .server-card:hover {
+    border-color: rgba(22, 163, 74, 0.30);
+  }
+
+  .light-theme .server-logo-wrap {
+    border-color: rgba(22, 163, 74, 0.18);
+  }
+
+  .light-theme .server-status-dot {
+    background: rgba(22, 163, 74, 0.15);
+    border-color: var(--bg-surface, #eaebef);
+    color: #16a34a;
+  }
+
+  .light-theme .tag-server {
+    background: rgba(22, 163, 74, 0.08);
+    color: #16a34a;
+    border-color: rgba(22, 163, 74, 0.20);
+  }
+
+  .light-theme .server-view-link {
+    color: #16a34a;
   }
 </style>

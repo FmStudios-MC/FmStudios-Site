@@ -12,21 +12,20 @@ export interface Server {
 
 export const servers: Server[] = [
   {
-    name: 'Create Unbound Community Server',
+    name: 'Simply Legacy SMP',
+    game: 'Minecraft',
+    address: 'fmi-legacy.kinetichosting.gg',
+    version: '1.21.10',
+    description: 'Our SMP for the Simply Legacy Modpack',
+    status: 'online',
+  },
+    {
+    name: 'Create Unbound Server',
     game: 'Minecraft',
     address: '/',
     port: 25565,
-    version: '21.6',
-    description: 'Our official Create Unbound community server. Open for all players!',
-    status: 'offline',
-  },
-  {
-    name: 'Hytale Community Server',
-    game: 'Hytale',
-    address: '176.9.102.179',
-    port: 25571,
-    version: 'Latest',
-    description: 'Our official Hytale community server. Open for all players!',
-    status: 'offline',
+    version: '1.21.10',
+    description: 'The official Modpack Server for Create Unbound',
+    status: 'maintenance',
   },
 ];

@@ -2,7 +2,7 @@ export interface Project {
   id: number;
   slug: string;
   name: string;
-  category: 'modpacks' | 'mods' | 'resourcepacks';
+  category: 'modpacks' | 'mods' | 'resourcepacks' | 'servers';
   subcategory?: string;
   status: 'discontinued' | 'beta' | 'soon' | 'active' | 'updated';
   logo: string;
@@ -17,9 +17,26 @@ export interface Project {
   modList?: string[];
   minimumRam?: string;
   recommendedRam?: string;
+  trailerUrl?: string;
 }
 
 export const projects: Project[] = [
+  {
+    id: 7,
+    slug: 'simply-legacy-smp',
+    name: 'Simply Legacy Community SMP',
+    category: 'servers',
+    status: 'updated',
+    logo: '/images/projects/79dd6a009a4cb101837b931234f4ba146837df85.webp',
+    description: 'The official FabiMvurice Interactive community Minecraft server. Play together with the community on our modded server.',
+    version: '1.21.10',
+    features: ['Legacy Gameplay', 'Community Events', 'Active Moderation'],
+    screenshots: ['/images/projects/d314800e52950835032a0d6b68ca63bf2859bccd.webp'],
+    downloadUrl: 'https://modrinth.com/modpack/simply-legacy',
+    downloads: '-',
+    lastUpdate: '-',
+    trailerUrl: 'https://www.youtube.com/embed/7m3K0WCMT2U?si=Guwpaf5GRbDYgkcJ',
+  },
   {
     id: 1,
     slug: 'create-unbound',
@@ -198,6 +215,7 @@ export const categories = [
   { id: 'modpacks', label: 'Modpacks' },
   { id: 'mods', label: 'Mods' },
   { id: 'resourcepacks', label: 'Resource Packs' },
+  { id: 'servers', label: 'Servers' },
 ];
 
 export const modpackTypes = [
