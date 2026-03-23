@@ -33,6 +33,7 @@ export const projects: Project[] = [
     features: ['Legacy Gameplay', 'Community Events', 'Active Moderation'],
     screenshots: ['/images/projects/d314800e52950835032a0d6b68ca63bf2859bccd.webp'],
     downloadUrl: 'https://modrinth.com/modpack/simply-legacy',
+    modrinthUrl: 'https://modrinth.com/modpack/simply-legacy',
     downloads: '-',
     lastUpdate: '-',
     trailerUrl: 'https://www.youtube.com/embed/7m3K0WCMT2U?si=Guwpaf5GRbDYgkcJ',
