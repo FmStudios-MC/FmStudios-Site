@@ -15,7 +15,7 @@ export const kineticHosting = {
       icon: 'cpu',
       title: 'High RAM Plans',
       description:
-        'Plans up to 32GB RAM perfect for heavy modpacks like Create Unbound and tech-focused packs with large factories.',
+        'Plans up to 64GB RAM perfect for heavy modpacks like Create Unbound and tech-focused packs with large factories.',
     },
     {
       icon: 'headphones',
@@ -49,7 +49,7 @@ export const kineticHosting = {
     { value: '$0.87', label: 'Per GB/Month' },
   ],
   whyWeChose:
-    "We partnered with Kinetic Hosting because they understand modded Minecraft. Their servers handle our Create modpacks flawlessly, and their support team actually knows what they're doing. When our community members have issues, they get real help - not automated responses.",
+    "We partnered with Kinetic Hosting because they understand modded Minecraft. Their servers handle our Create modpacks flawlessly, and their support team actually knows what they're doing. When our community members have issues, they get real help and not automated responses.",
   whyBullets: [
     'Handles 200+ mod modpacks without lag',
     'One-click installer for our modpacks',
@@ -57,10 +57,10 @@ export const kineticHosting = {
     'Competitive pricing for high-RAM plans',
   ],
   plans: [
-    { ram: '4 GB',  price: '$3.48/mo', recommended: 'Additions', best: false },
-    { ram: '6 GB',  price: '$5.22/mo', recommended: 'Create F&M', best: false },
-    { ram: '8 GB',  price: '$6.96/mo', recommended: 'Create Unbound', best: true },
-    { ram: '16 GB', price: '$13.92/mo', recommended: 'Large Communities', best: false },
+    { ram: '4 GB',  price: '€4.10/mo', recommended: 'Additions', best: false },
+    { ram: '8 GB',  price: '€7.10/mo', recommended: 'Create F&M', best: false },
+    { ram: '12 GB',  price:'€11.0/mo', recommended: 'Create Unbound', best: false },
+    { ram: '16 GB', price: '€16.0/mo', recommended: 'Large Communities', best: true },
   ],
   faq: [
     {
