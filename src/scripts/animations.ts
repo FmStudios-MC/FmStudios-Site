@@ -1,9 +1,6 @@
 // Master animation init — imports all modular animation scripts
 
 import { initScrollReveal } from './animations/scroll-reveal';
-import { initTiltCards } from './animations/tilt-cards';
-import { initParallax } from './animations/parallax';
-import { initEmberParticles } from './animations/ember-particles';
 import { initCounters } from './animations/counters';
 import { initPageTransition } from './animations/page-transition';
 
@@ -141,16 +138,21 @@ function initAccordions() {
   });
 }
 
-// Init all
+// Init critical (above-fold) animations immediately
 initScrollReveal();
-initTiltCards();
-initParallax();
-initEmberParticles();
 initCounters();
 initPageTransition();
 initScrollTop();
 initAccordions();
 initCardGlow();
+
+// Defer non-critical animations until browser is idle
+const scheduleIdle = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 80));
+scheduleIdle(() => {
+  import('./animations/tilt-cards').then(({ initTiltCards }) => initTiltCards());
+  import('./animations/parallax').then(({ initParallax }) => initParallax());
+  import('./animations/ember-particles').then(({ initEmberParticles }) => initEmberParticles());
+});
 
 // Clean up on page transitions
 document.addEventListener('astro:before-swap', () => {

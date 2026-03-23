@@ -12,9 +12,15 @@ export default defineConfig({
     plugins: [tailwindcss()],
     build: {
       cssMinify: 'lightningcss',
+      modulePreload: { polyfill: false },
       rollupOptions: {
         output: {
           assetFileNames: 'assets/[hash][extname]',
+          manualChunks(id) {
+            if (id.includes('scripts/animations/')) {
+              return 'animations';
+            }
+          },
         },
       },
     },
