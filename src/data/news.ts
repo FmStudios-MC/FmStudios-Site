@@ -25,7 +25,7 @@ export const blogPosts: BlogPost[] = [
     title: 'Simply Legacy SMP launched!',
     slug: 'simply-legacy-smp-launch',
     category: 'news',
-    date: '',
+    date: '2026-03-20',
     author: 'Itzz_Fabi',
     excerpt: 'Our new SMP for the Simply Legacy Modpack just launched!',
     content: `
