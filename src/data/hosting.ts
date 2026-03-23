@@ -21,7 +21,7 @@ export const kineticHosting = {
       icon: 'headphones',
       title: '24/7 Human Support',
       description:
-        'Real humans available around the clock. No AI bots - get actual help when you need it most.',
+        'Real humans available around the clock. No AI bots. Get actual help when you need it most.',
     },
     {
       icon: 'layout-dashboard',
