@@ -28,7 +28,7 @@ export const projects: Project[] = [
     category: 'servers',
     status: 'updated',
     logo: '/images/projects/79dd6a009a4cb101837b931234f4ba146837df85.webp',
-    description: 'The official FabiMvurice Interactive community Minecraft server. Play together with the community on our modded server.',
+    description: 'The official FabiMvurice Interactive Simply Legacy SMP. Modpack by Lasting Legacy',
     version: '1.21.10',
     features: ['Legacy Gameplay', 'Community Events', 'Active Moderation'],
     screenshots: ['/images/projects/d314800e52950835032a0d6b68ca63bf2859bccd.webp'],

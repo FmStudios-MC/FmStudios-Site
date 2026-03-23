@@ -5,6 +5,16 @@ export interface ChangelogEntry {
 }
 
 export const changelogs: Record<string, ChangelogEntry[]> = {
+  'Simply Legacy SMP': [
+    {
+      version: '26.03.5',
+      date: '2026-03-23',
+      changes: [
+        'Updated Server to newest version',
+        'The Modpack got performance improvements',
+      ],
+    },
+  ],
   '{Additions}': [
     {
       version: '21.8.2',
