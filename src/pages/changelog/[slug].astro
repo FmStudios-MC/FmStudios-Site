@@ -1,0 +1,106 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Icon from '../../components/Icon.astro';
+import ScrollReveal from '../../components/ScrollReveal.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ChangelogBlock from '../../components/ChangelogBlock.astro';
+import { changelogProjects } from '../../data/changelog';
+import { DISCORD_URL } from '../../data/social';
+
+export function getStaticPaths() {
+  return changelogProjects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      prevProject: i > 0 ? changelogProjects[i - 1] : null,
+      nextProject: i < changelogProjects.length - 1 ? changelogProjects[i + 1] : null,
+    },
+  }));
+}
+
+const { project, prevProject, nextProject } = Astro.props;
+const totalChanges = project.entries.reduce((sum, e) => sum + e.changes.length, 0);
+---
+
+<Layout title={`${project.name} Changelog - FabiMvurice Interactive`}>
+  <section class="max-w-4xl mx-auto px-5 sm:px-8 pt-6 pb-10">
+    <Breadcrumb items={[{ label: 'Changelog', href: '/changelog' }, { label: project.name }]} class="mb-4" />
+
+    <ScrollReveal>
+      <div class="mb-6">
+        <p class="section-eyebrow mb-2">Changelog</p>
+        <h1 class="text-page-title font-black font-display mb-2" style="color: var(--text-primary);">{project.name}</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">{project.description}</p>
+        <div class="flex items-center gap-4 mt-3 text-sm" style="color: var(--text-dim);">
+          <span class="flex items-center gap-1">
+            <Icon name="git-branch" size={14} />
+            {project.entries.length} version{project.entries.length > 1 ? 's' : ''}
+          </span>
+          <span class="flex items-center gap-1">
+            <Icon name="list" size={14} />
+            {totalChanges} change{totalChanges > 1 ? 's' : ''} total
+          </span>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Timeline -->
+    <div class="relative">
+      <div class="absolute left-6 top-0 bottom-0 w-0.5 hidden sm:block" style="background: linear-gradient(180deg, var(--accent), var(--accent-deep), transparent); box-shadow: 0 0 8px rgba(224,64,80,0.2);" aria-hidden="true"></div>
+
+      <div class="space-y-4 sm:pl-10">
+        {project.entries.map((entry, i) => (
+          <ScrollReveal delay={i * 80}>
+            <ChangelogBlock entry={entry} />
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
+
+    <!-- Prev/Next nav -->
+    <ScrollReveal>
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {prevProject ? (
+          <a href={`/changelog/${prevProject.slug}`} class="depth-card p-4 group flex items-center gap-3">
+            <Icon name="chevron-right" size={16} class="rotate-180 flex-shrink-0" style="color: var(--text-dim);" />
+            <div class="min-w-0">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-dim);">Previous</p>
+              <p class="text-sm font-semibold truncate" style="color: var(--text-primary);">{prevProject.name}</p>
+            </div>
+          </a>
+        ) : <div />}
+        {nextProject ? (
+          <a href={`/changelog/${nextProject.slug}`} class="depth-card p-4 group flex items-center gap-3 sm:text-right sm:flex-row-reverse">
+            <Icon name="chevron-right" size={16} class="flex-shrink-0" style="color: var(--text-dim);" />
+            <div class="min-w-0">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--text-dim);">Next</p>
+              <p class="text-sm font-semibold truncate" style="color: var(--text-primary);">{nextProject.name}</p>
+            </div>
+          </a>
+        ) : <div />}
+      </div>
+    </ScrollReveal>
+
+    <!-- Discord CTA -->
+    <ScrollReveal>
+      <div class="mt-6 depth-card px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-bold font-display text-sm" style="color: var(--text-primary);">Found a bug?</p>
+          <p class="text-sm" style="color: var(--text-muted);">Report issues on our Discord and help us improve.</p>
+        </div>
+        <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-sm whitespace-nowrap inline-flex items-center gap-2">
+          <Icon name="discord" size={16} />
+          Join Discord
+        </a>
+      </div>
+    </ScrollReveal>
+
+    <!-- Back to changelogs -->
+    <div class="mt-6 text-center">
+      <a href="/changelog" class="btn-primary inline-flex items-center gap-2">
+        <Icon name="chevron-right" size={16} class="rotate-180" />
+        All Changelogs
+      </a>
+    </div>
+  </section>
+</Layout>

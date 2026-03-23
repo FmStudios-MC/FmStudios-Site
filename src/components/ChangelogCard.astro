@@ -1,0 +1,62 @@
+---
+import Icon from './Icon.astro';
+import type { ChangelogProject } from '../data/changelog';
+import { formatDate } from '../data/utils';
+
+interface Props {
+  project: ChangelogProject;
+}
+
+const { project } = Astro.props;
+const href = `/changelog/${project.slug}`;
+const latestEntry = project.entries[0];
+const totalChanges = project.entries.reduce((sum, e) => sum + e.changes.length, 0);
+---
+
+<a href={href} class="depth-card block group overflow-hidden">
+  <div class="p-5">
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <h3 class="text-lg font-bold font-display leading-snug" style="color: var(--text-primary);">{project.name}</h3>
+      <span class="text-xs font-semibold px-2 py-0.5 rounded-md flex-shrink-0" style="background-color: var(--accent); color: #fff;">
+        {project.entries.length} version{project.entries.length > 1 ? 's' : ''}
+      </span>
+    </div>
+
+    <p class="text-sm mb-4 line-clamp-2" style="color: var(--text-muted);">{project.description}</p>
+
+    {latestEntry && (
+      <div class="inner-panel p-3 mb-4">
+        <p class="text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--text-dim);">Latest: v{latestEntry.version}</p>
+        <ul class="space-y-1">
+          {latestEntry.changes.slice(0, 3).map((change) => (
+            <li class="flex items-start gap-2 text-sm" style="color: var(--text-muted);">
+              <Icon name="check" size={12} class="flex-shrink-0 mt-0.5" style="color: var(--accent);" />
+              <span class="line-clamp-1">{change}</span>
+            </li>
+          ))}
+          {latestEntry.changes.length > 3 && (
+            <li class="text-xs" style="color: var(--text-dim);">+{latestEntry.changes.length - 3} more</li>
+          )}
+        </ul>
+      </div>
+    )}
+
+    <div class="flex items-center justify-between text-xs pt-3 border-t border-[var(--border-subtle)]">
+      <div class="flex items-center gap-3" style="color: var(--text-dim);">
+        {latestEntry && (
+          <span class="flex items-center gap-1">
+            <Icon name="calendar" size={12} />
+            {formatDate(latestEntry.date)}
+          </span>
+        )}
+        <span class="flex items-center gap-1">
+          <Icon name="list" size={12} />
+          {totalChanges} change{totalChanges > 1 ? 's' : ''} total
+        </span>
+      </div>
+      <span class="font-bold inline-flex items-center gap-1 transition-colors" style="color: var(--accent);">
+        View <Icon name="arrow-right" size={12} />
+      </span>
+    </div>
+  </div>
+</a>
