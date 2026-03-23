@@ -8,6 +8,13 @@ export default defineConfig({
   output: 'static',
   integrations: [sitemap()],
   compressHTML: true,
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
+  build: {
+    inlineStylesheets: 'auto',
+  },
   vite: {
     plugins: [tailwindcss()],
     build: {

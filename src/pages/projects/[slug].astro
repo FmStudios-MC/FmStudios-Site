@@ -392,12 +392,18 @@ const serverEntry = isServer ? servers.find(s => s.address !== '/') : null;
   <LightboxModal />
 
   <script>
-    import { openLightbox } from '../../scripts/lightbox';
+    // Lazy hydration: defer lightbox import until first image click
+    let lightboxMod: typeof import('../../scripts/lightbox') | null = null;
 
     const images = document.querySelectorAll<HTMLImageElement>('.lightbox-trigger');
     const srcs = Array.from(images).map((img) => ({ src: img.src, alt: img.alt }));
     images.forEach((img, i) => {
-      img.addEventListener('click', () => openLightbox(srcs, i));
+      img.addEventListener('click', async () => {
+        if (!lightboxMod) {
+          lightboxMod = await import('../../scripts/lightbox');
+        }
+        lightboxMod.openLightbox(srcs, i);
+      });
     });
 
     // Copy server address

@@ -397,41 +397,60 @@ const latestNews = blogPosts.slice(0, 3);
   </style>
 
   <script>
-    import { openModal, closeModal } from '../scripts/modal';
-    import { renderProjectModalHtml } from '../scripts/project-modal';
-    import { openLightbox } from '../scripts/lightbox';
-    import '../scripts/search';
+    // Lazy hydration: defer heavy imports until user interaction
+    let modulesLoaded = false;
+    let modalMod: typeof import('../scripts/modal') | null = null;
+    let projectModalMod: typeof import('../scripts/project-modal') | null = null;
+    let lightboxMod: typeof import('../scripts/lightbox') | null = null;
+    let projectData: { projects: any[]; statusConfig: any } | null = null;
 
-    const projectData = {
-      projects: (await import('../data/projects')).projects,
-      statusConfig: (await import('../data/projects')).statusConfig,
-    };
+    async function ensureModules() {
+      if (modulesLoaded) return;
+      const [modal, projModal, lightbox, data] = await Promise.all([
+        import('../scripts/modal'),
+        import('../scripts/project-modal'),
+        import('../scripts/lightbox'),
+        import('../data/projects'),
+      ]);
+      modalMod = modal;
+      projectModalMod = projModal;
+      lightboxMod = lightbox;
+      projectData = { projects: data.projects, statusConfig: data.statusConfig };
+      modulesLoaded = true;
+    }
 
     document.querySelectorAll('.project-card').forEach((card) => {
-      card.addEventListener('click', (e) => {
+      card.addEventListener('click', async (e) => {
         e.preventDefault();
+        await ensureModules();
+        if (!modalMod || !projectModalMod || !lightboxMod || !projectData) return;
+
         const id = Number((card as HTMLElement).dataset.projectId);
         const project = projectData.projects.find((p) => p.id === id);
         if (!project) return;
 
         const status = projectData.statusConfig[project.status];
-        const html = renderProjectModalHtml(project, status);
-        openModal('project-modal', html);
+        const html = projectModalMod.renderProjectModalHtml(project, status);
+        modalMod.openModal('project-modal', html);
 
         document.querySelector('#project-modal .modal-close-btn')?.addEventListener('click', () => {
-          closeModal('project-modal');
+          modalMod!.closeModal('project-modal');
         });
 
         document.querySelectorAll('#project-modal .lightbox-trigger').forEach((img, i) => {
           img.addEventListener('click', () => {
-            const srcs = project.screenshots.map((s, idx) => ({
+            const srcs = project.screenshots.map((s: string, idx: number) => ({
               src: s,
               alt: `${project.name} screenshot ${idx + 1}`,
             }));
-            openLightbox(srcs, i);
+            lightboxMod!.openLightbox(srcs, i);
           });
         });
       });
     });
+
+    // Defer search script to idle time
+    const _scheduleIdle = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 120));
+    _scheduleIdle(() => { import('../scripts/search'); });
   </script>
 </Layout>

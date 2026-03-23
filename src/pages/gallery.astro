@@ -112,7 +112,8 @@ const projectFilters = [
   <LightboxModal />
 
   <script>
-    import { openLightbox } from '../scripts/lightbox';
+    // Lazy hydration: defer lightbox import until first image click
+    let lightboxMod: typeof import('../scripts/lightbox') | null = null;
 
     const allItems = Array.from(document.querySelectorAll('.gallery-item'));
     const filterBtns = document.querySelectorAll('.gallery-filter-btn');
@@ -155,14 +156,17 @@ const projectFilters = [
     });
 
     allItems.forEach((item) => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', async () => {
+        if (!lightboxMod) {
+          lightboxMod = await import('../scripts/lightbox');
+        }
         const visibleItems = getVisibleItems();
         const srcs = visibleItems.map((el) => ({
           src: (el as HTMLElement).dataset.src || '',
           alt: (el as HTMLElement).dataset.alt || '',
         }));
         const idx = visibleItems.indexOf(item);
-        openLightbox(srcs, idx >= 0 ? idx : 0);
+        lightboxMod.openLightbox(srcs, idx >= 0 ? idx : 0);
       });
     });
   </script>
