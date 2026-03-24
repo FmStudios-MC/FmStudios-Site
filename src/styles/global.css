@@ -77,6 +77,7 @@
 
   /* Nav */
   --nav-height: 64px;
+  --banner-height: 0px;
 
   /* Legacy sidebar vars (for compat) */
   --sidebar-width: 0px;
@@ -705,7 +706,7 @@
   /* ── Top Navigation ──────────────────── */
   .top-nav {
     position: fixed;
-    top: 0;
+    top: var(--banner-height);
     left: 0;
     right: 0;
     height: var(--nav-height);
@@ -850,7 +851,7 @@
   /* Dropdown */
   .nav-dropdown {
     position: absolute;
-    top: calc(var(--nav-height) - 4px);
+    top: calc(var(--banner-height) + var(--nav-height) - 4px);
     right: 1rem;
     background: var(--glass-bg);
     backdrop-filter: blur(16px);

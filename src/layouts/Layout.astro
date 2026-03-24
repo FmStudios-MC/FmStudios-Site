@@ -1,6 +1,8 @@
 ---
 import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
+import AnnouncementBar from '../components/AnnouncementBar.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/global.css';
 
 interface AccentOverride {
@@ -124,6 +126,9 @@ const accentStyle = accentOverride ? [
   <!-- Ember particle canvas -->
   {!kinetic && <canvas id="ember-canvas" class="ember-canvas" aria-hidden="true"></canvas>}
 
+  <!-- Announcement banner -->
+  <AnnouncementBar />
+
   <!-- Top navigation -->
   <NavBar />
 
@@ -145,6 +150,9 @@ const accentStyle = accentOverride ? [
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
   </button>
+
+  <!-- Cookie consent -->
+  <CookieBanner />
 
   <!-- Client scripts -->
   <script>
@@ -211,7 +219,7 @@ const accentStyle = accentOverride ? [
 
 <style>
   .page-content {
-    padding-top: calc(var(--nav-height) + 1.5rem);
+    padding-top: calc(var(--banner-height) + var(--nav-height) + 1.5rem);
   }
 
   .scroll-top-btn:hover {

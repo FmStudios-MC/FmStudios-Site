@@ -1,0 +1,195 @@
+---
+import Icon from './Icon.astro';
+import { announcement } from '../data/announcement';
+
+const { enabled, id, text, link, icon } = announcement;
+---
+
+{enabled && (
+  <div
+    class="announcement-bar"
+    id="announcement-bar"
+    data-id={id}
+    role="banner"
+    aria-label="Announcement"
+  >
+    <div class="announcement-inner">
+      <div class="announcement-content">
+        {icon && <Icon name={icon} size={16} class="announcement-icon" />}
+        <span class="announcement-text">{text}</span>
+        {link && (
+          <a href={link.url} class="announcement-link">
+            {link.label}
+            <Icon name="arrow-right" size={14} />
+          </a>
+        )}
+      </div>
+      <button
+        class="announcement-dismiss"
+        id="announcement-dismiss"
+        aria-label="Dismiss announcement"
+      >
+        <Icon name="x" size={16} />
+      </button>
+    </div>
+  </div>
+)}
+
+<style>
+  .announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 55;
+    background: linear-gradient(135deg, rgba(224, 64, 80, 0.12), rgba(176, 53, 117, 0.10));
+    border-bottom: 1px solid rgba(224, 64, 80, 0.18);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: announcementSlideIn 0.4s var(--ease-out-expo) both;
+  }
+
+  .light-theme .announcement-bar {
+    background: linear-gradient(135deg, rgba(224, 64, 80, 0.08), rgba(176, 53, 117, 0.06));
+    border-bottom-color: rgba(224, 64, 80, 0.12);
+  }
+
+  .announcement-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    position: relative;
+  }
+
+  .announcement-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .announcement-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .announcement-text {
+    line-height: 1.4;
+  }
+
+  .announcement-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+  }
+
+  .announcement-link:hover {
+    opacity: 0.8;
+  }
+
+  .announcement-dismiss {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .announcement-dismiss:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .light-theme .announcement-dismiss:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .announcement-bar.hiding {
+    animation: announcementSlideOut 0.3s var(--ease-in-out-quart) forwards;
+  }
+
+  @keyframes announcementSlideIn {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes announcementSlideOut {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .announcement-content {
+      font-size: 0.78rem;
+    }
+
+    .announcement-inner {
+      padding-right: 2.5rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var bar = document.getElementById('announcement-bar');
+    if (!bar) return;
+    var id = bar.dataset.id;
+    var key = 'fmi-announcement-' + id;
+
+    if (localStorage.getItem(key) === 'dismissed') {
+      bar.remove();
+      document.documentElement.style.setProperty('--banner-height', '0px');
+      return;
+    }
+
+    // Set banner height
+    var height = bar.offsetHeight + 'px';
+    document.documentElement.style.setProperty('--banner-height', height);
+
+    var btn = document.getElementById('announcement-dismiss');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        localStorage.setItem(key, 'dismissed');
+        bar.classList.add('hiding');
+        bar.addEventListener('animationend', function() {
+          bar.remove();
+          document.documentElement.style.setProperty('--banner-height', '0px');
+        }, { once: true });
+      });
+    }
+  })();
+</script>
