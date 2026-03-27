@@ -1,17 +1,58 @@
-Copyright (c) 2026 FabiMvurice Interactive (https://github.com/FmStudios-MC).
-All Rights Reserved.
+Copyright (c) 2023-2026 FabiMvurice Interactive (https://github.com/FmStudios-MC).
 
-This software and associated documentation files (the "Software") are the
-exclusive property of FabiMvurice Interactive, operating under the GitHub
-organization FmStudios-MC (https://github.com/FmStudios-MC).
+Source-Available License — Contribution Use Only
 
-Permission is NOT granted to any person or organization to use, copy, modify,
-merge, publish, distribute, sublicense, sell, or create derivative works of
-the Software, in whole or in part, without prior written authorization from
-FabiMvurice Interactive.
+1. DEFINITIONS
 
-The Software is provided for viewing and reference purposes only. Unauthorized
-use, reproduction, or distribution of the Software is strictly prohibited and
-may result in legal action.
+   "Software" means the source code, documentation, assets (images, icons,
+   styles), and configuration files in this repository.
+
+   "Owner" means FabiMvurice Interactive, operating under the GitHub
+   organization FmStudios-MC (https://github.com/FmStudios-MC).
+
+   "Contribution" means any modification submitted to the Owner via pull
+   request or other contribution mechanism for inclusion in the original
+   project.
+
+2. PERMITTED USES
+
+   You MAY:
+   (a) Fork the repository on GitHub.
+   (b) Clone and run the Software locally for development and testing purposes.
+   (c) Modify the Software and submit Contributions back to the Owner.
+   (d) Study the source code for personal learning and reference.
+
+3. RESTRICTIONS
+
+   You MAY NOT:
+   (a) Deploy, host, or publicly serve the Software — or any derivative
+       of it — as your own website, service, or product.
+   (b) Use the Software, in whole or in part, as the basis for another
+       website or commercial offering.
+   (c) Redistribute the Software or any modified version outside of
+       Contributions back to the original repository.
+   (d) Remove or alter this license or any copyright notices.
+   (e) Use the Owner's name, branding, logos, or trademarks to imply
+       endorsement of any derivative work.
+
+4. CONTRIBUTIONS
+
+   By submitting a Contribution, you grant the Owner a perpetual,
+   worldwide, royalty-free, non-exclusive license to use, modify, and
+   distribute your Contribution as part of the Software. You retain
+   copyright over your Contribution but agree it will be distributed
+   under this same license.
+
+5. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED. IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES,
+   OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+6. TERMINATION
+
+   This license terminates automatically if you violate any of its terms.
+   Upon termination, you must destroy all copies of the Software in your
+   possession.
 
 For licensing inquiries, contact FabiMvurice Interactive.
