@@ -18,6 +18,13 @@ export const changelogProjects: ChangelogProject[] = [
     description: 'Updates and patches for the Simply Legacy SMP server.',
     entries: [
       {
+        version: '26.03.6',
+        date: '2026-03-28',
+        changes: [
+          'Updated Server to newest version',
+        ],
+      },
+      {
         version: '26.03.5',
         date: '2026-03-23',
         changes: [
