@@ -13,7 +13,7 @@ export interface Announcement {
 
 export const announcement: Announcement = {
   enabled: true,
-  id: 'simply-legacy-opend',
+  id: 'simply-legacy-opend1',
   text: 'NEW | Simply Legacy Modpack SMP is now live!',
   link: { url: '/projects/simply-legacy-smp', label: 'Learn more' },
   icon: 'rocket',
