@@ -21,6 +21,28 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    id: 6,
+    title: 'New Logo and Website Design!',
+    slug: 'new-design-launch',
+    category: 'news',
+    date: '2026-04-18',
+    author: 'Itzz_Fabi',
+    excerpt:
+      "We have a new logo and website design! Check out the fresh look and let us know what you think.",
+    content: `
+      <h3>Why this change?</h3>
+      <p>We thought it was time for something new. We felt that the current design wasnt something we were happy with.</p>
+      <h3>Also, what is coming in the few months?</h3>
+      <ul>
+        <li><strong>Create Unbound</strong> - Currently waiting on 26.1. If it takes to long, we will probably release on 1.21.1</li>
+        <li><strong>{Additions} Rebound</strong> - A little side project on our Vanilla+ Side</li>
+      </ul>
+      <p>If you have any feedback about the new design, feel free to let us know!</p>
+    `,
+    image: '/images/logoneu.webp',
+    tags: ['News', 'Community', '2026'],
+  },
+  {
     id: 5,
     title: 'Simply Legacy SMP launched!',
     slug: 'simply-legacy-smp-launch',
