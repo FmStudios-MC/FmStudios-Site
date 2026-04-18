@@ -105,7 +105,7 @@ import { teamMembers, milestones, techStack } from '../data/team';
             <div class="depth-card p-5 min-w-[260px] max-w-[300px] flex-shrink-0 h-full">
               <div class="flex items-center gap-2 mb-3">
                 <span class="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style="background: rgba(224,64,80,0.12); color: var(--accent); border: 1px solid rgba(224,64,80,0.25);">
+                  style="background: rgba(var(--accent-rgb),0.12); color: var(--accent); border: 1px solid rgba(var(--accent-rgb),0.25);">
                   {ms.year}
                 </span>
               </div>
@@ -149,8 +149,8 @@ import { teamMembers, milestones, techStack } from '../data/team';
     height: 80px;
     border-radius: 1rem;
     object-fit: cover;
-    border: 1px solid rgba(224, 64, 80, 0.25);
-    box-shadow: 0 0 20px rgba(224, 64, 80, 0.15);
+    border: 1px solid rgba(var(--accent-rgb), 0.25);
+    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.15);
   }
 
   .team-avatar {
@@ -158,8 +158,8 @@ import { teamMembers, milestones, techStack } from '../data/team';
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(224, 64, 80, 0.30);
-    box-shadow: 0 0 16px rgba(224, 64, 80, 0.20);
+    border: 2px solid rgba(var(--accent-rgb), 0.30);
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.20);
   }
 
   .tech-icon-wrap {

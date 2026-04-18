@@ -46,7 +46,7 @@ const totalChanges = project.entries.reduce((sum, e) => sum + e.changes.length, 
 
     <!-- Timeline -->
     <div class="relative">
-      <div class="absolute left-6 top-0 bottom-0 w-0.5 hidden sm:block" style="background: linear-gradient(180deg, var(--accent), var(--accent-deep), transparent); box-shadow: 0 0 8px rgba(224,64,80,0.2);" aria-hidden="true"></div>
+      <div class="absolute left-6 top-0 bottom-0 w-0.5 hidden sm:block" style="background: linear-gradient(180deg, var(--accent), var(--accent-deep), transparent); box-shadow: 0 0 8px rgba(var(--accent-rgb),0.2);" aria-hidden="true"></div>
 
       <div class="space-y-4 sm:pl-10">
         {project.entries.map((entry, i) => (

@@ -4,10 +4,10 @@ main {
   /* Syntax highlighting */
   --color-prettylights-syntax-comment: #5a5a72;
   --color-prettylights-syntax-constant: #6cb6ff;
-  --color-prettylights-syntax-entity: #b03575;
+  --color-prettylights-syntax-entity: #22c55e;
   --color-prettylights-syntax-storage-modifier-import: #8888a0;
   --color-prettylights-syntax-entity-tag: #8ddb8c;
-  --color-prettylights-syntax-keyword: #e04050;
+  --color-prettylights-syntax-keyword: #4ade80;
   --color-prettylights-syntax-string: #96d0ff;
   --color-prettylights-syntax-variable: #f69d50;
   --color-prettylights-syntax-brackethighlighter-unmatched: #e5534b;
@@ -28,7 +28,7 @@ main {
   --color-prettylights-syntax-markup-changed-bg: #682d0f;
   --color-prettylights-syntax-markup-ignored-text: #8888a0;
   --color-prettylights-syntax-markup-ignored-bg: #255ab2;
-  --color-prettylights-syntax-meta-diff-range: #b03575;
+  --color-prettylights-syntax-meta-diff-range: #22c55e;
   --color-prettylights-syntax-brackethighlighter-angle: #5a5a72;
   --color-prettylights-syntax-sublimelinter-gutter-mark: #5a5a72;
   --color-prettylights-syntax-constant-other-reference-link: #96d0ff;
@@ -47,16 +47,16 @@ main {
 
   /* Primary buttons — accent gradient */
   --color-btn-primary-text: #fff;
-  --color-btn-primary-bg: #e04050;
-  --color-btn-primary-border: rgba(224, 64, 80, 0.30);
-  --color-btn-primary-shadow: 0 0 12px rgba(224, 64, 80, 0.15);
+  --color-btn-primary-bg: #4ade80;
+  --color-btn-primary-border: rgba(74, 222, 128, 0.30);
+  --color-btn-primary-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
   --color-btn-primary-inset-shadow: 0 0 transparent;
-  --color-btn-primary-hover-bg: #b03575;
-  --color-btn-primary-hover-border: rgba(176, 53, 117, 0.30);
-  --color-btn-primary-selected-bg: #e04050;
+  --color-btn-primary-hover-bg: #22c55e;
+  --color-btn-primary-hover-border: rgba(34, 197, 94, 0.30);
+  --color-btn-primary-selected-bg: #4ade80;
   --color-btn-primary-selected-shadow: 0 0 transparent;
   --color-btn-primary-disabled-text: rgba(255, 255, 255, 0.50);
-  --color-btn-primary-disabled-bg: rgba(224, 64, 80, 0.40);
+  --color-btn-primary-disabled-bg: rgba(74, 222, 128, 0.40);
   --color-btn-primary-disabled-border: rgba(255, 255, 255, 0.06);
 
   /* Dropdowns & controls */
@@ -82,24 +82,24 @@ main {
   --color-neutral-muted: rgba(255, 255, 255, 0.06);
 
   /* Accent — red-magenta */
-  --color-accent-fg: #e04050;
-  --color-accent-emphasis: #b03575;
-  --color-accent-muted: rgba(224, 64, 80, 0.40);
-  --color-accent-subtle: rgba(224, 64, 80, 0.10);
+  --color-accent-fg: #4ade80;
+  --color-accent-emphasis: #22c55e;
+  --color-accent-muted: rgba(74, 222, 128, 0.40);
+  --color-accent-subtle: rgba(74, 222, 128, 0.10);
 
   /* Status colors */
   --color-success-fg: #57ab5a;
   --color-attention-fg: #c69026;
   --color-attention-muted: rgba(174, 124, 20, 0.40);
   --color-attention-subtle: rgba(174, 124, 20, 0.15);
-  --color-danger-fg: #e04050;
-  --color-danger-muted: rgba(224, 64, 80, 0.40);
-  --color-danger-subtle: rgba(224, 64, 80, 0.10);
+  --color-danger-fg: #4ade80;
+  --color-danger-muted: rgba(74, 222, 128, 0.40);
+  --color-danger-subtle: rgba(74, 222, 128, 0.10);
 
   /* Misc */
   --color-primer-shadow-inset: 0 0 transparent;
   --color-scale-gray-7: rgba(255, 255, 255, 0.06);
-  --color-scale-blue-8: rgba(224, 64, 80, 0.15);
+  --color-scale-blue-8: rgba(74, 222, 128, 0.15);
 
   /* Reactions */
   --color-social-reaction-bg-hover: var(--color-scale-gray-7);

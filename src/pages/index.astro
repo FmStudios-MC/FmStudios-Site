@@ -252,14 +252,14 @@ const latestNews = blogPosts.slice(0, 3);
       left: 10%;
       right: 10%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.55), rgba(176, 53, 117, 0.40), transparent);
-      box-shadow: 0 0 24px rgba(224, 64, 80, 0.35);
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.55), rgba(var(--accent-deep-rgb), 0.40), transparent);
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.35);
       animation: hero-border-glow 3s ease-in-out infinite;
     }
 
     @keyframes hero-border-glow {
-      0%, 100% { opacity: 0.7; box-shadow: 0 0 20px rgba(224, 64, 80, 0.25); }
-      50% { opacity: 1; box-shadow: 0 0 36px rgba(224, 64, 80, 0.50); }
+      0%, 100% { opacity: 0.7; box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.25); }
+      50% { opacity: 1; box-shadow: 0 0 36px rgba(var(--accent-rgb), 0.50); }
     }
 
     :global(.light-theme) .hero-card {
@@ -281,7 +281,7 @@ const latestNews = blogPosts.slice(0, 3);
       position: absolute;
       inset: -70px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(224, 64, 80, 0.50) 0%, rgba(176, 53, 117, 0.25) 40%, transparent 70%);
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.50) 0%, rgba(var(--accent-deep-rgb), 0.25) 40%, transparent 70%);
       filter: blur(30px);
       opacity: 0.85;
       pointer-events: none;
@@ -291,9 +291,9 @@ const latestNews = blogPosts.slice(0, 3);
       position: absolute;
       inset: -20px;
       border-radius: 50%;
-      border: 1px solid rgba(224, 64, 80, 0.25);
+      border: 1px solid rgba(var(--accent-rgb), 0.25);
       pointer-events: none;
-      box-shadow: 0 0 28px rgba(224, 64, 80, 0.12);
+      box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.12);
     }
 
     .hero-orbit-ring::before {
@@ -305,7 +305,7 @@ const latestNews = blogPosts.slice(0, 3);
       height: 4px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(224, 64, 80, 0.6);
+      box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(var(--accent-rgb), 0.6);
       animation: orbit 8s linear infinite;
     }
 
@@ -317,17 +317,17 @@ const latestNews = blogPosts.slice(0, 3);
       z-index: 1;
       animation: float 7s ease-in-out infinite;
       filter:
-        drop-shadow(0 0 30px rgba(224, 64, 80, 0.55))
+        drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.55))
         drop-shadow(0 16px 48px rgba(0, 0, 0, 0.60));
       border-radius: 50%;
     }
 
     :global(.light-theme) .hero-logo-glow {
-      background: radial-gradient(circle, rgba(200, 56, 72, 0.22) 0%, rgba(150, 45, 96, 0.08) 45%, transparent 70%);
+      background: radial-gradient(circle, rgba(var(--accent-dark-rgb), 0.22) 0%, rgba(150, 45, 96, 0.08) 45%, transparent 70%);
     }
 
     :global(.light-theme) .hero-logo-img {
-      filter: drop-shadow(0 0 18px rgba(200, 56, 72, 0.40)) drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
+      filter: drop-shadow(0 0 18px rgba(var(--accent-dark-rgb), 0.40)) drop-shadow(0 12px 32px rgba(0, 0, 0, 0.18));
     }
 
     /* Neon divider */
@@ -335,8 +335,8 @@ const latestNews = blogPosts.slice(0, 3);
       height: 1px;
       max-width: 80rem;
       margin: 0 auto;
-      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.45), rgba(176, 53, 117, 0.35), transparent);
-      box-shadow: 0 0 24px rgba(224, 64, 80, 0.18), 0 0 8px rgba(224, 64, 80, 0.10);
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.45), rgba(var(--accent-deep-rgb), 0.35), transparent);
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18), 0 0 8px rgba(var(--accent-rgb), 0.10);
     }
 
     /* Featured split cards */
@@ -358,7 +358,7 @@ const latestNews = blogPosts.slice(0, 3);
       left: 10%;
       right: 10%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(224, 64, 80, 0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.35), transparent);
       opacity: 0;
       transition: opacity 0.4s ease;
     }
@@ -366,7 +366,7 @@ const latestNews = blogPosts.slice(0, 3);
     .featured-split-card:hover {
       transform: translateY(-6px);
       border-color: rgba(255, 255, 255, 0.14);
-      box-shadow: var(--shadow-lg), 0 0 50px rgba(224, 64, 80, 0.12), 0 0 0 1px rgba(224, 64, 80, 0.06);
+      box-shadow: var(--shadow-lg), 0 0 50px rgba(var(--accent-rgb), 0.12), 0 0 0 1px rgba(var(--accent-rgb), 0.06);
     }
 
     .featured-split-card:hover::after {

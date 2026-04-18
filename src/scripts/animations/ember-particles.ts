@@ -60,9 +60,9 @@ export function initEmberParticles() {
 
   // Read ember color from CSS custom properties (fallback to red accent)
   const styles = getComputedStyle(document.documentElement);
-  const emberR = styles.getPropertyValue('--ember-r').trim() || '224';
-  const emberG = styles.getPropertyValue('--ember-g').trim() || '64';
-  const emberB = styles.getPropertyValue('--ember-b').trim() || '80';
+  const emberR = styles.getPropertyValue('--ember-r').trim() || '74';
+  const emberG = styles.getPropertyValue('--ember-g').trim() || '222';
+  const emberB = styles.getPropertyValue('--ember-b').trim() || '128';
 
   // Throttle to ~30fps — particles move slowly so 60fps is wasted
   const FRAME_INTERVAL = 1000 / 30;

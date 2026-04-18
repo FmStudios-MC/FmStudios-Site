@@ -42,16 +42,16 @@ const { enabled, id, text, link, icon } = announcement;
     left: 0;
     right: 0;
     z-index: 55;
-    background: linear-gradient(135deg, rgba(224, 64, 80, 0.12), rgba(176, 53, 117, 0.10));
-    border-bottom: 1px solid rgba(224, 64, 80, 0.18);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-deep-rgb), 0.10));
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.18);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     animation: announcementSlideIn 0.4s var(--ease-out-expo) both;
   }
 
   .light-theme .announcement-bar {
-    background: linear-gradient(135deg, rgba(224, 64, 80, 0.08), rgba(176, 53, 117, 0.06));
-    border-bottom-color: rgba(224, 64, 80, 0.12);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08), rgba(var(--accent-deep-rgb), 0.06));
+    border-bottom-color: rgba(var(--accent-rgb), 0.12);
   }
 
   .announcement-inner {

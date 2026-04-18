@@ -73,7 +73,7 @@ const { question, answer, id } = Astro.props;
 
   .faq-item:has(.faq-toggle[aria-expanded="true"]) .faq-dot {
     opacity: 1;
-    box-shadow: 0 0 8px rgba(224, 64, 80, 0.5);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
   }
 
   .faq-question {
