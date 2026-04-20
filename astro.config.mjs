@@ -18,6 +18,8 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     build: {
+      minify: true,
+      sourcemap: false,
       cssMinify: 'lightningcss',
       modulePreload: { polyfill: false },
       rollupOptions: {
@@ -26,6 +28,9 @@ export default defineConfig({
           manualChunks(id) {
             if (id.includes('scripts/animations/')) {
               return 'animations';
+            }
+            if (id.includes('scripts/')) {
+              return 'scripts';
             }
           },
         },
