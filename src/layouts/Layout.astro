@@ -157,7 +157,15 @@ const accentStyle = accentOverride ? [
   <!-- Client scripts -->
   <script>
     import '../scripts/theme';
-    import '../scripts/animations';
+
+    // Lazy load animations after page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        import('../scripts/animations');
+      });
+    } else {
+      import('../scripts/animations');
+    }
 
     // Search clear buttons
     document.querySelectorAll('.search-clear-btn').forEach((btn) => {

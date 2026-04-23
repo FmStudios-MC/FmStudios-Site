@@ -9,8 +9,8 @@ export default defineConfig({
   integrations: [sitemap()],
   compressHTML: true,
   prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'viewport',
+    prefetchAll: false,
+    defaultStrategy: 'hover',
   },
   build: {
     inlineStylesheets: 'auto',
