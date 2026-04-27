@@ -26,7 +26,7 @@ export const projects: Project[] = [
     slug: 'simply-legacy-smp',
     name: 'Simply Legacy Community SMP',
     category: 'servers',
-    status: 'updated',
+    status: 'discontinued',
     logo: '/images/projects/79dd6a009a4cb101837b931234f4ba146837df85.webp',
     description: 'The official FabiMvurice Interactive Simply Legacy SMP. Modpack by Lasting Legacy',
     version: '1.21.10',
