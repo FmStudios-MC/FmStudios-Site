@@ -4,6 +4,7 @@
 export function initParallax() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.innerWidth < 768) return;
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return;
 
   const layers = document.querySelectorAll<HTMLElement>('[data-parallax]');
   if (layers.length === 0) return;

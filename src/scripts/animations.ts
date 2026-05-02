@@ -9,6 +9,7 @@ let scrollTopController: AbortController | null = null;
 
 // Card hover glow — track mouse position via CSS custom properties (throttled to 60fps)
 function initCardGlow() {
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return;
   cardGlowController?.abort();
   cardGlowController = new AbortController();
   const signal = cardGlowController.signal;

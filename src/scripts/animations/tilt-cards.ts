@@ -5,6 +5,7 @@ const MAX_TILT = 6; // degrees
 export function initTiltCards() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.innerWidth < 768) return; // skip on mobile
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return;
 
   const controller = new AbortController();
   const signal = controller.signal;

@@ -13,6 +13,7 @@ interface Ember {
 export function initEmberParticles() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (window.innerWidth < 768) return; // disable on mobile
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) return; // disable on low-end devices
 
   const canvas = document.getElementById('ember-canvas') as HTMLCanvasElement;
   if (!canvas) return;
@@ -41,7 +42,7 @@ export function initEmberParticles() {
 
   // Fewer particles on very high-res to save fillrate
   const isHighRes = w * dpr > 3000;
-  const PARTICLE_COUNT = isHighRes ? 20 : 35;
+  const PARTICLE_COUNT = isHighRes ? 10 : 15;
   const embers: Ember[] = [];
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -64,8 +65,8 @@ export function initEmberParticles() {
   const emberG = styles.getPropertyValue('--ember-g').trim() || '222';
   const emberB = styles.getPropertyValue('--ember-b').trim() || '128';
 
-  // Throttle to ~30fps — particles move slowly so 60fps is wasted
-  const FRAME_INTERVAL = 1000 / 30;
+  // Throttle to ~20fps — particles move slowly so 30fps is wasted
+  const FRAME_INTERVAL = 1000 / 20;
   let lastFrameTime = 0;
 
   function draw(now: number) {

@@ -6,6 +6,8 @@ import SocialBar from '../components/SocialBar.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Modal from '../components/Modal.astro';
 import LightboxModal from '../components/LightboxModal.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/images/logoneu.webp';
 import { projects } from '../data/projects';
 import { blogPosts } from '../data/news';
 import { relativeDate } from '../data/utils';
@@ -82,8 +84,8 @@ const latestNews = blogPosts.slice(0, 3);
             <div class="hero-logo-wrap">
               <div class="hero-orbit-ring" aria-hidden="true"></div>
               <div class="hero-logo-glow" aria-hidden="true"></div>
-              <img
-                src="/images/logoneu.webp"
+              <Image
+                src={logo}
                 alt="FabiMvurice Interactive logo"
                 width="200"
                 height="200"
