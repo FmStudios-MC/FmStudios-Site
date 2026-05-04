@@ -10,7 +10,7 @@ export const teamMembers: TeamMember[] = [
     name: 'Itzz_Fabi',
     role: 'Founder & Lead Developer',
     bio: 'Creator of the Create F&M series and Additions. Passionate about modded Minecraft and building communities.',
-    avatar: '/images/logoneu.webp',
+    avatar: '/images/teamsite/fabipfp.webp',
   },
     {
     name: 'Mvurice',
