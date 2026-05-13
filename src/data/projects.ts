@@ -22,23 +22,6 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: 7,
-    slug: 'simply-legacy-smp',
-    name: 'Simply Legacy Community SMP',
-    category: 'servers',
-    status: 'discontinued',
-    logo: '/images/projects/79dd6a009a4cb101837b931234f4ba146837df85.webp',
-    description: 'The official FabiMvurice Interactive Simply Legacy SMP. Modpack by Lasting Legacy',
-    version: '1.21.10',
-    features: ['Legacy Gameplay', 'Community Events', 'Active Moderation'],
-    screenshots: ['/images/projects/d314800e52950835032a0d6b68ca63bf2859bccd.webp'],
-    downloadUrl: 'https://modrinth.com/modpack/simply-legacy',
-    modrinthUrl: 'https://modrinth.com/modpack/simply-legacy',
-    downloads: '-',
-    lastUpdate: '-',
-    trailerUrl: 'https://www.youtube.com/embed/7m3K0WCMT2U?si=Guwpaf5GRbDYgkcJ',
-  },
-  {
     id: 1,
     slug: 'create-unbound',
     name: 'Create Unbound',

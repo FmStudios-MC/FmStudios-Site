@@ -24,6 +24,7 @@ $RECYCLE.BIN/
 # IDE / Editors
 .vscode/
 .idea/
+*.code-workspace
 *.swp
 *.swo
 *~
@@ -43,6 +44,11 @@ lerna-debug.log*
 # Dependencies
 node_modules/
 bower_components/
+
+# Astro / build output
+dist/
+.astro/
+public/build/
 
 # Temporary files
 *.tmp

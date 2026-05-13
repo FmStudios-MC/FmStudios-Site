@@ -75,20 +75,6 @@ export const roadmapItems: RoadmapItem[] = [
     features: ['Advanced Create automation with magic'],
     updates: [],
   },
-  {
-    id: 5,
-    title: 'SMP for "Simply Legacy" Modpack',
-    description: 'We want to make a community Server for the Simply Legacy Modpack.',
-    status: 'completed',
-    category: 'modpacks',
-    priority: 'high',
-    progress: 100,
-    estimatedDate: '2026',
-    features: ['Legacy Edition Content','https://modrinth.com/modpack/simply-legacy'],
-    updates: [
-      { date: '2026-03-14', text: 'Starting setting up the server' }
-    ],
-  },
 ];
 
 export const roadmapStatusConfig: Record<string, { label: string; badge: string }> = {
