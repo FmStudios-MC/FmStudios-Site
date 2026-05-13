@@ -29,7 +29,7 @@ export const roadmapItems: RoadmapItem[] = [
       'Modrinth and Curseforge as a same Version',
     ],
     updates: [
-      { date: '2026-01-15', text: 'Waiting for 26.1 release of the create mod' },
+      { date: '2026-05-13', text: 'Started development' },
     ],
   },
   {
