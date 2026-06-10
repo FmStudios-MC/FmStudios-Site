@@ -1,0 +1,346 @@
+---
+import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Button from "../../components/Button.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const isLive = data.status === "Released";
+const accent = data.accent ?? "var(--gold)";
+
+const meta = [
+  { label: "Type", value: data.type },
+  { label: "Status", value: data.status },
+  data.version ? { label: "Version", value: data.version } : null,
+  data.loader ? { label: "Loader", value: data.loader } : null,
+].filter(Boolean) as { label: string; value: string }[];
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="detail" style={`--accent:${accent}`}>
+    <div class="container">
+      <a href="/work" class="detail__back">
+        <span aria-hidden="true">&larr;</span> All work
+      </a>
+    </div>
+
+    <header class="detail__hero">
+      <div class="container detail__hero-inner">
+        <div class="detail__intro">
+          <div class="detail__tags">
+            <span class="detail__type">{data.type}</span>
+            <span
+              class:list={["chip", isLive ? "chip--live" : "chip--dev"]}
+            >
+              <span class="chip__dot" aria-hidden="true"></span>
+              {data.status}
+            </span>
+          </div>
+          <h1 class="detail__title">{data.title}</h1>
+          <p class="detail__tagline">{data.tagline}</p>
+
+          {
+            data.links.length > 0 ? (
+              <div class="detail__actions">
+                {data.links.map((link, i) => (
+                  <Button
+                    href={link.url}
+                    external
+                    variant={i === 0 ? "primary" : "ghost"}
+                  >
+                    {link.label}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <p class="detail__nolinks">
+                {isLive
+                  ? "Download links are being added. Check back shortly."
+                  : "Not released yet. Links will appear here on launch."}
+              </p>
+            )
+          }
+        </div>
+
+        <div class="detail__art">
+          <Image
+            src={data.image}
+            alt={`${data.title} project art`}
+            width={720}
+            height={720}
+            class="detail__img"
+          />
+        </div>
+      </div>
+    </header>
+
+    <div class="container detail__body">
+      <dl class="detail__meta">
+        {
+          meta.map((m) => (
+            <div class="detail__meta-row">
+              <dt>{m.label}</dt>
+              <dd>{m.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="detail__prose">
+        <p class="detail__summary">{data.summary}</p>
+        <Content />
+      </div>
+    </div>
+
+    <div class="container detail__foot">
+      <Button href="/work" variant="ghost">Back to all work</Button>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .detail {
+    position: relative;
+    z-index: var(--z-base);
+    padding-top: var(--space-l);
+  }
+
+  .detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .detail__back:hover {
+    color: var(--gold);
+  }
+
+  .detail__hero {
+    position: relative;
+    padding-block: var(--space-xl) var(--space-2xl);
+    overflow: hidden;
+  }
+
+  .detail__hero::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 50vw;
+    height: 50vw;
+    max-width: 620px;
+    max-height: 620px;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--accent) 32%, transparent),
+      transparent 65%
+    );
+    filter: blur(30px);
+    pointer-events: none;
+  }
+
+  .detail__hero-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: var(--space-2xl);
+  }
+
+  .detail__tags {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin-bottom: var(--space-m);
+  }
+
+  .detail__type {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    color: var(--gold);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.3em 0.7em;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .chip__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .chip--live .chip__dot {
+    background: var(--status-live);
+    box-shadow: 0 0 10px var(--status-live);
+  }
+
+  .chip--dev .chip__dot {
+    background: var(--status-dev);
+    box-shadow: 0 0 10px var(--status-dev);
+  }
+
+  .detail__title {
+    font-size: var(--step-5);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .detail__tagline {
+    margin-top: var(--space-m);
+    font-size: var(--step-1);
+    color: var(--ink-muted);
+    max-width: 40ch;
+  }
+
+  .detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-l);
+  }
+
+  .detail__nolinks {
+    margin-top: var(--space-l);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    padding: var(--space-s) var(--space-m);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-m);
+    max-width: fit-content;
+  }
+
+  .detail__art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: var(--radius-l);
+    background:
+      radial-gradient(
+        80% 80% at 50% 35%,
+        color-mix(in oklch, var(--accent) 30%, transparent),
+        transparent 70%
+      ),
+      var(--surface);
+    border: 1px solid var(--line);
+    padding: var(--space-xl);
+  }
+
+  .detail__img {
+    width: min(82%, 380px);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 24px 40px oklch(0 0 0 / 0.5));
+  }
+
+  .detail__body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--space-2xl);
+    padding-block: var(--space-l) var(--space-2xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .detail__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    align-self: start;
+    position: sticky;
+    top: var(--space-xl);
+  }
+
+  .detail__meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .detail__meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .detail__meta dd {
+    font-size: var(--step-0);
+    color: var(--ink);
+  }
+
+  .detail__prose {
+    max-width: 68ch;
+  }
+
+  .detail__summary {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-2);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: var(--space-l);
+  }
+
+  .detail__prose :global(p) {
+    color: var(--ink-muted);
+    margin-bottom: var(--space-m);
+    line-height: 1.7;
+  }
+
+  .detail__foot {
+    padding-bottom: var(--space-2xl);
+  }
+
+  @media (max-width: 860px) {
+    .detail__hero-inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+    .detail__art {
+      order: -1;
+      max-width: 360px;
+    }
+    .detail__body {
+      grid-template-columns: 1fr;
+      gap: var(--space-l);
+    }
+    .detail__meta {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-l);
+    }
+    .detail__meta-row {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+</style>

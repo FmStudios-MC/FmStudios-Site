@@ -1,0 +1,146 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+
+const projects = (await getCollection("projects")).sort((a, b) => {
+  // Released first, then by order
+  const statusRank = (s: string) => (s === "Released" ? 0 : 1);
+  const byStatus = statusRank(a.data.status) - statusRank(b.data.status);
+  return byStatus !== 0 ? byStatus : a.data.order - b.data.order;
+});
+
+const order = ["Modpacks", "Mods", "Resource Packs", "Roblox", "Programs"];
+const present = order.filter((t) => projects.some((p) => p.data.type === t));
+const filters = ["All", ...present];
+---
+
+<BaseLayout
+  title="Work"
+  description="Projects from FabiMvurice Interactive: Minecraft modpacks, mods, resource packs, Roblox games, and programs."
+>
+  <PageHeader
+    eyebrow="The work"
+    title="Everything the studio ships."
+    lede="Modpacks, mods, resource packs, Roblox games, and standalone programs. Filter by what you are looking for."
+  />
+
+  <section class="section work">
+    <div class="container-wide">
+      <div class="filters" role="tablist" aria-label="Filter projects by type">
+        {
+          filters.map((f, i) => (
+            <button
+              class:list={["filter", { "is-active": i === 0 }]}
+              role="tab"
+              aria-selected={i === 0 ? "true" : "false"}
+              data-filter={f}
+            >
+              {f}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="work-grid" data-grid>
+        {
+          projects.map((project, i) => (
+            <div class="work-grid__cell" data-type={project.data.type}>
+              <ProjectCard project={project} delay={(i % 3) * 0.07} />
+            </div>
+          ))
+        }
+      </div>
+
+      <p class="work-empty" data-empty hidden>
+        Nothing here yet. More is in the workshop.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const buttons =
+    document.querySelectorAll<HTMLButtonElement>("[data-filter]");
+  const cells = document.querySelectorAll<HTMLElement>("[data-type]");
+  const empty = document.querySelector<HTMLElement>("[data-empty]");
+
+  function apply(type: string) {
+    let shown = 0;
+    cells.forEach((cell) => {
+      const match = type === "All" || cell.dataset.type === type;
+      cell.hidden = !match;
+      if (match) shown++;
+    });
+    if (empty) empty.hidden = shown !== 0;
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      buttons.forEach((b) => {
+        b.classList.remove("is-active");
+        b.setAttribute("aria-selected", "false");
+      });
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-selected", "true");
+      apply(btn.dataset.filter || "All");
+    });
+  });
+</script>
+
+<style>
+  .work {
+    padding-top: 0;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-m);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filter {
+    padding: 0.55em 1.1em;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    font-weight: 500;
+    transition:
+      color var(--dur-fast) var(--ease-out-quart),
+      border-color var(--dur-fast) var(--ease-out-quart),
+      background-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .filter:hover {
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+
+  .filter.is-active {
+    color: var(--gold-ink);
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-l);
+  }
+
+  .work-grid__cell[hidden] {
+    display: none;
+  }
+
+  .work-empty {
+    color: var(--ink-muted);
+    padding-block: var(--space-2xl);
+    text-align: center;
+    font-size: var(--step-1);
+  }
+</style>

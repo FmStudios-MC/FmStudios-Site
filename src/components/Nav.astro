@@ -1,0 +1,208 @@
+---
+import Mark from "./Mark.astro";
+
+const links = [
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header class="nav" data-nav>
+  <div class="nav__inner container-wide">
+    <a class="nav__brand" href="/" aria-label="FabiMvurice Interactive home">
+      <Mark size={34} />
+      <span class="nav__wordmark">
+        Fabi<span class="nav__wordmark-accent">Mvurice</span>
+        <span class="nav__wordmark-sub">Interactive</span>
+      </span>
+    </a>
+
+    <nav class="nav__links" aria-label="Primary">
+      {
+        links.map((link) => {
+          const active =
+            path === link.href || path.startsWith(link.href + "/");
+          return (
+            <a
+              href={link.href}
+              class:list={["nav__link", { "is-active": active }]}
+              aria-current={active ? "page" : undefined}
+            >
+              {link.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <button
+      class="nav__toggle"
+      aria-expanded="false"
+      aria-controls="nav-mobile"
+      data-nav-toggle
+    >
+      <span class="visually-hidden">Toggle menu</span>
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+    </button>
+  </div>
+
+  <div class="nav__mobile" id="nav-mobile" data-nav-mobile hidden>
+    {
+      links.map((link) => (
+        <a href={link.href} class="nav__mobile-link">
+          {link.label}
+        </a>
+      ))
+    }
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    transition: background-color var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding-block: var(--space-s);
+  }
+
+  /* Frosted bar appears once scrolled */
+  .nav[data-scrolled] {
+    background: oklch(0.13 0.009 75 / 0.78);
+    backdrop-filter: blur(14px) saturate(1.3);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .nav__wordmark {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--step-0);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .nav__wordmark-accent {
+    color: var(--gold);
+  }
+
+  .nav__wordmark-sub {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.62em;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.25em;
+  }
+
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-l);
+  }
+
+  .nav__link {
+    position: relative;
+    font-size: var(--step-0);
+    color: var(--ink-muted);
+    padding-block: var(--space-3xs);
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .nav__link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 2px;
+    width: 100%;
+    background: var(--gold-sheen);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-mid) var(--ease-out-expo);
+  }
+
+  .nav__link:hover,
+  .nav__link.is-active {
+    color: var(--ink);
+  }
+
+  .nav__link:hover::after,
+  .nav__link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .nav__toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: var(--space-2xs);
+  }
+
+  .nav__toggle-bar {
+    width: 24px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: transform var(--dur-fast) var(--ease-out-quart),
+      opacity var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-bar:first-child {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-bar:last-child {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .nav__mobile {
+    display: none;
+    flex-direction: column;
+    padding: var(--space-s) var(--space-m) var(--space-l);
+    background: oklch(0.12 0.009 75 / 0.96);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav__mobile[data-open] {
+    display: flex;
+  }
+
+  .nav__mobile-link {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    padding-block: var(--space-xs);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    .nav__links {
+      display: none;
+    }
+    .nav__toggle {
+      display: flex;
+    }
+  }
+</style>

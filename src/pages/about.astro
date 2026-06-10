@@ -1,0 +1,271 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Button from "../components/Button.astro";
+import Mark from "../components/Mark.astro";
+
+const disciplines = [
+  {
+    name: "Minecraft Modpacks",
+    body: "Curated, balanced packs with a real progression arc, built around Create and beyond.",
+  },
+  {
+    name: "Mods",
+    body: "Focused mods that fix one thing properly, from per-player loot to new content.",
+  },
+  {
+    name: "Resource Packs",
+    body: "Textures and assets that change how a world feels, not just how it looks.",
+  },
+  {
+    name: "Roblox Games",
+    body: "Playable experiences built for the Roblox platform and its community.",
+  },
+  {
+    name: "Programs",
+    body: "Standalone tools and programs, the studio's next frontier.",
+  },
+];
+
+const principles = [
+  {
+    k: "01",
+    t: "Craft over volume",
+    d: "We would rather ship one pack that feels considered than ten that feel automated.",
+  },
+  {
+    k: "02",
+    t: "Play it ourselves",
+    d: "If a release is not fun to play through, it does not ship. We are the first testers.",
+  },
+  {
+    k: "03",
+    t: "Built to last",
+    d: "Clean configs, sensible defaults, and updates that respect the people running servers.",
+  },
+];
+---
+
+<BaseLayout
+  title="About"
+  description="FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and programs with deliberate care."
+>
+  <PageHeader
+    eyebrow="The studio"
+    title="A small studio with a high bar."
+    lede="FabiMvurice Interactive (FMI) makes things for the games people already love, and treats each release like it deserves a stage."
+  />
+
+  <section class="section intro">
+    <div class="container intro__grid">
+      <div class="intro__copy">
+        <p class="intro__lead">
+          We started where a lot of creators do: deep inside Minecraft, taking
+          apart what worked and rebuilding it better. That instinct never left.
+        </p>
+        <p>
+          Today the studio spans modpacks, mods, resource packs, and Roblox
+          games, with standalone programs on the way. The thread through all of
+          it is the same: deliberate work, made by people who actually play what
+          they build.
+        </p>
+        <p>
+          FMI stays small on purpose. It means every decision is intentional,
+          every release carries the studio's name with confidence, and nothing
+          ships just to fill a calendar.
+        </p>
+      </div>
+      <aside class="intro__mark" aria-hidden="true">
+        <Mark size={200} sheen={true} />
+      </aside>
+    </div>
+  </section>
+
+  <section class="section disciplines">
+    <div class="container">
+      <h2 class="disciplines__title reveal">What we build</h2>
+      <ul class="disciplines__list">
+        {
+          disciplines.map((d, i) => (
+            <li class="discipline reveal" style={`--reveal-delay:${i * 0.05}s`}>
+              <span class="discipline__name">{d.name}</span>
+              <p class="discipline__body">{d.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section principles">
+    <div class="container">
+      <h2 class="principles__title reveal">How we work</h2>
+      <div class="principles__grid">
+        {
+          principles.map((p, i) => (
+            <article
+              class="principle reveal"
+              style={`--reveal-delay:${i * 0.07}s`}
+            >
+              <span class="principle__k">{p.k}</span>
+              <h3 class="principle__t">{p.t}</h3>
+              <p class="principle__d">{p.d}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section about-cta">
+    <div class="container about-cta__inner">
+      <h2 class="reveal">See what that looks like in practice.</h2>
+      <div class="about-cta__actions reveal">
+        <Button href="/work">Browse the work</Button>
+        <Button href="/contact" variant="ghost">Work with us</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-top: 0;
+  }
+
+  .intro__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    align-items: center;
+    gap: var(--space-2xl);
+  }
+
+  .intro__lead {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-2);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: var(--space-m);
+    text-wrap: balance;
+  }
+
+  .intro__copy p + p {
+    margin-top: var(--space-m);
+    color: var(--ink-muted);
+    max-width: 60ch;
+    line-height: 1.7;
+  }
+
+  .intro__mark {
+    display: grid;
+    place-items: center;
+  }
+
+  .disciplines__title,
+  .principles__title {
+    font-size: var(--step-3);
+    margin-bottom: var(--space-l);
+  }
+
+  .disciplines__list {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .discipline {
+    display: grid;
+    grid-template-columns: 0.4fr 0.6fr;
+    gap: var(--space-l);
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+    transition: background-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .discipline:hover {
+    background: oklch(0.2 0.013 72 / 0.4);
+  }
+
+  .discipline__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--step-1);
+  }
+
+  .discipline__body {
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 52ch;
+  }
+
+  .principles__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-l);
+  }
+
+  .principle {
+    padding: var(--space-l);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+  }
+
+  .principle__k {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--gold);
+  }
+
+  .principle__t {
+    margin-block: var(--space-s) var(--space-2xs);
+    font-size: var(--step-1);
+  }
+
+  .principle__d {
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  .about-cta__inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-l);
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .about-cta__inner h2 {
+    font-size: var(--step-3);
+    max-width: 20ch;
+  }
+
+  .about-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    justify-content: center;
+  }
+
+  @media (max-width: 860px) {
+    .intro__grid {
+      grid-template-columns: 1fr;
+    }
+    .intro__mark {
+      order: -1;
+      justify-items: start;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .discipline {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xs);
+    }
+  }
+</style>

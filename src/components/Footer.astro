@@ -1,0 +1,140 @@
+---
+import Mark from "./Mark.astro";
+
+const year = new Date().getFullYear();
+
+const explore = [
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+const elsewhere = [
+  { href: "https://www.curseforge.com", label: "CurseForge" },
+  { href: "https://modrinth.com", label: "Modrinth" },
+  { href: "https://www.roblox.com", label: "Roblox" },
+];
+---
+
+<footer class="footer">
+  <div class="footer__inner container-wide">
+    <div class="footer__brand">
+      <a href="/" class="footer__mark" aria-label="FabiMvurice Interactive home">
+        <Mark size={48} />
+      </a>
+      <p class="footer__line">
+        FabiMvurice Interactive. A studio crafting Minecraft modpacks, mods,
+        resource packs, Roblox games, and standalone programs.
+      </p>
+    </div>
+
+    <nav class="footer__col" aria-label="Explore">
+      <h2 class="footer__heading">Explore</h2>
+      {explore.map((l) => <a href={l.href} class="footer__link">{l.label}</a>)}
+    </nav>
+
+    <nav class="footer__col" aria-label="Elsewhere">
+      <h2 class="footer__heading">Elsewhere</h2>
+      {
+        elsewhere.map((l) => (
+          <a
+            href={l.href}
+            class="footer__link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+
+  <div class="footer__base container-wide">
+    <span>&copy; {year} FabiMvurice Interactive</span>
+    <span class="footer__mono">Built with deliberate craft</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: var(--z-base);
+    margin-top: var(--space-3xl);
+    border-top: 1px solid var(--line);
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      oklch(0.1 0.008 75 / 0.6)
+    );
+  }
+
+  .footer__inner {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .footer__line {
+    margin-top: var(--space-s);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    max-width: 38ch;
+    line-height: 1.6;
+  }
+
+  .footer__heading {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: var(--space-s);
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .footer__link {
+    color: var(--ink-muted);
+    width: fit-content;
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .footer__link:hover {
+    color: var(--gold);
+  }
+
+  .footer__base {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding-block: var(--space-m);
+    border-top: 1px solid var(--line);
+    color: var(--ink-faint);
+    font-size: var(--step--1);
+  }
+
+  .footer__mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .footer__inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer__brand {
+      grid-column: 1 / -1;
+    }
+    .footer__base {
+      flex-direction: column;
+      gap: var(--space-2xs);
+    }
+  }
+</style>

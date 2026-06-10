@@ -1,0 +1,357 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Mark from "../components/Mark.astro";
+import Button from "../components/Button.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+
+const projects = (await getCollection("projects")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const featured = projects.filter((p) => p.data.featured).slice(0, 3);
+
+const disciplines = [
+  "Modpacks",
+  "Mods",
+  "Resource Packs",
+  "Roblox Games",
+  "Programs",
+];
+
+const releasedCount = projects.filter(
+  (p) => p.data.status === "Released",
+).length;
+---
+
+<BaseLayout>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__inner container-wide">
+      <p class="hero__eyebrow eyebrow">Interactive Studio</p>
+
+      <h1 class="hero__title">
+        <span class="hero__line">We build worlds</span>
+        <span class="hero__line">inside the games</span>
+        <span class="hero__line">
+          you <span class="gold-text">already love</span>.
+        </span>
+      </h1>
+
+      <p class="hero__lede lede">
+        FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods,
+        and resource packs, Roblox games, and standalone programs. Built with
+        deliberate care, made to be played.
+      </p>
+
+      <div class="hero__actions">
+        <Button href="/work">Explore the work</Button>
+        <Button href="/contact" variant="ghost">Start a conversation</Button>
+      </div>
+
+      <aside class="hero__mark" aria-hidden="true">
+        <Mark size={156} sheen={true} />
+      </aside>
+    </div>
+
+    <!-- Discipline marquee, the studio signature -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        {
+          [0, 1].map(() => (
+            <div class="marquee__group">
+              {disciplines.map((d) => (
+                <span class="marquee__item">
+                  {d}
+                  <span class="marquee__sep">/</span>
+                </span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <p class="visually-hidden">
+      Disciplines: {disciplines.join(", ")}.
+    </p>
+  </section>
+
+  <!-- Featured work -->
+  <section class="section work-preview">
+    <div class="container-wide">
+      <header class="section-head">
+        <div>
+          <p class="eyebrow">Selected work</p>
+          <h2 class="section-head__title">
+            Projects shipping<br />out of the studio.
+          </h2>
+        </div>
+        <a href="/work" class="section-head__link">
+          All projects <span aria-hidden="true">&rarr;</span>
+        </a>
+      </header>
+
+      <div class="work-grid">
+        {
+          featured.map((project, i) => (
+            <ProjectCard project={project} delay={i * 0.08} />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Studio statement -->
+  <section class="section statement">
+    <div class="container">
+      <p class="statement__kicker eyebrow reveal">The studio</p>
+      <p class="statement__body reveal">
+        We treat a Minecraft modpack the way a studio treats a release. Every
+        contraption, loot table, and texture is a deliberate choice. Small team,
+        high standards, and a refusal to ship anything that feels like filler.
+      </p>
+      <div class="statement__meta reveal">
+        <span><strong>{releasedCount}</strong> released projects</span>
+        <span><strong>{disciplines.length}</strong> disciplines</span>
+        <span><strong>1.21.1</strong> current target</span>
+      </div>
+      <div class="reveal">
+        <Button href="/about" variant="ghost">More about FMI</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="section cta">
+    <div class="container cta__inner">
+      <h2 class="cta__title reveal">
+        Have an idea worth <span class="gold-text">building?</span>
+      </h2>
+      <p class="cta__text lede reveal">
+        Whether it is a modpack collaboration, a commission, or a question about
+        a release, the studio is open.
+      </p>
+      <div class="reveal">
+        <Button href="/contact">Get in touch</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    position: relative;
+    z-index: var(--z-base);
+    padding-top: clamp(3rem, 8vh, 6rem);
+    overflow: hidden;
+  }
+
+  .hero__glow {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    max-width: 760px;
+    max-height: 760px;
+    background: radial-gradient(circle, var(--gold-glow), transparent 65%);
+    pointer-events: none;
+    filter: blur(20px);
+  }
+
+  .hero__inner {
+    position: relative;
+    padding-block: clamp(2rem, 6vh, 5rem) var(--space-2xl);
+  }
+
+  .hero__eyebrow {
+    margin-bottom: var(--space-m);
+  }
+
+  .hero__title {
+    font-size: var(--step-5);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+
+  .hero__line {
+    display: block;
+  }
+
+  .hero__lede {
+    margin-top: var(--space-l);
+    max-width: 52ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-xl);
+  }
+
+  .hero__mark {
+    position: absolute;
+    top: clamp(1rem, 4vh, 3rem);
+    right: 0;
+    opacity: 0.96;
+  }
+
+  @media (max-width: 900px) {
+    .hero__mark {
+      display: none;
+    }
+  }
+
+  /* Marquee signature */
+  .marquee {
+    position: relative;
+    border-block: 1px solid var(--line);
+    padding-block: var(--space-s);
+    overflow: hidden;
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .marquee__group {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-l);
+    padding-inline: var(--space-l);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 500;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  .marquee__sep {
+    color: var(--gold);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee__track {
+      animation: marquee 32s linear infinite;
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Section heading shared */
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-l);
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-head__title {
+    margin-top: var(--space-s);
+    font-size: var(--step-4);
+    line-height: 1.04;
+  }
+
+  .section-head__link {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--ink-muted);
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .section-head__link:hover {
+    color: var(--gold);
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-l);
+  }
+
+  /* Statement */
+  .statement {
+    text-align: center;
+  }
+
+  .statement__kicker {
+    display: block;
+    margin-bottom: var(--space-m);
+  }
+
+  .statement__body {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-3);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    max-width: 22ch;
+    margin-inline: auto;
+    text-wrap: balance;
+  }
+
+  .statement__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-l);
+    margin-block: var(--space-xl) var(--space-l);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  .statement__meta strong {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* Closing CTA */
+  .cta__inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-m);
+    padding-block: var(--space-xl);
+    border-top: 1px solid var(--line);
+  }
+
+  .cta__title {
+    font-size: var(--step-4);
+    max-width: 18ch;
+  }
+
+  .cta__text {
+    max-width: 50ch;
+  }
+
+  @media (max-width: 640px) {
+    .section-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

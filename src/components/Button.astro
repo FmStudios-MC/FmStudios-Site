@@ -1,0 +1,84 @@
+---
+interface Props {
+  href: string;
+  variant?: "primary" | "ghost";
+  class?: string;
+  external?: boolean;
+}
+
+const {
+  href,
+  variant = "primary",
+  class: className = "",
+  external = false,
+} = Astro.props;
+
+const rel = external ? "noopener noreferrer" : undefined;
+const target = external ? "_blank" : undefined;
+---
+
+<a
+  href={href}
+  class:list={["btn", `btn--${variant}`, className]}
+  rel={rel}
+  target={target}
+>
+  <span class="btn__label"><slot /></span>
+  <span class="btn__arrow" aria-hidden="true">&rarr;</span>
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: 0.85em 1.5em;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--step-0);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    transition:
+      transform var(--dur-fast) var(--ease-out-quart),
+      background-color var(--dur-fast) var(--ease-out-quart),
+      border-color var(--dur-fast) var(--ease-out-quart),
+      box-shadow var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .btn__arrow {
+    transition: transform var(--dur-mid) var(--ease-out-expo);
+  }
+
+  .btn:hover .btn__arrow {
+    transform: translateX(0.25em);
+  }
+
+  .btn--primary {
+    background: var(--gold-sheen);
+    color: var(--gold-ink);
+    box-shadow: 0 0 0 0 var(--gold-glow);
+  }
+
+  .btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px -12px var(--gold-glow);
+  }
+
+  .btn--ghost {
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+  }
+
+  .btn--ghost:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn:hover {
+      transform: none;
+    }
+  }
+</style>

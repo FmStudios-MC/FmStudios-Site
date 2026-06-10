@@ -1,0 +1,246 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+
+// Replace these with your real channels. Links left as placeholders.
+const channels = [
+  { label: "Email", value: "hello@fabimvurice.com", href: "mailto:hello@fabimvurice.com" },
+  { label: "Discord", value: "Join the server", href: "#" },
+  { label: "CurseForge", value: "FabiMvurice", href: "#" },
+  { label: "Modrinth", value: "FabiMvurice", href: "#" },
+];
+---
+
+<BaseLayout
+  title="Contact"
+  description="Get in touch with FabiMvurice Interactive about a collaboration, commission, or a question on a release."
+>
+  <PageHeader
+    eyebrow="Get in touch"
+    title="Tell us what you have in mind."
+    lede="A modpack collaboration, a commission, a bug on a release, or just a question. The studio reads everything."
+  />
+
+  <section class="section contact">
+    <div class="container contact__grid">
+      <form
+        class="contact__form"
+        method="POST"
+        action="https://formspree.io/f/your-form-id"
+      >
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required />
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="topic">Topic</label>
+          <select id="topic" name="topic">
+            <option>Collaboration</option>
+            <option>Commission</option>
+            <option>Support / bug report</option>
+            <option>Something else</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="6" required></textarea>
+        </div>
+
+        <button type="submit" class="contact__submit">
+          <span>Send message</span>
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+
+        <p class="contact__note">
+          This form posts to a placeholder endpoint. Swap the form action for
+          your real handler (Formspree, Resend, or similar) before going live.
+        </p>
+      </form>
+
+      <aside class="contact__aside">
+        <h2 class="contact__aside-title">Or reach us directly</h2>
+        <ul class="channels">
+          {
+            channels.map((c) => (
+              <li class="channel">
+                <a href={c.href} class="channel__link">
+                  <span class="channel__label">{c.label}</span>
+                  <span class="channel__value">
+                    {c.value} <span aria-hidden="true">&rarr;</span>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="contact__hours">
+          Small studio, real people. Expect a reply within a few days.
+        </p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact {
+    padding-top: 0;
+  }
+
+  .contact__grid {
+    display: grid;
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .field label {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 0.8em 1em;
+    color: var(--ink);
+    font-size: var(--step-0);
+    transition:
+      border-color var(--dur-fast) var(--ease-out-quart),
+      background-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--surface-2);
+  }
+
+  .contact__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2xs);
+    align-self: flex-start;
+    margin-top: var(--space-2xs);
+    padding: 0.85em 1.6em;
+    border-radius: var(--radius-pill);
+    background: var(--gold-sheen);
+    color: var(--gold-ink);
+    font-weight: 600;
+    font-size: var(--step-0);
+    transition:
+      transform var(--dur-fast) var(--ease-out-quart),
+      box-shadow var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .contact__submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px -12px var(--gold-glow);
+  }
+
+  .contact__note {
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    max-width: 48ch;
+    line-height: 1.5;
+  }
+
+  .contact__aside-title {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-m);
+  }
+
+  .channels {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .channel__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    padding-block: var(--space-s);
+    border-bottom: 1px solid var(--line);
+    transition: padding-left var(--dur-mid) var(--ease-out-expo);
+  }
+
+  .channel__link:hover {
+    padding-left: var(--space-2xs);
+  }
+
+  .channel__label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .channel__value {
+    font-size: var(--step-0);
+    color: var(--ink);
+  }
+
+  .channel__link:hover .channel__value {
+    color: var(--gold);
+  }
+
+  .contact__hours {
+    margin-top: var(--space-l);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 860px) {
+    .contact__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+  }
+</style>
