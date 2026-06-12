@@ -1,82 +1,68 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHeader from "../components/PageHeader.astro";
+import Button from "../components/Button.astro";
 
-// Replace these with your real channels. Links left as placeholders.
+const discordInvite = "https://discord.gg/x9jsed8qyR";
+
+// Where the work itself lives. Update handles/links as channels go live.
 const channels = [
-  { label: "Email", value: "hello@fabimvurice.com", href: "mailto:hello@fabimvurice.com" },
-  { label: "Discord", value: "Join the server", href: "#" },
-  { label: "CurseForge", value: "FabiMvurice", href: "#" },
-  { label: "Modrinth", value: "FabiMvurice", href: "#" },
+  { label: "CurseForge", value: "FabiMvurice", href: "https://www.curseforge.com" },
+  { label: "Modrinth", value: "FabiMvurice", href: "https://modrinth.com" },
+  { label: "Roblox", value: "FabiMvurice", href: "https://www.roblox.com" },
 ];
 ---
 
 <BaseLayout
   title="Contact"
-  description="Get in touch with FabiMvurice Interactive about a collaboration, commission, or a question on a release."
+  description="Reach FabiMvurice Interactive on Discord about a collaboration, commission, or a question on a release."
 >
   <PageHeader
     eyebrow="Get in touch"
-    title="Tell us what you have in mind."
-    lede="A modpack collaboration, a commission, a bug on a release, or just a question. The studio reads everything."
+    title="The studio lives on Discord."
+    lede="A modpack collaboration, a commission, a bug on a release, or just a question. Join the server and you reach the people building the work directly."
   />
 
   <section class="section contact">
     <div class="container contact__grid">
-      <form
-        class="contact__form"
-        method="POST"
-        action="https://formspree.io/f/your-form-id"
-      >
-        <div class="field">
-          <label for="name">Name</label>
-          <input id="name" name="name" type="text" autocomplete="name" required />
-        </div>
+      <div class="discord">
+        <span class="discord__glyph" aria-hidden="true">
+          <svg viewBox="0 0 127.14 96.36" role="presentation">
+            <path
+              fill="currentColor"
+              d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"
+            ></path>
+          </svg>
+        </span>
 
-        <div class="field">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            required
-          />
-        </div>
-
-        <div class="field">
-          <label for="topic">Topic</label>
-          <select id="topic" name="topic">
-            <option>Collaboration</option>
-            <option>Commission</option>
-            <option>Support / bug report</option>
-            <option>Something else</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="6" required></textarea>
-        </div>
-
-        <button type="submit" class="contact__submit">
-          <span>Send message</span>
-          <span aria-hidden="true">&rarr;</span>
-        </button>
-
-        <p class="contact__note">
-          This form posts to a placeholder endpoint. Swap the form action for
-          your real handler (Formspree, Resend, or similar) before going live.
+        <h2 class="discord__title">Join the server</h2>
+        <p class="discord__copy">
+          The studio's Discord is where releases are announced, builds get
+          tested, and conversations happen. Drop in, say what you have in mind,
+          and a real person reads it.
         </p>
-      </form>
+
+        <Button href={discordInvite} external class="discord__cta">
+          Join the Discord
+        </Button>
+
+        <p class="discord__note">
+          Small studio, real people. Expect a reply within a few days.
+        </p>
+      </div>
 
       <aside class="contact__aside">
-        <h2 class="contact__aside-title">Or reach us directly</h2>
+        <h2 class="contact__aside-title">Find the work</h2>
         <ul class="channels">
           {
             channels.map((c) => (
               <li class="channel">
-                <a href={c.href} class="channel__link">
+                <a
+                  href={c.href}
+                  class="channel__link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <span class="channel__label">{c.label}</span>
                   <span class="channel__value">
                     {c.value} <span aria-hidden="true">&rarr;</span>
@@ -86,10 +72,6 @@ const channels = [
             ))
           }
         </ul>
-
-        <p class="contact__hours">
-          Small studio, real people. Expect a reply within a few days.
-        </p>
       </aside>
     </div>
   </section>
@@ -107,85 +89,55 @@ const channels = [
     align-items: start;
   }
 
-  .contact__form {
+  .discord {
+    position: relative;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-m);
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xs);
-  }
-
-  .field label {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--surface);
+    padding: clamp(1.75rem, 4vw, 3rem);
     border: 1px solid var(--line);
-    border-radius: var(--radius-m);
-    padding: 0.8em 1em;
-    color: var(--ink);
-    font-size: var(--step-0);
-    transition:
-      border-color var(--dur-fast) var(--ease-out-quart),
-      background-color var(--dur-fast) var(--ease-out-quart);
+    border-radius: var(--radius-l);
+    background:
+      radial-gradient(
+        120% 100% at 0% 0%,
+        var(--gold-glow),
+        transparent 60%
+      ),
+      var(--surface);
+    overflow: hidden;
   }
 
-  .field textarea {
-    resize: vertical;
-    min-height: 7rem;
-  }
-
-  .field input::placeholder,
-  .field textarea::placeholder {
-    color: var(--ink-faint);
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    outline: none;
-    border-color: var(--gold);
-    background: var(--surface-2);
-  }
-
-  .contact__submit {
+  .discord__glyph {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2xs);
-    align-self: flex-start;
-    margin-top: var(--space-2xs);
-    padding: 0.85em 1.6em;
-    border-radius: var(--radius-pill);
-    background: var(--gold-sheen);
-    color: var(--gold-ink);
-    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .discord__glyph svg {
+    width: clamp(2.75rem, 6vw, 3.75rem);
+    height: auto;
+  }
+
+  .discord__title {
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .discord__copy {
+    color: var(--ink-muted);
     font-size: var(--step-0);
-    transition:
-      transform var(--dur-fast) var(--ease-out-quart),
-      box-shadow var(--dur-mid) var(--ease-out-quart);
+    line-height: 1.6;
+    max-width: 52ch;
   }
 
-  .contact__submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 40px -12px var(--gold-glow);
+  .discord__cta {
+    margin-top: var(--space-2xs);
   }
 
-  .contact__note {
-    font-size: var(--step--1);
+  .discord__note {
+    margin-top: var(--space-xs);
     color: var(--ink-faint);
-    max-width: 48ch;
+    font-size: var(--step--1);
     line-height: 1.5;
   }
 
@@ -230,11 +182,10 @@ const channels = [
     color: var(--gold);
   }
 
-  .contact__hours {
-    margin-top: var(--space-l);
-    color: var(--ink-muted);
-    font-size: var(--step--1);
-    line-height: 1.6;
+  @media (prefers-reduced-motion: reduce) {
+    .channel__link {
+      transition: none;
+    }
   }
 
   @media (max-width: 860px) {
