@@ -1,0 +1,249 @@
+---
+import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Button from "../../components/Button.astro";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection("news")).filter((p) => !p.data.draft);
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { data } = post;
+const { Content } = await render(post);
+
+const fmtDate = (d: Date) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(d);
+
+const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="post">
+    <div class="container">
+      <a href="/news" class="post__back">
+        <span aria-hidden="true">&larr;</span> All news
+      </a>
+    </div>
+
+    <header class="post__hero container">
+      <div class="post__dateline">
+        <time datetime={fmtISO(data.date)}>{fmtDate(data.date)}</time>
+        <span class="post__sep" aria-hidden="true">/</span>
+        <span class="post__author">{data.author}</span>
+      </div>
+      <h1 class="post__title">{data.title}</h1>
+      <p class="post__summary">{data.summary}</p>
+      {
+        data.tags.length > 0 && (
+          <ul class="taglist" aria-label="Tags">
+            {data.tags.map((t) => (
+              <li class="tag">{t}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      data.image && (
+        <div class="container">
+          <Image
+            src={data.image}
+            alt={`${data.title} cover image`}
+            width={1280}
+            height={720}
+            class="post__cover"
+          />
+        </div>
+      )
+    }
+
+    <div class="container post__body">
+      <div class="post__prose">
+        <Content />
+      </div>
+    </div>
+
+    <div class="container post__foot">
+      <Button href="/news" variant="ghost">Back to all news</Button>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    position: relative;
+    z-index: var(--z-base);
+    padding-top: var(--space-l);
+  }
+
+  .post__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .post__back:hover {
+    color: var(--gold);
+  }
+
+  .post__hero {
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .post__dateline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    margin-bottom: var(--space-m);
+  }
+
+  .post__dateline time {
+    color: var(--gold);
+  }
+
+  .post__sep {
+    color: var(--line-strong);
+  }
+
+  .post__title {
+    font-size: var(--step-5);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 18ch;
+  }
+
+  .post__summary {
+    margin-top: var(--space-m);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--step-2);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 40ch;
+  }
+
+  .taglist {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-l);
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    padding: 0.3em 0.7em;
+    border: 1px solid color-mix(in oklch, var(--gold) 32%, var(--line));
+    border-radius: var(--radius-pill);
+  }
+
+  .post__cover {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-l);
+    border: 1px solid var(--line);
+    margin-top: var(--space-l);
+  }
+
+  .post__body {
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .post__prose {
+    max-width: 68ch;
+  }
+
+  .post__prose :global(p) {
+    color: var(--ink-muted);
+    margin-bottom: var(--space-m);
+    line-height: 1.75;
+  }
+
+  .post__prose :global(h2) {
+    font-size: var(--step-2);
+    margin-top: var(--space-l);
+    margin-bottom: var(--space-s);
+  }
+
+  .post__prose :global(h3) {
+    font-size: var(--step-1);
+    margin-top: var(--space-l);
+    margin-bottom: var(--space-xs);
+  }
+
+  .post__prose :global(a) {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: color-mix(in oklch, var(--gold) 45%, transparent);
+    transition: text-decoration-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .post__prose :global(a:hover) {
+    text-decoration-color: var(--gold);
+  }
+
+  .post__prose :global(ul),
+  .post__prose :global(ol) {
+    color: var(--ink-muted);
+    margin-bottom: var(--space-m);
+    padding-left: 1.2em;
+    line-height: 1.75;
+  }
+
+  .post__prose :global(li) {
+    margin-bottom: var(--space-2xs);
+  }
+
+  .post__prose :global(blockquote) {
+    margin: var(--space-l) 0;
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--surface);
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .post__prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-s);
+  }
+
+  .post__foot {
+    padding-bottom: var(--space-2xl);
+  }
+
+  @media (max-width: 720px) {
+    .post__hero {
+      padding-block: var(--space-l) var(--space-m);
+    }
+  }
+</style>

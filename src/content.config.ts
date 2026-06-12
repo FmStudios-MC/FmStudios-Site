@@ -30,4 +30,23 @@ const projects = defineCollection({
     }),
 });
 
-export const collections = { projects };
+const news = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/news" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      // Drives ordering (newest first) and the displayed dateline
+      date: z.coerce.date(),
+      // Free-form labels. Defining a tag is writing it on a post.
+      tags: z.array(z.string()).default([]),
+      summary: z.string(),
+      // Optional cover art, rendered through Astro <Image> when present
+      image: image().optional(),
+      author: z.string().default("FabiMvurice Interactive"),
+      featured: z.boolean().default(false),
+      // Kept out of the build until ready
+      draft: z.boolean().default(false),
+    }),
+});
+
+export const collections = { projects, news };

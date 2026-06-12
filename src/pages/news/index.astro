@@ -1,0 +1,349 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+
+const posts = (await getCollection("news"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Tags present across all posts, in first-seen (newest-first) order
+const tags: string[] = [];
+for (const p of posts) {
+  for (const t of p.data.tags) if (!tags.includes(t)) tags.push(t);
+}
+const filters = ["All", ...tags];
+
+const fmtDate = (d: Date) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+
+const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<BaseLayout
+  title="News"
+  description="Release notes, devlogs, and studio updates from FabiMvurice Interactive."
+>
+  <PageHeader
+    eyebrow="The news"
+    title="From the studio."
+    lede="Release notes, devlogs, and announcements. Filter by tag to follow the threads you care about."
+  />
+
+  <section class="section news">
+    <div class="container">
+      {
+        filters.length > 1 && (
+          <div
+            class="filters"
+            role="tablist"
+            aria-label="Filter news by tag"
+          >
+            {filters.map((f, i) => (
+              <button
+                class:list={["filter", { "is-active": i === 0 }]}
+                role="tab"
+                aria-selected={i === 0 ? "true" : "false"}
+                data-filter={f}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        posts.length > 0 ? (
+          <ol class="ledger" data-ledger>
+            {posts.map((post, i) => {
+              const tagList = post.data.tags.join(",");
+              return (
+                <li
+                  class:list={["entry reveal", { "entry--lead": i === 0 }]}
+                  style={`--reveal-delay:${Math.min(i, 4) * 0.06}s`}
+                  data-tags={tagList}
+                >
+                  <a class="entry__link" href={`/news/${post.id}`}>
+                    <div class="entry__rail">
+                      <time datetime={fmtISO(post.data.date)}>
+                        {fmtDate(post.data.date)}
+                      </time>
+                      {post.data.featured && (
+                        <span class="entry__pin">Pinned</span>
+                      )}
+                    </div>
+                    <div class="entry__main">
+                      <h2 class="entry__title">{post.data.title}</h2>
+                      <p class="entry__summary">{post.data.summary}</p>
+                      <div class="entry__foot">
+                        {post.data.tags.length > 0 && (
+                          <ul class="taglist" aria-label="Tags">
+                            {post.data.tags.map((t) => (
+                              <li class="tag">{t}</li>
+                            ))}
+                          </ul>
+                        )}
+                        <span class="entry__cta">
+                          Read <span aria-hidden="true">&rarr;</span>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
+          <p class="news-empty">Nothing posted yet. The first dispatch is coming.</p>
+        )
+      }
+
+      <p class="news-empty" data-empty hidden>
+        No posts under that tag yet.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
+  const entries = document.querySelectorAll<HTMLElement>("[data-tags]");
+  const empty = document.querySelector<HTMLElement>("[data-empty]");
+
+  function apply(tag: string) {
+    let shown = 0;
+    entries.forEach((el) => {
+      const tags = (el.dataset.tags || "").split(",").filter(Boolean);
+      const match = tag === "All" || tags.includes(tag);
+      el.hidden = !match;
+      if (match) shown++;
+    });
+    if (empty) empty.hidden = shown !== 0;
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      buttons.forEach((b) => {
+        b.classList.remove("is-active");
+        b.setAttribute("aria-selected", "false");
+      });
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-selected", "true");
+      apply(btn.dataset.filter || "All");
+    });
+  });
+</script>
+
+<style>
+  .news {
+    padding-top: 0;
+  }
+
+  /* Tag filter row, shared language with /work */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-m);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filter {
+    padding: 0.55em 1.1em;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    font-weight: 500;
+    transition:
+      color var(--dur-fast) var(--ease-out-quart),
+      border-color var(--dur-fast) var(--ease-out-quart),
+      background-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .filter:hover {
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+
+  .filter.is-active {
+    color: var(--gold-ink);
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* Dispatch ledger: hairline-separated rows, not a card grid */
+  .ledger {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .entry {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .entry[hidden] {
+    display: none;
+  }
+
+  .entry__link {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-l);
+    align-items: baseline;
+    padding-block: var(--space-l);
+    transition: background-color var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .entry__link:hover {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--gold) 7%, transparent),
+      transparent 70%
+    );
+  }
+
+  .entry__rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    align-items: flex-start;
+  }
+
+  .entry__rail time {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    transition: color var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .entry__link:hover .entry__rail time {
+    color: var(--gold);
+  }
+
+  .entry__pin {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 0.2em 0.6em;
+    border: 1px solid color-mix(in oklch, var(--gold) 40%, var(--line));
+    border-radius: var(--radius-pill);
+  }
+
+  .entry__main {
+    min-width: 0;
+  }
+
+  .entry__title {
+    font-size: var(--step-3);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    transition: color var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .entry__link:hover .entry__title {
+    color: var(--gold-bright);
+  }
+
+  /* The newest post leads louder */
+  .entry--lead .entry__title {
+    font-size: var(--step-4);
+  }
+
+  .entry--lead .entry__summary {
+    font-size: var(--step-1);
+  }
+
+  .entry__summary {
+    margin-top: var(--space-xs);
+    color: var(--ink-muted);
+    max-width: 60ch;
+    line-height: 1.6;
+  }
+
+  .entry__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-m);
+    margin-top: var(--space-m);
+  }
+
+  .taglist {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    padding: 0.3em 0.7em;
+    border: 1px solid color-mix(in oklch, var(--gold) 32%, var(--line));
+    border-radius: var(--radius-pill);
+  }
+
+  .entry__cta {
+    font-weight: 600;
+    color: var(--ink-muted);
+    display: inline-flex;
+    gap: 0.4em;
+    margin-left: auto;
+    transition: color var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .entry__cta span {
+    transition: transform var(--dur-mid) var(--ease-out-expo);
+  }
+
+  .entry__link:hover .entry__cta {
+    color: var(--ink);
+  }
+
+  .entry__link:hover .entry__cta span {
+    transform: translateX(0.3em);
+  }
+
+  .news-empty {
+    color: var(--ink-muted);
+    padding-block: var(--space-2xl);
+    text-align: center;
+    font-size: var(--step-1);
+  }
+
+  @media (max-width: 720px) {
+    .entry__link {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+      padding-block: var(--space-m);
+    }
+    .entry__rail {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-s);
+    }
+    .entry__cta {
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .entry__cta span {
+      transition: none;
+    }
+  }
+</style>
