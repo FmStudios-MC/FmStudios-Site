@@ -55,8 +55,12 @@ const { size = 40, class: className = "", sheen = false } = Astro.props;
       animation: sheen 4.5s var(--ease-out-expo) 1.1s infinite;
     }
 
-    .mark--sheen:hover::after {
-      animation-play-state: paused;
+    /* Only pause for real pointers. On touch devices :hover sticks and freezes
+       the sheen band mid-sweep across the mark. */
+    @media (hover: hover) and (pointer: fine) {
+      .mark--sheen:hover::after {
+        animation-play-state: paused;
+      }
     }
   }
 

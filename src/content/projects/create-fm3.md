@@ -10,11 +10,11 @@ image: ../../assets/projects/create-fm3.png
 accent: "oklch(0.74 0.14 65)"
 featured: true
 order: 3
-links: []
+links:
+  - label: Modrinth
+    url: "https://modrinth.com/modpack/create-fm3"
+  - label: CurseForge
+    url: "https://www.curseforge.com/minecraft/modpacks/create-fm3"
 ---
 
-Placeholder description. Create F&M 3 is the released third entry in the studio's F&M
-modpack series, built on the Create mod. Replace this copy with the real overview: what is
-new in chapter three, the headline contraptions, the progression arc, and recommended specs.
-
-Add download links (CurseForge / Modrinth) to the front matter `links` array when ready.
+Create F&M 3 is a Create Modpack with many addons.

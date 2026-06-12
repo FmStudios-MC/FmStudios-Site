@@ -66,7 +66,7 @@ const meta = [
               <p class="detail__nolinks">
                 {isLive
                   ? "Download links are being added. Check back shortly."
-                  : "Not released yet. Links will appear here on launch."}
+                  : "This project isn't released yet and can't be downloaded. Links will appear here on launch."}
               </p>
             )
           }
@@ -132,24 +132,6 @@ const meta = [
     position: relative;
     padding-block: var(--space-xl) var(--space-2xl);
     overflow: hidden;
-  }
-
-  .detail__hero::before {
-    content: "";
-    position: absolute;
-    top: -30%;
-    right: -10%;
-    width: 50vw;
-    height: 50vw;
-    max-width: 620px;
-    max-height: 620px;
-    background: radial-gradient(
-      circle,
-      color-mix(in oklch, var(--accent) 32%, transparent),
-      transparent 65%
-    );
-    filter: blur(30px);
-    pointer-events: none;
   }
 
   .detail__hero-inner {
@@ -248,6 +230,22 @@ const meta = [
       var(--surface);
     border: 1px solid var(--line);
     padding: var(--space-xl);
+  }
+
+  /* Accent halo, centered on the logo and bleeding out from behind the card */
+  .detail__art::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--accent) 22%, transparent),
+      transparent 60%
+    );
+    filter: blur(45px);
+    pointer-events: none;
   }
 
   .detail__img {

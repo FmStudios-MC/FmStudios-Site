@@ -1,0 +1,291 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Button from "../components/Button.astro";
+
+type Status = "planned" | "in-progress" | "released";
+
+interface Item {
+  title: string;
+  kind: string;
+  when: string;
+  summary: string;
+}
+
+// Placeholder milestones. Edit these to reshape the board.
+const board: { status: Status; label: string; items: Item[] }[] = [
+  {
+    status: "planned",
+    label: "Planned",
+    items: [
+      {
+        title: "Programs: standalone toolset",
+        kind: "Programs",
+        when: "Later",
+        summary:
+          "The studio's first desktop utilities, built outside the game sandbox.",
+      },
+      {
+        title: "{Additions} Rebound",
+        kind: "Modpack",
+        when: "TBD",
+        summary:
+          "A new Vanilla+ pack with focus on QOL and performance.",
+      },
+    ],
+  },
+  {
+    status: "in-progress",
+    label: "In progress",
+    items: [
+      {
+        title: "Create Unbound",
+        kind: "Modpack",
+        when: "Now",
+        summary:
+          "A Create Modpack with many great addons and QOL mods.",
+      },
+    ],
+  },
+  {
+    status: "released",
+    label: "Released",
+    items: [
+      {
+        title: "FMI site rework",
+        kind: "Studio",
+        when: "Shipped",
+        summary: "Our main page for news, info, and sharing the work as it happens.",
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Roadmap"
+  description="What FabiMvurice Interactive is planning, building, and has already shipped, on one board."
+>
+  <PageHeader
+    eyebrow="The roadmap"
+    title="Where the studio is headed."
+    lede="A working board of what is planned, in progress, and already out the door. Honest, not a promise, and it moves as the work does."
+  />
+
+  <section class="section roadmap">
+    <div class="container">
+      <div class="roadmap__board">
+        {
+          board.map((lane, laneIndex) => (
+            <section
+              class:list={["lane reveal", `lane--${lane.status}`]}
+              style={`--reveal-delay:${laneIndex * 0.08}s`}
+              aria-label={lane.label}
+            >
+              <header class="lane__head">
+                <span class="lane__dot" aria-hidden="true" />
+                <h2 class="lane__label">{lane.label}</h2>
+                <span class="lane__count">{lane.items.length}</span>
+              </header>
+
+              <ol class="lane__list">
+                {lane.items.map((item) => (
+                  <li class="ritem">
+                    <div class="ritem__meta">
+                      <span class="ritem__kind">{item.kind}</span>
+                      <span class="ritem__when">{item.when}</span>
+                    </div>
+                    <h3 class="ritem__title">{item.title}</h3>
+                    <p class="ritem__summary">{item.summary}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="roadmap__foot reveal">
+        <p class="roadmap__note">
+          Dates stay loose on purpose. The studio ships when a release is worth
+          playing, not to fill a calendar.
+        </p>
+        <div class="roadmap__actions">
+          <Button href="/news">Follow the updates</Button>
+          <Button href="/work" variant="ghost">See the work</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .roadmap {
+    padding-top: 0;
+  }
+
+  .roadmap__board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-l);
+  }
+
+  /* Each lane carries its own status hue */
+  .lane {
+    --lane: var(--ink-faint);
+  }
+  .lane--planned {
+    --lane: var(--ink-faint);
+  }
+  .lane--in-progress {
+    --lane: var(--status-dev);
+  }
+  .lane--released {
+    --lane: var(--status-live);
+  }
+
+  .lane__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .lane__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--lane);
+    box-shadow: 0 0 0.6rem color-mix(in oklch, var(--lane) 70%, transparent);
+  }
+
+  .lane__label {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .lane__count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lane__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Hairline-separated rows, not nested cards */
+  .ritem {
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: padding-left var(--dur-mid) var(--ease-out-expo);
+  }
+
+  /* A short accent tick keyed to the lane hue, grows on hover */
+  .ritem::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: var(--space-m);
+    width: 0;
+    height: 1.1em;
+    border-radius: var(--radius-pill);
+    background: var(--lane);
+    opacity: 0;
+    transition:
+      width var(--dur-mid) var(--ease-out-expo),
+      opacity var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .ritem:hover {
+    padding-left: var(--space-s);
+  }
+
+  .ritem:hover::before {
+    width: 2px;
+    opacity: 0.9;
+  }
+
+  .ritem__meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .ritem__kind {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .ritem__when {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+
+  .ritem__title {
+    font-size: var(--step-1);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .ritem__summary {
+    margin-top: var(--space-2xs);
+    color: var(--ink-muted);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    max-width: 42ch;
+  }
+
+  .roadmap__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+
+  .roadmap__note {
+    color: var(--ink-muted);
+    max-width: 46ch;
+    line-height: 1.6;
+  }
+
+  .roadmap__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  @media (max-width: 560px) {
+    .ritem:hover {
+      padding-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ritem,
+    .ritem::before {
+      transition: none;
+    }
+  }
+</style>
