@@ -18,5 +18,5 @@ The third reason is that I’m not really a very good developer. I get the feeli
 
 I'll be working on “Create Unbound,” but don't expect anything mind-blowing. There will be a community server again. However, the modpack's features won't be anything special. Quests probably won't be included either, or if they are, they'll be half-hearted.
 
-I also plan to work on other projects besides Minecraft—useful programs and other stuff. I hope you can understand, and if not, I’m sorry. There’s no release date for “Create Ubound” yet, but I’m aiming for the third quarter of 2026.
+I also plan to work on other projects besides Minecraft. Like useful programs and other stuff. I hope you can understand, and if not, I’m sorry. There’s no release date for “Create Ubound” yet, but I’m aiming for the third quarter of 2026.
 
