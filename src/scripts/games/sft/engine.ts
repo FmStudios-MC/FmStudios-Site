@@ -1,10 +1,14 @@
 /* Pure simulation. No DOM, no storage. Given a GameState (+ static config),
    it derives the live economy and advances it by a time delta. */
 
-import type { BuildingDef, Derived, GameState } from "./types";
+import type { AchievementDef, BuildingDef, Derived, EventDef, GameState } from "./types";
 import {
+  ACHIEVEMENTS,
+  ACHIEVEMENT_BY_ID,
   BUILDINGS,
   BUILDING_BY_ID,
+  EVENT_BY_ID,
+  EVENTS,
   PRESTIGE,
   TUNING,
   UPGRADES,
@@ -13,6 +17,15 @@ import {
 const owned = (s: GameState, id: string) => s.buildings[id] ?? 0;
 const plevel = (s: GameState, id: string) => s.prestigeUpgrades[id] ?? 0;
 const hasUpgrade = (s: GameState, id: string) => s.upgrades.includes(id);
+
+/** Deterministic 0..1 PRNG from an integer seed (mulberry32 finalizer). Keeps
+    the incident scheduler replayable, so offline catch-up is fair. */
+function rng(seed: number): number {
+  let t = (seed + 0x6d2b79f5) | 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
 
 /** Cost of the next unit of a building, after prestige cost-growth reduction. */
 export function buildingCost(s: GameState, def: BuildingDef): number {
@@ -52,6 +65,70 @@ export function gridPrice(now: number): number {
   return TUNING.basePowerRate * (1 + TUNING.gridSwing * Math.sin(phase));
 }
 
+// --- Incident scheduler -------------------------------------------------
+
+/** Set the next-incident timestamp from a deterministic gap. */
+function scheduleNextEvent(s: GameState, now: number): void {
+  const r = rng(s.eventSeed ^ 0x9e3779b9);
+  const gap =
+    TUNING.eventMinGapMs + r * (TUNING.eventMaxGapMs - TUNING.eventMinGapMs);
+  s.nextEventAt = now + gap;
+}
+
+/** Pick an eligible incident deterministically from the current seed. */
+function rollEvent(s: GameState): EventDef | null {
+  const pool = EVENTS.filter((e) => !e.relevant || e.relevant(s));
+  if (pool.length === 0) return null;
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let r = rng(s.eventSeed) * total;
+  for (const e of pool) {
+    r -= e.weight;
+    if (r <= 0) return e;
+  }
+  return pool[pool.length - 1];
+}
+
+/** Advance incident state up to `now`: expire a finished event, then fire a
+    due one. An event whose whole window elapsed while offline is consumed
+    (not applied retroactively), so returning players aren't penalised. */
+function advanceEvents(s: GameState, now: number): void {
+  if (s.nextEventAt === 0) {
+    scheduleNextEvent(s, now);
+    return;
+  }
+  if (s.activeEvent && now >= s.activeEvent.endsAt) {
+    s.activeEvent = null;
+    scheduleNextEvent(s, now);
+  }
+  if (!s.activeEvent && now >= s.nextEventAt) {
+    if (s.lifetimeEarnings < TUNING.eventMinEarnings) {
+      scheduleNextEvent(s, now);
+      return;
+    }
+    const def = rollEvent(s);
+    if (!def) {
+      scheduleNextEvent(s, now);
+      return;
+    }
+    const endsAt = s.nextEventAt + def.durationSec * 1000;
+    s.eventSeed += 1;
+    if (now < endsAt) {
+      s.activeEvent = { id: def.id, startedAt: s.nextEventAt, endsAt, responded: false };
+    } else {
+      // Window already passed offline — skip it and line up the next one.
+      scheduleNextEvent(s, now);
+    }
+  }
+}
+
+/** Cost to immediately mitigate the live incident. */
+export function eventRespondCost(s: GameState, grossPerSec: number): number {
+  return Math.max(
+    TUNING.eventRespondMin,
+    Math.ceil(grossPerSec * TUNING.eventRespondSeconds),
+  );
+}
+
 /** Everything the UI and tick need, computed from state. */
 export function derive(s: GameState, now: number): Derived {
   let computeBase = 0;
@@ -79,6 +156,26 @@ export function derive(s: GameState, now: number): Derived {
     if (u.multCoolingCap) coolingCapMult *= u.multCoolingCap;
   }
 
+  // Permanent milestone buffs.
+  for (const id of s.achievements) {
+    const buff = ACHIEVEMENT_BY_ID[id]?.buff;
+    if (!buff) continue;
+    if (buff.multCompute) upgradeComputeMult *= buff.multCompute;
+    if (buff.multPrice) upgradePriceMult *= buff.multPrice;
+    if (buff.multCoolingCap) coolingCapMult *= buff.multCoolingCap;
+  }
+
+  // Live incident multipliers (guarded by endsAt so the effect stops the
+  // instant the window closes, even before the next economy tick clears it).
+  const liveEvent =
+    s.activeEvent && now < s.activeEvent.endsAt ? s.activeEvent : null;
+  const evDef = liveEvent ? EVENT_BY_ID[liveEvent.id] : undefined;
+  const evCoolingMult = evDef?.coolingMult ?? 1;
+  const evGridMult = evDef?.gridPriceMult ?? 1;
+  const evPowerCapMult = evDef?.powerCapMult ?? 1;
+  const evPriceMult = evDef?.priceMult ?? 1;
+  const evComputeMult = evDef?.computeMult ?? 1;
+
   for (const def of BUILDINGS) {
     const n = owned(s, def.id);
     if (n === 0) continue;
@@ -96,7 +193,8 @@ export function derive(s: GameState, now: number): Derived {
     if (def.multUptime) uptimeBonus += def.multUptime * n;
   }
 
-  coolingCap *= coolingCapMult;
+  coolingCap *= coolingCapMult * evCoolingMult;
+  powerCap *= evPowerCapMult;
 
   // Heat throttle: full output while cooling keeps up, easing toward a floor
   // as heat generation outruns cooling capacity.
@@ -117,7 +215,11 @@ export function derive(s: GameState, now: number): Derived {
   const overclockActive = now < s.overclockUntil;
   const overclock = overclockActive ? TUNING.overclockMult : 1;
   const computeMult =
-    (1 + engineerMult) * upgradeComputeMult * prestigeComputeMult * overclock;
+    (1 + engineerMult) *
+    upgradeComputeMult *
+    prestigeComputeMult *
+    overclock *
+    evComputeMult;
 
   const compute =
     computeBase * computeMult * heatThrottle * powerThrottle;
@@ -130,12 +232,29 @@ export function derive(s: GameState, now: number): Derived {
     repMult *
     (1 + salesMult) *
     upgradePriceMult *
-    prestigePriceMult;
+    prestigePriceMult *
+    evPriceMult;
 
   // Operating cost: every kW of draw is billed at the live grid price.
-  const grid = gridPrice(now);
+  const grid = gridPrice(now) * evGridMult;
   const grossPerSec = compute * price;
   const powerCost = powerDraw * grid;
+
+  // Surface the live incident for the UI banner.
+  let event: Derived["event"] = null;
+  if (liveEvent && evDef) {
+    const respondCost = eventRespondCost(s, grossPerSec);
+    event = {
+      id: evDef.id,
+      name: evDef.name,
+      desc: evDef.desc,
+      kind: evDef.kind,
+      endsAt: liveEvent.endsAt,
+      respondCost,
+      canRespond:
+        evDef.kind === "bad" && !liveEvent.responded && s.money >= respondCost,
+    };
+  }
 
   return {
     computeBase,
@@ -155,7 +274,22 @@ export function derive(s: GameState, now: number): Derived {
     pendingCredits: pendingCredits(s),
     overclockActive,
     computeMult,
+    event,
   };
+}
+
+/** Grant any newly-earned milestones, mutating state. Returns the freshly
+    unlocked defs so the caller can log/toast them; pure of DOM + storage. */
+export function claimAchievements(s: GameState, d: Derived): AchievementDef[] {
+  const granted: AchievementDef[] = [];
+  for (const a of ACHIEVEMENTS) {
+    if (s.achievements.includes(a.id)) continue;
+    if (a.check(s, d)) {
+      s.achievements.push(a.id);
+      granted.push(a);
+    }
+  }
+  return granted;
 }
 
 /** Advance the economy by dt seconds. Mutates and returns the state.
@@ -170,6 +304,8 @@ export function tick(
     s.lastTick = now;
     return s;
   }
+  // Resolve incidents up to `now` before reading the economy off state.
+  advanceEvents(s, now);
   const d = derive(s, now);
 
   // Revenue feeds earnings/credits; the electricity bill is a cash drain only,
@@ -231,7 +367,25 @@ export function doPrestige(s: GameState, now: number): boolean {
   s.upgrades = [];
   s.overclockUntil = 0;
   s.overclockReadyAt = 0;
+  // A world incident on a now-empty farm is meaningless — clear it and let the
+  // scheduler line up the next one. (Milestones persist across rebuilds.)
+  s.activeEvent = null;
   s.lastTick = now;
+  return true;
+}
+
+/** Spend cash to immediately end the live bad incident. */
+export function respondEvent(s: GameState, now: number): boolean {
+  const ev = s.activeEvent;
+  if (!ev || now >= ev.endsAt || ev.responded) return false;
+  const def = EVENT_BY_ID[ev.id];
+  if (!def || def.kind !== "bad") return false;
+  const cost = eventRespondCost(s, derive(s, now).grossPerSec);
+  if (s.money < cost) return false;
+  s.money -= cost;
+  s.activeEvent = null;
+  s.eventsResponded += 1;
+  scheduleNextEvent(s, now);
   return true;
 }
 

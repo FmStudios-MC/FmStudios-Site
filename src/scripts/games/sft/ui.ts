@@ -4,6 +4,7 @@
 
 import type { Derived, GameState } from "./types";
 import {
+  ACHIEVEMENTS,
   BUILDINGS,
   BUILDING_BY_ID,
   CATEGORY_LABELS,
@@ -25,6 +26,7 @@ export interface Handlers {
   onBuyPrestige(id: string): void;
   onPrestige(): void;
   onOverclock(): void;
+  onRespondEvent(): void;
   onSave(): void;
   onReset(): void;
   onExport(): void;
@@ -292,6 +294,35 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   prestigeBtn.addEventListener("click", () => handlers.onPrestige());
   overclockBtn.addEventListener("click", () => handlers.onOverclock());
 
+  // --- Incident banner --------------------------------------------------
+  const eventBanner = root.querySelector<HTMLElement>("[data-event]");
+  const eventName = root.querySelector<HTMLElement>("[data-event-name]");
+  const eventDesc = root.querySelector<HTMLElement>("[data-event-desc]");
+  const eventTimer = root.querySelector<HTMLElement>("[data-event-timer]");
+  const respondBtn = root.querySelector<HTMLButtonElement>("[data-event-respond]");
+  respondBtn?.addEventListener("click", () => handlers.onRespondEvent());
+
+  // --- Milestones (collapsible) ----------------------------------------
+  const achWrap = root.querySelector<HTMLElement>("[data-achievements]");
+  const achNote = root.querySelector<HTMLElement>("[data-ach-note]");
+  const achPanel = achWrap?.closest<HTMLElement>(".sft-ach");
+  achPanel
+    ?.querySelector(".sft-panel__head")
+    ?.addEventListener("click", () => achPanel.classList.toggle("is-collapsed"));
+
+  const achChips = achWrap
+    ? ACHIEVEMENTS.map((def) => {
+        const chip = el("div", "sft-ach__chip is-locked");
+        chip.append(
+          el("span", "sft-ach__name", def.name),
+          el("span", "sft-ach__desc", def.desc),
+        );
+        if (def.buffNote) chip.append(el("span", "sft-ach__buff", def.buffNote));
+        achWrap.appendChild(chip);
+        return { root: chip, def };
+      })
+    : [];
+
   // --- Save / data controls --------------------------------------------
   $("[data-save]").addEventListener("click", () => handlers.onSave());
   $("[data-reset]").addEventListener("click", () => handlers.onReset());
@@ -314,7 +345,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   }
 
   // --- Render -----------------------------------------------------------
-  function setText(node: HTMLElement | undefined, value: string) {
+  function setText(node: HTMLElement | null | undefined, value: string) {
     if (node && node.textContent !== value) node.textContent = value;
   }
   function setDisabled(btn: HTMLButtonElement, disabled: boolean) {
@@ -485,6 +516,38 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         ? `Overclock x${TUNING.overclockMult}`
         : `Cooldown ${duration((s.overclockReadyAt - now) / 1000)}`;
     setText(overclockBtn, ocLabel);
+
+    // Incident banner
+    if (eventBanner) {
+      const ev = d.event;
+      setFlag(eventBanner, "is-shown", ev != null);
+      if (ev) {
+        if (eventBanner.dataset.kind !== ev.kind) eventBanner.dataset.kind = ev.kind;
+        setText(eventName, ev.name);
+        setText(eventDesc, ev.desc);
+        setText(eventTimer, duration((ev.endsAt - now) / 1000));
+        if (respondBtn) {
+          const showRespond = ev.kind === "bad";
+          setFlag(respondBtn, "is-hidden", !showRespond);
+          if (showRespond) {
+            setText(respondBtn, `Respond · ${money(ev.respondCost)}`);
+            setDisabled(respondBtn, !ev.canRespond);
+          }
+        }
+      }
+    }
+
+    // Milestones
+    if (achChips.length) {
+      let unlocked = 0;
+      for (const c of achChips) {
+        const has = s.achievements.includes(c.def.id);
+        if (has) unlocked++;
+        setFlag(c.root, "is-locked", !has);
+        setFlag(c.root, "is-unlocked", has);
+      }
+      setText(achNote ?? undefined, `${unlocked} / ${achChips.length}`);
+    }
   }
 
   return { render, toast, pushLog };

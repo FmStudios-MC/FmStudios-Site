@@ -55,6 +55,55 @@ export interface PrestigeDef {
   maxLevel?: number;
 }
 
+/** A world incident. While active, its multipliers ride the existing Derived
+    levers (cooling, grid price, power cap, sell price, compute) — so the engine
+    only multiplies, and ui.ts only paints. "bad" events can be Responded to. */
+export interface EventDef {
+  id: string;
+  name: string;
+  /** One functional ops-console line. */
+  desc: string;
+  kind: "bad" | "good";
+  durationSec: number;
+  /** Relative likelihood among eligible events. */
+  weight: number;
+
+  // Effect multipliers applied in derive() while the event is live.
+  coolingMult?: number; // scales effective cooling capacity
+  gridPriceMult?: number; // scales the electricity price
+  powerCapMult?: number; // scales total power capacity
+  priceMult?: number; // scales sell price
+  computeMult?: number; // scales effective compute
+
+  /** Only rolled when this holds (keeps irrelevant incidents from firing). */
+  relevant?: (s: GameState) => boolean;
+}
+
+/** The currently-running incident, persisted so it survives reloads. */
+export interface ActiveEvent {
+  id: string;
+  startedAt: number; // epoch ms
+  endsAt: number; // epoch ms
+  responded: boolean;
+}
+
+/** A persisted milestone. `check` mirrors how UpgradeDef.unlock works; an
+    optional `buff` makes it more than cosmetic. */
+export interface AchievementDef {
+  id: string;
+  name: string;
+  desc: string;
+  check: (s: GameState, d: Derived) => boolean;
+  /** Tiny permanent multipliers, applied in derive() once earned. */
+  buff?: {
+    multCompute?: number;
+    multPrice?: number;
+    multCoolingCap?: number;
+  };
+  /** Short functional note shown on the chip when a buff is attached. */
+  buffNote?: string;
+}
+
 export interface GameState {
   version: number;
   money: number;
@@ -71,6 +120,15 @@ export interface GameState {
   overclockUntil: number; // epoch ms, while > now the burst is active
   overclockReadyAt: number; // epoch ms, cooldown gate
   lastTick: number; // epoch ms, for offline catch-up
+
+  // Incidents (deterministic scheduler — see engine.advanceEvents).
+  activeEvent: ActiveEvent | null;
+  nextEventAt: number; // epoch ms the next incident is due (0 = unscheduled)
+  eventSeed: number; // monotonic counter seeding the deterministic rolls
+  eventsResponded: number; // lifetime count, for the milestone predicate
+
+  // Milestones (persist across rebuilds).
+  achievements: string[]; // earned achievement ids
 }
 
 /** Everything computed from state each tick. Never persisted. */
@@ -92,4 +150,15 @@ export interface Derived {
   pendingCredits: number; // credits gained if prestiging now
   overclockActive: boolean;
   computeMult: number; // combined compute multiplier (debug/preview)
+
+  /** The live incident as the UI needs it, or null. */
+  event: {
+    id: string;
+    name: string;
+    desc: string;
+    kind: "bad" | "good";
+    endsAt: number;
+    respondCost: number;
+    canRespond: boolean;
+  } | null;
 }

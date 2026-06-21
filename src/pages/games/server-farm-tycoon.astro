@@ -65,6 +65,19 @@ const buyLists: { cat: string; label: string }[] = [
           }
         </div>
 
+        <!-- Incident banner: shown only while a world event is live -->
+        <div class="sft-event" data-event role="alert" aria-live="assertive">
+          <span class="sft-event__pulse" aria-hidden="true"></span>
+          <div class="sft-event__body">
+            <span class="sft-event__name" data-event-name>Incident</span>
+            <span class="sft-event__desc" data-event-desc></span>
+          </div>
+          <span class="sft-event__timer" data-event-timer></span>
+          <button class="sft-event__respond" data-event-respond type="button">
+            Respond
+          </button>
+        </div>
+
         <!-- Data Hall: front-elevation server room, fills as you build -->
         <section class="sft-panel sft-hall" aria-label="Data hall">
           <header class="sft-panel__head">
@@ -163,6 +176,14 @@ const buyLists: { cat: string; label: string }[] = [
                 Decommission &amp; Rebuild
               </button>
               <div class="sft-prow-list" data-prestige-list></div>
+            </section>
+
+            <section class="sft-panel sft-ach">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Milestones</h2>
+                <span class="sft-panel__note" data-ach-note>0 / 0</span>
+              </header>
+              <div class="sft-ach__grid" data-achievements></div>
             </section>
 
             <section class="sft-panel">

@@ -1,9 +1,9 @@
 /* Default state + (de)serialization. Versioned so saves survive balance edits. */
 
-import type { GameState } from "./types";
-import { TUNING } from "./config";
+import type { ActiveEvent, GameState } from "./types";
+import { EVENT_BY_ID, TUNING } from "./config";
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export function defaultState(now = Date.now()): GameState {
   return {
@@ -20,6 +20,11 @@ export function defaultState(now = Date.now()): GameState {
     overclockUntil: 0,
     overclockReadyAt: 0,
     lastTick: now,
+    activeEvent: null,
+    nextEventAt: 0,
+    eventSeed: 0,
+    eventsResponded: 0,
+    achievements: [],
   };
 }
 
@@ -49,6 +54,25 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     }
   }
 
+  // Only keep a live incident if its shape + id are recognisable; the
+  // scheduler will expire/replace it on the next tick regardless.
+  let activeEvent: ActiveEvent | null = null;
+  if (o.activeEvent && typeof o.activeEvent === "object") {
+    const e = o.activeEvent as Record<string, unknown>;
+    if (typeof e.id === "string" && EVENT_BY_ID[e.id]) {
+      activeEvent = {
+        id: e.id,
+        startedAt: num(e.startedAt, now),
+        endsAt: num(e.endsAt, now),
+        responded: e.responded === true,
+      };
+    }
+  }
+
+  const achievements = Array.isArray(o.achievements)
+    ? (o.achievements.filter((x) => typeof x === "string") as string[])
+    : [];
+
   return {
     version: SAVE_VERSION,
     money: num(o.money, base.money),
@@ -65,6 +89,11 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     overclockUntil: num(o.overclockUntil, 0),
     overclockReadyAt: num(o.overclockReadyAt, 0),
     lastTick: num(o.lastTick, now),
+    activeEvent,
+    nextEventAt: num(o.nextEventAt, 0),
+    eventSeed: Math.max(0, Math.floor(num(o.eventSeed, 0))),
+    eventsResponded: Math.max(0, Math.floor(num(o.eventsResponded, 0))),
+    achievements,
   };
 }
 

@@ -2,14 +2,16 @@
    Imported by the game page via <script>. */
 
 import { installAdmin } from "./admin";
-import { BUILDING_BY_ID, TUNING, UPGRADES } from "./config";
+import { BUILDING_BY_ID, EVENT_BY_ID, TUNING, UPGRADES } from "./config";
 import {
   buyBuilding,
   buyPrestige,
   buyUpgrade,
+  claimAchievements,
   derive,
   doPrestige,
   gridPrice,
+  respondEvent,
   tick,
   triggerOverclock,
 } from "./engine";
@@ -47,6 +49,15 @@ export function startGame(root: HTMLElement) {
     onOverclock: () => {
       if (triggerOverclock(state, Date.now())) {
         ui.pushLog(`⚡ Overclock engaged ×${TUNING.overclockMult}`, "gold");
+        renderNow();
+      }
+    },
+    onRespondEvent: () => {
+      const ev = state.activeEvent;
+      if (ev && respondEvent(state, Date.now())) {
+        const name = EVENT_BY_ID[ev.id]?.name ?? "Incident";
+        ui.toast(`${name} mitigated.`);
+        ui.pushLog(`✓ ${name} mitigated`, "good");
         renderNow();
       }
     },
@@ -120,6 +131,10 @@ export function startGame(root: HTMLElement) {
     now: () => Date.now(),
   });
 
+  // Grant any milestones the save already qualifies for, silently — no toast
+  // storm for a returning player or a save predating this feature.
+  claimAchievements(state, derive(state, Date.now()));
+
   ui.pushLog("▣ Systems online", "good");
 
   // Welcome-back toast + log for offline earnings.
@@ -142,6 +157,7 @@ export function startGame(root: HTMLElement) {
   // once a second so the feed reads like a real ops console without spamming.
   let prevOverheat = false;
   let prevBrownout = false;
+  let prevEventId: string | null = state.activeEvent?.id ?? null;
   let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
   let milestoneExp =
     state.lifetimeEarnings >= 1000
@@ -183,6 +199,26 @@ export function startGame(root: HTMLElement) {
         "gold",
       );
       milestoneExp += 1;
+    }
+
+    // Incidents: announce a fresh event, and the all-clear when one ends.
+    const curEvent = d.event;
+    const curId = curEvent?.id ?? null;
+    if (curId && curId !== prevEventId) {
+      ui.pushLog(
+        `${curEvent!.kind === "good" ? "▲" : "⚠"} ${curEvent!.name} — ${curEvent!.desc}`,
+        curEvent!.kind === "good" ? "gold" : "warn",
+      );
+      ui.toast(`${curEvent!.name}: ${curEvent!.desc}`, 6000);
+    } else if (!curId && prevEventId) {
+      ui.pushLog(`✓ ${EVENT_BY_ID[prevEventId]?.name ?? "Incident"} cleared`, "good");
+    }
+    prevEventId = curId;
+
+    // Milestones: toast + log anything newly earned this second.
+    for (const a of claimAchievements(state, d)) {
+      ui.pushLog(`✦ Milestone — ${a.name}`, "gold");
+      ui.toast(`Milestone unlocked: ${a.name}`);
     }
   }, 1000);
 

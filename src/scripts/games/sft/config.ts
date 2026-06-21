@@ -1,7 +1,13 @@
 /* Server-Farm Tycoon - all balancing lives here.
    Tuning the game = editing these numbers. */
 
-import type { BuildingDef, UpgradeDef, PrestigeDef } from "./types";
+import type {
+  AchievementDef,
+  BuildingDef,
+  EventDef,
+  PrestigeDef,
+  UpgradeDef,
+} from "./types";
 
 export const TUNING = {
   startMoney: 15,
@@ -34,6 +40,15 @@ export const TUNING = {
   basePowerRate: 0.5, // $/kW/s at the neutral grid price
   gridSwing: 0.35, // ± fraction the price drifts from neutral
   gridCycleMs: 120_000, // one full off-peak -> peak -> off-peak cycle
+
+  // Incidents: a deterministic scheduler fires an event every gap, holds it for
+  // its duration, then schedules the next. The window stays quiet until the
+  // farm is past its first earnings so beginners aren't punished.
+  eventMinEarnings: 400, // lifetime earnings before incidents begin
+  eventMinGapMs: 90_000, // shortest quiet stretch between incidents
+  eventMaxGapMs: 180_000, // longest quiet stretch between incidents
+  eventRespondSeconds: 25, // respond cost = this many seconds of gross revenue
+  eventRespondMin: 10, // ...but never cheaper than this
 } as const;
 
 export const BUILDINGS: BuildingDef[] = [
@@ -297,3 +312,159 @@ export const CATEGORY_LABELS: Record<string, string> = {
   cooling: "Cooling",
   staff: "Staff",
 };
+
+// How many producer cabinets are online (gates a few events/milestones).
+const PRODUCER_IDS = BUILDINGS.filter((b) => b.category === "producer").map(
+  (b) => b.id,
+);
+const producerCount = (s: { buildings: Record<string, number> }): number =>
+  PRODUCER_IDS.reduce((n, id) => n + (s.buildings[id] ?? 0), 0);
+
+// --- Incidents ---------------------------------------------------------
+export const EVENTS: EventDef[] = [
+  {
+    id: "heatwave",
+    name: "Heatwave",
+    desc: "Ambient temps up — cooling capacity cut 45%.",
+    kind: "bad",
+    durationSec: 45,
+    weight: 3,
+    coolingMult: 0.55,
+    relevant: (s) => producerCount(s) > 0,
+  },
+  {
+    id: "grid-surge",
+    name: "Grid Surge",
+    desc: "Spot electricity spiking — power bill up 120%.",
+    kind: "bad",
+    durationSec: 60,
+    weight: 3,
+    gridPriceMult: 2.2,
+  },
+  {
+    id: "brownout",
+    name: "Feeder Brownout",
+    desc: "External feed degraded — power capacity down 40%.",
+    kind: "bad",
+    durationSec: 30,
+    weight: 2,
+    powerCapMult: 0.6,
+  },
+  {
+    id: "hardware-fault",
+    name: "Hardware Fault",
+    desc: "A producer line is throttled — output down 40%.",
+    kind: "bad",
+    durationSec: 40,
+    weight: 2,
+    computeMult: 0.6,
+    relevant: (s) => producerCount(s) > 0,
+  },
+  {
+    id: "demand-spike",
+    name: "Demand Spike",
+    desc: "Compute prices rallying — sell price up 80%.",
+    kind: "good",
+    durationSec: 30,
+    weight: 3,
+    priceMult: 1.8,
+  },
+];
+
+export const EVENT_BY_ID: Record<string, EventDef> = Object.fromEntries(
+  EVENTS.map((e) => [e.id, e]),
+);
+
+// --- Milestones --------------------------------------------------------
+const ownedAll = (s: { buildings: Record<string, number> }, ids: string[]) =>
+  ids.every((id) => (s.buildings[id] ?? 0) > 0);
+
+export const ACHIEVEMENTS: AchievementDef[] = [
+  {
+    id: "first-light",
+    name: "First Light",
+    desc: "Bring your first cabinet online.",
+    check: (s) => producerCount(s) > 0,
+  },
+  {
+    id: "petty-cash",
+    name: "Petty Cash",
+    desc: "Reach $1K in lifetime earnings.",
+    check: (s) => s.lifetimeEarnings >= 1_000,
+  },
+  {
+    id: "redline",
+    name: "Redline",
+    desc: "Engage an overclock burst.",
+    check: (s) => s.overclockReadyAt > 0,
+  },
+  {
+    id: "hyperscaler",
+    name: "Hyperscaler",
+    desc: "Reach $1M in lifetime earnings.",
+    check: (s) => s.lifetimeEarnings >= 1_000_000,
+    buff: { multCompute: 1.02 },
+    buffNote: "+2% compute",
+  },
+  {
+    id: "full-roster",
+    name: "Full Roster",
+    desc: "Employ a technician, an engineer and a sales rep.",
+    check: (s) => ownedAll(s, ["technician", "engineer", "sales"]),
+    buff: { multPrice: 1.02 },
+    buffNote: "+2% sell price",
+  },
+  {
+    id: "cool-head",
+    name: "Cool Head",
+    desc: "Run 50+ producers with heat fully nominal.",
+    check: (s, d) => producerCount(s) >= 50 && d.heatThrottle >= 0.999,
+    buff: { multCoolingCap: 1.05 },
+    buffNote: "+5% cooling cap",
+  },
+  {
+    id: "crisis-managed",
+    name: "Crisis Managed",
+    desc: "Respond to an incident.",
+    check: (s) => s.eventsResponded >= 1,
+  },
+  {
+    id: "off-the-grid",
+    name: "Off The Grid",
+    desc: "Commission a micro-reactor.",
+    check: (s) => (s.buildings["reactor"] ?? 0) > 0,
+  },
+  {
+    id: "phoenix",
+    name: "Phoenix",
+    desc: "Decommission and rebuild for the first time.",
+    check: (s) => s.prestigeCount >= 1,
+  },
+  {
+    id: "quantum-leap",
+    name: "Quantum Leap",
+    desc: "Bring a quantum node online.",
+    check: (s) => (s.buildings["quantum"] ?? 0) > 0,
+    buff: { multCompute: 1.03 },
+    buffNote: "+3% compute",
+  },
+  {
+    id: "serial-rebuilder",
+    name: "Serial Rebuilder",
+    desc: "Complete 10 rebuilds.",
+    check: (s) => s.prestigeCount >= 10,
+    buff: { multPrice: 1.05 },
+    buffNote: "+5% sell price",
+  },
+  {
+    id: "cloud-baron",
+    name: "Cloud Baron",
+    desc: "Reach $1B in lifetime earnings.",
+    check: (s) => s.lifetimeEarnings >= 1_000_000_000,
+    buff: { multCompute: 1.05 },
+    buffNote: "+5% compute",
+  },
+];
+
+export const ACHIEVEMENT_BY_ID: Record<string, AchievementDef> =
+  Object.fromEntries(ACHIEVEMENTS.map((a) => [a.id, a]));
