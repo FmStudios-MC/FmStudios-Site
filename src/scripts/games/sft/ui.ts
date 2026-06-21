@@ -6,6 +6,7 @@ import type { Derived, GameState } from "./types";
 import {
   BUILDINGS,
   BUILDING_BY_ID,
+  CATEGORY_LABELS,
   PRESTIGE,
   TUNING,
   UPGRADES,
@@ -35,8 +36,8 @@ export interface Handlers {
    cabinet shows before it caps (the real owned count is still in the label). */
 const HALL_GROUPS = [
   { kind: "producer", ids: ["mini-rack", "blade", "cluster", "ai-pod", "quantum"], slots: 14 },
-  { kind: "cooling", ids: ["fan", "ac", "liquid"], slots: 6 },
   { kind: "power", ids: ["generator", "solar", "reactor"], slots: 6 },
+  { kind: "cooling", ids: ["fan", "ac", "liquid"], slots: 6 },
 ] as const;
 
 /* Short chassis labels so the nameplates stay one line. */
@@ -113,7 +114,13 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const hallEl = $("[data-hall]");
   const hallEmpty = $("[data-hall-empty]");
   const cabinets: Cabinet[] = [];
+  // Each category is its own labelled zone; a zone hides itself until at
+  // least one of its cabinets is online.
+  const zones: { root: HTMLElement; kind: string }[] = [];
   for (const group of HALL_GROUPS) {
+    const zone = el("div", `sft-hall__zone sft-hall__zone--${group.kind} is-empty`);
+    const zoneCabs = el("div", "sft-hall__zone__cabs");
+
     for (const id of group.ids) {
       const def = BUILDING_BY_ID[id];
       if (!def) continue;
@@ -143,9 +150,18 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       plate.append(name, count);
 
       cab.append(frame, plate);
-      hallEl.appendChild(cab);
+      zoneCabs.appendChild(cab);
       cabinets.push({ root: cab, units, count, id, kind: group.kind });
     }
+
+    const label = el(
+      "span",
+      "sft-hall__zone__label",
+      CATEGORY_LABELS[group.kind] ?? group.kind,
+    );
+    zone.append(label, zoneCabs);
+    hallEl.appendChild(zone);
+    zones.push({ root: zone, kind: group.kind });
   }
 
   const heatBar = $("[data-bar-heat]");
@@ -403,10 +419,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     // Data Hall: fill each cabinet from its owned count.
     const tier =
       d.heatThrottle >= 0.9 ? "ok" : d.heatThrottle >= 0.6 ? "warm" : "hot";
-    let producerCount = 0;
+    const zoneTotals: Record<string, number> = {};
     for (const cab of cabinets) {
       const count = s.buildings[cab.id] ?? 0;
-      if (cab.kind === "producer") producerCount += count;
+      zoneTotals[cab.kind] = (zoneTotals[cab.kind] ?? 0) + count;
       const empty = count <= 0;
       setFlag(cab.root, "is-empty", empty);
       if (empty) continue;
@@ -416,6 +432,11 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       }
       setFlag(cab.root, "is-full", count > cab.units.length);
       setText(cab.count, "x" + fmt(count));
+    }
+    const producerCount = zoneTotals.producer ?? 0;
+    // Hide an entire category zone (label included) until it has hardware.
+    for (const z of zones) {
+      setFlag(z.root, "is-empty", (zoneTotals[z.kind] ?? 0) <= 0);
     }
 
     // Hall-wide reactive state, driven by attributes/vars so CSS does the work.

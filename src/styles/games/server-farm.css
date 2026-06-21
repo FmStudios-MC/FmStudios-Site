@@ -373,9 +373,38 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
-  gap: clamp(8px, 1.6vw, 18px);
+  gap: clamp(16px, 3vw, 44px);
   padding-bottom: var(--space-m);
   min-height: 150px;
+}
+
+/* ---- Category zone (Producers / Power / Cooling) ------------------- */
+.sft-hall__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.sft-hall__zone.is-empty {
+  display: none;
+}
+.sft-hall__zone__label {
+  width: 100%;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold);
+}
+.sft-hall__zone__cabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(8px, 1.6vw, 18px);
 }
 
 .sft-hall__empty {
@@ -503,6 +532,174 @@
   background: var(--sft-hot);
   box-shadow: 0 0 5px var(--sft-hot-glow);
   animation: sft-blink 0.9s steps(2, jump-none) infinite;
+}
+
+/* ---- Producer chassis variants ------------------------------------- */
+/* The base producer styling above is the Blade Server: a vertical stack of
+   louvred blades. Each other producer tier renders as its own machine, but
+   every cell keeps the .sft-u/.is-on hooks so owned-count lighting + the
+   heat-tier LED recolour above still drive them. */
+
+/* --- Mini Rack: a handful of stacked consumer boxes ----------------- */
+.sft-cab--mini-rack .sft-cab__units {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: end;
+  gap: 4px;
+  height: 120px;
+  padding: 6px 4px;
+}
+.sft-cab--mini-rack .sft-u {
+  flex: none;
+  min-height: 0;
+  aspect-ratio: 16 / 7;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.21 0.008 80), oklch(0.14 0.006 78));
+}
+.sft-cab--mini-rack .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.33 0.012 80), oklch(0.24 0.01 78));
+}
+/* A drive-bay slit across the box front (replaces the blade louvre). */
+.sft-cab--mini-rack .sft-u.is-on::after {
+  left: 4px;
+  right: 10px;
+  top: 50%;
+  translate: 0 -50%;
+  width: auto;
+  height: 2px;
+  background: oklch(0 0 0 / 0.45);
+}
+
+/* --- Server Cluster: a packed dual-column cabinet under a controller - */
+.sft-cab--cluster .sft-cab__units {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 2px 4px;
+  height: 120px;
+  padding: 16px 3px 3px;
+}
+/* Cluster controller strip across the top. */
+.sft-cab--cluster .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  right: 3px;
+  height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.24 0.012 75), oklch(0.16 0.008 72));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+/* Heartbeat LED on the controller while the cluster is online. */
+.sft-cab--cluster:not(.is-empty) .sft-cab__units::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 5px var(--gold-glow);
+}
+.sft-cab--cluster .sft-u {
+  flex: none;
+  min-height: 0;
+  border-radius: 1px;
+}
+/* Dense packing reads better without the per-blade louvre; keep the LED. */
+.sft-cab--cluster .sft-u.is-on::after {
+  content: none;
+}
+
+/* --- AI Pod: violet GPU shelves, finned cards, lots of heat --------- */
+.sft-cab--ai-pod .sft-cab__units {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 4px;
+  height: 120px;
+  padding: 6px 5px;
+}
+.sft-cab--ai-pod .sft-u {
+  flex: none;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, oklch(0.2 0.02 330), oklch(0.15 0.015 330));
+}
+.sft-cab--ai-pod .sft-u.is-on {
+  background: linear-gradient(90deg, oklch(0.5 0.16 330), oklch(0.34 0.12 332));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.6 0.18 328 / 0.55),
+    0 0 6px oklch(0.6 0.2 330 / 0.4);
+}
+/* Heatsink fins across each GPU card (replaces the blade louvre). */
+.sft-cab--ai-pod .sft-u.is-on::after {
+  left: 4px;
+  right: 11px;
+  top: 3px;
+  bottom: 3px;
+  width: auto;
+  border-radius: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    oklch(0 0 0 / 0.32) 0 1px,
+    transparent 1px 4px
+  );
+}
+/* Magenta status LED (overrides the inherited gold + heat-tier recolour). */
+.sft-cab--ai-pod .sft-u.is-on::before {
+  background: oklch(0.72 0.2 330);
+  box-shadow: 0 0 5px oklch(0.72 0.22 330 / 0.75);
+}
+
+/* --- Quantum Node: a cryostat of glowing rings with a pulsing core --- */
+.sft-cab--quantum .sft-cab__units {
+  position: relative;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 7px;
+}
+/* Cryogenic aura around the stack. */
+.sft-cab--quantum:not(.is-empty) .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 30px;
+  height: 78%;
+  border-radius: 44%;
+  background: radial-gradient(circle, oklch(0.7 0.16 210 / 0.5), transparent 70%);
+  animation: sft-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.sft-cab--quantum .sft-u {
+  flex: 0 0 4px;
+  width: auto;
+  min-height: 0;
+  border-radius: var(--radius-pill);
+  background: oklch(0.18 0.02 210);
+  z-index: 1;
+}
+/* Each live stage is a cyan ring of the cryo chandelier. */
+.sft-cab--quantum .sft-u.is-on {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.64 0.15 210),
+    transparent
+  );
+  box-shadow: 0 0 6px oklch(0.6 0.16 210 / 0.55);
+}
+.sft-cab--quantum .sft-u.is-on::after,
+.sft-cab--quantum .sft-u.is-on::before {
+  content: none;
+}
+/* Cryo nodes have no intake fans. */
+.sft-cab--quantum .sft-cab__fans {
+  display: none;
 }
 
 /* ---- Cooling cabinets ---------------------------------------------- */
@@ -1382,6 +1579,7 @@
   .sft-cab--liquid .sft-u.is-on,
   .sft-cab--generator .sft-cab__units::after,
   .sft-cab--reactor .sft-cab__units::before,
+  .sft-cab--quantum .sft-cab__units::before,
   [data-hall][data-power="low"] .sft-cab--power .sft-u.is-on,
   [data-hall][data-oc="1"] .sft-cab__frame,
   .sft-cab,
