@@ -336,6 +336,15 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW`,
     );
     setFlag(stats.power?.parentElement ?? root, "is-warn", d.powerThrottle < 1);
+    setText(
+      stats.bill,
+      d.powerCost > 0 ? "-$" + fmt(d.powerCost) + "/s" : "$0/s",
+    );
+    setFlag(
+      stats.bill?.parentElement ?? root,
+      "is-warn",
+      d.powerCost > d.grossPerSec && d.powerCost > 0,
+    );
 
     // Building rows
     for (const r of buildingRows) {
@@ -409,11 +418,14 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     powerBar.style.width = pct(powerFrac);
     const browningOut = d.powerThrottle < 1;
     setFlag(powerBar, "is-hot", browningOut);
+    const gridRatio = d.gridPrice / TUNING.basePowerRate;
+    const gridWord =
+      gridRatio > 1.12 ? "peak" : gridRatio < 0.88 ? "off-peak" : "normal";
     setText(
       powerLabel,
       browningOut
         ? `Over capacity - output ${pct(d.powerThrottle)}`
-        : `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW`,
+        : `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW · grid ${gridWord}`,
     );
 
     // Data Hall: fill each cabinet from its owned count.

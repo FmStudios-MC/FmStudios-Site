@@ -45,6 +45,13 @@ export function startingMoney(s: GameState): number {
   return TUNING.startMoney * Math.pow(10, plevel(s, "seed"));
 }
 
+/** Current electricity price ($/kW/s). Swings on a slow deterministic cycle so
+    off-peak and peak hours feel different without needing any stored state. */
+export function gridPrice(now: number): number {
+  const phase = (now / TUNING.gridCycleMs) * Math.PI * 2;
+  return TUNING.basePowerRate * (1 + TUNING.gridSwing * Math.sin(phase));
+}
+
 /** Everything the UI and tick need, computed from state. */
 export function derive(s: GameState, now: number): Derived {
   let computeBase = 0;
@@ -125,6 +132,11 @@ export function derive(s: GameState, now: number): Derived {
     upgradePriceMult *
     prestigePriceMult;
 
+  // Operating cost: every kW of draw is billed at the live grid price.
+  const grid = gridPrice(now);
+  const grossPerSec = compute * price;
+  const powerCost = powerDraw * grid;
+
   return {
     computeBase,
     compute,
@@ -136,7 +148,10 @@ export function derive(s: GameState, now: number): Derived {
     heatThrottle,
     heatLoad,
     price,
-    moneyPerSec: compute * price,
+    gridPrice: grid,
+    grossPerSec,
+    powerCost,
+    moneyPerSec: grossPerSec - powerCost,
     pendingCredits: pendingCredits(s),
     overclockActive,
     computeMult,
@@ -157,10 +172,15 @@ export function tick(
   }
   const d = derive(s, now);
 
-  const earned = d.moneyPerSec * dtSec * efficiency;
-  s.money += earned;
-  s.runEarnings += earned;
-  s.lifetimeEarnings += earned;
+  // Revenue feeds earnings/credits; the electricity bill is a cash drain only,
+  // so it never pushes lifetime/run earnings (and the unlocks they gate)
+  // backwards. Cash is floored at zero so a lopsided farm can stall but never
+  // go into debt.
+  const gross = d.grossPerSec * dtSec * efficiency;
+  const bill = d.powerCost * dtSec * efficiency;
+  s.money = Math.max(0, s.money + gross - bill);
+  s.runEarnings += gross;
+  s.lifetimeEarnings += gross;
 
   // Reputation accrues slowly, scaled by output so a bigger farm earns trust.
   s.reputation += TUNING.reputationRate * Math.sqrt(d.compute) * dtSec;

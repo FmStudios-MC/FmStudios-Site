@@ -85,7 +85,10 @@ export interface Derived {
   heatThrottle: number; // 0..1
   heatLoad: number; // heatGen / coolingCap (>1 means overheating)
   price: number; // $/FLOP after reputation + mults
-  moneyPerSec: number;
+  gridPrice: number; // current electricity price, $/kW/s
+  grossPerSec: number; // revenue before the electricity bill
+  powerCost: number; // electricity bill, $/s
+  moneyPerSec: number; // net income = grossPerSec - powerCost
   pendingCredits: number; // credits gained if prestiging now
   overclockActive: boolean;
   computeMult: number; // combined compute multiplier (debug/preview)

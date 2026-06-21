@@ -9,6 +9,7 @@ import {
   buyUpgrade,
   derive,
   doPrestige,
+  gridPrice,
   tick,
   triggerOverclock,
 } from "./engine";
@@ -141,6 +142,7 @@ export function startGame(root: HTMLElement) {
   // once a second so the feed reads like a real ops console without spamming.
   let prevOverheat = false;
   let prevBrownout = false;
+  let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
   let milestoneExp =
     state.lifetimeEarnings >= 1000
       ? Math.floor(Math.log10(state.lifetimeEarnings)) + 1
@@ -166,6 +168,14 @@ export function startGame(root: HTMLElement) {
     else if (!brownout && prevBrownout)
       ui.pushLog("✓ Power restored", "good");
     prevBrownout = brownout;
+
+    // Grid pricing: flag peak/off-peak swings so the bill makes sense.
+    const peak = d.gridPrice / TUNING.basePowerRate > 1.12;
+    if (peak && !prevPeak && d.powerCost > 0)
+      ui.pushLog(`$ Grid at peak rate — power bill ${money(d.powerCost)}/s`, "warn");
+    else if (!peak && prevPeak && d.powerCost > 0)
+      ui.pushLog("$ Grid back to off-peak rates", "good");
+    prevPeak = peak;
 
     while (state.lifetimeEarnings >= Math.pow(10, milestoneExp)) {
       ui.pushLog(

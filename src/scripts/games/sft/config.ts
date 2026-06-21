@@ -25,6 +25,15 @@ export const TUNING = {
   overclockMult: 2.5, // burst output multiplier
   overclockDurationMs: 15_000,
   overclockCooldownMs: 90_000,
+
+  // Operating cost: electricity is billed per kW of draw, every second. The
+  // grid price drifts between off-peak and peak on a slow, deterministic cycle,
+  // so the same farm is cheaper to run at some times than others. This turns
+  // power draw into an ongoing cash drain and makes efficiency (PUE Tuning,
+  // Solar, right-sized cooling) an economic choice, not just a capacity gate.
+  basePowerRate: 0.5, // $/kW/s at the neutral grid price
+  gridSwing: 0.35, // ± fraction the price drifts from neutral
+  gridCycleMs: 120_000, // one full off-peak -> peak -> off-peak cycle
 } as const;
 
 export const BUILDINGS: BuildingDef[] = [
