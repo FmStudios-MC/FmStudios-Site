@@ -1081,7 +1081,7 @@
 /* ---- Telemetry strip under the hall -------------------------------- */
 .sft-hall__telemetry {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto;
   align-items: end;
   gap: var(--space-m);
   margin-top: var(--space-m);
@@ -1096,13 +1096,19 @@
   align-self: end;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 820px) {
   .sft-hall__telemetry {
     grid-template-columns: 1fr 1fr;
   }
   .sft-hall__telemetry .sft-overclock {
     grid-column: 1 / -1;
     width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .sft-hall__telemetry {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1467,6 +1473,100 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* ---- Contracts (demand market) ------------------------------------- */
+.sft-contract__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.sft-contract__idle.is-hidden,
+.sft-contract__offer.is-hidden,
+.sft-contract__active.is-hidden {
+  display: none;
+}
+.sft-contract__idle {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink-faint);
+}
+.sft-contract__offer,
+.sft-contract__active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+.sft-contract__line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  line-height: 1.3;
+  color: var(--ink);
+}
+.sft-contract__reward {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gold-bright);
+}
+.sft-contract__risk {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--sft-hot);
+}
+.sft-contract__expiry,
+.sft-contract__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.sft-contract__active .sft-bar {
+  margin: var(--space-3xs) 0;
+}
+.sft-contract__actions {
+  display: flex;
+  gap: var(--space-2xs);
+  margin-top: var(--space-2xs);
+}
+.sft-contract__accept {
+  flex: 1 1 auto;
+  padding: var(--space-2xs) var(--space-s);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out-quart);
+}
+.sft-contract__accept:hover {
+  filter: brightness(1.08);
+}
+.sft-contract__decline {
+  flex: 0 0 auto;
+  padding: var(--space-2xs) var(--space-s);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-contract__decline:hover {
+  border-color: var(--sft-hot);
+  color: var(--sft-hot);
 }
 
 /* ---- Milestones ----------------------------------------------------- */

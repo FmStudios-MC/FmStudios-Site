@@ -17,6 +17,7 @@ const buyLists: { cat: string; label: string }[] = [
   { cat: "producer", label: "Producers" },
   { cat: "power", label: "Power" },
   { cat: "cooling", label: "Cooling" },
+  { cat: "network", label: "Network" },
   { cat: "staff", label: "Staff" },
 ];
 ---
@@ -116,6 +117,16 @@ const buyLists: { cat: string; label: string }[] = [
               </div>
             </div>
 
+            <div class="sft-gauge">
+              <div class="sft-gauge__top">
+                <span class="sft-gauge__name">Network</span>
+                <span class="sft-gauge__label" data-label-net>0 Gb/s</span>
+              </div>
+              <div class="sft-bar">
+                <span class="sft-bar__fill" data-bar-net></span>
+              </div>
+            </div>
+
             <button class="sft-overclock" data-overclock type="button">
               Overclock
             </button>
@@ -157,6 +168,16 @@ const buyLists: { cat: string; label: string }[] = [
                 <span class="sft-panel__note">Live</span>
               </header>
               <ul class="sft-log" data-log aria-live="polite"></ul>
+            </section>
+
+            <section class="sft-panel sft-contract">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Contracts</h2>
+                <span class="sft-panel__note" data-contract-note>
+                  Demand market
+                </span>
+              </header>
+              <div class="sft-contract__body" data-contract-body></div>
             </section>
 
             <section class="sft-panel">

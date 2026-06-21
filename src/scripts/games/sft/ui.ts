@@ -27,6 +27,8 @@ export interface Handlers {
   onPrestige(): void;
   onOverclock(): void;
   onRespondEvent(): void;
+  onAcceptContract(): void;
+  onDeclineContract(): void;
   onSave(): void;
   onReset(): void;
   onExport(): void;
@@ -170,6 +172,8 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const heatLabel = $("[data-label-heat]");
   const powerBar = $("[data-bar-power]");
   const powerLabel = $("[data-label-power]");
+  const netBar = $("[data-bar-net]");
+  const netLabel = $("[data-label-net]");
 
   const overclockBtn = $<HTMLButtonElement>("[data-overclock]");
 
@@ -217,7 +221,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
 
   // --- Building rows, grouped by category ------------------------------
   const buildingRows: BuildingRow[] = [];
-  (["producer", "power", "cooling", "staff"] as const).forEach((cat) => {
+  (["producer", "power", "cooling", "network", "staff"] as const).forEach((cat) => {
     const list = root.querySelector<HTMLElement>(`[data-list="${cat}"]`);
     if (!list) return;
     BUILDINGS.filter((b) => b.category === cat).forEach((def) => {
@@ -301,6 +305,41 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const eventTimer = root.querySelector<HTMLElement>("[data-event-timer]");
   const respondBtn = root.querySelector<HTMLButtonElement>("[data-event-respond]");
   respondBtn?.addEventListener("click", () => handlers.onRespondEvent());
+
+  // --- Contracts card ---------------------------------------------------
+  // Built once in three mutually-exclusive states (idle / offer / active);
+  // render() toggles which is shown and updates only the live values.
+  const contractBody = root.querySelector<HTMLElement>("[data-contract-body]");
+  const contractNote = root.querySelector<HTMLElement>("[data-contract-note]");
+
+  const cIdle = el("p", "sft-contract__idle");
+
+  const cOffer = el("div", "sft-contract__offer");
+  const cOfferTitle = el("p", "sft-contract__line");
+  const cOfferReward = el("p", "sft-contract__reward");
+  const cOfferRisk = el("p", "sft-contract__risk");
+  const cOfferExpiry = el("p", "sft-contract__expiry");
+  const cActions = el("div", "sft-contract__actions");
+  const acceptBtn = el("button", "sft-contract__accept", "Accept");
+  acceptBtn.type = "button";
+  const declineBtn = el("button", "sft-contract__decline", "Pass");
+  declineBtn.type = "button";
+  acceptBtn.addEventListener("click", () => handlers.onAcceptContract());
+  declineBtn.addEventListener("click", () => handlers.onDeclineContract());
+  cActions.append(acceptBtn, declineBtn);
+  cOffer.append(cOfferTitle, cOfferReward, cOfferRisk, cOfferExpiry, cActions);
+
+  const cActive = el("div", "sft-contract__active");
+  const cActiveTitle = el("p", "sft-contract__line");
+  const cActiveBar = el("div", "sft-bar");
+  const cActiveFill = el("span", "sft-bar__fill");
+  cActiveBar.appendChild(cActiveFill);
+  const cActiveProgress = el("p", "sft-contract__progress");
+  const cActiveReward = el("p", "sft-contract__reward");
+  const cActiveTimer = el("p", "sft-contract__expiry");
+  cActive.append(cActiveTitle, cActiveBar, cActiveProgress, cActiveReward, cActiveTimer);
+
+  contractBody?.append(cIdle, cOffer, cActive);
 
   // --- Milestones (collapsible) ----------------------------------------
   const achWrap = root.querySelector<HTMLElement>("[data-achievements]");
@@ -459,6 +498,19 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         : `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW · grid ${gridWord}`,
     );
 
+    // Telemetry: network throughput (same hard-cap behaviour as power)
+    const netFrac =
+      d.bandwidthCap > 0 ? Math.min(1, d.bandwidthDraw / d.bandwidthCap) : 0;
+    netBar.style.width = pct(netFrac);
+    const saturated = d.bandwidthThrottle < 1;
+    setFlag(netBar, "is-hot", saturated);
+    setText(
+      netLabel,
+      saturated
+        ? `Saturated - output ${pct(d.bandwidthThrottle)}`
+        : `${fmt(d.bandwidthDraw)} / ${fmt(d.bandwidthCap)} Gb/s`,
+    );
+
     // Data Hall: fill each cabinet from its owned count.
     const tier =
       d.heatThrottle >= 0.9 ? "ok" : d.heatThrottle >= 0.6 ? "warm" : "hot";
@@ -547,6 +599,44 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setFlag(c.root, "is-unlocked", has);
       }
       setText(achNote ?? undefined, `${unlocked} / ${achChips.length}`);
+    }
+
+    // Contracts (idle / offer / active)
+    if (contractBody) {
+      const ac = d.contract.active;
+      const of = d.contract.offer;
+      setFlag(cIdle, "is-hidden", ac != null || of != null);
+      setFlag(cOffer, "is-hidden", ac != null || of == null);
+      setFlag(cActive, "is-hidden", ac == null);
+
+      if (ac) {
+        setText(cActiveTitle, `Deliver ${fmt(ac.required)} FLOP`);
+        cActiveFill.style.width = pct(ac.progress);
+        setText(
+          cActiveProgress,
+          `${fmt(ac.delivered)} / ${fmt(ac.required)} FLOP · ${pct(ac.progress)}`,
+        );
+        setText(cActiveReward, `Pays ${money(ac.reward)} + ${fmt(ac.repReward)} rep`);
+        setText(cActiveTimer, `${duration(ac.remainingSec)} remaining`);
+        setText(contractNote ?? undefined, "In progress");
+      } else if (of) {
+        setText(
+          cOfferTitle,
+          `Deliver ${fmt(of.required)} FLOP within ${duration(of.durationSec)}`,
+        );
+        setText(cOfferReward, `Pays ${money(of.reward)} + ${fmt(of.repReward)} rep`);
+        setText(cOfferRisk, `Failure costs ${fmt(of.repPenalty)} reputation`);
+        setText(cOfferExpiry, `Offer withdrawn in ${duration(of.expiresSec)}`);
+        setText(contractNote ?? undefined, "Offer on the board");
+      } else {
+        setText(
+          cIdle,
+          s.lifetimeEarnings < TUNING.contractMinEarnings
+            ? `The board opens at ${money(TUNING.contractMinEarnings)} earned.`
+            : "No contracts on the board. Check back shortly.",
+        );
+        setText(contractNote ?? undefined, "Demand market");
+      }
     }
   }
 

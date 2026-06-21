@@ -2,7 +2,12 @@
    The simulation (engine.ts) is pure: it reads a GameState + static defs and
    returns Derived values or a mutated state. No DOM here. */
 
-export type BuildingCategory = "producer" | "power" | "cooling" | "staff";
+export type BuildingCategory =
+  | "producer"
+  | "power"
+  | "cooling"
+  | "network"
+  | "staff";
 
 export interface BuildingDef {
   id: string;
@@ -20,6 +25,8 @@ export interface BuildingDef {
   powerCap?: number; // kW capacity added
   heat?: number; // heat units/s generated
   cooling?: number; // heat units/s removed
+  bandwidthCap?: number; // Gb/s of network throughput added
+  bandwidthDraw?: number; // Gb/s consumed (producers)
 
   // Staff act as global, additive multipliers (fraction per unit).
   multCompute?: number; // +x to the global compute multiplier
@@ -41,6 +48,7 @@ export interface UpgradeDef {
   multPrice?: number; // multiplies sell price
   multCoolingCap?: number; // multiplies cooling capacity
   powerDrawFactor?: number; // scales producer power draw (e.g. 0.85 = -15%)
+  bandwidthDrawFactor?: number; // scales producer bandwidth draw (e.g. 0.8 = -20%)
 
   /** Becomes purchasable once this predicate is true. */
   unlock: (s: GameState) => boolean;
@@ -87,6 +95,32 @@ export interface ActiveEvent {
   responded: boolean;
 }
 
+/** A compute-delivery contract on the demand market, before it is accepted.
+    Params are baked at offer time from a live snapshot, so the deal the player
+    sees is the deal they get. Generated deterministically by the scheduler. */
+export interface ContractOffer {
+  id: string; // unique instance id (also used for log/UI keys)
+  required: number; // total FLOP to deliver
+  reward: number; // cash paid on fulfilment
+  repReward: number; // reputation gained on fulfilment
+  repPenalty: number; // reputation lost if accepted then failed
+  durationSec: number; // time allowed once accepted
+  expiresAt: number; // epoch ms the offer is withdrawn if not accepted
+}
+
+/** An accepted contract being worked. `delivered` accrues from effective
+    compute each tick; fulfils early at `required`, fails at `endsAt`. */
+export interface ActiveContract {
+  id: string;
+  required: number;
+  delivered: number;
+  reward: number;
+  repReward: number;
+  repPenalty: number;
+  startedAt: number; // epoch ms
+  endsAt: number; // epoch ms
+}
+
 /** A persisted milestone. `check` mirrors how UpgradeDef.unlock works; an
     optional `buff` makes it more than cosmetic. */
 export interface AchievementDef {
@@ -129,6 +163,14 @@ export interface GameState {
 
   // Milestones (persist across rebuilds).
   achievements: string[]; // earned achievement ids
+
+  // Contracts / demand market (deterministic offer scheduler).
+  contract: ActiveContract | null; // the one in progress, if any
+  contractOffer: ContractOffer | null; // the offer on the board, if any
+  nextOfferAt: number; // epoch ms a new offer may appear (0 = unscheduled)
+  contractSeed: number; // monotonic counter seeding the deterministic rolls
+  contractsCompleted: number; // lifetime count, for milestones + UI
+  contractsFailed: number; // lifetime count, for UI
 }
 
 /** Everything computed from state each tick. Never persisted. */
@@ -142,6 +184,9 @@ export interface Derived {
   heatGen: number;
   heatThrottle: number; // 0..1
   heatLoad: number; // heatGen / coolingCap (>1 means overheating)
+  bandwidthCap: number; // Gb/s of throughput available
+  bandwidthDraw: number; // Gb/s demanded by producers
+  bandwidthThrottle: number; // 0..1 hard cap when draw exceeds capacity
   price: number; // $/FLOP after reputation + mults
   gridPrice: number; // current electricity price, $/kW/s
   grossPerSec: number; // revenue before the electricity bill
@@ -161,4 +206,25 @@ export interface Derived {
     respondCost: number;
     canRespond: boolean;
   } | null;
+
+  /** The demand market as the UI needs it: the contract in progress and/or
+      the offer on the board, with timers/progress resolved against `now`. */
+  contract: {
+    active: {
+      required: number;
+      delivered: number;
+      progress: number; // 0..1
+      reward: number;
+      repReward: number;
+      remainingSec: number;
+    } | null;
+    offer: {
+      required: number;
+      reward: number;
+      repReward: number;
+      repPenalty: number;
+      durationSec: number;
+      expiresSec: number; // seconds until the offer is withdrawn
+    } | null;
+  };
 }

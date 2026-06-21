@@ -1,7 +1,14 @@
 /* Pure simulation. No DOM, no storage. Given a GameState (+ static config),
    it derives the live economy and advances it by a time delta. */
 
-import type { AchievementDef, BuildingDef, Derived, EventDef, GameState } from "./types";
+import type {
+  AchievementDef,
+  BuildingDef,
+  ContractOffer,
+  Derived,
+  EventDef,
+  GameState,
+} from "./types";
 import {
   ACHIEVEMENTS,
   ACHIEVEMENT_BY_ID,
@@ -129,6 +136,87 @@ export function eventRespondCost(s: GameState, grossPerSec: number): number {
   );
 }
 
+// --- Contract scheduler -------------------------------------------------
+
+/** Set the earliest time a new offer may be posted, from a deterministic gap. */
+function scheduleNextOffer(s: GameState, now: number): void {
+  const r = rng(s.contractSeed ^ 0x85ebca6b);
+  const gap =
+    TUNING.contractOfferMinGapMs +
+    r * (TUNING.contractOfferMaxGapMs - TUNING.contractOfferMinGapMs);
+  s.nextOfferAt = now + gap;
+}
+
+/** Build a contract offer deterministically, scaled to the current farm so a
+    deal is always relevant to whoever's offered it. Returns null when there's
+    nothing meaningful to ask for yet (no live compute). */
+function generateOffer(s: GameState, now: number): ContractOffer | null {
+  const d = derive(s, now);
+  if (d.compute <= 0) return null;
+
+  // Four decorrelated draws off the same monotonic seed.
+  const r1 = rng(s.contractSeed);
+  const r2 = rng(s.contractSeed ^ 0xa5a5a5a5);
+  const r3 = rng((s.contractSeed + 0x9e3779b9) | 0);
+  const r4 = rng((s.contractSeed ^ 0x27d4eb2f) | 0);
+
+  const durs = TUNING.contractDurationsSec;
+  const durationSec = durs[Math.min(durs.length - 1, Math.floor(r1 * durs.length))];
+
+  // Required output is a slice of full-throughput production over the window;
+  // > 1.0 means you'll have to grow capacity to fulfil it in time.
+  const targetMult =
+    TUNING.contractTargetMin +
+    r2 * (TUNING.contractTargetMax - TUNING.contractTargetMin);
+  const required = Math.max(1, d.compute * durationSec * targetMult);
+
+  // Reward beats letting that compute auto-sell, paid as a lump sum.
+  const bonus =
+    TUNING.contractRewardBonusMin +
+    r3 * (TUNING.contractRewardBonusMax - TUNING.contractRewardBonusMin);
+  const reward = Math.ceil(required * d.price * bonus);
+
+  // Reputation is the contract's second currency: completing lifts it, and
+  // failing an accepted deal costs more than completing it pays.
+  const repReward = Math.max(1, Math.round((durationSec / 60) * (2 + r4 * 3)));
+  const repPenalty = Math.round(repReward * 1.5);
+
+  return {
+    id: "ct-" + s.contractSeed,
+    required,
+    reward,
+    repReward,
+    repPenalty,
+    durationSec,
+    expiresAt: now + TUNING.contractOfferTtlMs,
+  };
+}
+
+/** Advance the offer board up to `now`: withdraw a stale offer, then post a
+    fresh one when due. No offers are posted while a contract is in progress
+    (the board holds one job at a time) or before the farm is established. */
+function advanceContracts(s: GameState, now: number): void {
+  if (s.nextOfferAt === 0) {
+    scheduleNextOffer(s, now);
+    return;
+  }
+  if (s.contractOffer && now >= s.contractOffer.expiresAt) {
+    s.contractOffer = null;
+    scheduleNextOffer(s, now);
+  }
+  if (
+    !s.contractOffer &&
+    !s.contract &&
+    now >= s.nextOfferAt &&
+    s.lifetimeEarnings >= TUNING.contractMinEarnings
+  ) {
+    const offer = generateOffer(s, now);
+    s.contractSeed += 1;
+    if (offer) s.contractOffer = offer;
+    else scheduleNextOffer(s, now);
+  }
+}
+
 /** Everything the UI and tick need, computed from state. */
 export function derive(s: GameState, now: number): Derived {
   let computeBase = 0;
@@ -137,6 +225,8 @@ export function derive(s: GameState, now: number): Derived {
   let coolingCap =
     TUNING.baseCoolingCap * Math.pow(1.5, plevel(s, "passive-cooling"));
   let heatGen = 0;
+  let bandwidthCap = TUNING.baseBandwidthCap;
+  let bandwidthDraw = 0;
 
   // Staff accumulators
   let engineerMult = 0;
@@ -145,12 +235,14 @@ export function derive(s: GameState, now: number): Derived {
 
   // One-off upgrade modifiers
   let powerDrawFactor = 1;
+  let bandwidthDrawFactor = 1;
   let upgradeComputeMult = 1;
   let upgradePriceMult = 1;
   let coolingCapMult = 1;
   for (const u of UPGRADES) {
     if (!hasUpgrade(s, u.id)) continue;
     if (u.powerDrawFactor) powerDrawFactor *= u.powerDrawFactor;
+    if (u.bandwidthDrawFactor) bandwidthDrawFactor *= u.bandwidthDrawFactor;
     if (u.multCompute) upgradeComputeMult *= u.multCompute;
     if (u.multPrice) upgradePriceMult *= u.multPrice;
     if (u.multCoolingCap) coolingCapMult *= u.multCoolingCap;
@@ -183,6 +275,8 @@ export function derive(s: GameState, now: number): Derived {
     if (def.powerCap) powerCap += def.powerCap * n;
     if (def.cooling) coolingCap += def.cooling * n;
     if (def.heat) heatGen += def.heat * n;
+    if (def.bandwidthCap) bandwidthCap += def.bandwidthCap * n;
+    if (def.bandwidthDraw) bandwidthDraw += def.bandwidthDraw * n * bandwidthDrawFactor;
     if (def.powerDraw) {
       const draw = def.powerDraw * n;
       // PUE tuning only discounts producers, not infrastructure.
@@ -210,6 +304,13 @@ export function derive(s: GameState, now: number): Derived {
   const powerThrottle =
     powerDraw > powerCap && powerDraw > 0 ? powerCap / powerDraw : 1;
 
+  // Bandwidth throttle: same hard cap as power. Starve the network and the
+  // compute can't get out, so output is gated exactly the same way.
+  const bandwidthThrottle =
+    bandwidthDraw > bandwidthCap && bandwidthDraw > 0
+      ? bandwidthCap / bandwidthDraw
+      : 1;
+
   // Prestige + upgrade + staff compute multipliers, plus active overclock.
   const prestigeComputeMult = 1 + 0.25 * plevel(s, "dist-arch");
   const overclockActive = now < s.overclockUntil;
@@ -222,7 +323,7 @@ export function derive(s: GameState, now: number): Derived {
     evComputeMult;
 
   const compute =
-    computeBase * computeMult * heatThrottle * powerThrottle;
+    computeBase * computeMult * heatThrottle * powerThrottle * bandwidthThrottle;
 
   // Sell price: base, lifted by reputation, sales staff, upgrades, prestige.
   const repMult = 1 + Math.log10(1 + s.reputation) * 0.2;
@@ -256,6 +357,33 @@ export function derive(s: GameState, now: number): Derived {
     };
   }
 
+  // Surface the demand market: the contract in progress and/or the live offer,
+  // with timers + progress resolved against `now` so the UI only paints.
+  let activeContract: Derived["contract"]["active"] = null;
+  if (s.contract) {
+    const c = s.contract;
+    activeContract = {
+      required: c.required,
+      delivered: c.delivered,
+      progress: c.required > 0 ? Math.min(1, c.delivered / c.required) : 1,
+      reward: c.reward,
+      repReward: c.repReward,
+      remainingSec: Math.max(0, (c.endsAt - now) / 1000),
+    };
+  }
+  let contractOffer: Derived["contract"]["offer"] = null;
+  if (s.contractOffer && now < s.contractOffer.expiresAt) {
+    const o = s.contractOffer;
+    contractOffer = {
+      required: o.required,
+      reward: o.reward,
+      repReward: o.repReward,
+      repPenalty: o.repPenalty,
+      durationSec: o.durationSec,
+      expiresSec: Math.max(0, (o.expiresAt - now) / 1000),
+    };
+  }
+
   return {
     computeBase,
     compute,
@@ -266,6 +394,9 @@ export function derive(s: GameState, now: number): Derived {
     heatGen,
     heatThrottle,
     heatLoad,
+    bandwidthCap,
+    bandwidthDraw,
+    bandwidthThrottle,
     price,
     gridPrice: grid,
     grossPerSec,
@@ -275,6 +406,7 @@ export function derive(s: GameState, now: number): Derived {
     overclockActive,
     computeMult,
     event,
+    contract: { active: activeContract, offer: contractOffer },
   };
 }
 
@@ -304,8 +436,10 @@ export function tick(
     s.lastTick = now;
     return s;
   }
-  // Resolve incidents up to `now` before reading the economy off state.
+  // Resolve incidents + post/withdraw contract offers up to `now` before
+  // reading the economy off state.
   advanceEvents(s, now);
+  advanceContracts(s, now);
   const d = derive(s, now);
 
   // Revenue feeds earnings/credits; the electricity bill is a cash drain only,
@@ -320,6 +454,30 @@ export function tick(
 
   // Reputation accrues slowly, scaled by output so a bigger farm earns trust.
   s.reputation += TUNING.reputationRate * Math.sqrt(d.compute) * dtSec;
+
+  // Contract delivery: effective compute accrues toward the active contract,
+  // but only for the slice of this window that fell before its deadline (so a
+  // window that elapsed offline can't deliver past the deadline). Fulfils the
+  // instant it's met; fails the instant the deadline passes short.
+  if (s.contract) {
+    const c = s.contract;
+    const windowStart = now - dtSec * 1000;
+    const deliverSec =
+      Math.max(0, Math.min(now, c.endsAt) - windowStart) / 1000;
+    c.delivered += d.compute * deliverSec * efficiency;
+    if (c.delivered >= c.required) {
+      s.money += c.reward;
+      s.runEarnings += c.reward;
+      s.lifetimeEarnings += c.reward;
+      s.reputation += c.repReward;
+      s.contractsCompleted += 1;
+      s.contract = null;
+    } else if (now >= c.endsAt) {
+      s.reputation = Math.max(0, s.reputation - c.repPenalty);
+      s.contractsFailed += 1;
+      s.contract = null;
+    }
+  }
 
   s.lastTick = now;
   return s;
@@ -370,6 +528,10 @@ export function doPrestige(s: GameState, now: number): boolean {
   // A world incident on a now-empty farm is meaningless — clear it and let the
   // scheduler line up the next one. (Milestones persist across rebuilds.)
   s.activeEvent = null;
+  // Likewise drop any contract/offer: the deal was sized for the old farm.
+  s.contract = null;
+  s.contractOffer = null;
+  s.nextOfferAt = 0;
   s.lastTick = now;
   return true;
 }
@@ -386,6 +548,33 @@ export function respondEvent(s: GameState, now: number): boolean {
   s.activeEvent = null;
   s.eventsResponded += 1;
   scheduleNextEvent(s, now);
+  return true;
+}
+
+/** Take the offer on the board, starting its delivery clock from `now`. */
+export function acceptContract(s: GameState, now: number): boolean {
+  const o = s.contractOffer;
+  if (!o || s.contract || now >= o.expiresAt) return false;
+  s.contract = {
+    id: o.id,
+    required: o.required,
+    delivered: 0,
+    reward: o.reward,
+    repReward: o.repReward,
+    repPenalty: o.repPenalty,
+    startedAt: now,
+    endsAt: now + o.durationSec * 1000,
+  };
+  s.contractOffer = null;
+  scheduleNextOffer(s, now);
+  return true;
+}
+
+/** Pass on the offer on the board; the scheduler lines up the next one. */
+export function declineContract(s: GameState, now: number): boolean {
+  if (!s.contractOffer) return false;
+  s.contractOffer = null;
+  scheduleNextOffer(s, now);
   return true;
 }
 

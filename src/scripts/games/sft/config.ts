@@ -14,6 +14,7 @@ export const TUNING = {
   basePrice: 1.2, // $/FLOP before reputation + multipliers
   basePowerCap: 8, // free kW at the start
   baseCoolingCap: 1, // free cooling at the start
+  baseBandwidthCap: 5, // free Gb/s of throughput at the start
 
   tickMs: 250, // economy tick
   saveEveryMs: 10_000,
@@ -49,6 +50,21 @@ export const TUNING = {
   eventMaxGapMs: 180_000, // longest quiet stretch between incidents
   eventRespondSeconds: 25, // respond cost = this many seconds of gross revenue
   eventRespondMin: 10, // ...but never cheaper than this
+
+  // Contracts: a deterministic scheduler posts a single offer to the board
+  // every gap; it sits there until accepted or withdrawn. Params are baked
+  // from a live snapshot so a deal scales with the farm that's offered it.
+  // Delivery measures effective compute over the window, so banking capacity
+  // (and the bandwidth/power/cooling headroom behind it) is what wins them.
+  contractMinEarnings: 2_000, // lifetime earnings before contracts appear
+  contractOfferMinGapMs: 75_000, // shortest stretch between offers
+  contractOfferMaxGapMs: 150_000, // longest stretch between offers
+  contractOfferTtlMs: 60_000, // an unaccepted offer is withdrawn after this
+  contractDurationsSec: [180, 300, 480], // delivery windows to roll from
+  contractTargetMin: 0.7, // required = compute · window · (min..max)
+  contractTargetMax: 1.35,
+  contractRewardBonusMin: 1.4, // reward = required · price · (min..max), so a
+  contractRewardBonusMax: 1.95, // fulfilled contract beats letting it auto-sell
 } as const;
 
 export const BUILDINGS: BuildingDef[] = [
@@ -63,6 +79,7 @@ export const BUILDINGS: BuildingDef[] = [
     compute: 0.18,
     powerDraw: 0.05,
     heat: 0.05,
+    bandwidthDraw: 0.02,
   },
   {
     id: "blade",
@@ -74,6 +91,7 @@ export const BUILDINGS: BuildingDef[] = [
     compute: 1.8,
     powerDraw: 0.4,
     heat: 0.4,
+    bandwidthDraw: 0.3,
     unlockAt: 260,
   },
   {
@@ -86,6 +104,7 @@ export const BUILDINGS: BuildingDef[] = [
     compute: 22,
     powerDraw: 4,
     heat: 4,
+    bandwidthDraw: 3,
     unlockAt: 4_500,
   },
   {
@@ -98,6 +117,7 @@ export const BUILDINGS: BuildingDef[] = [
     compute: 360,
     powerDraw: 60,
     heat: 65,
+    bandwidthDraw: 70,
     unlockAt: 90_000,
   },
   {
@@ -110,6 +130,7 @@ export const BUILDINGS: BuildingDef[] = [
     compute: 8_000,
     powerDraw: 800,
     heat: 820,
+    bandwidthDraw: 1_000,
     unlockAt: 1_600_000,
   },
 
@@ -176,6 +197,41 @@ export const BUILDINGS: BuildingDef[] = [
     cooling: 700,
     powerDraw: 40,
     unlockAt: 280_000,
+  },
+
+  // --- Network throughput ------------------------------------------------
+  {
+    id: "switch",
+    name: "ToR Switch",
+    desc: "Top-of-rack switching. Modest throughput.",
+    category: "network",
+    baseCost: 120,
+    growth: 1.15,
+    bandwidthCap: 6,
+    powerDraw: 0.05,
+    unlockAt: 600,
+  },
+  {
+    id: "uplink",
+    name: "Fiber Uplink",
+    desc: "A fat pipe to the backbone.",
+    category: "network",
+    baseCost: 9_000,
+    growth: 1.15,
+    bandwidthCap: 90,
+    powerDraw: 1.5,
+    unlockAt: 14_000,
+  },
+  {
+    id: "spine",
+    name: "Spine Router",
+    desc: "Carrier-grade core routing.",
+    category: "network",
+    baseCost: 400_000,
+    growth: 1.16,
+    bandwidthCap: 2_200,
+    powerDraw: 30,
+    unlockAt: 600_000,
   },
 
   // --- Staff (global multipliers) ---------------------------------------
@@ -253,6 +309,14 @@ export const UPGRADES: UpgradeDef[] = [
     unlock: (s) => (s.buildings["ac"] ?? 0) >= 10,
   },
   {
+    id: "traffic-shaping",
+    name: "Traffic Shaping",
+    desc: "Producer bandwidth draw -20%.",
+    cost: 60_000,
+    bandwidthDrawFactor: 0.8,
+    unlock: (s) => (s.buildings["uplink"] ?? 0) >= 4,
+  },
+  {
     id: "enterprise-sla",
     name: "Enterprise SLAs",
     desc: "Sell price +40%.",
@@ -310,6 +374,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   producer: "Producers",
   power: "Power",
   cooling: "Cooling",
+  network: "Network",
   staff: "Staff",
 };
 
@@ -433,6 +498,29 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     name: "Off The Grid",
     desc: "Commission a micro-reactor.",
     check: (s) => (s.buildings["reactor"] ?? 0) > 0,
+  },
+  {
+    id: "on-the-wire",
+    name: "On The Wire",
+    desc: "Bring a network device online.",
+    check: (s) =>
+      (s.buildings["switch"] ?? 0) > 0 ||
+      (s.buildings["uplink"] ?? 0) > 0 ||
+      (s.buildings["spine"] ?? 0) > 0,
+  },
+  {
+    id: "first-contract",
+    name: "Signed & Delivered",
+    desc: "Fulfil your first compute contract.",
+    check: (s) => s.contractsCompleted >= 1,
+  },
+  {
+    id: "preferred-vendor",
+    name: "Preferred Vendor",
+    desc: "Fulfil 15 compute contracts.",
+    check: (s) => s.contractsCompleted >= 15,
+    buff: { multPrice: 1.04 },
+    buffNote: "+4% sell price",
   },
   {
     id: "phoenix",

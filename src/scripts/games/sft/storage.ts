@@ -29,6 +29,16 @@ export function load(now = Date.now()): LoadResult {
     TUNING.maxOfflineSec,
     Math.max(0, (now - state.lastTick) / 1000),
   );
+  // Pause any in-progress contract across the away time: shift its clock
+  // forward by the elapsed gap so the deadline can't lapse while the player is
+  // gone. Delivery still accrues over the catch-up window (at offline rate),
+  // so a contract can be fulfilled while away but never failed by absence.
+  if (state.contract && elapsedSec > 1) {
+    const shiftMs = elapsedSec * 1000;
+    state.contract.startedAt += shiftMs;
+    state.contract.endsAt += shiftMs;
+  }
+
   const before = state.money;
   if (elapsedSec > 1) {
     tick(state, elapsedSec, now, TUNING.offlineEfficiency);

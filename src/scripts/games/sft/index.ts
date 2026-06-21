@@ -4,10 +4,12 @@
 import { installAdmin } from "./admin";
 import { BUILDING_BY_ID, EVENT_BY_ID, TUNING, UPGRADES } from "./config";
 import {
+  acceptContract,
   buyBuilding,
   buyPrestige,
   buyUpgrade,
   claimAchievements,
+  declineContract,
   derive,
   doPrestige,
   gridPrice,
@@ -15,7 +17,7 @@ import {
   tick,
   triggerOverclock,
 } from "./engine";
-import { duration, money, pct } from "./format";
+import { duration, fmt, money, pct } from "./format";
 import { defaultState } from "./state";
 import {
   exportSave,
@@ -58,6 +60,20 @@ export function startGame(root: HTMLElement) {
         const name = EVENT_BY_ID[ev.id]?.name ?? "Incident";
         ui.toast(`${name} mitigated.`);
         ui.pushLog(`✓ ${name} mitigated`, "good");
+        renderNow();
+      }
+    },
+    onAcceptContract: () => {
+      const o = state.contractOffer;
+      if (o && acceptContract(state, Date.now())) {
+        ui.toast("Contract accepted. Deliver before the deadline.");
+        ui.pushLog(`◇ Contract accepted — ${money(o.reward)} on delivery`, "gold");
+        renderNow();
+      }
+    },
+    onDeclineContract: () => {
+      if (declineContract(state, Date.now())) {
+        ui.pushLog("◇ Contract passed", "");
         renderNow();
       }
     },
@@ -157,7 +173,11 @@ export function startGame(root: HTMLElement) {
   // once a second so the feed reads like a real ops console without spamming.
   let prevOverheat = false;
   let prevBrownout = false;
+  let prevSaturated = false;
   let prevEventId: string | null = state.activeEvent?.id ?? null;
+  let prevOfferId: string | null = state.contractOffer?.id ?? null;
+  let prevCompleted = state.contractsCompleted;
+  let prevFailed = state.contractsFailed;
   let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
   let milestoneExp =
     state.lifetimeEarnings >= 1000
@@ -167,6 +187,7 @@ export function startGame(root: HTMLElement) {
     const d0 = derive(state, Date.now());
     prevOverheat = d0.heatThrottle < 0.999;
     prevBrownout = d0.powerThrottle < 0.999;
+    prevSaturated = d0.bandwidthThrottle < 0.999;
   }
   setInterval(() => {
     const d = derive(state, Date.now());
@@ -184,6 +205,13 @@ export function startGame(root: HTMLElement) {
     else if (!brownout && prevBrownout)
       ui.pushLog("✓ Power restored", "good");
     prevBrownout = brownout;
+
+    const saturated = d.bandwidthThrottle < 0.999;
+    if (saturated && !prevSaturated)
+      ui.pushLog(`⚠ Network saturated — output ${pct(d.bandwidthThrottle)}`, "warn");
+    else if (!saturated && prevSaturated)
+      ui.pushLog("✓ Network throughput restored", "good");
+    prevSaturated = saturated;
 
     // Grid pricing: flag peak/off-peak swings so the bill makes sense.
     const peak = d.gridPrice / TUNING.basePowerRate > 1.12;
@@ -214,6 +242,30 @@ export function startGame(root: HTMLElement) {
       ui.pushLog(`✓ ${EVENT_BY_ID[prevEventId]?.name ?? "Incident"} cleared`, "good");
     }
     prevEventId = curId;
+
+    // Contracts: announce a fresh offer, and resolve fulfilment/failure off
+    // the lifetime counters (the engine clears the contract when it resolves).
+    const offerId = state.contractOffer?.id ?? null;
+    if (offerId && offerId !== prevOfferId) {
+      const o = state.contractOffer!;
+      ui.pushLog(
+        `◇ Contract offered — ${fmt(o.required)} FLOP for ${money(o.reward)}`,
+        "gold",
+      );
+      ui.toast(`New contract: deliver ${fmt(o.required)} FLOP for ${money(o.reward)}.`, 6000);
+    }
+    prevOfferId = offerId;
+
+    if (state.contractsCompleted > prevCompleted) {
+      ui.pushLog("✦ Contract fulfilled — bonus + reputation paid", "gold");
+      ui.toast("Contract fulfilled.");
+    }
+    if (state.contractsFailed > prevFailed) {
+      ui.pushLog("✕ Contract failed — reputation lost", "warn");
+      ui.toast("Contract failed — reputation took a hit.");
+    }
+    prevCompleted = state.contractsCompleted;
+    prevFailed = state.contractsFailed;
 
     // Milestones: toast + log anything newly earned this second.
     for (const a of claimAchievements(state, d)) {
