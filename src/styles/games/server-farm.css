@@ -998,6 +998,145 @@
     0 0 6px oklch(0.6 0.16 165 / 0.45);
 }
 
+/* ---- Network cabinets ---------------------------------------------- */
+/* Each network device renders as itself, not a server rack — but the
+   cells keep the .sft-u/.is-on hooks so owned-count lighting and the
+   saturation (brown-out style) state still drive them. Network gear reads
+   in a violet "link" hue, distinct from the cooling blues and power ambers. */
+.sft-cab--network .sft-cab__units {
+  position: relative;
+  height: 96px;
+}
+.sft-cab--network .sft-u.is-on::after,
+.sft-cab--network .sft-u.is-on::before {
+  content: none;
+}
+
+/* --- ToR Switch: stacked 1U switches with a row of blinking ports ---- */
+.sft-cab--switch .sft-cab__units {
+  gap: 5px;
+  padding: 8px 6px;
+  justify-content: center;
+}
+.sft-cab--switch .sft-u {
+  flex: 0 0 11px;
+  width: auto;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.2 0.012 300), oklch(0.14 0.008 300));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4);
+}
+.sft-cab--switch .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.26 0.02 300), oklch(0.17 0.012 300));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.5 0.12 300 / 0.45),
+    0 0 5px oklch(0.55 0.14 300 / 0.3);
+}
+/* A row of port LEDs blinking with link activity along each live switch. */
+.sft-cab--switch .sft-u.is-on::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 2px;
+  top: auto;
+  width: auto;
+  height: 3px;
+  border-radius: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    oklch(0.78 0.16 300) 0 2px,
+    transparent 2px 6px
+  );
+  box-shadow: 0 0 4px oklch(0.7 0.16 300 / 0.6);
+  animation: sft-blink 0.9s steps(1) infinite;
+}
+
+/* --- Fiber Uplink: vertical strands carrying light to the backbone --- */
+.sft-cab--uplink .sft-cab__units {
+  position: relative;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+}
+/* The patch panel the strands plug into, across the top. */
+.sft-cab--uplink .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  right: 6px;
+  height: 5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.3 0.03 300), oklch(0.18 0.015 300));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+.sft-cab--uplink .sft-u {
+  flex: 1 1 0;
+  width: auto;
+  min-height: 0;
+  align-self: stretch;
+  border-radius: 3px;
+  background: linear-gradient(180deg, oklch(0.18 0.015 300), oklch(0.13 0.01 300));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+/* Light pulsing down the live fibre strands. */
+.sft-cab--uplink .sft-u.is-on {
+  background-image: repeating-linear-gradient(
+    180deg,
+    oklch(0.7 0.16 300) 0 3px,
+    oklch(0.4 0.1 305) 3px 11px
+  );
+  background-size: 100% 22px;
+  box-shadow:
+    inset 0 0 0 1px oklch(0.62 0.14 300 / 0.55),
+    0 0 6px oklch(0.6 0.16 300 / 0.4);
+  animation: sft-flow 0.8s linear infinite;
+}
+
+/* --- Spine Router: a core chassis of line cards around a pulsing core - */
+.sft-cab--spine .sft-cab__units {
+  gap: 4px;
+  padding: 12px 7px;
+  justify-content: center;
+}
+/* Routing-core glow behind the line cards. */
+.sft-cab--spine:not(.is-empty) .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.62 0.16 300 / 0.5), transparent 70%);
+  animation: sft-pulse 1.7s ease-in-out infinite;
+  pointer-events: none;
+}
+.sft-cab--spine .sft-u {
+  flex: 0 0 8px;
+  width: auto;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.2 0.014 300), oklch(0.14 0.008 300));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4);
+  z-index: 1;
+}
+.sft-cab--spine .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.56 0.14 300), oklch(0.36 0.1 300));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.62 0.15 300 / 0.6),
+    0 0 6px oklch(0.62 0.17 300 / 0.45);
+}
+
+/* Saturation (link congestion) dims live network cells, mirroring the
+   power-throttle brown-out treatment on power cabinets. */
+[data-hall][data-net="low"] .sft-cab--network .sft-u.is-on {
+  filter: brightness(0.7) saturate(0.75);
+}
+
 /* ---- Chassis fans (producer cabinets) ------------------------------ */
 .sft-cab__fans {
   display: flex;
@@ -1850,6 +1989,9 @@
   .sft-cab--generator .sft-cab__units::after,
   .sft-cab--reactor .sft-cab__units::before,
   .sft-cab--quantum .sft-cab__units::before,
+  .sft-cab--switch .sft-u.is-on::after,
+  .sft-cab--uplink .sft-u.is-on,
+  .sft-cab--spine .sft-cab__units::before,
   [data-hall][data-power="low"] .sft-cab--power .sft-u.is-on,
   [data-hall][data-oc="1"] .sft-cab__frame,
   .sft-cab,

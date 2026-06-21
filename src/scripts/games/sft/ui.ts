@@ -42,6 +42,7 @@ const HALL_GROUPS = [
   { kind: "producer", ids: ["mini-rack", "blade", "cluster", "ai-pod", "quantum"], slots: 14 },
   { kind: "power", ids: ["generator", "solar", "reactor"], slots: 6 },
   { kind: "cooling", ids: ["fan", "ac", "liquid"], slots: 6 },
+  { kind: "network", ids: ["switch", "uplink", "spine"], slots: 6 },
 ] as const;
 
 /* Short chassis labels so the nameplates stay one line. */
@@ -57,6 +58,9 @@ const HALL_SHORT: Record<string, string> = {
   generator: "Diesel",
   solar: "Solar",
   reactor: "Reactor",
+  switch: "Switch",
+  uplink: "Uplink",
+  spine: "Spine",
 };
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -538,6 +542,8 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     if (hallEl.dataset.tier !== tier) hallEl.dataset.tier = tier;
     const powerState = d.powerThrottle < 1 ? "low" : "ok";
     if (hallEl.dataset.power !== powerState) hallEl.dataset.power = powerState;
+    const netState = d.bandwidthThrottle < 1 ? "low" : "ok";
+    if (hallEl.dataset.net !== netState) hallEl.dataset.net = netState;
     const ocState = d.overclockActive ? "1" : "0";
     if (hallEl.dataset.oc !== ocState) hallEl.dataset.oc = ocState;
     setFlag(hallEmpty, "is-hidden", producerCount > 0);
