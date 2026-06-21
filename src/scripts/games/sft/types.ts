@@ -7,6 +7,7 @@ export type BuildingCategory =
   | "power"
   | "cooling"
   | "network"
+  | "space"
   | "staff";
 
 export interface BuildingDef {
@@ -27,6 +28,8 @@ export interface BuildingDef {
   cooling?: number; // heat units/s removed
   bandwidthCap?: number; // Gb/s of network throughput added
   bandwidthDraw?: number; // Gb/s consumed (producers)
+  space?: number; // rack units of floor space occupied (physical equipment)
+  spaceCap?: number; // rack units of floor space added (facility expansions)
 
   // Staff act as global, additive multipliers (fraction per unit).
   multCompute?: number; // +x to the global compute multiplier
@@ -187,6 +190,8 @@ export interface Derived {
   bandwidthCap: number; // Gb/s of throughput available
   bandwidthDraw: number; // Gb/s demanded by producers
   bandwidthThrottle: number; // 0..1 hard cap when draw exceeds capacity
+  spaceCap: number; // rack units of floor space available
+  spaceUsed: number; // rack units occupied by installed equipment
   price: number; // $/FLOP after reputation + mults
   gridPrice: number; // current electricity price, $/kW/s
   grossPerSec: number; // revenue before the electricity bill

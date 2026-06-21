@@ -225,7 +225,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
 
   // --- Building rows, grouped by category ------------------------------
   const buildingRows: BuildingRow[] = [];
-  (["producer", "power", "cooling", "network", "staff"] as const).forEach((cat) => {
+  (["producer", "power", "cooling", "network", "space", "staff"] as const).forEach((cat) => {
     const list = root.querySelector<HTMLElement>(`[data-list="${cat}"]`);
     if (!list) return;
     BUILDINGS.filter((b) => b.category === cat).forEach((def) => {
@@ -410,6 +410,13 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW`,
     );
     setFlag(stats.power?.parentElement ?? root, "is-warn", d.powerThrottle < 1);
+    setText(stats.space, `${fmt(d.spaceUsed)} / ${fmt(d.spaceCap)} RU`);
+    // Warn once the floor is full enough that the cheapest cabinet won't fit.
+    setFlag(
+      stats.space?.parentElement ?? root,
+      "is-warn",
+      d.spaceUsed >= d.spaceCap,
+    );
     setText(
       stats.bill,
       d.powerCost > 0 ? "-$" + fmt(d.powerCost) + "/s" : "$0/s",
@@ -434,6 +441,17 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       }
       const cost = buildingCost(s, r.def);
       setText(r.owned, "x" + count);
+      // Floor space gates physical equipment before money does: once the rack
+      // units are gone, the only fix is a facility expansion.
+      const noSpace =
+        r.def.space != null && d.spaceUsed + r.def.space > d.spaceCap;
+      setFlag(r.root, "is-nospace", noSpace);
+      if (noSpace) {
+        setText(r.cost, "Floor full");
+        setDisabled(r.button, true);
+        setFlag(r.root, "is-afford", false);
+        continue;
+      }
       setText(r.cost, money(cost));
       const afford = s.money >= cost;
       setDisabled(r.button, !afford);
@@ -558,6 +576,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       Math.min(1, Math.log10(1 + producerCount) / 2.2).toFixed(3),
     );
     setVar("--sft-heat-pct", Math.round((1 - d.heatThrottle) * 100) + "%");
+
+    // Floor space lights the hall up as you expand: more capacity -> brighter,
+    // fuller deck. CSS reads --sft-floor (0..1) on the scene.
+    setVar("--sft-floor", Math.min(1, Math.log10(1 + d.spaceCap) / 3.5).toFixed(3));
 
     setText(
       rackNote,

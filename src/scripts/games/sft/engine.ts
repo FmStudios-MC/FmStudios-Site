@@ -34,6 +34,21 @@ function rng(seed: number): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
+/** Floor space the farm has and uses: equipment occupies rack units, facility
+    expansions add them. Both sides read straight off the buildings record, so
+    no persisted state is needed. Shared by derive() and the purchase gate. */
+export function floorSpace(s: GameState): { used: number; cap: number } {
+  let used = 0;
+  let cap = TUNING.baseSpace;
+  for (const def of BUILDINGS) {
+    const n = owned(s, def.id);
+    if (n === 0) continue;
+    if (def.space) used += def.space * n;
+    if (def.spaceCap) cap += def.spaceCap * n;
+  }
+  return { used, cap };
+}
+
 /** Cost of the next unit of a building, after prestige cost-growth reduction. */
 export function buildingCost(s: GameState, def: BuildingDef): number {
   const reduction = plevel(s, "bulk") * 0.01;
@@ -227,6 +242,8 @@ export function derive(s: GameState, now: number): Derived {
   let heatGen = 0;
   let bandwidthCap = TUNING.baseBandwidthCap;
   let bandwidthDraw = 0;
+  let spaceCap = TUNING.baseSpace;
+  let spaceUsed = 0;
 
   // Staff accumulators
   let engineerMult = 0;
@@ -277,6 +294,8 @@ export function derive(s: GameState, now: number): Derived {
     if (def.heat) heatGen += def.heat * n;
     if (def.bandwidthCap) bandwidthCap += def.bandwidthCap * n;
     if (def.bandwidthDraw) bandwidthDraw += def.bandwidthDraw * n * bandwidthDrawFactor;
+    if (def.space) spaceUsed += def.space * n;
+    if (def.spaceCap) spaceCap += def.spaceCap * n;
     if (def.powerDraw) {
       const draw = def.powerDraw * n;
       // PUE tuning only discounts producers, not infrastructure.
@@ -397,6 +416,8 @@ export function derive(s: GameState, now: number): Derived {
     bandwidthCap,
     bandwidthDraw,
     bandwidthThrottle,
+    spaceCap,
+    spaceUsed,
     price,
     gridPrice: grid,
     grossPerSec,
@@ -488,6 +509,12 @@ export function tick(
 export function buyBuilding(s: GameState, id: string): boolean {
   const def = BUILDING_BY_ID[id];
   if (!def) return false;
+  // Floor space is a hard gate: equipment can't be installed without the rack
+  // units to stand it on. Lift the cap by buying facility expansions.
+  if (def.space) {
+    const { used, cap } = floorSpace(s);
+    if (used + def.space > cap) return false;
+  }
   const cost = buildingCost(s, def);
   if (s.money < cost) return false;
   s.money -= cost;

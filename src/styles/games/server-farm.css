@@ -244,6 +244,10 @@
 .sft-row.is-afford .sft-row__cost {
   color: var(--gold-bright);
 }
+/* Out of floor space: the gate is rack units, not cash — flag it in red. */
+.sft-row.is-nospace .sft-row__cost {
+  color: var(--sft-hot);
+}
 
 /* ---- Upgrades ------------------------------------------------------- */
 .sft-upgrades {
@@ -361,7 +365,8 @@
     );
   transform: perspective(420px) rotateX(64deg);
   transform-origin: bottom center;
-  opacity: calc(0.18 + var(--sft-glow, 0) * 0.32);
+  /* Brightens with farm size (--sft-glow) and floor capacity (--sft-floor). */
+  opacity: calc(0.18 + var(--sft-glow, 0) * 0.32 + var(--sft-floor, 0) * 0.12);
   -webkit-mask-image: linear-gradient(to top, black, transparent 92%);
   mask-image: linear-gradient(to top, black, transparent 92%);
 }

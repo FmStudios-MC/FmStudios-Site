@@ -15,6 +15,7 @@ export const TUNING = {
   basePowerCap: 8, // free kW at the start
   baseCoolingCap: 1, // free cooling at the start
   baseBandwidthCap: 5, // free Gb/s of throughput at the start
+  baseSpace: 24, // free rack units of floor space at the start
 
   tickMs: 250, // economy tick
   saveEveryMs: 10_000,
@@ -80,6 +81,7 @@ export const BUILDINGS: BuildingDef[] = [
     powerDraw: 0.05,
     heat: 0.05,
     bandwidthDraw: 0.02,
+    space: 1,
   },
   {
     id: "blade",
@@ -92,6 +94,7 @@ export const BUILDINGS: BuildingDef[] = [
     powerDraw: 0.4,
     heat: 0.4,
     bandwidthDraw: 0.3,
+    space: 2,
     unlockAt: 260,
   },
   {
@@ -105,6 +108,7 @@ export const BUILDINGS: BuildingDef[] = [
     powerDraw: 4,
     heat: 4,
     bandwidthDraw: 3,
+    space: 5,
     unlockAt: 4_500,
   },
   {
@@ -118,6 +122,7 @@ export const BUILDINGS: BuildingDef[] = [
     powerDraw: 60,
     heat: 65,
     bandwidthDraw: 70,
+    space: 14,
     unlockAt: 90_000,
   },
   {
@@ -131,6 +136,7 @@ export const BUILDINGS: BuildingDef[] = [
     powerDraw: 800,
     heat: 820,
     bandwidthDraw: 1_000,
+    space: 40,
     unlockAt: 1_600_000,
   },
 
@@ -143,6 +149,7 @@ export const BUILDINGS: BuildingDef[] = [
     baseCost: 70,
     growth: 1.15,
     powerCap: 5,
+    space: 1,
   },
   {
     id: "solar",
@@ -152,6 +159,7 @@ export const BUILDINGS: BuildingDef[] = [
     baseCost: 6_500,
     growth: 1.15,
     powerCap: 70,
+    space: 6,
     unlockAt: 11_000,
   },
   {
@@ -162,6 +170,7 @@ export const BUILDINGS: BuildingDef[] = [
     baseCost: 320_000,
     growth: 1.16,
     powerCap: 1_800,
+    space: 30,
     unlockAt: 550_000,
   },
 
@@ -175,6 +184,7 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.15,
     cooling: 0.45,
     powerDraw: 0.05,
+    space: 1,
   },
   {
     id: "ac",
@@ -185,6 +195,7 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.15,
     cooling: 26,
     powerDraw: 2,
+    space: 4,
     unlockAt: 5_500,
   },
   {
@@ -196,6 +207,7 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.16,
     cooling: 700,
     powerDraw: 40,
+    space: 25,
     unlockAt: 280_000,
   },
 
@@ -209,6 +221,7 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.15,
     bandwidthCap: 6,
     powerDraw: 0.05,
+    space: 1,
     unlockAt: 600,
   },
   {
@@ -220,6 +233,7 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.15,
     bandwidthCap: 90,
     powerDraw: 1.5,
+    space: 4,
     unlockAt: 14_000,
   },
   {
@@ -231,7 +245,42 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.16,
     bandwidthCap: 2_200,
     powerDraw: 30,
+    space: 20,
     unlockAt: 600_000,
+  },
+
+  // --- Facility / floor space (a money sink that gates aggressive scaling) -
+  // Equipment occupies rack units; these raise the cap. Flat capacity per unit
+  // on a rising cost curve makes them an ongoing sink, with bigger tiers giving
+  // far more room per purchase as the farm outgrows bare tiles.
+  {
+    id: "floor-tile",
+    name: "Floor Tile",
+    desc: "Bare rack space. The cheapest way to grow.",
+    category: "space",
+    baseCost: 130,
+    growth: 1.16,
+    spaceCap: 8,
+  },
+  {
+    id: "server-hall",
+    name: "Server Hall",
+    desc: "A whole new room, racks and trays included.",
+    category: "space",
+    baseCost: 14_000,
+    growth: 1.16,
+    spaceCap: 110,
+    unlockAt: 22_000,
+  },
+  {
+    id: "mega-annex",
+    name: "Mega Annex",
+    desc: "Warehouse-scale floor for hyperscale builds.",
+    category: "space",
+    baseCost: 650_000,
+    growth: 1.16,
+    spaceCap: 2_800,
+    unlockAt: 850_000,
   },
 
   // --- Staff (global multipliers) ---------------------------------------
@@ -375,6 +424,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   power: "Power",
   cooling: "Cooling",
   network: "Network",
+  space: "Facility",
   staff: "Staff",
 };
 
@@ -498,6 +548,23 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     name: "Off The Grid",
     desc: "Commission a micro-reactor.",
     check: (s) => (s.buildings["reactor"] ?? 0) > 0,
+  },
+  {
+    id: "breaking-ground",
+    name: "Breaking Ground",
+    desc: "Expand the floor with your first facility.",
+    check: (s) =>
+      (s.buildings["floor-tile"] ?? 0) > 0 ||
+      (s.buildings["server-hall"] ?? 0) > 0 ||
+      (s.buildings["mega-annex"] ?? 0) > 0,
+  },
+  {
+    id: "packed-house",
+    name: "Packed House",
+    desc: "Fill 90% of a floor of 200+ rack units.",
+    check: (s, d) => d.spaceCap >= 200 && d.spaceUsed >= d.spaceCap * 0.9,
+    buff: { multCompute: 1.03 },
+    buffNote: "+3% compute",
   },
   {
     id: "on-the-wire",
