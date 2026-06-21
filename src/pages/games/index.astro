@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import GameCard from "../../components/games/GameCard.astro";
+
+const games = [
+  {
+    href: "/games/server-farm-tycoon",
+    title: "Server-Farm Tycoon",
+    tagline:
+      "Build a data center, balance power against heat, and sell compute around the clock. An idle game that keeps running while you're away.",
+    kind: "Idle game",
+    status: "Playable",
+    live: true,
+  },
+];
+---
+
+<BaseLayout
+  title="Games"
+  description="Small browser games from FabiMvurice Interactive. No installs, no accounts, playable in the tab."
+>
+  <PageHeader
+    eyebrow="The arcade"
+    title="Small things to play."
+    lede="Quick browser games built in the studio's downtime. They run in the tab, save locally, and ask nothing of you."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="games-grid">
+        {
+          games.map((game, i) => (
+            <GameCard
+              href={game.href}
+              title={game.title}
+              tagline={game.tagline}
+              kind={game.kind}
+              status={game.status}
+              live={game.live}
+              delay={i * 0.08}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-l);
+  }
+</style>

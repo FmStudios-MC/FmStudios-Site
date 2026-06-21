@@ -1,0 +1,1399 @@
+/* Server-Farm Tycoon - scoped game styles.
+   Built on the FMI tokens (tokens.css). The look is a server NOC console:
+   mono telemetry, hairline panels, warm-gold status light. Two functional
+   status hues are introduced here and used only for warnings. */
+
+.sft {
+  /* Functional status colours, scoped to the game. */
+  --sft-ok: var(--status-live);
+  --sft-warn: oklch(0.8 0.15 70);
+  --sft-hot: oklch(0.63 0.2 28);
+  --sft-hot-glow: oklch(0.63 0.2 28 / 0.35);
+
+  /* Clearance for the site's sticky nav, so the HUD docks beneath it. */
+  --sft-nav-h: 90px;
+
+  position: relative;
+  z-index: var(--z-base);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .sft {
+    --sft-nav-h: 80px;
+  }
+}
+
+/* ---- HUD ------------------------------------------------------------- */
+.sft-hud {
+  position: sticky;
+  top: var(--sft-nav-h);
+  z-index: calc(var(--z-sticky) - 1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-xs);
+  padding: var(--space-s);
+  margin-bottom: var(--space-l);
+  background: oklch(0.13 0.009 75 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.sft-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sft-stat__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.sft-stat__value {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.sft-stat--key .sft-stat__value {
+  color: transparent;
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.sft-stat.is-warn .sft-stat__value {
+  color: var(--sft-hot);
+}
+
+/* ---- Layout --------------------------------------------------------- */
+.sft-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--space-l);
+  align-items: start;
+}
+
+@media (min-width: 920px) {
+  .sft-grid {
+    grid-template-columns: 1fr minmax(300px, 360px);
+  }
+  .sft-dash {
+    position: sticky;
+    /* Clear both the site nav and the docked HUD strip. */
+    top: calc(var(--sft-nav-h) + 96px);
+  }
+}
+
+.sft-panel {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  /* Translucent so the ambient scene glows through. */
+  background: oklch(0.2 0.013 72 / 0.86);
+  backdrop-filter: blur(9px) saturate(1.1);
+  padding: var(--space-m);
+  margin-bottom: var(--space-l);
+  overflow: hidden;
+}
+
+/* CRT scanline sheen over the console surfaces (subtle, static). */
+.sft-panel::after,
+.sft-hud::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    oklch(0 0 0 / 0.13) 2px 3px
+  );
+  opacity: 0.6;
+}
+.sft-panel > *,
+.sft-hud > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sft-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.sft-panel__title {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.sft-panel__note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.sft-subhead {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: var(--space-s) 0 var(--space-2xs);
+}
+.sft-subhead:first-child {
+  margin-top: 0;
+}
+
+/* ---- Buy rows ------------------------------------------------------- */
+.sft-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sft-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-xs) var(--space-2xs);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-left: 2px solid transparent;
+  background: none;
+  color: inherit;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    background-color var(--dur-fast) var(--ease-out-quart),
+    padding-left var(--dur-fast) var(--ease-out-quart);
+}
+
+.sft-row.is-afford {
+  cursor: pointer;
+}
+.sft-row.is-afford:hover {
+  border-left-color: var(--gold);
+  background: var(--surface-2);
+  padding-left: var(--space-xs);
+}
+
+.sft-row:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sft-row.is-locked {
+  opacity: 0.4;
+}
+
+.sft-row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.sft-row__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  letter-spacing: -0.01em;
+}
+.sft-row__desc {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  line-height: 1.35;
+}
+
+.sft-row__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.sft-row__owned {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.sft-row__cost {
+  font-size: var(--step-0);
+  color: var(--ink-muted);
+}
+.sft-row.is-afford .sft-row__cost {
+  color: var(--gold-bright);
+}
+
+/* ---- Upgrades ------------------------------------------------------- */
+.sft-upgrades {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-xs);
+}
+
+.sft-upgrade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  text-align: left;
+  padding: var(--space-s);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: inherit;
+}
+.sft-upgrade.is-hidden {
+  display: none;
+}
+.sft-upgrade.is-afford {
+  cursor: pointer;
+  border-color: var(--gold);
+}
+.sft-upgrade.is-afford:hover {
+  background: oklch(0.27 0.015 72);
+}
+.sft-upgrade:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.sft-upgrade__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+.sft-upgrade__desc {
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+.sft-upgrade__cost {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-bright);
+}
+.sft-upgrades:empty::after,
+.sft-upgrades-empty {
+  content: "No upgrades available yet.";
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* ---- Data Hall: front-elevation server room ------------------------ */
+/* The centrepiece. A row of equipment cabinets standing on a lit floor;
+   each cabinet is one building type and fills with unit modules as you buy.
+   Hall-wide state lives on [data-hall] attributes so CSS does the reacting:
+   data-tier (heat colour), data-power=low (brown-out flicker), data-oc=1
+   (overclock pulse), plus --sft-fan-dur for fan speed. */
+.sft-hall__scene {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line);
+  padding: var(--space-l) var(--space-s) 0;
+  min-height: 220px;
+  background:
+    radial-gradient(
+      130% 90% at 50% 0%,
+      oklch(0.22 0.012 75 / 0.55),
+      transparent 58%
+    ),
+    linear-gradient(to bottom, var(--bg-deep), var(--surface));
+}
+
+/* Ceiling cable tray with drop cables. */
+.sft-hall__tray {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 16px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0 26px,
+      color-mix(in oklch, var(--gold) 30%, transparent) 26px 27px,
+      transparent 27px 30px
+    ),
+    linear-gradient(to bottom, oklch(0 0 0 / 0.45), transparent);
+  opacity: 0.5;
+}
+
+/* Perspective floor the cabinets stand on. */
+.sft-hall__floor {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: 0;
+  height: 44%;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in oklch, var(--gold) 16%, transparent) 0 1px,
+      transparent 1px 56px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--gold) 12%, transparent) 0 1px,
+      transparent 1px 30px
+    );
+  transform: perspective(420px) rotateX(64deg);
+  transform-origin: bottom center;
+  opacity: calc(0.18 + var(--sft-glow, 0) * 0.32);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 92%);
+  mask-image: linear-gradient(to top, black, transparent 92%);
+}
+
+.sft-hall__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(8px, 1.6vw, 18px);
+  padding-bottom: var(--space-m);
+  min-height: 150px;
+}
+
+.sft-hall__empty {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: var(--space-l);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+.sft-hall__empty.is-hidden {
+  display: none;
+}
+
+/* ---- Cabinet -------------------------------------------------------- */
+.sft-cab {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: clamp(58px, 8.5vw, 82px);
+  animation: sft-cab-in var(--dur-mid) var(--ease-out-expo);
+}
+.sft-cab.is-empty {
+  display: none;
+}
+
+.sft-cab__frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 7px 8px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(var(--surface-2), var(--surface));
+  box-shadow:
+    inset 0 0 0 1px oklch(0 0 0 / 0.3),
+    inset 0 2px 10px oklch(0 0 0 / 0.45),
+    0 10px 22px -14px oklch(0 0 0 / 0.8);
+}
+/* Mounting rails down each side. */
+.sft-cab__frame::before,
+.sft-cab__frame::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--line-strong) 0 3px,
+    transparent 3px 8px
+  );
+  opacity: 0.6;
+}
+.sft-cab__frame::before {
+  left: 2px;
+}
+.sft-cab__frame::after {
+  right: 2px;
+}
+
+.sft-cab__units {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  height: 120px;
+  padding: 0 3px;
+}
+
+/* A rack unit (off = empty slot). */
+.sft-u {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 4px;
+  border-radius: 1px;
+  background: oklch(0.18 0.006 72);
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.35);
+}
+.sft-u.is-on {
+  background: linear-gradient(
+    90deg,
+    oklch(0.31 0.012 72),
+    oklch(0.25 0.01 72)
+  );
+}
+/* Vent louvres on a populated blade. */
+.sft-u.is-on::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  bottom: 2px;
+  width: 42%;
+  border-radius: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    oklch(0 0 0 / 0.4) 0 1px,
+    transparent 1px 3px
+  );
+}
+/* Status LED on a populated blade; colour follows the hall heat tier. */
+.sft-u.is-on::before {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold-glow);
+}
+[data-hall][data-tier="warm"] .sft-cab--producer .sft-u.is-on::before {
+  background: var(--sft-warn);
+  box-shadow: 0 0 4px var(--sft-warn);
+}
+[data-hall][data-tier="hot"] .sft-cab--producer .sft-u.is-on::before {
+  background: var(--sft-hot);
+  box-shadow: 0 0 5px var(--sft-hot-glow);
+  animation: sft-blink 0.9s steps(2, jump-none) infinite;
+}
+
+/* ---- Cooling cabinets ---------------------------------------------- */
+/* Each cooling tier renders as itself; cells keep .sft-u/.is-on so the
+   owned-count lighting still drives them. */
+
+/* --- Cooling Fan: a grid of spinning rotors ------------------------- */
+.sft-cab--fan .sft-cab__units {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  place-items: center;
+  height: 96px;
+  padding: 4px;
+}
+.sft-cab--fan .sft-u {
+  flex: none;
+  width: 86%;
+  min-height: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    oklch(0.24 0.01 72),
+    oklch(0.15 0.008 72)
+  );
+}
+.sft-cab--fan .sft-u.is-on::after,
+.sft-cab--fan .sft-u.is-on::before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+/* Five-blade fan rotor: wide blades with thin gaps read as a fan disc.
+   width/auto resets the producer louvre rule above so inset can center it. */
+.sft-cab--fan .sft-u.is-on::after {
+  inset: 11%;
+  width: auto;
+  background: repeating-conic-gradient(
+    from 0deg,
+    oklch(0.55 0.02 75) 0deg 50deg,
+    oklch(0.26 0.012 72) 50deg 72deg
+  );
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.35);
+  animation: sft-spin var(--sft-fan-dur, 2s) linear infinite;
+}
+/* Hub. */
+.sft-cab--fan .sft-u.is-on::before {
+  inset: 0;
+  margin: auto;
+  translate: none;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  box-shadow: 0 0 4px var(--gold-glow);
+  z-index: 1;
+}
+
+/* --- AC Unit: a CRAC with a control screen over louvre slats -------- */
+.sft-cab--ac .sft-cab__units {
+  position: relative;
+  flex-direction: column;
+  gap: 4px;
+  height: 96px;
+  padding: 26px 7px 8px;
+  justify-content: flex-end;
+}
+/* Control screen across the top. */
+.sft-cab--ac .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  right: 7px;
+  height: 13px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.16 0.01 215), oklch(0.11 0.008 215));
+  box-shadow:
+    inset 0 0 0 1px oklch(0 0 0 / 0.5),
+    inset 0 0 6px oklch(0.6 0.12 215 / 0.2);
+}
+/* A glowing readout segment on the screen while it runs. */
+.sft-cab--ac:not(.is-empty) .sft-cab__units::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 11px;
+  width: 16px;
+  height: 4px;
+  border-radius: 1px;
+  background: oklch(0.72 0.13 208);
+  box-shadow: 0 0 5px oklch(0.72 0.14 208 / 0.7);
+}
+/* Louvre slats: a top light-catch makes each read as an angled blind. */
+.sft-cab--ac .sft-u {
+  flex: 0 0 8px;
+  width: auto;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.21 0.012 215), oklch(0.14 0.008 215));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4);
+}
+.sft-cab--ac .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.6 0.12 210), oklch(0.34 0.07 216));
+  box-shadow:
+    inset 0 1px 0 oklch(0.78 0.1 205 / 0.5),
+    inset 0 0 0 1px oklch(0.55 0.1 212 / 0.5),
+    0 0 5px oklch(0.6 0.12 210 / 0.35);
+}
+.sft-cab--ac .sft-u.is-on::after,
+.sft-cab--ac .sft-u.is-on::before {
+  content: none;
+}
+
+/* --- Liquid Loop: a manifold of flowing coolant tubes -------------- */
+.sft-cab--liquid .sft-cab__units {
+  position: relative;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  height: 96px;
+  padding: 12px 8px;
+}
+/* Top + bottom manifolds the tubes plug into. */
+.sft-cab--liquid .sft-cab__units::before,
+.sft-cab--liquid .sft-cab__units::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  height: 5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.3 0.03 235), oklch(0.18 0.015 235));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+.sft-cab--liquid .sft-cab__units::before {
+  top: 4px;
+}
+.sft-cab--liquid .sft-cab__units::after {
+  bottom: 4px;
+}
+.sft-cab--liquid .sft-u {
+  flex: 1 1 0;
+  width: auto;
+  min-height: 0;
+  align-self: stretch;
+  border-radius: 3px;
+  background: linear-gradient(180deg, oklch(0.18 0.015 235), oklch(0.13 0.01 235));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+/* Coolant flowing up the live tubes. */
+.sft-cab--liquid .sft-u.is-on {
+  background-image: repeating-linear-gradient(
+    180deg,
+    oklch(0.62 0.13 235) 0 4px,
+    oklch(0.42 0.1 240) 4px 10px
+  );
+  background-size: 100% 20px;
+  box-shadow:
+    inset 0 0 0 1px oklch(0.6 0.12 235 / 0.55),
+    0 0 6px oklch(0.6 0.14 235 / 0.4);
+  animation: sft-flow 0.7s linear infinite;
+}
+.sft-cab--liquid .sft-u.is-on::after,
+.sft-cab--liquid .sft-u.is-on::before {
+  content: none;
+}
+
+/* ---- Power cabinets ------------------------------------------------- */
+/* Each power source renders as itself, not a server rack. The cells keep
+   the .sft-u/.is-on hooks so owned-count lighting + brown-out still work;
+   we just drop the inherited server louvres/LED and restyle per type. */
+.sft-cab--power .sft-cab__units {
+  position: relative;
+  height: 96px;
+}
+.sft-cab--power .sft-u.is-on::after,
+.sft-cab--power .sft-u.is-on::before {
+  content: none;
+}
+
+/* --- Diesel generator: a radiator fan over an amber engine block ----- */
+.sft-cab--generator .sft-cab__units {
+  gap: 3px;
+  padding: 30px 6px 6px;
+  justify-content: flex-end;
+}
+/* Fan housing. */
+.sft-cab--generator .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  translate: -50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.21 0.01 72), oklch(0.12 0.006 70));
+  box-shadow: inset 0 0 0 2px oklch(0 0 0 / 0.45);
+}
+/* Spinning fan blades whenever a generator is running. */
+.sft-cab--generator:not(.is-empty) .sft-cab__units::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  translate: -50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    oklch(0.5 0.07 70) 0deg 50deg,
+    oklch(0.24 0.02 68) 50deg 72deg
+  );
+  animation: sft-spin 1.8s linear infinite;
+}
+.sft-cab--generator .sft-u {
+  flex: 0 0 7px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.2 0.01 72), oklch(0.14 0.006 70));
+}
+.sft-cab--generator .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.48 0.07 68), oklch(0.34 0.05 64));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.55 0.1 66 / 0.6),
+    0 0 6px oklch(0.55 0.12 64 / 0.4);
+}
+
+/* --- Solar array: a tiled grid of photovoltaic cells, cool blue ------ */
+.sft-cab--solar .sft-cab__units {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 4px;
+  padding: 5px;
+}
+.sft-cab--solar .sft-u {
+  flex: none;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(135deg, oklch(0.2 0.02 250), oklch(0.14 0.01 250));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4);
+}
+.sft-cab--solar .sft-u.is-on {
+  background: linear-gradient(135deg, oklch(0.45 0.09 240), oklch(0.3 0.07 250));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.5 0.1 240 / 0.5),
+    0 0 5px oklch(0.5 0.12 245 / 0.35);
+}
+/* Busbar / cell grid lines on a live panel. */
+.sft-cab--solar .sft-u.is-on::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  width: auto;
+  background:
+    repeating-linear-gradient(0deg, oklch(0 0 0 / 0.35) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, oklch(0 0 0 / 0.35) 0 1px, transparent 1px 5px);
+}
+
+/* --- Micro reactor: control rods around a pulsing core, cyan-green --- */
+.sft-cab--reactor .sft-cab__units {
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 7px;
+}
+.sft-cab--reactor:not(.is-empty) .sft-cab__units::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.62 0.14 165 / 0.55), transparent 70%);
+  animation: sft-pulse 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.sft-cab--reactor .sft-u {
+  flex: 1 1 0;
+  align-self: stretch;
+  min-height: 0;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.18 0.02 170), oklch(0.13 0.01 170));
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.4);
+  z-index: 1;
+}
+.sft-cab--reactor .sft-u.is-on {
+  background: linear-gradient(180deg, oklch(0.55 0.13 168), oklch(0.34 0.09 168));
+  box-shadow:
+    inset 0 0 0 1px oklch(0.6 0.14 165 / 0.6),
+    0 0 6px oklch(0.6 0.16 165 / 0.45);
+}
+
+/* ---- Chassis fans (producer cabinets) ------------------------------ */
+.sft-cab__fans {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding-top: 1px;
+}
+.sft-fan {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    oklch(0.22 0.01 72),
+    oklch(0.14 0.006 72)
+  );
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.45);
+}
+.sft-cab:not(.is-empty) .sft-fan::before {
+  content: "";
+  position: absolute;
+  inset: 13%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    oklch(0.45 0.015 75) 0deg 50deg,
+    oklch(0.2 0.008 72) 50deg 72deg
+  );
+  animation: sft-spin var(--sft-fan-dur, 2s) linear infinite;
+}
+
+/* ---- Nameplate ------------------------------------------------------ */
+.sft-cab__plate {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 7px;
+  padding: 3px 4px 0;
+  border-top: 1px solid var(--line);
+}
+.sft-cab__name {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sft-cab__count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--gold-bright);
+  flex-shrink: 0;
+}
+.sft-cab.is-full .sft-cab__name {
+  color: var(--gold);
+}
+
+/* ---- Hall reactive states ------------------------------------------ */
+/* Brown-out: power cells flutter, producer LEDs dim. */
+[data-hall][data-power="low"] .sft-cab--power .sft-u.is-on {
+  animation: sft-flick 0.45s steps(2, jump-none) infinite;
+}
+[data-hall][data-power="low"] .sft-cab--producer .sft-u.is-on {
+  opacity: 0.7;
+}
+/* Overclock: frames flare gold. */
+[data-hall][data-oc="1"] .sft-cab__frame {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 0 0 1px oklch(0 0 0 / 0.3),
+    inset 0 2px 10px oklch(0 0 0 / 0.45),
+    0 0 22px -6px var(--gold-glow);
+  animation: sft-oc 1.1s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+/* ---- Telemetry strip under the hall -------------------------------- */
+.sft-hall__telemetry {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: var(--space-m);
+  margin-top: var(--space-m);
+}
+.sft-hall__telemetry .sft-gauge {
+  margin-top: 0;
+}
+.sft-hall__telemetry .sft-overclock {
+  width: auto;
+  margin-top: 0;
+  padding: var(--space-2xs) var(--space-m);
+  align-self: end;
+}
+
+@media (max-width: 560px) {
+  .sft-hall__telemetry {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sft-hall__telemetry .sft-overclock {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@keyframes sft-blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes sft-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes sft-flick {
+  50% {
+    opacity: 0.4;
+  }
+}
+@keyframes sft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+@keyframes sft-flow {
+  to {
+    background-position: 0 -20px;
+  }
+}
+@keyframes sft-oc {
+  to {
+    box-shadow:
+      inset 0 0 0 1px oklch(0 0 0 / 0.3),
+      inset 0 2px 10px oklch(0 0 0 / 0.45),
+      0 0 30px -2px var(--gold-glow);
+  }
+}
+@keyframes sft-cab-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Telemetry: bars ----------------------------------------------- */
+.sft-gauge {
+  margin-top: var(--space-s);
+}
+.sft-gauge__top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-s);
+  margin-bottom: var(--space-3xs);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.sft-gauge__name {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-gauge__label {
+  color: var(--ink-muted);
+  text-align: right;
+}
+.sft-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: oklch(0.26 0.01 72);
+  overflow: hidden;
+}
+.sft-bar__fill {
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--sft-ok);
+  transition:
+    width var(--dur-mid) var(--ease-out-quart),
+    background-color var(--dur-fast) linear;
+}
+.sft-bar__fill.is-hot {
+  background: var(--sft-hot);
+}
+
+/* ---- Overclock + actions ------------------------------------------- */
+.sft-overclock {
+  width: 100%;
+  margin-top: var(--space-s);
+  padding: var(--space-xs);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-bright);
+  background: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-overclock:not(:disabled):hover {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+.sft-overclock:disabled {
+  cursor: not-allowed;
+  border-color: var(--line-strong);
+  color: var(--ink-faint);
+}
+.sft-overclock.is-active {
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  border-color: transparent;
+}
+
+/* ---- Prestige ------------------------------------------------------- */
+.sft-prestige__preview {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-xs);
+  line-height: 1.4;
+}
+.sft-prestige__go {
+  width: 100%;
+  margin-bottom: var(--space-m);
+  padding: var(--space-xs);
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+.sft-prestige__go:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.6;
+}
+
+.sft-prow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-xs) var(--space-2xs);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+}
+.sft-prow.is-afford {
+  cursor: pointer;
+}
+.sft-prow.is-afford:hover {
+  background: var(--surface-2);
+}
+.sft-prow:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sft-prow__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.sft-prow__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.sft-prow__desc {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  line-height: 1.35;
+}
+.sft-prow__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.sft-prow__level {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.sft-prow__cost {
+  font-size: 0.85rem;
+  color: var(--gold-bright);
+}
+
+/* ---- Data controls -------------------------------------------------- */
+.sft-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-top: var(--space-s);
+}
+.sft-ctl {
+  flex: 1 1 auto;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  background: none;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-ctl:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.sft-ctl--danger:hover {
+  border-color: var(--sft-hot);
+  color: var(--sft-hot);
+}
+
+/* ---- Toasts --------------------------------------------------------- */
+.sft-toasts {
+  position: fixed;
+  bottom: var(--space-m);
+  right: var(--space-m);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-width: min(92vw, 360px);
+}
+.sft-toast {
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-s);
+  background: oklch(0.16 0.012 75 / 0.96);
+  backdrop-filter: blur(8px);
+  font-size: 0.82rem;
+  color: var(--ink);
+  box-shadow: 0 12px 40px -16px var(--gold-glow);
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition:
+    opacity var(--dur-mid) var(--ease-out-quart),
+    transform var(--dur-mid) var(--ease-out-expo);
+}
+.sft-toast.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- No-JS fallback ------------------------------------------------- */
+.sft-nojs {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  padding: var(--space-l);
+  background: var(--surface);
+  color: var(--ink-muted);
+}
+.no-js .sft-app {
+  display: none;
+}
+.sft-nojs {
+  display: none;
+}
+.no-js .sft-nojs {
+  display: block;
+}
+
+/* ---- Ambient data-center scene ------------------------------------- */
+/* A faux server-room corridor behind the UI. Driven by two custom props
+   set from the render loop: --sft-glow (0..1, farm size) brightens it, and
+   --sft-heat-pct shifts the accent from gold toward the overload red. */
+.sft-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius-m);
+  /* Accent eases from gold to hot-red as the farm overheats. */
+  --accent: color-mix(
+    in oklch,
+    var(--gold),
+    var(--sft-hot) var(--sft-heat-pct, 0%)
+  );
+}
+
+/* Vanishing-point glow at the end of the hall. */
+.sft-scene__glow {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: min(46vw, 620px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent), transparent 62%);
+  filter: blur(26px);
+  opacity: calc(0.14 + var(--sft-glow, 0) * 0.5);
+  transition: opacity var(--dur-slow) linear;
+}
+
+/* Perspective floor grid. */
+.sft-scene__floor {
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: -12%;
+  height: 60%;
+  background:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in oklch, var(--accent) 28%, transparent) 0 1px,
+      transparent 1px 70px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--accent) 20%, transparent) 0 1px,
+      transparent 1px 52px
+    );
+  transform: perspective(440px) rotateX(67deg);
+  transform-origin: bottom center;
+  opacity: calc(0.14 + var(--sft-glow, 0) * 0.34);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 85%);
+  mask-image: linear-gradient(to top, black, transparent 85%);
+}
+
+/* Two angled rack walls converging toward the vanishing point. */
+.sft-scene__wall {
+  position: absolute;
+  top: -12%;
+  bottom: 8%;
+  width: 46%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 10px,
+      oklch(0 0 0 / 0.45) 10px 12px
+    ),
+    repeating-linear-gradient(
+      to right,
+      color-mix(in oklch, var(--surface-2) 92%, transparent) 0 40px,
+      oklch(0 0 0 / 0.5) 40px 44px
+    );
+  opacity: calc(0.28 + var(--sft-glow, 0) * 0.42);
+}
+.sft-scene__wall::after {
+  /* Rows of status LEDs studding the racks. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    var(--accent) 0 1.5px,
+    transparent 2.5px
+  );
+  background-size: 44px 24px;
+  background-position: 10px 5px;
+  opacity: calc(0.3 + var(--sft-glow, 0) * 0.6);
+  animation: sft-flicker 2.6s steps(1, end) infinite;
+}
+.sft-scene__wall--l {
+  left: -8%;
+  transform: perspective(520px) rotateY(40deg);
+  transform-origin: left center;
+}
+.sft-scene__wall--r {
+  right: -8%;
+  transform: perspective(520px) rotateY(-40deg);
+  transform-origin: right center;
+}
+
+/* Depth haze: fades the corridor into the dark and keeps panels readable. */
+.sft-scene__haze {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(125% 80% at 50% 32%, transparent 46%, var(--bg-deep) 96%),
+    linear-gradient(
+      to bottom,
+      oklch(0.15 0.01 75 / 0.55) 0%,
+      transparent 26%,
+      transparent 70%,
+      var(--bg) 100%
+    );
+}
+
+/* ---- Activity log --------------------------------------------------- */
+.sft-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 200px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.sft-log__row {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
+  animation: sft-log-in var(--dur-mid) var(--ease-out-quart);
+}
+.sft-log__row:last-child {
+  border-bottom: 0;
+}
+.sft-log__time {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+}
+.sft-log__msg {
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+.sft-log__row--good .sft-log__msg {
+  color: var(--sft-ok);
+}
+.sft-log__row--warn .sft-log__msg {
+  color: var(--sft-hot);
+}
+.sft-log__row--gold .sft-log__msg {
+  color: var(--gold-bright);
+}
+.sft-log__empty {
+  color: var(--ink-faint);
+  padding: 3px 0;
+}
+
+/* ---- Keyframes ------------------------------------------------------ */
+@keyframes sft-flicker {
+  0%,
+  100% {
+    opacity: calc(0.3 + var(--sft-glow, 0) * 0.6);
+  }
+  48% {
+    opacity: calc(0.18 + var(--sft-glow, 0) * 0.5);
+  }
+  52% {
+    opacity: calc(0.34 + var(--sft-glow, 0) * 0.62);
+  }
+}
+@keyframes sft-log-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Motion + accessibility ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-hall][data-tier="hot"] .sft-cab--producer .sft-u.is-on::before,
+  .sft-cab--fan .sft-u.is-on::after,
+  .sft-fan::before,
+  .sft-cab--liquid .sft-u.is-on,
+  .sft-cab--generator .sft-cab__units::after,
+  .sft-cab--reactor .sft-cab__units::before,
+  [data-hall][data-power="low"] .sft-cab--power .sft-u.is-on,
+  [data-hall][data-oc="1"] .sft-cab__frame,
+  .sft-cab,
+  .sft-scene__wall::after,
+  .sft-log__row {
+    animation: none;
+  }
+  .sft-bar__fill,
+  .sft-u,
+  .sft-row,
+  .sft-toast,
+  .sft-scene__glow {
+    transition: none;
+  }
+}

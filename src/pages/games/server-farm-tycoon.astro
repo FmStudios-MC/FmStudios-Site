@@ -1,0 +1,194 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import "../../styles/games/server-farm.css";
+
+const stats = [
+  { key: "money", label: "Cash", value: "$0", feature: true },
+  { key: "rate", label: "Income", value: "$0/s" },
+  { key: "compute", label: "Compute", value: "0 FLOP/s" },
+  { key: "power", label: "Power", value: "0 / 0 kW" },
+  { key: "reputation", label: "Reputation", value: "0" },
+  { key: "credits", label: "Research", value: "0 ⬡" },
+];
+
+const buyLists: { cat: string; label: string }[] = [
+  { cat: "producer", label: "Producers" },
+  { cat: "power", label: "Power" },
+  { cat: "cooling", label: "Cooling" },
+  { cat: "staff", label: "Staff" },
+];
+---
+
+<BaseLayout
+  title="Server-Farm Tycoon"
+  description="Build a data center, balance power and cooling, and sell computing power in this browser-based idle game by FabiMvurice Interactive."
+>
+  <PageHeader
+    eyebrow="Idle game"
+    title="Server-Farm Tycoon"
+    lede="Buy servers, keep them powered and cool, and sell compute around the clock. It keeps running while you're away."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <!-- No-JS fallback -->
+      <div class="sft-nojs">
+        <p>
+          Server-Farm Tycoon runs entirely in your browser and needs JavaScript
+          to play. Enable it and reload to start building your data center.
+        </p>
+      </div>
+
+      <div class="sft sft-app" data-sft>
+        <!-- Ambient data-center scene (reacts to farm size + heat) -->
+        <div class="sft-scene" aria-hidden="true">
+          <div class="sft-scene__floor"></div>
+          <div class="sft-scene__wall sft-scene__wall--l"></div>
+          <div class="sft-scene__wall sft-scene__wall--r"></div>
+          <div class="sft-scene__glow"></div>
+          <div class="sft-scene__haze"></div>
+        </div>
+
+        <!-- HUD -->
+        <div class="sft-hud" role="status" aria-label="Farm telemetry">
+          {
+            stats.map((s) => (
+              <div class:list={["sft-stat", { "sft-stat--key": s.feature }]}>
+                <span class="sft-stat__label">{s.label}</span>
+                <span class="sft-stat__value" data-stat={s.key}>
+                  {s.value}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+
+        <!-- Data Hall: front-elevation server room, fills as you build -->
+        <section class="sft-panel sft-hall" aria-label="Data hall">
+          <header class="sft-panel__head">
+            <h2 class="sft-panel__title">Data Hall</h2>
+            <span class="sft-panel__note" data-rack-note>0 servers</span>
+          </header>
+
+          <div class="sft-hall__scene">
+            <div class="sft-hall__tray" aria-hidden="true"></div>
+            <div class="sft-hall__floor" aria-hidden="true"></div>
+            <div class="sft-hall__row" data-hall aria-hidden="true"></div>
+            <p class="sft-hall__empty" data-hall-empty>
+              The floor is dark. Buy a Mini Rack to bring the first cabinet
+              online.
+            </p>
+          </div>
+
+          <div class="sft-hall__telemetry">
+            <div class="sft-gauge">
+              <div class="sft-gauge__top">
+                <span class="sft-gauge__name">Heat</span>
+                <span class="sft-gauge__label" data-label-heat>Nominal</span>
+              </div>
+              <div class="sft-bar">
+                <span class="sft-bar__fill" data-bar-heat></span>
+              </div>
+            </div>
+
+            <div class="sft-gauge">
+              <div class="sft-gauge__top">
+                <span class="sft-gauge__name">Power</span>
+                <span class="sft-gauge__label" data-label-power>0 kW</span>
+              </div>
+              <div class="sft-bar">
+                <span class="sft-bar__fill" data-bar-power></span>
+              </div>
+            </div>
+
+            <button class="sft-overclock" data-overclock type="button">
+              Overclock
+            </button>
+          </div>
+        </section>
+
+        <div class="sft-grid">
+          <!-- Operations -->
+          <div class="sft-ops">
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Operations</h2>
+                <span class="sft-panel__note">Build the farm</span>
+              </header>
+              {
+                buyLists.map((b) => (
+                  <>
+                    <p class="sft-subhead">{b.label}</p>
+                    <div class="sft-list" data-list={b.cat} />
+                  </>
+                ))
+              }
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Upgrades</h2>
+                <span class="sft-panel__note">One-time</span>
+              </header>
+              <div class="sft-upgrades" data-upgrades></div>
+            </section>
+          </div>
+
+          <!-- Dashboard -->
+          <aside class="sft-dash">
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Activity</h2>
+                <span class="sft-panel__note">Live</span>
+              </header>
+              <ul class="sft-log" data-log aria-live="polite"></ul>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Rebuild</h2>
+                <span class="sft-panel__note">Prestige</span>
+              </header>
+              <p class="sft-prestige__preview" data-prestige-preview>
+                Earn enough this run to unlock a rebuild.
+              </p>
+              <button
+                class="sft-prestige__go"
+                data-prestige-go
+                type="button"
+                disabled
+              >
+                Decommission &amp; Rebuild
+              </button>
+              <div class="sft-prow-list" data-prestige-list></div>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Save</h2>
+                <span class="sft-panel__note">Local only</span>
+              </header>
+              <div class="sft-controls">
+                <button class="sft-ctl" data-save type="button">Save</button>
+                <button class="sft-ctl" data-export type="button">Export</button>
+                <button class="sft-ctl" data-import type="button">Import</button>
+                <button class="sft-ctl sft-ctl--danger" data-reset type="button">
+                  Reset
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <div class="sft-toasts" data-toasts aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { startGame } from "../../scripts/games/sft";
+  const root = document.querySelector<HTMLElement>("[data-sft]");
+  if (root) startGame(root);
+</script>

@@ -1,0 +1,120 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  tagline: string;
+  kind: string;
+  status: string;
+  live?: boolean;
+  delay?: number;
+}
+
+const { href, title, tagline, kind, status, live = true, delay = 0 } =
+  Astro.props;
+---
+
+<a href={href} class="gcard reveal" style={`--reveal-delay:${delay}s`}>
+  <div class="gcard__top">
+    <span class="gcard__kind">{kind}</span>
+    <span class:list={["gbadge", live ? "gbadge--live" : "gbadge--dev"]}>
+      <span class="gbadge__dot" aria-hidden="true"></span>
+      {status}
+    </span>
+  </div>
+  <h3 class="gcard__title">{title}</h3>
+  <p class="gcard__tagline">{tagline}</p>
+  <span class="gcard__cta">Play <span aria-hidden="true">&rarr;</span></span>
+</a>
+
+<style>
+  .gcard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-l);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    transition:
+      transform var(--dur-mid) var(--ease-out-expo),
+      border-color var(--dur-mid) var(--ease-out-quart),
+      box-shadow var(--dur-mid) var(--ease-out-quart);
+  }
+
+  .gcard:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in oklch, var(--gold) 55%, var(--line));
+    box-shadow: 0 30px 60px -28px var(--gold-glow);
+  }
+
+  .gcard__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
+  .gcard__kind {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    color: var(--gold);
+  }
+
+  .gbadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.3em 0.7em;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .gbadge__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .gbadge--live .gbadge__dot {
+    background: var(--status-live);
+    box-shadow: 0 0 10px var(--status-live);
+  }
+  .gbadge--dev .gbadge__dot {
+    background: var(--status-dev);
+    box-shadow: 0 0 10px var(--status-dev);
+  }
+
+  .gcard__title {
+    font-size: var(--step-2);
+    line-height: 1.1;
+    margin-top: var(--space-2xs);
+  }
+
+  .gcard__tagline {
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  .gcard__cta {
+    margin-top: var(--space-xs);
+    font-weight: 600;
+    color: var(--ink);
+    display: inline-flex;
+    gap: 0.4em;
+  }
+  .gcard__cta span {
+    transition: transform var(--dur-mid) var(--ease-out-expo);
+  }
+  .gcard:hover .gcard__cta span {
+    transform: translateX(0.3em);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gcard:hover {
+      transform: none;
+    }
+  }
+</style>
