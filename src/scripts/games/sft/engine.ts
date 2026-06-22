@@ -8,22 +8,31 @@ import type {
   Derived,
   EventDef,
   GameState,
+  WorkloadDef,
 } from "./types";
 import {
   ACHIEVEMENTS,
   ACHIEVEMENT_BY_ID,
   BUILDINGS,
   BUILDING_BY_ID,
+  CONTRACT_ARCHETYPES,
   EVENT_BY_ID,
   EVENTS,
   PRESTIGE,
   TUNING,
   UPGRADES,
+  WORKLOADS,
 } from "./config";
 
 const owned = (s: GameState, id: string) => s.buildings[id] ?? 0;
 const plevel = (s: GameState, id: string) => s.prestigeUpgrades[id] ?? 0;
 const hasUpgrade = (s: GameState, id: string) => s.upgrades.includes(id);
+
+const PRODUCER_IDS = BUILDINGS.filter((b) => b.category === "producer").map(
+  (b) => b.id,
+);
+const producerCount = (s: GameState): number =>
+  PRODUCER_IDS.reduce((n, id) => n + owned(s, id), 0);
 
 /** Deterministic 0..1 PRNG from an integer seed (mulberry32 finalizer). Keeps
     the incident scheduler replayable, so offline catch-up is fair. */
@@ -56,6 +65,13 @@ export function buildingCost(s: GameState, def: BuildingDef): number {
   return Math.ceil(def.baseCost * Math.pow(growth, owned(s, def.id)));
 }
 
+/** Whether a prestige node's prerequisite branch nodes are satisfied. */
+export function prestigeUnlocked(s: GameState, id: string): boolean {
+  const def = PRESTIGE.find((p) => p.id === id);
+  if (!def?.requires) return true;
+  return def.requires.every((r) => plevel(s, r.id) >= r.level);
+}
+
 /** Cost of the next level of a prestige upgrade. */
 export function prestigeCost(s: GameState, id: string): number {
   const def = PRESTIGE.find((p) => p.id === id);
@@ -80,11 +96,58 @@ export function startingMoney(s: GameState): number {
   return TUNING.startMoney * Math.pow(10, plevel(s, "seed"));
 }
 
+/** Offline catch-up efficiency, lifted by the Warm Spares prestige unlock. */
+export function offlineEfficiency(s: GameState): number {
+  return TUNING.offlineEfficiency + (plevel(s, "warm-spares") > 0 ? 0.25 : 0);
+}
+
 /** Current electricity price ($/kW/s). Swings on a slow deterministic cycle so
     off-peak and peak hours feel different without needing any stored state. */
 export function gridPrice(now: number): number {
   const phase = (now / TUNING.gridCycleMs) * Math.PI * 2;
   return TUNING.basePowerRate * (1 + TUNING.gridSwing * Math.sin(phase));
+}
+
+// --- Workloads ----------------------------------------------------------
+
+/** A workload's live price multiplier, swinging on its own deterministic cycle. */
+export function workloadPrice(def: WorkloadDef, now: number): number {
+  const phase = (now / def.cycleMs) * Math.PI * 2;
+  return def.priceMult * (1 + def.swing * Math.sin(phase));
+}
+
+/** Normalised capacity split across workloads. Falls back to "all on the first
+    workload" when nothing is allocated, so the default run behaves like before. */
+export function allocationFractions(
+  s: GameState,
+): { def: WorkloadDef; frac: number }[] {
+  let total = 0;
+  const weights = WORKLOADS.map((def) => {
+    const w = Math.max(0, s.allocation[def.id] ?? 0);
+    total += w;
+    return { def, w };
+  });
+  if (total <= 0) {
+    return WORKLOADS.map((def, i) => ({ def, frac: i === 0 ? 1 : 0 }));
+  }
+  return weights.map(({ def, w }) => ({ def, frac: w / total }));
+}
+
+/** Shift a workload's allocation weight by `delta`, clamped to [0, max]. */
+export function setAllocation(s: GameState, id: string, delta: number): boolean {
+  if (!WORKLOADS.some((w) => w.id === id)) return false;
+  // If nothing is explicitly allocated yet (fresh/migrated save), materialise
+  // the implicit baseline first, so the first nudge blends rather than jumps.
+  const total = WORKLOADS.reduce(
+    (n, w) => n + Math.max(0, s.allocation[w.id] ?? 0),
+    0,
+  );
+  if (total <= 0) s.allocation[WORKLOADS[0].id] = 1;
+  const cur = Math.max(0, Math.floor(s.allocation[id] ?? 0));
+  const next = Math.max(0, Math.min(TUNING.allocationMax, cur + delta));
+  if (next === cur) return false;
+  s.allocation[id] = next;
+  return true;
 }
 
 // --- Incident scheduler -------------------------------------------------
@@ -151,6 +214,53 @@ export function eventRespondCost(s: GameState, grossPerSec: number): number {
   );
 }
 
+// --- Rack hotspot scheduler ---------------------------------------------
+
+/** Set the next-hotspot timestamp; technicians stretch the gap. */
+function scheduleNextHotspot(s: GameState, now: number): void {
+  const r = rng(s.hotspotSeed ^ 0xc2b2ae35);
+  const gap =
+    TUNING.hotspotMinGapMs +
+    r * (TUNING.hotspotMaxGapMs - TUNING.hotspotMinGapMs) +
+    owned(s, "technician") * TUNING.hotspotTechGapMs;
+  s.nextHotspotAt = now + gap;
+}
+
+/** Advance hotspot state up to `now`, mirroring advanceEvents: expire a stale
+    one, then fire a due one once the floor is busy enough to have hot spots.
+    A window that fully elapsed offline is consumed rather than applied. */
+function advanceHotspots(s: GameState, now: number): void {
+  if (s.nextHotspotAt === 0) {
+    scheduleNextHotspot(s, now);
+    return;
+  }
+  if (s.hotspot && now >= s.hotspot.endsAt) {
+    s.hotspot = null;
+    scheduleNextHotspot(s, now);
+  }
+  if (!s.hotspot && now >= s.nextHotspotAt) {
+    if (producerCount(s) < TUNING.hotspotMinProducers) {
+      scheduleNextHotspot(s, now);
+      return;
+    }
+    const endsAt = s.nextHotspotAt + TUNING.hotspotDurationSec * 1000;
+    s.hotspotSeed += 1;
+    if (now < endsAt) {
+      s.hotspot = { startedAt: s.nextHotspotAt, endsAt };
+    } else {
+      scheduleNextHotspot(s, now);
+    }
+  }
+}
+
+/** Cost to immediately clear the live hotspot. */
+export function hotspotClearCost(grossPerSec: number): number {
+  return Math.max(
+    TUNING.hotspotClearMin,
+    Math.ceil(grossPerSec * TUNING.hotspotClearSeconds),
+  );
+}
+
 // --- Contract scheduler -------------------------------------------------
 
 /** Set the earliest time a new offer may be posted, from a deterministic gap. */
@@ -162,42 +272,43 @@ function scheduleNextOffer(s: GameState, now: number): void {
   s.nextOfferAt = now + gap;
 }
 
-/** Build a contract offer deterministically, scaled to the current farm so a
-    deal is always relevant to whoever's offered it. Returns null when there's
-    nothing meaningful to ask for yet (no live compute). */
+/** Build a contract offer deterministically, scaled to the current farm and
+    shaped by a rotating archetype, so the board holds a mix of deal shapes.
+    Returns null when there's nothing meaningful to ask for yet (no compute). */
 function generateOffer(s: GameState, now: number): ContractOffer | null {
   const d = derive(s, now);
   if (d.compute <= 0) return null;
 
-  // Four decorrelated draws off the same monotonic seed.
-  const r1 = rng(s.contractSeed);
+  const arch = CONTRACT_ARCHETYPES[s.contractSeed % CONTRACT_ARCHETYPES.length];
+
+  // Decorrelated draws off the same monotonic seed.
   const r2 = rng(s.contractSeed ^ 0xa5a5a5a5);
   const r3 = rng((s.contractSeed + 0x9e3779b9) | 0);
   const r4 = rng((s.contractSeed ^ 0x27d4eb2f) | 0);
 
-  const durs = TUNING.contractDurationsSec;
-  const durationSec = durs[Math.min(durs.length - 1, Math.floor(r1 * durs.length))];
+  const durationSec = TUNING.contractDurationsSec[arch.durIdx];
 
   // Required output is a slice of full-throughput production over the window;
-  // > 1.0 means you'll have to grow capacity to fulfil it in time.
-  const targetMult =
-    TUNING.contractTargetMin +
-    r2 * (TUNING.contractTargetMax - TUNING.contractTargetMin);
+  // the archetype sets the centre, a jittered factor adds variety.
+  const targetMult = arch.target * (0.85 + r2 * 0.3);
   const required = Math.max(1, d.compute * durationSec * targetMult);
 
-  // Reward beats letting that compute auto-sell, paid as a lump sum.
-  const bonus =
-    TUNING.contractRewardBonusMin +
-    r3 * (TUNING.contractRewardBonusMax - TUNING.contractRewardBonusMin);
-  const reward = Math.ceil(required * d.price * bonus);
+  // Reward beats letting that compute auto-sell, paid as a lump sum; Standing
+  // Orders (prestige) sweetens every payout.
+  const standing = plevel(s, "standing-orders") > 0 ? 1.25 : 1;
+  const bonus = arch.reward * (0.9 + r3 * 0.2);
+  const reward = Math.ceil(required * d.price * bonus * standing);
 
-  // Reputation is the contract's second currency: completing lifts it, and
-  // failing an accepted deal costs more than completing it pays.
-  const repReward = Math.max(1, Math.round((durationSec / 60) * (2 + r4 * 3)));
+  // Reputation is the contract's second currency, weighted by archetype.
+  const repReward = Math.max(
+    1,
+    Math.round((durationSec / 60) * (2 + r4 * 3) * arch.rep),
+  );
   const repPenalty = Math.round(repReward * 1.5);
 
   return {
     id: "ct-" + s.contractSeed,
+    tag: arch.tag,
     required,
     reward,
     repReward,
@@ -207,29 +318,32 @@ function generateOffer(s: GameState, now: number): ContractOffer | null {
   };
 }
 
-/** Advance the offer board up to `now`: withdraw a stale offer, then post a
-    fresh one when due. No offers are posted while a contract is in progress
-    (the board holds one job at a time) or before the farm is established. */
+/** Advance the offer board up to `now`: withdraw stale offers, then top the
+    board up toward its size when due and the farm is established. The board is
+    independent of the active jobs now, so deals keep appearing while you work. */
 function advanceContracts(s: GameState, now: number): void {
   if (s.nextOfferAt === 0) {
     scheduleNextOffer(s, now);
     return;
   }
-  if (s.contractOffer && now >= s.contractOffer.expiresAt) {
-    s.contractOffer = null;
-    scheduleNextOffer(s, now);
+  if (s.contractOffers.length) {
+    s.contractOffers = s.contractOffers.filter((o) => now < o.expiresAt);
   }
   if (
-    !s.contractOffer &&
-    !s.contract &&
     now >= s.nextOfferAt &&
-    s.lifetimeEarnings >= TUNING.contractMinEarnings
+    s.lifetimeEarnings >= TUNING.contractMinEarnings &&
+    s.contractOffers.length < TUNING.contractBoardSize
   ) {
     const offer = generateOffer(s, now);
     s.contractSeed += 1;
-    if (offer) s.contractOffer = offer;
-    else scheduleNextOffer(s, now);
+    if (offer) s.contractOffers.push(offer);
+    scheduleNextOffer(s, now);
   }
+}
+
+/** Reputation multiplier on a contract payout from the current streak. */
+function streakMult(s: GameState): number {
+  return 1 + Math.min(TUNING.contractStreakMax, s.contractStreak) * TUNING.contractStreakStep;
 }
 
 /** Everything the UI and tick need, computed from state. */
@@ -237,6 +351,7 @@ export function derive(s: GameState, now: number): Derived {
   let computeBase = 0;
   let powerCap = TUNING.basePowerCap;
   let powerDraw = 0;
+  let producerPowerDraw = 0;
   let coolingCap =
     TUNING.baseCoolingCap * Math.pow(1.5, plevel(s, "passive-cooling"));
   let heatGen = 0;
@@ -276,14 +391,18 @@ export function derive(s: GameState, now: number): Derived {
 
   // Live incident multipliers (guarded by endsAt so the effect stops the
   // instant the window closes, even before the next economy tick clears it).
+  // Predictive Ops (prestige) eases bad incidents halfway back toward neutral.
   const liveEvent =
     s.activeEvent && now < s.activeEvent.endsAt ? s.activeEvent : null;
   const evDef = liveEvent ? EVENT_BY_ID[liveEvent.id] : undefined;
-  const evCoolingMult = evDef?.coolingMult ?? 1;
-  const evGridMult = evDef?.gridPriceMult ?? 1;
-  const evPowerCapMult = evDef?.powerCapMult ?? 1;
-  const evPriceMult = evDef?.priceMult ?? 1;
-  const evComputeMult = evDef?.computeMult ?? 1;
+  const soften =
+    evDef?.kind === "bad" && plevel(s, "predictive-ops") > 0 ? 0.5 : 0;
+  const ease = (m: number) => 1 + (m - 1) * (1 - soften);
+  const evCoolingMult = ease(evDef?.coolingMult ?? 1);
+  const evGridMult = ease(evDef?.gridPriceMult ?? 1);
+  const evPowerCapMult = ease(evDef?.powerCapMult ?? 1);
+  const evComputeMult = ease(evDef?.computeMult ?? 1);
+  const evPriceMult = evDef?.priceMult ?? 1; // good-only, never softened
 
   for (const def of BUILDINGS) {
     const n = owned(s, def.id);
@@ -299,15 +418,39 @@ export function derive(s: GameState, now: number): Derived {
     if (def.powerDraw) {
       const draw = def.powerDraw * n;
       // PUE tuning only discounts producers, not infrastructure.
-      powerDraw += def.category === "producer" ? draw * powerDrawFactor : draw;
+      if (def.category === "producer") {
+        const p = draw * powerDrawFactor;
+        powerDraw += p;
+        producerPowerDraw += p;
+      } else {
+        powerDraw += draw;
+      }
     }
     if (def.multCompute) engineerMult += def.multCompute * n;
     if (def.multPrice) salesMult += def.multPrice * n;
     if (def.multUptime) uptimeBonus += def.multUptime * n;
   }
 
+  // Workload split: the blend sets the effective sell price and the extra heat
+  // and power the chosen markets drive (AI training runs hot and hungry).
+  const fractions = allocationFractions(s);
+  let workloadPriceMult = 0;
+  let workloadHeatExtra = 0;
+  let workloadPowerExtra = 0;
+  for (const { def, frac } of fractions) {
+    workloadPriceMult += frac * workloadPrice(def, now);
+    if (def.heatFactor) workloadHeatExtra += frac * def.heatFactor;
+    if (def.powerFactor) workloadPowerExtra += frac * def.powerFactor;
+  }
+  heatGen *= 1 + workloadHeatExtra;
+  powerDraw += producerPowerDraw * workloadPowerExtra;
+
   coolingCap *= coolingCapMult * evCoolingMult;
   powerCap *= evPowerCapMult;
+
+  // Rack hotspot: a live one cuts effective cooling until cleared or it expires.
+  const hotspotActive = s.hotspot != null && now < s.hotspot.endsAt;
+  if (hotspotActive) coolingCap *= TUNING.hotspotCoolingMult;
 
   // Heat throttle: full output while cooling keeps up, easing toward a floor
   // as heat generation outruns cooling capacity.
@@ -331,7 +474,8 @@ export function derive(s: GameState, now: number): Derived {
       : 1;
 
   // Prestige + upgrade + staff compute multipliers, plus active overclock.
-  const prestigeComputeMult = 1 + 0.25 * plevel(s, "dist-arch");
+  const prestigeComputeMult =
+    (1 + 0.25 * plevel(s, "dist-arch")) * (1 + 0.35 * plevel(s, "hyperthread"));
   const overclockActive = now < s.overclockUntil;
   const overclock = overclockActive ? TUNING.overclockMult : 1;
   const computeMult =
@@ -344,7 +488,8 @@ export function derive(s: GameState, now: number): Derived {
   const compute =
     computeBase * computeMult * heatThrottle * powerThrottle * bandwidthThrottle;
 
-  // Sell price: base, lifted by reputation, sales staff, upgrades, prestige.
+  // Sell price: base, lifted by reputation, sales staff, upgrades, prestige,
+  // and the live workload blend.
   const repMult = 1 + Math.log10(1 + s.reputation) * 0.2;
   const prestigePriceMult = 1 + 0.2 * plevel(s, "market");
   const price =
@@ -353,12 +498,35 @@ export function derive(s: GameState, now: number): Derived {
     (1 + salesMult) *
     upgradePriceMult *
     prestigePriceMult *
-    evPriceMult;
+    evPriceMult *
+    workloadPriceMult;
 
   // Operating cost: every kW of draw is billed at the live grid price.
   const grid = gridPrice(now) * evGridMult;
   const grossPerSec = compute * price;
   const powerCost = powerDraw * grid;
+
+  // Per-workload view for the UI: normalised share + live effective $/FLOP.
+  const workloads = fractions.map(({ def, frac }) => {
+    const slope = Math.cos((now / def.cycleMs) * Math.PI * 2);
+    const trend: "up" | "down" | "flat" =
+      def.swing < 0.08 ? "flat" : slope > 0.15 ? "up" : slope < -0.15 ? "down" : "flat";
+    return {
+      id: def.id,
+      name: def.name,
+      alloc: frac,
+      // Effective $/FLOP this workload would fetch (everything except the blend).
+      price:
+        TUNING.basePrice *
+        repMult *
+        (1 + salesMult) *
+        upgradePriceMult *
+        prestigePriceMult *
+        evPriceMult *
+        workloadPrice(def, now),
+      trend,
+    };
+  });
 
   // Surface the live incident for the UI banner.
   let event: Derived["event"] = null;
@@ -376,32 +544,40 @@ export function derive(s: GameState, now: number): Derived {
     };
   }
 
-  // Surface the demand market: the contract in progress and/or the live offer,
+  // Surface the live hotspot for the UI banner.
+  const hotspot =
+    hotspotActive && s.hotspot
+      ? {
+          endsAt: s.hotspot.endsAt,
+          severity: 1 - TUNING.hotspotCoolingMult,
+          clearCost: hotspotClearCost(grossPerSec),
+        }
+      : null;
+
+  // Surface the demand market: jobs in progress + the offers on the board,
   // with timers + progress resolved against `now` so the UI only paints.
-  let activeContract: Derived["contract"]["active"] = null;
-  if (s.contract) {
-    const c = s.contract;
-    activeContract = {
-      required: c.required,
-      delivered: c.delivered,
-      progress: c.required > 0 ? Math.min(1, c.delivered / c.required) : 1,
-      reward: c.reward,
-      repReward: c.repReward,
-      remainingSec: Math.max(0, (c.endsAt - now) / 1000),
-    };
-  }
-  let contractOffer: Derived["contract"]["offer"] = null;
-  if (s.contractOffer && now < s.contractOffer.expiresAt) {
-    const o = s.contractOffer;
-    contractOffer = {
+  const active = s.contracts.map((c) => ({
+    id: c.id,
+    tag: c.tag,
+    required: c.required,
+    delivered: c.delivered,
+    progress: c.required > 0 ? Math.min(1, c.delivered / c.required) : 1,
+    reward: c.reward,
+    repReward: c.repReward,
+    remainingSec: Math.max(0, (c.endsAt - now) / 1000),
+  }));
+  const offers = s.contractOffers
+    .filter((o) => now < o.expiresAt)
+    .map((o) => ({
+      id: o.id,
+      tag: o.tag,
       required: o.required,
       reward: o.reward,
       repReward: o.repReward,
       repPenalty: o.repPenalty,
       durationSec: o.durationSec,
       expiresSec: Math.max(0, (o.expiresAt - now) / 1000),
-    };
-  }
+    }));
 
   return {
     computeBase,
@@ -426,8 +602,15 @@ export function derive(s: GameState, now: number): Derived {
     pendingCredits: pendingCredits(s),
     overclockActive,
     computeMult,
+    workloads,
+    hotspot,
     event,
-    contract: { active: activeContract, offer: contractOffer },
+    contracts: {
+      streak: s.contractStreak,
+      canAccept: s.contracts.length < TUNING.contractMaxActive,
+      active,
+      offers,
+    },
   };
 }
 
@@ -457,9 +640,10 @@ export function tick(
     s.lastTick = now;
     return s;
   }
-  // Resolve incidents + post/withdraw contract offers up to `now` before
-  // reading the economy off state.
+  // Resolve incidents + hotspots + post/withdraw contract offers up to `now`
+  // before reading the economy off state.
   advanceEvents(s, now);
+  advanceHotspots(s, now);
   advanceContracts(s, now);
   const d = derive(s, now);
 
@@ -476,27 +660,31 @@ export function tick(
   // Reputation accrues slowly, scaled by output so a bigger farm earns trust.
   s.reputation += TUNING.reputationRate * Math.sqrt(d.compute) * dtSec;
 
-  // Contract delivery: effective compute accrues toward the active contract,
-  // but only for the slice of this window that fell before its deadline (so a
-  // window that elapsed offline can't deliver past the deadline). Fulfils the
-  // instant it's met; fails the instant the deadline passes short.
-  if (s.contract) {
-    const c = s.contract;
+  // Contract delivery: each active job accrues effective compute over the slice
+  // of this window that fell before its deadline (so a window that elapsed
+  // offline can't deliver past the deadline). Fulfils the instant it's met
+  // (paying a streak-boosted reputation reward); fails the instant it lapses.
+  if (s.contracts.length) {
     const windowStart = now - dtSec * 1000;
-    const deliverSec =
-      Math.max(0, Math.min(now, c.endsAt) - windowStart) / 1000;
-    c.delivered += d.compute * deliverSec * efficiency;
-    if (c.delivered >= c.required) {
-      s.money += c.reward;
-      s.runEarnings += c.reward;
-      s.lifetimeEarnings += c.reward;
-      s.reputation += c.repReward;
-      s.contractsCompleted += 1;
-      s.contract = null;
-    } else if (now >= c.endsAt) {
-      s.reputation = Math.max(0, s.reputation - c.repPenalty);
-      s.contractsFailed += 1;
-      s.contract = null;
+    for (let i = s.contracts.length - 1; i >= 0; i--) {
+      const c = s.contracts[i];
+      const deliverSec =
+        Math.max(0, Math.min(now, c.endsAt) - windowStart) / 1000;
+      c.delivered += d.compute * deliverSec * efficiency;
+      if (c.delivered >= c.required) {
+        s.money += c.reward;
+        s.runEarnings += c.reward;
+        s.lifetimeEarnings += c.reward;
+        s.reputation += c.repReward * streakMult(s);
+        s.contractsCompleted += 1;
+        s.contractStreak += 1;
+        s.contracts.splice(i, 1);
+      } else if (now >= c.endsAt) {
+        s.reputation = Math.max(0, s.reputation - c.repPenalty);
+        s.contractsFailed += 1;
+        s.contractStreak = 0;
+        s.contracts.splice(i, 1);
+      }
     }
   }
 
@@ -532,6 +720,7 @@ export function buyUpgrade(s: GameState, id: string): boolean {
 }
 
 export function buyPrestige(s: GameState, id: string): boolean {
+  if (!prestigeUnlocked(s, id)) return false;
   const cost = prestigeCost(s, id);
   if (!isFinite(cost) || s.credits < cost) return false;
   s.credits -= cost;
@@ -550,14 +739,21 @@ export function doPrestige(s: GameState, now: number): boolean {
   s.runEarnings = 0;
   s.buildings = {};
   s.upgrades = [];
+  // Prefab Halls (prestige) hands every rebuild a Server Hall to build into.
+  if (plevel(s, "prefab-halls") > 0) s.buildings["server-hall"] = 1;
+  // Reset the workload split back to the default baseline.
+  s.allocation = { [WORKLOADS[0].id]: 1 };
   s.overclockUntil = 0;
   s.overclockReadyAt = 0;
-  // A world incident on a now-empty farm is meaningless — clear it and let the
-  // scheduler line up the next one. (Milestones persist across rebuilds.)
+  // A world incident / hotspot on a now-empty farm is meaningless — clear them
+  // and let the schedulers line up the next ones. (Milestones persist.)
   s.activeEvent = null;
-  // Likewise drop any contract/offer: the deal was sized for the old farm.
-  s.contract = null;
-  s.contractOffer = null;
+  s.hotspot = null;
+  s.nextHotspotAt = 0;
+  // Likewise drop any contracts/offers: the deals were sized for the old farm.
+  s.contracts = [];
+  s.contractOffers = [];
+  s.contractStreak = 0;
   s.nextOfferAt = 0;
   s.lastTick = now;
   return true;
@@ -578,12 +774,28 @@ export function respondEvent(s: GameState, now: number): boolean {
   return true;
 }
 
-/** Take the offer on the board, starting its delivery clock from `now`. */
-export function acceptContract(s: GameState, now: number): boolean {
-  const o = s.contractOffer;
-  if (!o || s.contract || now >= o.expiresAt) return false;
-  s.contract = {
+/** Spend cash to immediately clear the live rack hotspot. */
+export function rebalanceRacks(s: GameState, now: number): boolean {
+  if (!s.hotspot || now >= s.hotspot.endsAt) return false;
+  const cost = hotspotClearCost(derive(s, now).grossPerSec);
+  if (s.money < cost) return false;
+  s.money -= cost;
+  s.hotspot = null;
+  s.hotspotsCleared += 1;
+  scheduleNextHotspot(s, now);
+  return true;
+}
+
+/** Take an offer off the board, starting its delivery clock from `now`. */
+export function acceptContract(s: GameState, now: number, id: string): boolean {
+  if (s.contracts.length >= TUNING.contractMaxActive) return false;
+  const idx = s.contractOffers.findIndex((o) => o.id === id);
+  if (idx < 0) return false;
+  const o = s.contractOffers[idx];
+  if (now >= o.expiresAt) return false;
+  s.contracts.push({
     id: o.id,
+    tag: o.tag,
     required: o.required,
     delivered: 0,
     reward: o.reward,
@@ -591,17 +803,16 @@ export function acceptContract(s: GameState, now: number): boolean {
     repPenalty: o.repPenalty,
     startedAt: now,
     endsAt: now + o.durationSec * 1000,
-  };
-  s.contractOffer = null;
-  scheduleNextOffer(s, now);
+  });
+  s.contractOffers.splice(idx, 1);
   return true;
 }
 
-/** Pass on the offer on the board; the scheduler lines up the next one. */
-export function declineContract(s: GameState, now: number): boolean {
-  if (!s.contractOffer) return false;
-  s.contractOffer = null;
-  scheduleNextOffer(s, now);
+/** Pass on an offer; the scheduler tops the board back up in time. */
+export function declineContract(s: GameState, _now: number, id: string): boolean {
+  const idx = s.contractOffers.findIndex((o) => o.id === id);
+  if (idx < 0) return false;
+  s.contractOffers.splice(idx, 1);
   return true;
 }
 

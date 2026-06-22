@@ -13,7 +13,9 @@ import {
   derive,
   doPrestige,
   gridPrice,
+  rebalanceRacks,
   respondEvent,
+  setAllocation,
   tick,
   triggerOverclock,
 } from "./engine";
@@ -63,16 +65,26 @@ export function startGame(root: HTMLElement) {
         renderNow();
       }
     },
-    onAcceptContract: () => {
-      const o = state.contractOffer;
-      if (o && acceptContract(state, Date.now())) {
-        ui.toast("Contract accepted. Deliver before the deadline.");
-        ui.pushLog(`◇ Contract accepted — ${money(o.reward)} on delivery`, "gold");
+    onRebalance: () => {
+      if (rebalanceRacks(state, Date.now())) {
+        ui.toast("Racks rebalanced.");
+        ui.pushLog("✓ Rack hotspot rebalanced", "good");
         renderNow();
       }
     },
-    onDeclineContract: () => {
-      if (declineContract(state, Date.now())) {
+    onSetAllocation: (id, delta) => {
+      if (setAllocation(state, id, delta)) renderNow();
+    },
+    onAcceptContract: (id) => {
+      const o = state.contractOffers.find((x) => x.id === id);
+      if (o && acceptContract(state, Date.now(), id)) {
+        ui.toast("Contract accepted. Deliver before the deadline.");
+        ui.pushLog(`◇ ${o.tag} contract accepted — ${money(o.reward)} on delivery`, "gold");
+        renderNow();
+      }
+    },
+    onDeclineContract: (id) => {
+      if (declineContract(state, Date.now(), id)) {
         ui.pushLog("◇ Contract passed", "");
         renderNow();
       }
@@ -175,7 +187,8 @@ export function startGame(root: HTMLElement) {
   let prevBrownout = false;
   let prevSaturated = false;
   let prevEventId: string | null = state.activeEvent?.id ?? null;
-  let prevOfferId: string | null = state.contractOffer?.id ?? null;
+  let prevHotspot = state.hotspot != null;
+  let prevOfferIds = new Set(state.contractOffers.map((o) => o.id));
   let prevCompleted = state.contractsCompleted;
   let prevFailed = state.contractsFailed;
   let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
@@ -243,18 +256,29 @@ export function startGame(root: HTMLElement) {
     }
     prevEventId = curId;
 
-    // Contracts: announce a fresh offer, and resolve fulfilment/failure off
-    // the lifetime counters (the engine clears the contract when it resolves).
-    const offerId = state.contractOffer?.id ?? null;
-    if (offerId && offerId !== prevOfferId) {
-      const o = state.contractOffer!;
-      ui.pushLog(
-        `◇ Contract offered — ${fmt(o.required)} FLOP for ${money(o.reward)}`,
-        "gold",
-      );
-      ui.toast(`New contract: deliver ${fmt(o.required)} FLOP for ${money(o.reward)}.`, 6000);
+    // Hotspots: announce a fresh one and the all-clear when it ends.
+    const hotspot = d.hotspot != null;
+    if (hotspot && !prevHotspot)
+      ui.pushLog("⚠ Rack hotspot — cooling degraded, rebalance to clear", "warn");
+    else if (!hotspot && prevHotspot)
+      ui.pushLog("✓ Rack hotspot cleared", "good");
+    prevHotspot = hotspot;
+
+    // Contracts: announce each fresh offer on the board, and resolve
+    // fulfilment/failure off the lifetime counters (the engine clears a
+    // contract when it resolves).
+    const offerIds = new Set<string>();
+    for (const o of state.contractOffers) {
+      offerIds.add(o.id);
+      if (!prevOfferIds.has(o.id)) {
+        ui.pushLog(
+          `◇ ${o.tag} contract — ${fmt(o.required)} FLOP for ${money(o.reward)}`,
+          "gold",
+        );
+        ui.toast(`New ${o.tag} contract: ${fmt(o.required)} FLOP for ${money(o.reward)}.`, 6000);
+      }
     }
-    prevOfferId = offerId;
+    prevOfferIds = offerIds;
 
     if (state.contractsCompleted > prevCompleted) {
       ui.pushLog("✦ Contract fulfilled — bonus + reputation paid", "gold");

@@ -40,6 +40,25 @@ export interface BuildingDef {
   unlockAt?: number;
 }
 
+/** A sellable compute workload. The player splits the farm's capacity across
+    these; each has its own price behaviour and its own load cost on the farm,
+    so chasing the lucrative one (AI) means paying for it in heat and power. */
+export interface WorkloadDef {
+  id: string;
+  name: string;
+  desc: string;
+  /** Baseline $/FLOP multiplier vs. TUNING.basePrice (web = 1.0, the neutral). */
+  priceMult: number;
+  /** ± fraction the price drifts on its own deterministic cycle. */
+  swing: number;
+  /** Length of one full price cycle, ms — decorrelates the workloads. */
+  cycleMs: number;
+  /** Extra heat driven at full allocation (fraction added to heat generation). */
+  heatFactor?: number;
+  /** Extra power drawn at full allocation (fraction added to producer draw). */
+  powerFactor?: number;
+}
+
 export interface UpgradeDef {
   id: string;
   name: string;
@@ -64,6 +83,10 @@ export interface PrestigeDef {
   baseCost: number; // in research credits
   costGrowth: number;
   maxLevel?: number;
+  /** Which arm of the tech tree this node sits on (for grouping + colour). */
+  branch?: "scale" | "efficiency" | "market";
+  /** Prerequisite nodes that must reach a level before this one unlocks. */
+  requires?: { id: string; level: number }[];
 }
 
 /** A world incident. While active, its multipliers ride the existing Derived
@@ -98,11 +121,20 @@ export interface ActiveEvent {
   responded: boolean;
 }
 
+/** A localised thermal hotspot on the floor — the maintenance loop. While live
+    it cuts effective cooling; the player clears it early with a rebalance, or
+    waits it out and eats the throttle. Deterministic scheduler, like incidents. */
+export interface ActiveHotspot {
+  startedAt: number; // epoch ms
+  endsAt: number; // epoch ms
+}
+
 /** A compute-delivery contract on the demand market, before it is accepted.
     Params are baked at offer time from a live snapshot, so the deal the player
     sees is the deal they get. Generated deterministically by the scheduler. */
 export interface ContractOffer {
   id: string; // unique instance id (also used for log/UI keys)
+  tag: string; // archetype label shown on the board ("Rush", "Bulk", "Reputation")
   required: number; // total FLOP to deliver
   reward: number; // cash paid on fulfilment
   repReward: number; // reputation gained on fulfilment
@@ -115,6 +147,7 @@ export interface ContractOffer {
     compute each tick; fulfils early at `required`, fails at `endsAt`. */
 export interface ActiveContract {
   id: string;
+  tag: string;
   required: number;
   delivered: number;
   reward: number;
@@ -154,6 +187,10 @@ export interface GameState {
   upgrades: string[]; // purchased one-off upgrade ids
   prestigeUpgrades: Record<string, number>; // prestige id -> level
 
+  // Workloads: how compute capacity is split across markets, as raw integer
+  // weights (normalised in derive). Empty = everything on the first workload.
+  allocation: Record<string, number>;
+
   overclockUntil: number; // epoch ms, while > now the burst is active
   overclockReadyAt: number; // epoch ms, cooldown gate
   lastTick: number; // epoch ms, for offline catch-up
@@ -164,14 +201,22 @@ export interface GameState {
   eventSeed: number; // monotonic counter seeding the deterministic rolls
   eventsResponded: number; // lifetime count, for the milestone predicate
 
+  // Rack hotspots / maintenance (deterministic scheduler — see advanceHotspots).
+  hotspot: ActiveHotspot | null;
+  nextHotspotAt: number; // epoch ms the next hotspot is due (0 = unscheduled)
+  hotspotSeed: number; // monotonic counter seeding the deterministic rolls
+  hotspotsCleared: number; // lifetime count, for the milestone predicate
+
   // Milestones (persist across rebuilds).
   achievements: string[]; // earned achievement ids
 
-  // Contracts / demand market (deterministic offer scheduler).
-  contract: ActiveContract | null; // the one in progress, if any
-  contractOffer: ContractOffer | null; // the offer on the board, if any
+  // Contracts / demand market: a board of offers and concurrent active jobs,
+  // plus a fulfilment streak that lifts reputation payouts.
+  contracts: ActiveContract[]; // jobs in progress
+  contractOffers: ContractOffer[]; // offers on the board
   nextOfferAt: number; // epoch ms a new offer may appear (0 = unscheduled)
   contractSeed: number; // monotonic counter seeding the deterministic rolls
+  contractStreak: number; // consecutive fulfilments (resets on a failure)
   contractsCompleted: number; // lifetime count, for milestones + UI
   contractsFailed: number; // lifetime count, for UI
 }
@@ -192,7 +237,7 @@ export interface Derived {
   bandwidthThrottle: number; // 0..1 hard cap when draw exceeds capacity
   spaceCap: number; // rack units of floor space available
   spaceUsed: number; // rack units occupied by installed equipment
-  price: number; // $/FLOP after reputation + mults
+  price: number; // blended $/FLOP after reputation + mults + workload split
   gridPrice: number; // current electricity price, $/kW/s
   grossPerSec: number; // revenue before the electricity bill
   powerCost: number; // electricity bill, $/s
@@ -200,6 +245,18 @@ export interface Derived {
   pendingCredits: number; // credits gained if prestiging now
   overclockActive: boolean;
   computeMult: number; // combined compute multiplier (debug/preview)
+
+  /** Per-workload split as the UI needs it: normalised share + live price. */
+  workloads: {
+    id: string;
+    name: string;
+    alloc: number; // 0..1 share of capacity
+    price: number; // effective $/FLOP for this workload right now
+    trend: "up" | "down" | "flat";
+  }[];
+
+  /** The live rack hotspot, or null. `severity` is the cooling fraction lost. */
+  hotspot: { endsAt: number; severity: number; clearCost: number } | null;
 
   /** The live incident as the UI needs it, or null. */
   event: {
@@ -212,24 +269,30 @@ export interface Derived {
     canRespond: boolean;
   } | null;
 
-  /** The demand market as the UI needs it: the contract in progress and/or
-      the offer on the board, with timers/progress resolved against `now`. */
-  contract: {
+  /** The demand market as the UI needs it: the jobs in progress and the offers
+      on the board, with timers/progress resolved against `now`. */
+  contracts: {
+    streak: number;
+    canAccept: boolean; // false once the active list is at capacity
     active: {
+      id: string;
+      tag: string;
       required: number;
       delivered: number;
       progress: number; // 0..1
       reward: number;
       repReward: number;
       remainingSec: number;
-    } | null;
-    offer: {
+    }[];
+    offers: {
+      id: string;
+      tag: string;
       required: number;
       reward: number;
       repReward: number;
       repPenalty: number;
       durationSec: number;
       expiresSec: number; // seconds until the offer is withdrawn
-    } | null;
+    }[];
   };
 }

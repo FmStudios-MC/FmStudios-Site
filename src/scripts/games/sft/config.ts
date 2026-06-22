@@ -7,6 +7,7 @@ import type {
   EventDef,
   PrestigeDef,
   UpgradeDef,
+  WorkloadDef,
 } from "./types";
 
 export const TUNING = {
@@ -66,7 +67,74 @@ export const TUNING = {
   contractTargetMax: 1.35,
   contractRewardBonusMin: 1.4, // reward = required · price · (min..max), so a
   contractRewardBonusMax: 1.95, // fulfilled contract beats letting it auto-sell
+  contractBoardSize: 3, // how many offers sit on the board at once
+  contractMaxActive: 3, // how many contracts can run concurrently
+  contractStreakStep: 0.1, // reputation bonus per consecutive fulfilment
+  contractStreakMax: 10, // streak length the bonus caps out at
+
+  // Workloads: the player splits capacity across markets (integer weights up to
+  // this max each); the blend sets the effective sell price and the load the
+  // farm carries. Web is the neutral baseline so the default split (all web)
+  // leaves the early-game economy exactly where it was.
+  allocationMax: 20,
+
+  // Rack hotspots: a deterministic maintenance scheduler. Once the floor is big
+  // enough, a hotspot periodically cuts effective cooling until it's cleared or
+  // it times out; each technician on staff lengthens the gap between them.
+  hotspotMinProducers: 8, // producers online before hotspots can occur
+  hotspotMinGapMs: 60_000, // shortest stretch between hotspots
+  hotspotMaxGapMs: 110_000, // longest stretch between hotspots
+  hotspotTechGapMs: 12_000, // each technician adds this to the gap
+  hotspotDurationSec: 40, // how long an unattended hotspot lasts
+  hotspotCoolingMult: 0.6, // effective cooling while a hotspot is live
+  hotspotClearSeconds: 8, // rebalance cost = this many seconds of gross
+  hotspotClearMin: 5, // ...but never cheaper than this
 } as const;
+
+// --- Workloads ----------------------------------------------------------
+export const WORKLOADS: WorkloadDef[] = [
+  {
+    id: "web",
+    name: "Web Hosting",
+    desc: "Steady demand. The reliable baseline.",
+    priceMult: 1.0,
+    swing: 0.06,
+    cycleMs: 90_000,
+  },
+  {
+    id: "ai",
+    name: "AI Training",
+    desc: "Pays the most — and runs the hardware hottest.",
+    priceMult: 1.55,
+    swing: 0.18,
+    cycleMs: 70_000,
+    heatFactor: 0.6,
+    powerFactor: 0.25,
+  },
+  {
+    id: "crypto",
+    name: "Crypto / Batch",
+    desc: "Volatile spot price. Feast or famine.",
+    priceMult: 1.1,
+    swing: 0.6,
+    cycleMs: 50_000,
+    powerFactor: 0.15,
+  },
+];
+
+export const WORKLOAD_BY_ID: Record<string, WorkloadDef> = Object.fromEntries(
+  WORKLOADS.map((w) => [w.id, w]),
+);
+
+// --- Contract archetypes -----------------------------------------------
+// The board fills with a rotating mix of these so the player is choosing
+// between shapes of deal, not just accept/decline. `durIdx` indexes
+// TUNING.contractDurationsSec; `target`/`reward`/`rep` weight the generator.
+export const CONTRACT_ARCHETYPES = [
+  { tag: "Rush", durIdx: 0, target: 0.6, reward: 1.5, rep: 1.0 },
+  { tag: "Bulk", durIdx: 2, target: 1.25, reward: 1.95, rep: 0.85 },
+  { tag: "Reputation", durIdx: 1, target: 0.9, reward: 1.25, rep: 2.4 },
+] as const;
 
 export const BUILDINGS: BuildingDef[] = [
   // --- Producers ---------------------------------------------------------
@@ -375,28 +443,28 @@ export const UPGRADES: UpgradeDef[] = [
   },
 ];
 
+// A small branching tree. Credits are scarce enough that no single rebuild can
+// take everything, so each branch is a build identity. The five original nodes
+// keep their ids (so old saves carry over); each branch then opens a deeper
+// multiplier node and a one-off "unlock" node (maxLevel 1) gated behind it.
 export const PRESTIGE: PrestigeDef[] = [
+  // --- Scale: raw output + a bigger starting position -------------------
   {
     id: "dist-arch",
     name: "Distributed Architecture",
     desc: "+25% global compute per level.",
     baseCost: 1,
     costGrowth: 2.4,
+    branch: "scale",
   },
   {
-    id: "market",
-    name: "Market Connections",
-    desc: "+20% sell price per level.",
-    baseCost: 1,
-    costGrowth: 2.4,
-  },
-  {
-    id: "bulk",
-    name: "Bulk Procurement",
-    desc: "-1% cost growth per level.",
-    baseCost: 2,
-    costGrowth: 2.5,
-    maxLevel: 5,
+    id: "hyperthread",
+    name: "Hyperthreading",
+    desc: "+35% global compute per level.",
+    baseCost: 6,
+    costGrowth: 2.6,
+    branch: "scale",
+    requires: [{ id: "dist-arch", level: 3 }],
   },
   {
     id: "seed",
@@ -405,15 +473,82 @@ export const PRESTIGE: PrestigeDef[] = [
     baseCost: 2,
     costGrowth: 3.2,
     maxLevel: 6,
+    branch: "scale",
   },
+  // --- Efficiency: cooling, cost, resilience ---------------------------
   {
     id: "passive-cooling",
     name: "Passive Cooling R&D",
     desc: "+50% base cooling capacity per level.",
     baseCost: 2,
     costGrowth: 2.4,
+    branch: "efficiency",
+  },
+  {
+    id: "bulk",
+    name: "Bulk Procurement",
+    desc: "-1% cost growth per level.",
+    baseCost: 2,
+    costGrowth: 2.5,
+    maxLevel: 5,
+    branch: "efficiency",
+  },
+  {
+    id: "warm-spares",
+    name: "Warm Spares",
+    desc: "Offline farms run +25% efficiency.",
+    baseCost: 5,
+    costGrowth: 1,
+    maxLevel: 1,
+    branch: "efficiency",
+    requires: [{ id: "passive-cooling", level: 2 }],
+  },
+  {
+    id: "predictive-ops",
+    name: "Predictive Ops",
+    desc: "Incident severity halved.",
+    baseCost: 8,
+    costGrowth: 1,
+    maxLevel: 1,
+    branch: "efficiency",
+    requires: [{ id: "bulk", level: 2 }],
+  },
+  // --- Market: price, contracts, prefab facilities ---------------------
+  {
+    id: "market",
+    name: "Market Connections",
+    desc: "+20% sell price per level.",
+    baseCost: 1,
+    costGrowth: 2.4,
+    branch: "market",
+  },
+  {
+    id: "prefab-halls",
+    name: "Prefab Halls",
+    desc: "Start each rebuild with a Server Hall.",
+    baseCost: 6,
+    costGrowth: 1,
+    maxLevel: 1,
+    branch: "market",
+    requires: [{ id: "market", level: 2 }],
+  },
+  {
+    id: "standing-orders",
+    name: "Standing Orders",
+    desc: "Contract payouts +25%.",
+    baseCost: 7,
+    costGrowth: 1,
+    maxLevel: 1,
+    branch: "market",
+    requires: [{ id: "market", level: 3 }],
   },
 ];
+
+export const PRESTIGE_BRANCH_LABELS: Record<string, string> = {
+  scale: "Scale",
+  efficiency: "Efficiency",
+  market: "Market",
+};
 
 export const BUILDING_BY_ID: Record<string, BuildingDef> = Object.fromEntries(
   BUILDINGS.map((b) => [b.id, b]),
@@ -618,6 +753,30 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     check: (s) => s.lifetimeEarnings >= 1_000_000_000,
     buff: { multCompute: 1.05 },
     buffNote: "+5% compute",
+  },
+  {
+    id: "diversified",
+    name: "Diversified",
+    desc: "Run all three workloads at once.",
+    check: (s) => WORKLOADS.every((w) => (s.allocation[w.id] ?? 0) > 0),
+    buff: { multPrice: 1.03 },
+    buffNote: "+3% sell price",
+  },
+  {
+    id: "load-balancer",
+    name: "Load Balancer",
+    desc: "Clear 10 rack hotspots.",
+    check: (s) => s.hotspotsCleared >= 10,
+    buff: { multCoolingCap: 1.05 },
+    buffNote: "+5% cooling cap",
+  },
+  {
+    id: "hot-streak",
+    name: "Hot Streak",
+    desc: "Fulfil 5 contracts in a row.",
+    check: (s) => s.contractStreak >= 5,
+    buff: { multCompute: 1.03 },
+    buffNote: "+3% compute",
   },
 ];
 

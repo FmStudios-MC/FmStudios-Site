@@ -81,6 +81,24 @@ const buyLists: { cat: string; label: string }[] = [
           </button>
         </div>
 
+        <!-- Hotspot banner: shown only while a rack hotspot is live -->
+        <div
+          class="sft-event sft-event--hotspot"
+          data-hotspot
+          role="alert"
+          aria-live="assertive"
+        >
+          <span class="sft-event__pulse" aria-hidden="true"></span>
+          <div class="sft-event__body">
+            <span class="sft-event__name">Rack Hotspot</span>
+            <span class="sft-event__desc" data-hotspot-desc></span>
+          </div>
+          <span class="sft-event__timer" data-hotspot-timer></span>
+          <button class="sft-event__respond" data-hotspot-clear type="button">
+            Rebalance
+          </button>
+        </div>
+
         <!-- Data Hall: front-elevation server room, fills as you build -->
         <section class="sft-panel sft-hall" aria-label="Data hall">
           <header class="sft-panel__head">
@@ -151,6 +169,14 @@ const buyLists: { cat: string; label: string }[] = [
                   </>
                 ))
               }
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Workloads</h2>
+                <span class="sft-panel__note">Capacity split</span>
+              </header>
+              <div class="sft-workloads" data-workloads></div>
             </section>
 
             <section class="sft-panel">

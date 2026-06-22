@@ -1423,6 +1423,13 @@
   cursor: not-allowed;
   opacity: 0.5;
 }
+.sft-prow.is-locked {
+  opacity: 0.45;
+}
+.sft-prow.is-locked .sft-prow__cost {
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+}
 .sft-prow__main {
   display: flex;
   flex-direction: column;
@@ -1637,11 +1644,23 @@
   line-height: 1.4;
   color: var(--ink-faint);
 }
+.sft-contract__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+.sft-contract__list:empty {
+  display: none;
+}
 .sft-contract__offer,
 .sft-contract__active {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
 }
 .sft-contract__line {
   margin: 0;
@@ -1711,6 +1730,107 @@
 .sft-contract__decline:hover {
   border-color: var(--sft-hot);
   color: var(--sft-hot);
+}
+
+/* ---- Workloads (capacity allocation) ------------------------------- */
+.sft-workloads {
+  display: flex;
+  flex-direction: column;
+}
+.sft-wl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding: var(--space-xs) var(--space-2xs);
+  border-bottom: 1px solid var(--line);
+}
+.sft-wl:last-child {
+  border-bottom: 0;
+}
+.sft-wl__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+.sft-wl__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+.sft-wl__price {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sft-wl__price.is-up {
+  color: var(--sft-ok);
+}
+.sft-wl__price.is-down {
+  color: var(--sft-hot);
+}
+.sft-wl__desc {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  line-height: 1.35;
+}
+.sft-wl__bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: oklch(0.26 0.01 72);
+  overflow: hidden;
+}
+.sft-wl__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  transition: width var(--dur-mid) var(--ease-out-quart);
+}
+.sft-wl__ctrls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  margin-top: var(--space-3xs);
+}
+.sft-wl__share {
+  min-width: 3.5ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.sft-wl__step {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-wl__step:not(:disabled):hover {
+  cursor: pointer;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.sft-wl__step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Hotspot banner reuses the incident-banner chrome in the warn (amber) hue. */
+.sft-event--hotspot {
+  --accent: var(--sft-warn);
 }
 
 /* ---- Milestones ----------------------------------------------------- */

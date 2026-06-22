@@ -9,13 +9,16 @@ import {
   BUILDING_BY_ID,
   CATEGORY_LABELS,
   PRESTIGE,
+  PRESTIGE_BRANCH_LABELS,
   TUNING,
   UPGRADES,
+  WORKLOADS,
 } from "./config";
 import {
   buildingCost,
   creditScale,
   prestigeCost,
+  prestigeUnlocked,
   startingMoney,
 } from "./engine";
 import { duration, fmt, money, pct, rate } from "./format";
@@ -27,8 +30,10 @@ export interface Handlers {
   onPrestige(): void;
   onOverclock(): void;
   onRespondEvent(): void;
-  onAcceptContract(): void;
-  onDeclineContract(): void;
+  onRebalance(): void;
+  onSetAllocation(id: string, delta: number): void;
+  onAcceptContract(id: string): void;
+  onDeclineContract(id: string): void;
   onSave(): void;
   onReset(): void;
   onExport(): void;
@@ -275,9 +280,61 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     return { root: card, button: card as HTMLButtonElement, def };
   });
 
-  // --- Prestige tree ----------------------------------------------------
+  // --- Workloads (capacity allocation) ----------------------------------
+  // One row per workload: a live price + trend, the current share, and a pair
+  // of steppers that shift its allocation weight. Built once; values patch.
+  interface WorkloadRow {
+    root: HTMLElement;
+    price: HTMLElement;
+    share: HTMLElement;
+    bar: HTMLElement;
+    minus: HTMLButtonElement;
+    plus: HTMLButtonElement;
+    id: string;
+  }
+  const workloadWrap = root.querySelector<HTMLElement>("[data-workloads]");
+  const workloadRows: WorkloadRow[] = [];
+  if (workloadWrap) {
+    for (const def of WORKLOADS) {
+      const rowEl = el("div", "sft-wl");
+      const head = el("div", "sft-wl__head");
+      const name = el("span", "sft-wl__name", def.name);
+      const price = el("span", "sft-wl__price", "");
+      head.append(name, price);
+
+      const desc = el("span", "sft-wl__desc", def.desc);
+
+      const barWrap = el("div", "sft-wl__bar");
+      const bar = el("span", "sft-wl__fill");
+      barWrap.appendChild(bar);
+
+      const ctrls = el("div", "sft-wl__ctrls");
+      const minus = el("button", "sft-wl__step", "–") as HTMLButtonElement;
+      minus.type = "button";
+      const share = el("span", "sft-wl__share", "0%");
+      const plus = el("button", "sft-wl__step", "+") as HTMLButtonElement;
+      plus.type = "button";
+      minus.addEventListener("click", () => handlers.onSetAllocation(def.id, -1));
+      plus.addEventListener("click", () => handlers.onSetAllocation(def.id, 1));
+      ctrls.append(minus, share, plus);
+
+      rowEl.append(head, desc, barWrap, ctrls);
+      workloadWrap.appendChild(rowEl);
+      workloadRows.push({ root: rowEl, price, share, bar, minus, plus, id: def.id });
+    }
+  }
+
+  // --- Prestige tree (grouped by branch) --------------------------------
   const prestigeWrap = $("[data-prestige-list]");
-  const prestigeRows: PrestigeRow[] = PRESTIGE.map((def) => {
+  const prestigeRows: PrestigeRow[] = [];
+  let prestigeBranch = "";
+  for (const def of PRESTIGE) {
+    if (def.branch && def.branch !== prestigeBranch) {
+      prestigeBranch = def.branch;
+      prestigeWrap.appendChild(
+        el("p", "sft-subhead", PRESTIGE_BRANCH_LABELS[def.branch] ?? def.branch),
+      );
+    }
     const rowEl = el("button", "sft-prow");
     rowEl.type = "button";
     (rowEl as HTMLButtonElement).addEventListener("click", () =>
@@ -294,8 +351,14 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     meta.append(level, cost);
     rowEl.append(main, meta);
     prestigeWrap.appendChild(rowEl);
-    return { root: rowEl, level, cost, button: rowEl as HTMLButtonElement, def };
-  });
+    prestigeRows.push({
+      root: rowEl,
+      level,
+      cost,
+      button: rowEl as HTMLButtonElement,
+      def,
+    });
+  }
 
   const prestigeBtn = $<HTMLButtonElement>("[data-prestige-go]");
   const prestigePreview = $("[data-prestige-preview]");
@@ -310,40 +373,75 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const respondBtn = root.querySelector<HTMLButtonElement>("[data-event-respond]");
   respondBtn?.addEventListener("click", () => handlers.onRespondEvent());
 
+  // --- Hotspot banner ---------------------------------------------------
+  const hotspotBanner = root.querySelector<HTMLElement>("[data-hotspot]");
+  const hotspotDesc = root.querySelector<HTMLElement>("[data-hotspot-desc]");
+  const hotspotTimer = root.querySelector<HTMLElement>("[data-hotspot-timer]");
+  const rebalanceBtn = root.querySelector<HTMLButtonElement>("[data-hotspot-clear]");
+  rebalanceBtn?.addEventListener("click", () => handlers.onRebalance());
+
   // --- Contracts card ---------------------------------------------------
-  // Built once in three mutually-exclusive states (idle / offer / active);
-  // render() toggles which is shown and updates only the live values.
+  // A board of offers plus the concurrent jobs in progress. Rows are keyed by
+  // contract id and reconciled each frame (create new, drop gone, patch the
+  // rest) so the demand market can hold several deals at once without churn.
   const contractBody = root.querySelector<HTMLElement>("[data-contract-body]");
   const contractNote = root.querySelector<HTMLElement>("[data-contract-note]");
 
+  interface ActiveRow {
+    root: HTMLElement;
+    title: HTMLElement;
+    fill: HTMLElement;
+    progress: HTMLElement;
+    reward: HTMLElement;
+    timer: HTMLElement;
+  }
+  interface OfferRow {
+    root: HTMLElement;
+    title: HTMLElement;
+    reward: HTMLElement;
+    risk: HTMLElement;
+    expiry: HTMLElement;
+    accept: HTMLButtonElement;
+  }
+
   const cIdle = el("p", "sft-contract__idle");
+  const cActiveList = el("div", "sft-contract__list");
+  const cOfferList = el("div", "sft-contract__list");
+  contractBody?.append(cIdle, cActiveList, cOfferList);
 
-  const cOffer = el("div", "sft-contract__offer");
-  const cOfferTitle = el("p", "sft-contract__line");
-  const cOfferReward = el("p", "sft-contract__reward");
-  const cOfferRisk = el("p", "sft-contract__risk");
-  const cOfferExpiry = el("p", "sft-contract__expiry");
-  const cActions = el("div", "sft-contract__actions");
-  const acceptBtn = el("button", "sft-contract__accept", "Accept");
-  acceptBtn.type = "button";
-  const declineBtn = el("button", "sft-contract__decline", "Pass");
-  declineBtn.type = "button";
-  acceptBtn.addEventListener("click", () => handlers.onAcceptContract());
-  declineBtn.addEventListener("click", () => handlers.onDeclineContract());
-  cActions.append(acceptBtn, declineBtn);
-  cOffer.append(cOfferTitle, cOfferReward, cOfferRisk, cOfferExpiry, cActions);
+  const activeRows = new Map<string, ActiveRow>();
+  const offerRows = new Map<string, OfferRow>();
 
-  const cActive = el("div", "sft-contract__active");
-  const cActiveTitle = el("p", "sft-contract__line");
-  const cActiveBar = el("div", "sft-bar");
-  const cActiveFill = el("span", "sft-bar__fill");
-  cActiveBar.appendChild(cActiveFill);
-  const cActiveProgress = el("p", "sft-contract__progress");
-  const cActiveReward = el("p", "sft-contract__reward");
-  const cActiveTimer = el("p", "sft-contract__expiry");
-  cActive.append(cActiveTitle, cActiveBar, cActiveProgress, cActiveReward, cActiveTimer);
+  function makeActiveRow(): ActiveRow {
+    const rootEl = el("div", "sft-contract__active");
+    const title = el("p", "sft-contract__line");
+    const barWrap = el("div", "sft-bar");
+    const fill = el("span", "sft-bar__fill");
+    barWrap.appendChild(fill);
+    const progress = el("p", "sft-contract__progress");
+    const reward = el("p", "sft-contract__reward");
+    const timer = el("p", "sft-contract__expiry");
+    rootEl.append(title, barWrap, progress, reward, timer);
+    return { root: rootEl, title, fill, progress, reward, timer };
+  }
 
-  contractBody?.append(cIdle, cOffer, cActive);
+  function makeOfferRow(id: string): OfferRow {
+    const rootEl = el("div", "sft-contract__offer");
+    const title = el("p", "sft-contract__line");
+    const reward = el("p", "sft-contract__reward");
+    const risk = el("p", "sft-contract__risk");
+    const expiry = el("p", "sft-contract__expiry");
+    const actions = el("div", "sft-contract__actions");
+    const accept = el("button", "sft-contract__accept", "Accept") as HTMLButtonElement;
+    accept.type = "button";
+    const decline = el("button", "sft-contract__decline", "Pass") as HTMLButtonElement;
+    decline.type = "button";
+    accept.addEventListener("click", () => handlers.onAcceptContract(id));
+    decline.addEventListener("click", () => handlers.onDeclineContract(id));
+    actions.append(accept, decline);
+    rootEl.append(title, reward, risk, expiry, actions);
+    return { root: rootEl, title, reward, risk, expiry, accept };
+  }
 
   // --- Milestones (collapsible) ----------------------------------------
   const achWrap = root.querySelector<HTMLElement>("[data-achievements]");
@@ -469,11 +567,45 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       setFlag(u.root, "is-afford", afford);
     }
 
+    // Workload allocation
+    if (workloadRows.length) {
+      const byId: Record<string, Derived["workloads"][number]> = {};
+      for (const w of d.workloads) byId[w.id] = w;
+      for (const r of workloadRows) {
+        const w = byId[r.id];
+        if (!w) continue;
+        const arrow = w.trend === "up" ? "▲" : w.trend === "down" ? "▼" : "·";
+        setText(r.price, `$${fmt(w.price)} ${arrow}`);
+        setFlag(r.price, "is-up", w.trend === "up");
+        setFlag(r.price, "is-down", w.trend === "down");
+        r.bar.style.width = pct(w.alloc);
+        setText(r.share, pct(w.alloc));
+        const weight = Math.max(0, Math.floor(s.allocation[r.id] ?? 0));
+        setDisabled(r.minus, weight <= 0);
+        setDisabled(r.plus, weight >= TUNING.allocationMax);
+        setFlag(r.root, "is-active", w.alloc > 0);
+      }
+    }
+
     // Prestige tree
     for (const p of prestigeRows) {
       const lvl = s.prestigeUpgrades[p.def.id] ?? 0;
-      const cost = prestigeCost(s, p.def.id);
+      const unlocked = prestigeUnlocked(s, p.def.id);
+      setFlag(p.root, "is-locked", !unlocked);
       setText(p.level, "Lv " + lvl);
+      if (!unlocked) {
+        const req = p.def.requires
+          ?.map((r) => {
+            const dep = PRESTIGE.find((x) => x.id === r.id);
+            return `${dep?.name ?? r.id} Lv${r.level}`;
+          })
+          .join(", ");
+        setText(p.cost, req ? `needs ${req}` : "Locked");
+        setDisabled(p.button, true);
+        setFlag(p.root, "is-afford", false);
+        continue;
+      }
+      const cost = prestigeCost(s, p.def.id);
       const maxed = !isFinite(cost);
       setText(p.cost, maxed ? "MAX" : fmt(cost) + " ⬡");
       const afford = !maxed && s.credits >= cost;
@@ -617,6 +749,23 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       }
     }
 
+    // Hotspot banner
+    if (hotspotBanner) {
+      const hs = d.hotspot;
+      setFlag(hotspotBanner, "is-shown", hs != null);
+      if (hs) {
+        setText(
+          hotspotDesc,
+          `Rack hotspot — cooling cut ${pct(hs.severity)}. Rebalance to clear.`,
+        );
+        setText(hotspotTimer, duration((hs.endsAt - now) / 1000));
+        if (rebalanceBtn) {
+          setText(rebalanceBtn, `Rebalance · ${money(hs.clearCost)}`);
+          setDisabled(rebalanceBtn, s.money < hs.clearCost);
+        }
+      }
+    }
+
     // Milestones
     if (achChips.length) {
       let unlocked = 0;
@@ -629,42 +778,79 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       setText(achNote ?? undefined, `${unlocked} / ${achChips.length}`);
     }
 
-    // Contracts (idle / offer / active)
+    // Contracts: reconcile the active + offer lists by id, then patch values.
     if (contractBody) {
-      const ac = d.contract.active;
-      const of = d.contract.offer;
-      setFlag(cIdle, "is-hidden", ac != null || of != null);
-      setFlag(cOffer, "is-hidden", ac != null || of == null);
-      setFlag(cActive, "is-hidden", ac == null);
+      const active = d.contracts.active;
+      const offers = d.contracts.offers;
 
-      if (ac) {
-        setText(cActiveTitle, `Deliver ${fmt(ac.required)} FLOP`);
-        cActiveFill.style.width = pct(ac.progress);
+      // Active jobs.
+      const seenActive = new Set<string>();
+      for (const ac of active) {
+        seenActive.add(ac.id);
+        let r = activeRows.get(ac.id);
+        if (!r) {
+          r = makeActiveRow();
+          activeRows.set(ac.id, r);
+          cActiveList.appendChild(r.root);
+        }
+        setText(r.title, `${ac.tag} · deliver ${fmt(ac.required)} FLOP`);
+        r.fill.style.width = pct(ac.progress);
         setText(
-          cActiveProgress,
+          r.progress,
           `${fmt(ac.delivered)} / ${fmt(ac.required)} FLOP · ${pct(ac.progress)}`,
         );
-        setText(cActiveReward, `Pays ${money(ac.reward)} + ${fmt(ac.repReward)} rep`);
-        setText(cActiveTimer, `${duration(ac.remainingSec)} remaining`);
-        setText(contractNote ?? undefined, "In progress");
-      } else if (of) {
+        setText(r.reward, `Pays ${money(ac.reward)} + ${fmt(ac.repReward)} rep`);
+        setText(r.timer, `${duration(ac.remainingSec)} remaining`);
+      }
+      for (const [id, r] of activeRows) {
+        if (!seenActive.has(id)) {
+          r.root.remove();
+          activeRows.delete(id);
+        }
+      }
+
+      // Offers on the board (accept disabled once the active list is full).
+      const seenOffer = new Set<string>();
+      for (const of of offers) {
+        seenOffer.add(of.id);
+        let r = offerRows.get(of.id);
+        if (!r) {
+          r = makeOfferRow(of.id);
+          offerRows.set(of.id, r);
+          cOfferList.appendChild(r.root);
+        }
         setText(
-          cOfferTitle,
-          `Deliver ${fmt(of.required)} FLOP within ${duration(of.durationSec)}`,
+          r.title,
+          `${of.tag} · ${fmt(of.required)} FLOP in ${duration(of.durationSec)}`,
         );
-        setText(cOfferReward, `Pays ${money(of.reward)} + ${fmt(of.repReward)} rep`);
-        setText(cOfferRisk, `Failure costs ${fmt(of.repPenalty)} reputation`);
-        setText(cOfferExpiry, `Offer withdrawn in ${duration(of.expiresSec)}`);
-        setText(contractNote ?? undefined, "Offer on the board");
-      } else {
+        setText(r.reward, `Pays ${money(of.reward)} + ${fmt(of.repReward)} rep`);
+        setText(r.risk, `Failure costs ${fmt(of.repPenalty)} reputation`);
+        setText(r.expiry, `Withdrawn in ${duration(of.expiresSec)}`);
+        setDisabled(r.accept, !d.contracts.canAccept);
+      }
+      for (const [id, r] of offerRows) {
+        if (!seenOffer.has(id)) {
+          r.root.remove();
+          offerRows.delete(id);
+        }
+      }
+
+      const empty = active.length === 0 && offers.length === 0;
+      setFlag(cIdle, "is-hidden", !empty);
+      if (empty) {
         setText(
           cIdle,
           s.lifetimeEarnings < TUNING.contractMinEarnings
             ? `The board opens at ${money(TUNING.contractMinEarnings)} earned.`
             : "No contracts on the board. Check back shortly.",
         );
-        setText(contractNote ?? undefined, "Demand market");
       }
+      setText(
+        contractNote ?? undefined,
+        active.length
+          ? `${active.length} active${d.contracts.streak >= 2 ? ` · ${d.contracts.streak}× streak` : ""}`
+          : "Demand market",
+      );
     }
   }
 

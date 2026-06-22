@@ -3,12 +3,13 @@
 import type {
   ActiveContract,
   ActiveEvent,
+  ActiveHotspot,
   ContractOffer,
   GameState,
 } from "./types";
-import { EVENT_BY_ID, TUNING } from "./config";
+import { EVENT_BY_ID, TUNING, WORKLOADS } from "./config";
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export function defaultState(now = Date.now()): GameState {
   return {
@@ -22,6 +23,8 @@ export function defaultState(now = Date.now()): GameState {
     buildings: {},
     upgrades: [],
     prestigeUpgrades: {},
+    // Start with everything on the first (baseline) workload.
+    allocation: { [WORKLOADS[0].id]: 1 },
     overclockUntil: 0,
     overclockReadyAt: 0,
     lastTick: now,
@@ -29,11 +32,16 @@ export function defaultState(now = Date.now()): GameState {
     nextEventAt: 0,
     eventSeed: 0,
     eventsResponded: 0,
+    hotspot: null,
+    nextHotspotAt: 0,
+    hotspotSeed: 0,
+    hotspotsCleared: 0,
     achievements: [],
-    contract: null,
-    contractOffer: null,
+    contracts: [],
+    contractOffers: [],
     nextOfferAt: 0,
     contractSeed: 0,
+    contractStreak: 0,
     contractsCompleted: 0,
     contractsFailed: 0,
   };
@@ -49,19 +57,25 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
   const num = (v: unknown, fallback: number) =>
     typeof v === "number" && isFinite(v) ? v : fallback;
 
-  const buildings: Record<string, number> = {};
-  if (o.buildings && typeof o.buildings === "object") {
-    for (const [k, v] of Object.entries(o.buildings as object)) {
-      const n = num(v, 0);
-      if (n > 0) buildings[k] = Math.floor(n);
+  const countMap = (v: unknown): Record<string, number> => {
+    const out: Record<string, number> = {};
+    if (v && typeof v === "object") {
+      for (const [k, val] of Object.entries(v as object)) {
+        const n = num(val, 0);
+        if (n > 0) out[k] = Math.floor(n);
+      }
     }
-  }
+    return out;
+  };
 
-  const prestigeUpgrades: Record<string, number> = {};
-  if (o.prestigeUpgrades && typeof o.prestigeUpgrades === "object") {
-    for (const [k, v] of Object.entries(o.prestigeUpgrades as object)) {
+  const buildings = countMap(o.buildings);
+  const prestigeUpgrades = countMap(o.prestigeUpgrades);
+  // Allocation weights can be 0, so keep the floor at >= 0 (not > 0 like counts).
+  const allocation: Record<string, number> = {};
+  if (o.allocation && typeof o.allocation === "object") {
+    for (const [k, v] of Object.entries(o.allocation as object)) {
       const n = num(v, 0);
-      if (n > 0) prestigeUpgrades[k] = Math.floor(n);
+      if (n > 0) allocation[k] = Math.floor(n);
     }
   }
 
@@ -80,43 +94,68 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     }
   }
 
+  let hotspot: ActiveHotspot | null = null;
+  if (o.hotspot && typeof o.hotspot === "object") {
+    const h = o.hotspot as Record<string, unknown>;
+    hotspot = { startedAt: num(h.startedAt, now), endsAt: num(h.endsAt, now) };
+  }
+
   const achievements = Array.isArray(o.achievements)
     ? (o.achievements.filter((x) => typeof x === "string") as string[])
     : [];
 
-  // Contracts: keep an in-progress contract / pending offer only if the shape
-  // reads back cleanly; the scheduler repairs anything missing on the next tick.
-  let contract: ActiveContract | null = null;
-  if (o.contract && typeof o.contract === "object") {
-    const c = o.contract as Record<string, unknown>;
-    if (typeof c.id === "string") {
-      contract = {
-        id: c.id,
-        required: Math.max(0, num(c.required, 0)),
-        delivered: Math.max(0, num(c.delivered, 0)),
-        reward: Math.max(0, num(c.reward, 0)),
-        repReward: Math.max(0, num(c.repReward, 0)),
-        repPenalty: Math.max(0, num(c.repPenalty, 0)),
-        startedAt: num(c.startedAt, now),
-        endsAt: num(c.endsAt, now),
-      };
-    }
+  // Contracts: read the new array shape, but migrate the old single
+  // contract/contractOffer fields from a v3 save into the arrays.
+  const readContract = (v: unknown): ActiveContract | null => {
+    if (!v || typeof v !== "object") return null;
+    const c = v as Record<string, unknown>;
+    if (typeof c.id !== "string") return null;
+    return {
+      id: c.id,
+      tag: typeof c.tag === "string" ? c.tag : "Contract",
+      required: Math.max(0, num(c.required, 0)),
+      delivered: Math.max(0, num(c.delivered, 0)),
+      reward: Math.max(0, num(c.reward, 0)),
+      repReward: Math.max(0, num(c.repReward, 0)),
+      repPenalty: Math.max(0, num(c.repPenalty, 0)),
+      startedAt: num(c.startedAt, now),
+      endsAt: num(c.endsAt, now),
+    };
+  };
+  const readOffer = (v: unknown): ContractOffer | null => {
+    if (!v || typeof v !== "object") return null;
+    const co = v as Record<string, unknown>;
+    if (typeof co.id !== "string") return null;
+    return {
+      id: co.id,
+      tag: typeof co.tag === "string" ? co.tag : "Contract",
+      required: Math.max(0, num(co.required, 0)),
+      reward: Math.max(0, num(co.reward, 0)),
+      repReward: Math.max(0, num(co.repReward, 0)),
+      repPenalty: Math.max(0, num(co.repPenalty, 0)),
+      durationSec: Math.max(1, num(co.durationSec, 180)),
+      expiresAt: num(co.expiresAt, now),
+    };
+  };
+
+  let contracts: ActiveContract[] = [];
+  if (Array.isArray(o.contracts)) {
+    contracts = o.contracts
+      .map(readContract)
+      .filter((c): c is ActiveContract => c != null);
+  } else {
+    const single = readContract(o.contract); // v3 migration
+    if (single) contracts = [single];
   }
 
-  let contractOffer: ContractOffer | null = null;
-  if (o.contractOffer && typeof o.contractOffer === "object") {
-    const co = o.contractOffer as Record<string, unknown>;
-    if (typeof co.id === "string") {
-      contractOffer = {
-        id: co.id,
-        required: Math.max(0, num(co.required, 0)),
-        reward: Math.max(0, num(co.reward, 0)),
-        repReward: Math.max(0, num(co.repReward, 0)),
-        repPenalty: Math.max(0, num(co.repPenalty, 0)),
-        durationSec: Math.max(1, num(co.durationSec, 180)),
-        expiresAt: num(co.expiresAt, now),
-      };
-    }
+  let contractOffers: ContractOffer[] = [];
+  if (Array.isArray(o.contractOffers)) {
+    contractOffers = o.contractOffers
+      .map(readOffer)
+      .filter((c): c is ContractOffer => c != null);
+  } else {
+    const single = readOffer(o.contractOffer); // v3 migration
+    if (single) contractOffers = [single];
   }
 
   return {
@@ -132,6 +171,7 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
       ? (o.upgrades.filter((x) => typeof x === "string") as string[])
       : [],
     prestigeUpgrades,
+    allocation,
     overclockUntil: num(o.overclockUntil, 0),
     overclockReadyAt: num(o.overclockReadyAt, 0),
     lastTick: num(o.lastTick, now),
@@ -139,11 +179,16 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     nextEventAt: num(o.nextEventAt, 0),
     eventSeed: Math.max(0, Math.floor(num(o.eventSeed, 0))),
     eventsResponded: Math.max(0, Math.floor(num(o.eventsResponded, 0))),
+    hotspot,
+    nextHotspotAt: num(o.nextHotspotAt, 0),
+    hotspotSeed: Math.max(0, Math.floor(num(o.hotspotSeed, 0))),
+    hotspotsCleared: Math.max(0, Math.floor(num(o.hotspotsCleared, 0))),
     achievements,
-    contract,
-    contractOffer,
+    contracts,
+    contractOffers,
     nextOfferAt: num(o.nextOfferAt, 0),
     contractSeed: Math.max(0, Math.floor(num(o.contractSeed, 0))),
+    contractStreak: Math.max(0, Math.floor(num(o.contractStreak, 0))),
     contractsCompleted: Math.max(0, Math.floor(num(o.contractsCompleted, 0))),
     contractsFailed: Math.max(0, Math.floor(num(o.contractsFailed, 0))),
   };
