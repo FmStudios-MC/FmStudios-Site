@@ -79,7 +79,7 @@ visitor. They are listed on `src/pages/games/index.astro`; add an entry to its
   a tower-defense game with a scheduled campaign and an endless high-score mode.
 
 The `.astro` page owns the static HTML shell and `data-*` hooks; a `<script>`
-mounts the game onto it. See `CLAUDE.md` for the full module-by-module breakdown.
+mounts the game onto it.
 
 ## Deployment
 
