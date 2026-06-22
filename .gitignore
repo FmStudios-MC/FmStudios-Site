@@ -35,6 +35,7 @@ desktop.ini
 
 # claude / internal docs (not for public repo)
 .claude/
+.impeccable/
 CLAUDE.md
 DESIGN.md
 PRODUCT.md
