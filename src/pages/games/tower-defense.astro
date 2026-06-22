@@ -1,0 +1,101 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import "../../styles/games/tower-defense.css";
+
+const stats = [
+  { key: "cash", label: "Cash", value: "$150", feature: true },
+  { key: "lives", label: "Lives", value: "20" },
+  { key: "wave", label: "Wave", value: "—" },
+  { key: "score", label: "Score", value: "0" },
+  { key: "best", label: "Best", value: "0 · W0" },
+];
+---
+
+<BaseLayout
+  title="Signal Defense"
+  description="A browser tower-defense game by FabiMvurice Interactive. Place machined defense nodes along an etched signal path and hold the core against waves of intrusions."
+>
+  <PageHeader
+    eyebrow="Tower defense"
+    title="Signal Defense"
+    lede="Set defense nodes into the board and stop the intrusions before they reach the core. Survive the schedule, then see how deep you get on endless."
+  />
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <!-- No-JS fallback -->
+      <div class="td-nojs">
+        <p>
+          Signal Defense runs entirely in your browser and needs JavaScript to
+          play. Enable it and reload to defend the core.
+        </p>
+      </div>
+
+      <div class="td td-app" data-td>
+        <p class="sr-only" data-live aria-live="polite"></p>
+
+        <!-- HUD -->
+        <div class="td-hud" role="status" aria-label="Run telemetry">
+          {
+            stats.map((s) => (
+              <div class:list={["td-stat", { "td-stat--key": s.feature }]}>
+                <span class="td-stat__label">{s.label}</span>
+                <span class="td-stat__value" data-stat={s.key}>
+                  {s.value}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="td-layout">
+          <!-- Board -->
+          <div class="td-board">
+            <canvas
+              class="td-canvas"
+              data-canvas
+              aria-label="Signal Defense board. Use the build tray and on-screen controls to play."
+              role="img"></canvas>
+
+            <div class="td-paused" aria-hidden="true">
+              <span class="td-paused__tag">Paused</span>
+            </div>
+
+            <div class="td-end" data-end hidden></div>
+          </div>
+
+          <!-- Rail: controls + build tray + selected node -->
+          <aside class="td-rail">
+            <section class="td-controls" aria-label="Run controls">
+              <button
+                type="button"
+                class="td-btn td-btn--primary"
+                data-start>Start wave 1</button>
+              <div class="td-controls__row">
+                <button type="button" class="td-btn" data-pause aria-pressed="false">
+                  Pause
+                </button>
+                <button type="button" class="td-btn" data-speed aria-pressed="false">
+                  1&times;
+                </button>
+              </div>
+            </section>
+
+            <section class="td-panel" data-panel aria-label="Selected node"></section>
+
+            <section class="td-tray" data-tray aria-label="Build a node"></section>
+          </aside>
+        </div>
+
+        <div class="td-toasts" data-toasts aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { startGame } from "../../scripts/games/td";
+  const root = document.querySelector<HTMLElement>("[data-td]");
+  if (root) startGame(root);
+</script>

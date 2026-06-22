@@ -1,0 +1,472 @@
+/* Signal Defense - scoped game styles, built on the FMI tokens (tokens.css).
+   The board is canvas; this dresses the chrome around it: a quiet steel console
+   with a single gold accent for the player's own actions and the core. Two cool
+   status hues are introduced here for low/critical states only. */
+
+.td {
+  /* Cool, low-chroma steel for enemy-side chrome; gold stays the one voice. */
+  --td-steel: oklch(0.74 0.03 250);
+  --td-warn: oklch(0.7 0.16 60);
+  --td-hot: oklch(0.62 0.19 28);
+  --td-hot-glow: oklch(0.62 0.19 28 / 0.3);
+
+  position: relative;
+  z-index: var(--z-base);
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* No-JS notice (hidden once the app mounts; same pattern as the idle game). */
+.td-nojs {
+  padding: var(--space-m);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  color: var(--ink-muted);
+  background: var(--surface);
+}
+.td-app .td-nojs {
+  display: none;
+}
+
+/* ---- HUD ------------------------------------------------------------- */
+.td-hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: var(--space-xs);
+  padding: var(--space-s) var(--space-m);
+  margin-bottom: var(--space-m);
+  background: oklch(0.13 0.009 75 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.td-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.td-stat__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.td-stat__value {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.td-stat--key .td-stat__value {
+  color: transparent;
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.td-stat__value.is-low {
+  color: var(--td-hot);
+}
+
+/* ---- Layout ---------------------------------------------------------- */
+.td-layout {
+  display: grid;
+  gap: var(--space-m);
+  align-items: start;
+}
+@media (min-width: 980px) {
+  .td-layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+}
+
+/* ---- Board ----------------------------------------------------------- */
+.td-board {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background: var(--bg-deep);
+  box-shadow: inset 0 0 80px -30px oklch(0 0 0 / 0.7);
+}
+.td-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  touch-action: none; /* the board owns drags; pointerdown places/selects */
+}
+.td-app.is-placing .td-canvas {
+  cursor: crosshair;
+}
+
+/* Paused veil */
+.td-paused {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: oklch(0.11 0.008 75 / 0.55);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-fast) var(--ease-out-quart),
+    visibility var(--dur-fast);
+}
+.td-app.is-paused .td-paused {
+  opacity: 1;
+  visibility: visible;
+}
+.td-paused__tag {
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: var(--step-1);
+  color: var(--ink);
+  padding: 0.5em 1.2em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: oklch(0.15 0.01 75 / 0.7);
+}
+
+/* ---- End screen ------------------------------------------------------ */
+.td-end {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-m);
+  background: oklch(0.1 0.008 75 / 0.78);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out-quart);
+}
+/* Critical: the base rule sets display:grid, which would otherwise override the
+   [hidden] attribute and leave this invisible overlay on top of the board,
+   swallowing every click. Restore display:none while hidden. */
+.td-end[hidden] {
+  display: none;
+}
+.td-end.is-open {
+  opacity: 1;
+}
+.td-end__card {
+  width: min(420px, 100%);
+  text-align: center;
+  padding: var(--space-l);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  box-shadow: 0 40px 80px -30px oklch(0 0 0 / 0.7);
+}
+.td-end__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--td-hot);
+}
+.td-end__title {
+  font-size: var(--step-3);
+  margin: var(--space-3xs) 0 var(--space-m);
+}
+.td-end__scores {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-l);
+  margin-bottom: var(--space-m);
+}
+.td-end__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.td-end__num {
+  font-family: var(--font-mono);
+  font-size: var(--step-3);
+  font-weight: 600;
+  color: var(--ink);
+}
+.td-end__lbl {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.td-end__best {
+  color: var(--ink-muted);
+  margin-bottom: var(--space-m);
+}
+.td-end__best.is-new {
+  color: var(--gold);
+}
+
+/* ---- Rail: controls -------------------------------------------------- */
+.td-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+.td-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.td-controls__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs);
+}
+
+/* ---- Buttons --------------------------------------------------------- */
+.td-btn {
+  font: inherit;
+  font-weight: 500;
+  min-height: 44px;
+  padding: 0.6em 1em;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    background var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart),
+    transform var(--dur-fast) var(--ease-out-quart);
+}
+.td-btn:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--gold) 55%, var(--line));
+  color: var(--gold);
+}
+.td-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.td-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.td-btn--primary {
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  border-color: transparent;
+  font-weight: 600;
+}
+.td-btn--primary:hover:not(:disabled) {
+  color: var(--gold-ink);
+  box-shadow: 0 12px 30px -14px var(--gold-glow);
+}
+.td-btn[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.td-btn--sell:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--td-hot) 60%, var(--line));
+  color: var(--td-hot);
+}
+
+/* ---- Build tray ------------------------------------------------------ */
+.td-tray {
+  display: grid;
+  gap: var(--space-xs);
+}
+.td-tower {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "head head"
+    "role cost"
+    "desc desc";
+  gap: 0.2em 0.5em;
+  text-align: left;
+  padding: var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    background var(--dur-fast) var(--ease-out-quart),
+    box-shadow var(--dur-fast) var(--ease-out-quart);
+}
+.td-tower:hover {
+  border-color: color-mix(in oklch, var(--gold) 40%, var(--line));
+}
+.td-tower.is-active {
+  border-color: var(--gold);
+  background: color-mix(in oklch, var(--gold) 8%, var(--surface));
+  box-shadow: 0 0 0 1px var(--gold) inset, 0 16px 36px -22px var(--gold-glow);
+}
+.td-tower__head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+.td-tower__name {
+  font-weight: 600;
+  font-size: var(--step-0);
+}
+.td-tower__key {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 0.05em 0.45em;
+}
+.td-tower__role {
+  grid-area: role;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.td-tower__cost {
+  grid-area: cost;
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--ink);
+}
+.td-tower__desc {
+  grid-area: desc;
+  font-size: var(--step--1);
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+.td-tower.is-unaffordable {
+  opacity: 0.6;
+}
+.td-tower.is-unaffordable .td-tower__cost {
+  color: var(--td-hot);
+}
+
+/* ---- Selected-node panel -------------------------------------------- */
+.td-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: oklch(0.2 0.013 72 / 0.9);
+  padding: var(--space-m);
+}
+.td-panel__hint {
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+  line-height: 1.55;
+  margin: 0;
+}
+.td-panel__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-s);
+}
+.td-panel__name {
+  font-size: var(--step-1);
+}
+.td-panel__role {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.td-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space-s);
+}
+.td-stat dt,
+.td-stats dt {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.td-stats dd {
+  margin: 1px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  color: var(--ink);
+}
+.td-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.td-panel__actions .td-btn {
+  width: 100%;
+  font-size: var(--step--1);
+  text-align: center;
+}
+
+/* ---- Toasts ---------------------------------------------------------- */
+.td-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-l);
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  pointer-events: none;
+  width: max-content;
+  max-width: min(92vw, 460px);
+}
+.td-toast {
+  padding: 0.7em 1.1em;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: oklch(0.16 0.01 75 / 0.92);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  font-size: var(--step--1);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--dur-mid) var(--ease-out-quart),
+    transform var(--dur-mid) var(--ease-out-expo);
+}
+.td-toast.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- Reduced motion -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .td-btn,
+  .td-tower,
+  .td-toast,
+  .td-paused,
+  .td-end {
+    transition-duration: 0.01ms;
+  }
+  .td-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
