@@ -8,6 +8,9 @@ import type {
   Derived,
   EventDef,
   GameState,
+  GoalDef,
+  PowerContract,
+  ReputationTierDef,
   WorkloadDef,
 } from "./types";
 import {
@@ -18,7 +21,12 @@ import {
   CONTRACT_ARCHETYPES,
   EVENT_BY_ID,
   EVENTS,
+  FINAL_GOAL_ID,
+  GOALS,
   PRESTIGE,
+  REPUTATION_TIERS,
+  RESEARCH,
+  RESEARCH_BY_ID,
   TUNING,
   UPGRADES,
   WORKLOADS,
@@ -101,11 +109,76 @@ export function offlineEfficiency(s: GameState): number {
   return TUNING.offlineEfficiency + (plevel(s, "warm-spares") > 0 ? 0.25 : 0);
 }
 
-/** Current electricity price ($/kW/s). Swings on a slow deterministic cycle so
-    off-peak and peak hours feel different without needing any stored state. */
+/** Raw spot-market electricity price ($/kW/s). Swings on a slow deterministic
+    cycle so off-peak and peak hours feel different without any stored state.
+    This is the *market*; what the farm is billed depends on its contract. */
 export function gridPrice(now: number): number {
   const phase = (now / TUNING.gridCycleMs) * Math.PI * 2;
   return TUNING.basePowerRate * (1 + TUNING.gridSwing * Math.sin(phase));
+}
+
+/** The Endless modifier (idea #5): a single multiplier that scales both
+    challenge and reward once the player has engaged it. 1 when off. */
+export function endlessMult(s: GameState): number {
+  return s.endless ? TUNING.endlessMult : 1;
+}
+
+/** The reputation tier the farm currently stands in, plus progress toward the
+    next one (idea #8). Pure function of reputation — no stored state. */
+export function reputationTier(reputation: number): {
+  index: number;
+  def: ReputationTierDef;
+  nextAt: number | null;
+  nextName: string | null;
+  progress: number;
+} {
+  let index = 0;
+  for (let i = 0; i < REPUTATION_TIERS.length; i++) {
+    if (reputation >= REPUTATION_TIERS[i].minRep) index = i;
+  }
+  const def = REPUTATION_TIERS[index];
+  const next = REPUTATION_TIERS[index + 1] ?? null;
+  if (!next) return { index, def, nextAt: null, nextName: null, progress: 1 };
+  const span = next.minRep - def.minRep;
+  const progress = span > 0 ? Math.min(1, (reputation - def.minRep) / span) : 1;
+  return { index, def, nextAt: next.minRep, nextName: next.name, progress };
+}
+
+/** The price the farm is actually billed per kW, given its power contract and
+    UPS batteries (idea #7). Flat + green are fixed; spot rides the market, with
+    each battery shaving part of any premium above the neutral rate. */
+export function effectiveGridPrice(s: GameState, now: number): number {
+  if (s.powerContract === "flat") return TUNING.powerFlatRate;
+  if (s.powerContract === "green") return TUNING.powerGreenRate;
+  // Spot: the live market, with batteries flattening the peak.
+  const market = gridPrice(now);
+  const premium = market - TUNING.basePowerRate;
+  const batteries = owned(s, "battery");
+  if (premium > 0 && batteries > 0) {
+    const shave = Math.min(
+      TUNING.batteryShaveMax,
+      1 - Math.pow(1 - TUNING.batteryShavePer, batteries),
+    );
+    return TUNING.basePowerRate + premium * (1 - shave);
+  }
+  return market;
+}
+
+/** Cost of the next level of an in-run research node (idea #6). */
+export function researchCost(s: GameState, id: string): number {
+  const def = RESEARCH_BY_ID[id];
+  if (!def) return Infinity;
+  const lvl = s.researchNodes[id] ?? 0;
+  if (def.maxLevel != null && lvl >= def.maxLevel) return Infinity;
+  return Math.ceil(def.baseCost * Math.pow(def.costGrowth, lvl));
+}
+
+/** Cost to service the floor back to nominal, scaled to live gross (idea #9). */
+export function serviceCost(s: GameState, grossPerSec: number): number {
+  return Math.max(
+    TUNING.wearServiceMin,
+    Math.ceil(grossPerSec * TUNING.wearServiceSeconds),
+  );
 }
 
 // --- Workloads ----------------------------------------------------------
@@ -152,11 +225,15 @@ export function setAllocation(s: GameState, id: string, delta: number): boolean 
 
 // --- Incident scheduler -------------------------------------------------
 
-/** Set the next-incident timestamp from a deterministic gap. */
+/** Set the next-incident timestamp from a deterministic gap. Higher reputation
+    tiers stretch the gap (fewer incidents); Endless compresses it. */
 function scheduleNextEvent(s: GameState, now: number): void {
   const r = rng(s.eventSeed ^ 0x9e3779b9);
+  const tier = reputationTier(s.reputation).def;
   const gap =
-    TUNING.eventMinGapMs + r * (TUNING.eventMaxGapMs - TUNING.eventMinGapMs);
+    (TUNING.eventMinGapMs + r * (TUNING.eventMaxGapMs - TUNING.eventMinGapMs)) *
+    tier.incidentGapMult /
+    endlessMult(s);
   s.nextEventAt = now + gap;
 }
 
@@ -216,13 +293,15 @@ export function eventRespondCost(s: GameState, grossPerSec: number): number {
 
 // --- Rack hotspot scheduler ---------------------------------------------
 
-/** Set the next-hotspot timestamp; technicians stretch the gap. */
+/** Set the next-hotspot timestamp; technicians stretch the gap, Endless
+    compresses it. */
 function scheduleNextHotspot(s: GameState, now: number): void {
   const r = rng(s.hotspotSeed ^ 0xc2b2ae35);
   const gap =
-    TUNING.hotspotMinGapMs +
-    r * (TUNING.hotspotMaxGapMs - TUNING.hotspotMinGapMs) +
-    owned(s, "technician") * TUNING.hotspotTechGapMs;
+    (TUNING.hotspotMinGapMs +
+      r * (TUNING.hotspotMaxGapMs - TUNING.hotspotMinGapMs) +
+      owned(s, "technician") * TUNING.hotspotTechGapMs) /
+    endlessMult(s);
   s.nextHotspotAt = now + gap;
 }
 
@@ -289,9 +368,14 @@ function generateOffer(s: GameState, now: number): ContractOffer | null {
   const durationSec = TUNING.contractDurationsSec[arch.durIdx];
 
   // Required output is a slice of full-throughput production over the window;
-  // the archetype sets the centre, a jittered factor adds variety.
+  // the archetype sets the centre, a jittered factor adds variety. Higher
+  // reputation tiers (idea #8) post bigger jobs; Endless (idea #5) bigger still.
+  const tierScale = reputationTier(s.reputation).def.contractScale;
   const targetMult = arch.target * (0.85 + r2 * 0.3);
-  const required = Math.max(1, d.compute * durationSec * targetMult);
+  const required = Math.max(
+    1,
+    d.compute * durationSec * targetMult * tierScale * endlessMult(s),
+  );
 
   // Reward beats letting that compute auto-sell, paid as a lump sum; Standing
   // Orders (prestige) sweetens every payout.
@@ -389,6 +473,17 @@ export function derive(s: GameState, now: number): Derived {
     if (buff.multCoolingCap) coolingCapMult *= buff.multCoolingCap;
   }
 
+  // In-run research (idea #6): each owned level compounds one lever. These
+  // reset on prestige, so they're a mid-run boost rather than a permanent one.
+  for (const def of RESEARCH) {
+    const lvl = s.researchNodes[def.id] ?? 0;
+    if (lvl <= 0) continue;
+    if (def.multComputePer) upgradeComputeMult *= Math.pow(1 + def.multComputePer, lvl);
+    if (def.multPricePer) upgradePriceMult *= Math.pow(1 + def.multPricePer, lvl);
+    if (def.multCoolingPer) coolingCapMult *= Math.pow(1 + def.multCoolingPer, lvl);
+    if (def.powerDrawFactorPer) powerDrawFactor *= Math.pow(def.powerDrawFactorPer, lvl);
+  }
+
   // Live incident multipliers (guarded by endsAt so the effect stops the
   // instant the window closes, even before the next economy tick clears it).
   // Predictive Ops (prestige) eases bad incidents halfway back toward neutral.
@@ -399,7 +494,10 @@ export function derive(s: GameState, now: number): Derived {
     evDef?.kind === "bad" && plevel(s, "predictive-ops") > 0 ? 0.5 : 0;
   const ease = (m: number) => 1 + (m - 1) * (1 - soften);
   const evCoolingMult = ease(evDef?.coolingMult ?? 1);
-  const evGridMult = ease(evDef?.gridPriceMult ?? 1);
+  // The green power contract (idea #7) shrugs off the Grid Surge price spike.
+  const gridSurgeImmune =
+    s.powerContract === "green" && (evDef?.gridPriceMult ?? 1) > 1;
+  const evGridMult = gridSurgeImmune ? 1 : ease(evDef?.gridPriceMult ?? 1);
   const evPowerCapMult = ease(evDef?.powerCapMult ?? 1);
   const evComputeMult = ease(evDef?.computeMult ?? 1);
   const evPriceMult = evDef?.priceMult ?? 1; // good-only, never softened
@@ -485,13 +583,27 @@ export function derive(s: GameState, now: number): Derived {
     overclock *
     evComputeMult;
 
+  // Hardware wear (idea #9): worn hardware shaves effective compute until it's
+  // serviced. Wear of 0 (fresh runs) leaves output untouched.
+  const wearPenalty = Math.max(0, Math.min(1, s.wear)) * TUNING.wearMaxPenalty;
+
   const compute =
-    computeBase * computeMult * heatThrottle * powerThrottle * bandwidthThrottle;
+    computeBase *
+    computeMult *
+    heatThrottle *
+    powerThrottle *
+    bandwidthThrottle *
+    (1 - wearPenalty);
+
+  // Reputation standing (idea #8) + Endless (idea #5) both lift sell price.
+  const tier = reputationTier(s.reputation);
+  const endlessM = endlessMult(s);
 
   // Sell price: base, lifted by reputation, sales staff, upgrades, prestige,
-  // and the live workload blend.
+  // the live workload blend, the standing premium and the Endless modifier.
   const repMult = 1 + Math.log10(1 + s.reputation) * 0.2;
   const prestigePriceMult = 1 + 0.2 * plevel(s, "market");
+  const standingMult = tier.def.priceBonus * endlessM;
   const price =
     TUNING.basePrice *
     repMult *
@@ -499,10 +611,13 @@ export function derive(s: GameState, now: number): Derived {
     upgradePriceMult *
     prestigePriceMult *
     evPriceMult *
-    workloadPriceMult;
+    workloadPriceMult *
+    standingMult;
 
-  // Operating cost: every kW of draw is billed at the live grid price.
-  const grid = gridPrice(now) * evGridMult;
+  // Operating cost: every kW of draw is billed at the contract grid price
+  // (idea #7); the raw market still drives the peak/off-peak read-out.
+  const gridMarket = gridPrice(now);
+  const grid = effectiveGridPrice(s, now) * evGridMult;
   const grossPerSec = compute * price;
   const powerCost = powerDraw * grid;
 
@@ -523,6 +638,7 @@ export function derive(s: GameState, now: number): Derived {
         upgradePriceMult *
         prestigePriceMult *
         evPriceMult *
+        standingMult *
         workloadPrice(def, now),
       trend,
     };
@@ -596,12 +712,28 @@ export function derive(s: GameState, now: number): Derived {
     spaceUsed,
     price,
     gridPrice: grid,
+    gridMarket,
     grossPerSec,
     powerCost,
     moneyPerSec: grossPerSec - powerCost,
     pendingCredits: pendingCredits(s),
     overclockActive,
     computeMult,
+    wear: Math.max(0, Math.min(1, s.wear)),
+    wearPenalty,
+    serviceCost: serviceCost(s, grossPerSec),
+    powerContract: s.powerContract,
+    gridSurgeImmune,
+    repTier: {
+      index: tier.index,
+      name: tier.def.name,
+      nextName: tier.nextName,
+      nextAt: tier.nextAt,
+      progress: tier.progress,
+    },
+    endlessUnlocked: s.goals.includes(FINAL_GOAL_ID),
+    endless: s.endless,
+    endlessMult: endlessM,
     workloads,
     hotspot,
     event,
@@ -623,6 +755,20 @@ export function claimAchievements(s: GameState, d: Derived): AchievementDef[] {
     if (a.check(s, d)) {
       s.achievements.push(a.id);
       granted.push(a);
+    }
+  }
+  return granted;
+}
+
+/** Grant any newly-completed campaign goals (idea #5). Mirrors
+    claimAchievements; the caller logs/toasts the returned defs. */
+export function claimGoals(s: GameState, d: Derived): GoalDef[] {
+  const granted: GoalDef[] = [];
+  for (const g of GOALS) {
+    if (s.goals.includes(g.id)) continue;
+    if (g.check(s, d)) {
+      s.goals.push(g.id);
+      granted.push(g);
     }
   }
   return granted;
@@ -659,6 +805,23 @@ export function tick(
 
   // Reputation accrues slowly, scaled by output so a bigger farm earns trust.
   s.reputation += TUNING.reputationRate * Math.sqrt(d.compute) * dtSec;
+
+  // In-run research points accrue from live compute (idea #6); spendable this
+  // run on the research tree, reset on prestige.
+  s.research +=
+    TUNING.researchRate * Math.sqrt(Math.max(0, d.compute)) * dtSec * efficiency;
+
+  // Hardware wear (idea #9): once the floor is busy, gear ages — faster when
+  // running hot, slower with technicians on staff, gentler while offline.
+  if (producerCount(s) >= TUNING.wearMinProducers) {
+    const heatStress = 1 + (1 - d.heatThrottle) * TUNING.wearHeatStress;
+    const techSlow = 1 / (1 + owned(s, "technician") * TUNING.wearTechSlow);
+    const offline = efficiency < 1 ? TUNING.wearOfflineMult : 1;
+    s.wear = Math.min(
+      1,
+      s.wear + TUNING.wearRatePerSec * heatStress * techSlow * offline * dtSec,
+    );
+  }
 
   // Contract delivery: each active job accrues effective compute over the slice
   // of this window that fell before its deadline (so a window that elapsed
@@ -739,6 +902,11 @@ export function doPrestige(s: GameState, now: number): boolean {
   s.runEarnings = 0;
   s.buildings = {};
   s.upgrades = [];
+  // In-run research + hardware wear are per-run: a rebuild ships fresh gear and
+  // a cleared lab (idea #6, #9). Goals, Endless and the power contract persist.
+  s.research = 0;
+  s.researchNodes = {};
+  s.wear = 0;
   // Prefab Halls (prestige) hands every rebuild a Server Hall to build into.
   if (plevel(s, "prefab-halls") > 0) s.buildings["server-hall"] = 1;
   // Reset the workload split back to the default baseline.
@@ -820,5 +988,39 @@ export function triggerOverclock(s: GameState, now: number): boolean {
   if (now < s.overclockReadyAt) return false;
   s.overclockUntil = now + TUNING.overclockDurationMs;
   s.overclockReadyAt = now + TUNING.overclockCooldownMs;
+  return true;
+}
+
+/** Switch the farm's electricity contract (idea #7). Free to change. */
+export function setPowerContract(s: GameState, contract: PowerContract): boolean {
+  if (s.powerContract === contract) return false;
+  s.powerContract = contract;
+  return true;
+}
+
+/** Buy a level of an in-run research node with R&D points (idea #6). */
+export function buyResearch(s: GameState, id: string): boolean {
+  const cost = researchCost(s, id);
+  if (!isFinite(cost) || s.research < cost) return false;
+  s.research -= cost;
+  s.researchNodes[id] = (s.researchNodes[id] ?? 0) + 1;
+  return true;
+}
+
+/** Spend cash to service the floor back to nominal, clearing wear (idea #9). */
+export function serviceHardware(s: GameState, now: number): boolean {
+  if (s.wear <= 0) return false;
+  const cost = serviceCost(s, derive(s, now).grossPerSec);
+  if (s.money < cost) return false;
+  s.money -= cost;
+  s.wear = 0;
+  s.servicedCount += 1;
+  return true;
+}
+
+/** Toggle Endless mode (idea #5). Only available once the campaign is done. */
+export function toggleEndless(s: GameState): boolean {
+  if (!s.goals.includes(FINAL_GOAL_ID)) return false;
+  s.endless = !s.endless;
   return true;
 }

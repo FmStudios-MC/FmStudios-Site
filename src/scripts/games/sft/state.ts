@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { EVENT_BY_ID, TUNING, WORKLOADS } from "./config";
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export function defaultState(now = Date.now()): GameState {
   return {
@@ -25,6 +25,14 @@ export function defaultState(now = Date.now()): GameState {
     prestigeUpgrades: {},
     // Start with everything on the first (baseline) workload.
     allocation: { [WORKLOADS[0].id]: 1 },
+    // Spot is the original swinging-grid behaviour (the default for new + old saves).
+    powerContract: "spot",
+    research: 0,
+    researchNodes: {},
+    wear: 0,
+    servicedCount: 0,
+    goals: [],
+    endless: false,
     overclockUntil: 0,
     overclockReadyAt: 0,
     lastTick: now,
@@ -104,6 +112,15 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     ? (o.achievements.filter((x) => typeof x === "string") as string[])
     : [];
 
+  const goals = Array.isArray(o.goals)
+    ? (o.goals.filter((x) => typeof x === "string") as string[])
+    : [];
+
+  const researchNodes = countMap(o.researchNodes);
+
+  const powerContract: GameState["powerContract"] =
+    o.powerContract === "flat" || o.powerContract === "green" ? o.powerContract : "spot";
+
   // Contracts: read the new array shape, but migrate the old single
   // contract/contractOffer fields from a v3 save into the arrays.
   const readContract = (v: unknown): ActiveContract | null => {
@@ -172,6 +189,13 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
       : [],
     prestigeUpgrades,
     allocation,
+    powerContract,
+    research: Math.max(0, num(o.research, 0)),
+    researchNodes,
+    wear: Math.max(0, Math.min(1, num(o.wear, 0))),
+    servicedCount: Math.max(0, Math.floor(num(o.servicedCount, 0))),
+    goals,
+    endless: o.endless === true,
     overclockUntil: num(o.overclockUntil, 0),
     overclockReadyAt: num(o.overclockReadyAt, 0),
     lastTick: num(o.lastTick, now),

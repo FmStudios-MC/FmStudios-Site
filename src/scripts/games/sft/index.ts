@@ -7,18 +7,25 @@ import {
   acceptContract,
   buyBuilding,
   buyPrestige,
+  buyResearch,
   buyUpgrade,
   claimAchievements,
+  claimGoals,
   declineContract,
   derive,
   doPrestige,
   gridPrice,
   rebalanceRacks,
+  reputationTier,
   respondEvent,
+  serviceHardware,
   setAllocation,
+  setPowerContract,
   tick,
+  toggleEndless,
   triggerOverclock,
 } from "./engine";
+import { RESEARCH_BY_ID } from "./config";
 import { duration, fmt, money, pct } from "./format";
 import { defaultState } from "./state";
 import {
@@ -86,6 +93,41 @@ export function startGame(root: HTMLElement) {
     onDeclineContract: (id) => {
       if (declineContract(state, Date.now(), id)) {
         ui.pushLog("◇ Contract passed", "");
+        renderNow();
+      }
+    },
+    onSetPowerContract: (id) => {
+      if (setPowerContract(state, id)) {
+        ui.pushLog(`⚡ Power contract → ${id}`, "gold");
+        renderNow();
+      }
+    },
+    onBuyResearch: (id) => {
+      if (buyResearch(state, id)) {
+        const lvl = state.researchNodes[id] ?? 0;
+        ui.pushLog(
+          `⚙ Research: ${RESEARCH_BY_ID[id]?.name ?? id} → Lv ${lvl}`,
+          "gold",
+        );
+        renderNow();
+      }
+    },
+    onServiceHardware: () => {
+      if (serviceHardware(state, Date.now())) {
+        ui.toast("Hardware serviced. Wear cleared.");
+        ui.pushLog("✓ Hardware serviced — wear cleared", "good");
+        renderNow();
+      }
+    },
+    onToggleEndless: () => {
+      if (toggleEndless(state)) {
+        if (state.endless) {
+          ui.toast("Endless engaged. Higher stakes, richer rewards.");
+          ui.pushLog("★ Endless mode engaged", "gold");
+        } else {
+          ui.pushLog("◇ Endless mode stood down", "");
+        }
+        save(state);
         renderNow();
       }
     },
@@ -159,9 +201,10 @@ export function startGame(root: HTMLElement) {
     now: () => Date.now(),
   });
 
-  // Grant any milestones the save already qualifies for, silently — no toast
-  // storm for a returning player or a save predating this feature.
+  // Grant any milestones + goals the save already qualifies for, silently — no
+  // toast storm for a returning player or a save predating this feature.
   claimAchievements(state, derive(state, Date.now()));
+  claimGoals(state, derive(state, Date.now()));
 
   ui.pushLog("▣ Systems online", "good");
 
@@ -192,6 +235,8 @@ export function startGame(root: HTMLElement) {
   let prevCompleted = state.contractsCompleted;
   let prevFailed = state.contractsFailed;
   let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
+  let prevTier = reputationTier(state.reputation).index;
+  let prevWorn = false;
   let milestoneExp =
     state.lifetimeEarnings >= 1000
       ? Math.floor(Math.log10(state.lifetimeEarnings)) + 1
@@ -296,6 +341,32 @@ export function startGame(root: HTMLElement) {
       ui.pushLog(`✦ Milestone — ${a.name}`, "gold");
       ui.toast(`Milestone unlocked: ${a.name}`);
     }
+
+    // Campaign objectives: toast + log anything newly completed; flag the
+    // Endless unlock when the final goal lands.
+    for (const g of claimGoals(state, d)) {
+      ui.pushLog(`◎ Objective complete — ${g.name}`, "gold");
+      ui.toast(`Objective complete: ${g.name}`);
+      if (g.final) {
+        ui.pushLog("★ Campaign complete — Endless mode unlocked", "gold");
+        ui.toast("Campaign complete. Endless mode unlocked.", 7000);
+      }
+    }
+
+    // Reputation tier-ups: announce new standing.
+    const tier = reputationTier(state.reputation);
+    if (tier.index > prevTier) {
+      ui.pushLog(`▲ Reputation standing — ${tier.def.name}`, "gold");
+      ui.toast(`New standing: ${tier.def.name}.`);
+    }
+    prevTier = tier.index;
+
+    // Hardware wear: nudge once the floor is noticeably worn, all-clear after.
+    const worn = d.wear >= 0.4;
+    if (worn && !prevWorn)
+      ui.pushLog(`⚠ Hardware worn — output ${pct(1 - d.wearPenalty)}, service to restore`, "warn");
+    else if (!worn && prevWorn) ui.pushLog("✓ Hardware serviced — wear cleared", "good");
+    prevWorn = worn;
   }, 1000);
 
   // Economy loop: fixed cadence, delta from real timestamps (robust to

@@ -11,7 +11,8 @@ const stats = [
   { key: "space", label: "Floor", value: "0 / 24 RU" },
   { key: "bill", label: "Power bill", value: "$0/s" },
   { key: "reputation", label: "Reputation", value: "0" },
-  { key: "credits", label: "Research", value: "0 ⬡" },
+  { key: "research", label: "R&D", value: "0" },
+  { key: "credits", label: "Prestige", value: "0 ⬡" },
 ];
 
 const buyLists: { cat: string; label: string }[] = [
@@ -181,6 +182,27 @@ const buyLists: { cat: string; label: string }[] = [
 
             <section class="sft-panel">
               <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Power Strategy</h2>
+                <span class="sft-panel__note" data-power-note>Spot market</span>
+              </header>
+              <div class="sft-pwr" data-power-contracts role="radiogroup" aria-label="Power contract"></div>
+              <p class="sft-pwr__hint" data-power-hint></p>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Research</h2>
+                <span class="sft-panel__note" data-research-note>0 R&amp;D</span>
+              </header>
+              <p class="sft-research__lede">
+                R&amp;D points accrue from live compute. Spent here for the run;
+                a rebuild clears the lab.
+              </p>
+              <div class="sft-research" data-research-list></div>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
                 <h2 class="sft-panel__title">Upgrades</h2>
                 <span class="sft-panel__note">One-time</span>
               </header>
@@ -206,6 +228,49 @@ const buyLists: { cat: string; label: string }[] = [
                 </span>
               </header>
               <div class="sft-contract__body" data-contract-body></div>
+            </section>
+
+            <section class="sft-panel sft-goals">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Objectives</h2>
+                <span class="sft-panel__note" data-goals-note>0 / 0</span>
+              </header>
+
+              <div class="sft-standing">
+                <div class="sft-standing__top">
+                  <span class="sft-standing__tier" data-standing-tier>Startup</span>
+                  <span class="sft-standing__next" data-standing-next></span>
+                </div>
+                <div class="sft-bar">
+                  <span class="sft-bar__fill" data-standing-bar></span>
+                </div>
+                <p class="sft-standing__perks" data-standing-perks></p>
+              </div>
+
+              <div class="sft-goals__list" data-goals-list></div>
+
+              <button class="sft-endless" data-endless type="button" hidden>
+                Engage Endless
+              </button>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Maintenance</h2>
+                <span class="sft-panel__note" data-wear-note>Nominal</span>
+              </header>
+              <div class="sft-gauge">
+                <div class="sft-gauge__top">
+                  <span class="sft-gauge__name">Wear</span>
+                  <span class="sft-gauge__label" data-label-wear>Nominal</span>
+                </div>
+                <div class="sft-bar">
+                  <span class="sft-bar__fill" data-bar-wear></span>
+                </div>
+              </div>
+              <button class="sft-service" data-service type="button" disabled>
+                Service Hardware
+              </button>
             </section>
 
             <section class="sft-panel">

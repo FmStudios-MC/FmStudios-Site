@@ -5,7 +5,10 @@ import type {
   AchievementDef,
   BuildingDef,
   EventDef,
+  GoalDef,
   PrestigeDef,
+  ReputationTierDef,
+  ResearchDef,
   UpgradeDef,
   WorkloadDef,
 } from "./types";
@@ -89,7 +92,134 @@ export const TUNING = {
   hotspotCoolingMult: 0.6, // effective cooling while a hotspot is live
   hotspotClearSeconds: 8, // rebalance cost = this many seconds of gross
   hotspotClearMin: 5, // ...but never cheaper than this
+
+  // Power strategy (idea #7): the spot contract keeps the original swinging
+  // grid (the default, so saves are unchanged). Flat trades a small premium
+  // for predictability; green costs more still but shrugs off Grid Surges.
+  // Each UPS battery shaves part of the peak premium on the spot contract,
+  // with diminishing returns.
+  powerFlatRate: 0.56, // $/kW/s, fixed (just above the spot average)
+  powerGreenRate: 0.64, // $/kW/s, fixed + immune to Grid Surge
+  batteryShavePer: 0.45, // fraction of the remaining peak premium each battery cuts
+  batteryShaveMax: 0.8, // ...never shaving more than this share of the premium
+
+  // In-run research (idea #6): R&D points accrue from live compute (sqrt-scaled,
+  // like reputation but spendable) and reset on prestige.
+  researchRate: 0.22, // points/sec = this · sqrt(compute)
+
+  // Hardware wear (idea #9): producers age once the floor is running, shaving
+  // compute until serviced. Heat accelerates wear; technicians slow it.
+  wearMinProducers: 5, // producers online before wear begins to accrue
+  wearRatePerSec: 0.00055, // base wear/sec at nominal heat
+  wearHeatStress: 1.6, // extra wear factor at full throttle loss
+  wearTechSlow: 0.35, // each technician divides the rate by (1 + this)
+  wearOfflineMult: 0.35, // wear accrues slower while away
+  wearMaxPenalty: 0.35, // compute lost at fully-worn hardware
+  wearServiceSeconds: 14, // service cost = this many seconds of gross
+  wearServiceMin: 8, // ...but never cheaper than this
+
+  // Campaign / Endless (idea #5): completing the final goal unlocks Endless, a
+  // toggle that scales challenge (incident/hotspot frequency, contract size)
+  // and reward (sell price, credit gain) together — spice for mastery players.
+  endlessMult: 1.4,
 } as const;
+
+// --- Reputation tiers (idea #8) ----------------------------------------
+// Named standing derived from reputation. Higher tiers post bigger contracts,
+// see fewer incidents and earn a small standing premium on price. The first
+// tier is neutral so the early game is unchanged.
+export const REPUTATION_TIERS: ReputationTierDef[] = [
+  { id: "startup", name: "Startup", minRep: 0, contractScale: 1, incidentGapMult: 1, priceBonus: 1 },
+  { id: "regional", name: "Regional", minRep: 120, contractScale: 1.3, incidentGapMult: 1.12, priceBonus: 1.03 },
+  { id: "hyperscaler", name: "Hyperscaler", minRep: 900, contractScale: 1.7, incidentGapMult: 1.25, priceBonus: 1.06 },
+  { id: "tier1", name: "Tier-1", minRep: 5_000, contractScale: 2.3, incidentGapMult: 1.45, priceBonus: 1.1 },
+];
+
+// --- In-run research tree (idea #6) ------------------------------------
+export const RESEARCH: ResearchDef[] = [
+  {
+    id: "compiler",
+    name: "Compiler Optimisations",
+    desc: "+8% total compute per level.",
+    baseCost: 45,
+    costGrowth: 1.85,
+    multComputePer: 0.08,
+  },
+  {
+    id: "forecast",
+    name: "Demand Forecasting",
+    desc: "+6% sell price per level.",
+    baseCost: 55,
+    costGrowth: 1.85,
+    multPricePer: 0.06,
+  },
+  {
+    id: "thermal",
+    name: "Thermal Modelling",
+    desc: "+10% cooling capacity per level.",
+    baseCost: 70,
+    costGrowth: 1.9,
+    multCoolingPer: 0.1,
+  },
+  {
+    id: "powercap",
+    name: "Power Capping",
+    desc: "-5% producer power draw per level.",
+    baseCost: 80,
+    costGrowth: 2.0,
+    maxLevel: 6,
+    powerDrawFactorPer: 0.95,
+  },
+];
+
+export const RESEARCH_BY_ID: Record<string, ResearchDef> = Object.fromEntries(
+  RESEARCH.map((r) => [r.id, r]),
+);
+
+// --- Campaign objectives (idea #5) -------------------------------------
+// An ordered ladder of state-driven goals (same `check` shape as milestones).
+// The final goal unlocks Endless. Targets are in the game's own compute units.
+export const GOALS: GoalDef[] = [
+  {
+    id: "g-online",
+    name: "First Hum",
+    desc: "Run 10 producers at once.",
+    check: (s) => producerCount(s) >= 10,
+  },
+  {
+    id: "g-kiloflop",
+    name: "Kiloscale",
+    desc: "Reach 1K FLOP/s of effective compute.",
+    check: (_s, d) => d.compute >= 1_000,
+  },
+  {
+    id: "g-contracts",
+    name: "Trusted Supplier",
+    desc: "Fulfil 10 compute contracts.",
+    check: (s) => s.contractsCompleted >= 10,
+  },
+  {
+    id: "g-megaflop",
+    name: "Megascale",
+    desc: "Reach 250K FLOP/s of effective compute.",
+    check: (_s, d) => d.compute >= 250_000,
+  },
+  {
+    id: "g-tier1",
+    name: "Tier-1 Operator",
+    desc: "Reach Tier-1 reputation standing.",
+    check: (s) => s.reputation >= 5_000,
+  },
+  {
+    id: "g-gigafarm",
+    name: "The Gigafarm",
+    desc: "Reach 5M FLOP/s of effective compute.",
+    check: (_s, d) => d.compute >= 5_000_000,
+    final: true,
+  },
+];
+
+export const FINAL_GOAL_ID = GOALS.find((g) => g.final)!.id;
 
 // --- Workloads ----------------------------------------------------------
 export const WORKLOADS: WorkloadDef[] = [
@@ -229,6 +359,16 @@ export const BUILDINGS: BuildingDef[] = [
     powerCap: 70,
     space: 6,
     unlockAt: 11_000,
+  },
+  {
+    id: "battery",
+    name: "UPS Battery",
+    desc: "Banks off-peak power to blunt the spot price at peak.",
+    category: "power",
+    baseCost: 16_000,
+    growth: 1.18,
+    space: 3,
+    unlockAt: 28_000,
   },
   {
     id: "reactor",
@@ -777,6 +917,45 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     check: (s) => s.contractStreak >= 5,
     buff: { multCompute: 1.03 },
     buffNote: "+3% compute",
+  },
+  {
+    id: "r-and-d",
+    name: "R&D Department",
+    desc: "Reach 6 combined levels of in-run research.",
+    check: (s) =>
+      Object.values(s.researchNodes).reduce((n, v) => n + v, 0) >= 6,
+    buff: { multCompute: 1.03 },
+    buffNote: "+3% compute",
+  },
+  {
+    id: "preventive-care",
+    name: "Preventive Care",
+    desc: "Service the hardware 10 times.",
+    check: (s) => s.servicedCount >= 10,
+    buff: { multCompute: 1.04 },
+    buffNote: "+4% compute",
+  },
+  {
+    id: "going-green",
+    name: "Going Green",
+    desc: "Switch the farm to a green power contract.",
+    check: (s) => s.powerContract === "green",
+  },
+  {
+    id: "tier-one",
+    name: "Tier-1 Standing",
+    desc: "Reach Tier-1 reputation.",
+    check: (s) => s.reputation >= 5_000,
+    buff: { multPrice: 1.05 },
+    buffNote: "+5% sell price",
+  },
+  {
+    id: "no-finish-line",
+    name: "No Finish Line",
+    desc: "Complete the campaign and engage Endless mode.",
+    check: (s) => s.endless,
+    buff: { multCompute: 1.05 },
+    buffNote: "+5% compute",
   },
 ];
 

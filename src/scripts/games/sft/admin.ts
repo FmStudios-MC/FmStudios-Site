@@ -9,7 +9,7 @@
    (#admin), or once the persisted flag is set. Everything operates on the
    live game state and re-renders. */
 
-import { BUILDINGS, BUILDING_BY_ID, PRESTIGE, UPGRADES } from "./config";
+import { BUILDINGS, BUILDING_BY_ID, GOALS, PRESTIGE, UPGRADES } from "./config";
 import { creditScale, derive, doPrestige, tick } from "./engine";
 import type { GameState } from "./types";
 
@@ -42,6 +42,9 @@ export function installAdmin(ctx: AdminCtx): void {
         "  sft.credits(n=100)     add research credits ⬡",
         "  sft.setCredits(n)      set research credits",
         "  sft.rep(n=1000)        add reputation",
+        "  sft.research(n=500)    add in-run R&D points",
+        "  sft.wear(f=0)          set hardware wear (0..1)",
+        "  sft.goals()            complete the whole campaign",
         "  sft.give(id, n=10)     add n of a building",
         "  sft.set(id, n)         set a building's count",
         "  sft.fill(n=25)         set EVERY building to n",
@@ -79,6 +82,19 @@ export function installAdmin(ctx: AdminCtx): void {
     rep(n = 1000) {
       st().reputation += n;
       return done(`+${n} reputation`);
+    },
+    research(n = 500) {
+      st().research += n;
+      return done(`+${n} R&D`);
+    },
+    wear(f = 0) {
+      st().wear = Math.max(0, Math.min(1, f));
+      return done(`wear = ${st().wear}`);
+    },
+    goals() {
+      const s = st();
+      for (const g of GOALS) if (!s.goals.includes(g.id)) s.goals.push(g.id);
+      return done("campaign completed (Endless unlocked)");
     },
 
     ids() {
@@ -146,9 +162,12 @@ export function installAdmin(ctx: AdminCtx): void {
       const s = st();
       s.money += 1e9;
       s.credits += 1000;
+      s.research += 5000;
+      s.wear = 0;
       s.lifetimeEarnings = Math.max(s.lifetimeEarnings, 1e13);
       for (const u of UPGRADES)
         if (!s.upgrades.includes(u.id)) s.upgrades.push(u.id);
+      for (const g of GOALS) if (!s.goals.includes(g.id)) s.goals.push(g.id);
       for (const b of BUILDINGS) s.buildings[b.id] = Math.max(s.buildings[b.id] ?? 0, 50);
       ctx.toast("Admin: god mode applied.");
       return done("god mode");

@@ -2,14 +2,17 @@
    shell and labelled slots; this module fills the data-driven lists once and
    then updates only the values that change each frame. No framework. */
 
-import type { Derived, GameState } from "./types";
+import type { Derived, GameState, PowerContract } from "./types";
 import {
   ACHIEVEMENTS,
   BUILDINGS,
   BUILDING_BY_ID,
   CATEGORY_LABELS,
+  GOALS,
   PRESTIGE,
   PRESTIGE_BRANCH_LABELS,
+  REPUTATION_TIERS,
+  RESEARCH,
   TUNING,
   UPGRADES,
   WORKLOADS,
@@ -19,9 +22,17 @@ import {
   creditScale,
   prestigeCost,
   prestigeUnlocked,
+  researchCost,
   startingMoney,
 } from "./engine";
 import { duration, fmt, money, pct, rate } from "./format";
+
+/* The power-contract options, in the order they appear in the selector. */
+const POWER_OPTIONS: { id: PowerContract; name: string; desc: string }[] = [
+  { id: "spot", name: "Spot", desc: "Rides the market — cheap off-peak, brutal at peak." },
+  { id: "flat", name: "Flat", desc: "A fixed rate. Predictable, slightly above average." },
+  { id: "green", name: "Green", desc: "Costs more, but immune to Grid Surge spikes." },
+];
 
 export interface Handlers {
   onBuyBuilding(id: string): void;
@@ -34,6 +45,10 @@ export interface Handlers {
   onSetAllocation(id: string, delta: number): void;
   onAcceptContract(id: string): void;
   onDeclineContract(id: string): void;
+  onSetPowerContract(id: PowerContract): void;
+  onBuyResearch(id: string): void;
+  onServiceHardware(): void;
+  onToggleEndless(): void;
   onSave(): void;
   onReset(): void;
   onExport(): void;
@@ -324,6 +339,98 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     }
   }
 
+  // --- Power strategy (contract selector) -------------------------------
+  interface PowerRow { root: HTMLButtonElement; id: PowerContract }
+  const powerWrap = root.querySelector<HTMLElement>("[data-power-contracts]");
+  const powerNote = root.querySelector<HTMLElement>("[data-power-note]");
+  const powerHint = root.querySelector<HTMLElement>("[data-power-hint]");
+  const powerRows: PowerRow[] = [];
+  if (powerWrap) {
+    for (const opt of POWER_OPTIONS) {
+      const btn = el("button", "sft-pwr__opt") as HTMLButtonElement;
+      btn.type = "button";
+      btn.setAttribute("role", "radio");
+      btn.append(
+        el("span", "sft-pwr__name", opt.name),
+        el("span", "sft-pwr__desc", opt.desc),
+      );
+      btn.addEventListener("click", () => handlers.onSetPowerContract(opt.id));
+      powerWrap.appendChild(btn);
+      powerRows.push({ root: btn, id: opt.id });
+    }
+  }
+
+  // --- In-run research tree --------------------------------------------
+  // Reuses the prestige-row chrome (.sft-prow); cost is paid in R&D points.
+  interface ResearchRow {
+    root: HTMLElement;
+    level: HTMLElement;
+    cost: HTMLElement;
+    button: HTMLButtonElement;
+    id: string;
+  }
+  const researchWrap = root.querySelector<HTMLElement>("[data-research-list]");
+  const researchNote = root.querySelector<HTMLElement>("[data-research-note]");
+  const researchRows: ResearchRow[] = [];
+  if (researchWrap) {
+    for (const def of RESEARCH) {
+      const rowEl = el("button", "sft-prow");
+      rowEl.type = "button";
+      (rowEl as HTMLButtonElement).addEventListener("click", () =>
+        handlers.onBuyResearch(def.id),
+      );
+      const main = el("span", "sft-prow__main");
+      main.append(
+        el("span", "sft-prow__name", def.name),
+        el("span", "sft-prow__desc", def.desc),
+      );
+      const meta = el("span", "sft-prow__meta");
+      const level = el("span", "sft-prow__level", "Lv 0");
+      const cost = el("span", "sft-prow__cost", "");
+      meta.append(level, cost);
+      rowEl.append(main, meta);
+      researchWrap.appendChild(rowEl);
+      researchRows.push({
+        root: rowEl,
+        level,
+        cost,
+        button: rowEl as HTMLButtonElement,
+        id: def.id,
+      });
+    }
+  }
+
+  // --- Objectives (campaign goals + reputation standing) ----------------
+  const goalsListWrap = root.querySelector<HTMLElement>("[data-goals-list]");
+  const goalsNote = root.querySelector<HTMLElement>("[data-goals-note]");
+  const standingTier = root.querySelector<HTMLElement>("[data-standing-tier]");
+  const standingNext = root.querySelector<HTMLElement>("[data-standing-next]");
+  const standingBar = root.querySelector<HTMLElement>("[data-standing-bar]");
+  const standingPerks = root.querySelector<HTMLElement>("[data-standing-perks]");
+  const endlessBtn = root.querySelector<HTMLButtonElement>("[data-endless]");
+  endlessBtn?.addEventListener("click", () => handlers.onToggleEndless());
+  const goalRows = goalsListWrap
+    ? GOALS.map((def) => {
+        const rowEl = el("div", "sft-goal is-locked");
+        const mark = el("span", "sft-goal__mark", "○");
+        const body = el("span", "sft-goal__body");
+        body.append(
+          el("span", "sft-goal__name", def.name),
+          el("span", "sft-goal__desc", def.desc),
+        );
+        rowEl.append(mark, body);
+        goalsListWrap.appendChild(rowEl);
+        return { root: rowEl, mark, def };
+      })
+    : [];
+
+  // --- Maintenance (hardware wear) --------------------------------------
+  const wearBar = root.querySelector<HTMLElement>("[data-bar-wear]");
+  const wearLabel = root.querySelector<HTMLElement>("[data-label-wear]");
+  const wearNote = root.querySelector<HTMLElement>("[data-wear-note]");
+  const serviceBtn = root.querySelector<HTMLButtonElement>("[data-service]");
+  serviceBtn?.addEventListener("click", () => handlers.onServiceHardware());
+
   // --- Prestige tree (grouped by branch) --------------------------------
   const prestigeWrap = $("[data-prestige-list]");
   const prestigeRows: PrestigeRow[] = [];
@@ -501,7 +608,8 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     setText(stats.money, money(s.money));
     setText(stats.rate, "$" + fmt(d.moneyPerSec) + "/s");
     setText(stats.compute, rate(d.compute, " FLOP"));
-    setText(stats.reputation, fmt(s.reputation));
+    setText(stats.reputation, `${fmt(s.reputation)} · ${d.repTier.name}`);
+    setText(stats.research, fmt(s.research));
     setText(stats.credits, fmt(s.credits));
     setText(
       stats.power,
@@ -587,6 +695,43 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       }
     }
 
+    // Power strategy: highlight the active contract; the hint reads the live
+    // billed rate, the raw market state and any UPS / surge-immunity perk.
+    if (powerRows.length) {
+      for (const r of powerRows) {
+        const on = s.powerContract === r.id;
+        setFlag(r.root, "is-active", on);
+        r.root.setAttribute("aria-checked", on ? "true" : "false");
+      }
+      const active = POWER_OPTIONS.find((o) => o.id === s.powerContract);
+      setText(powerNote ?? undefined, `${active?.name ?? "Spot"} contract`);
+      const marketRatio = d.gridMarket / TUNING.basePowerRate;
+      const marketWord =
+        marketRatio > 1.12 ? "peak" : marketRatio < 0.88 ? "off-peak" : "normal";
+      const batteries = s.buildings["battery"] ?? 0;
+      let hint = `Billed $${fmt(d.gridPrice)}/kW·s · market ${marketWord}`;
+      if (s.powerContract === "spot" && batteries > 0)
+        hint += ` · ${batteries} UPS shaving peaks`;
+      if (s.powerContract === "green")
+        hint += d.gridSurgeImmune ? " · surge shrugged off" : " · surge-proof";
+      setText(powerHint ?? undefined, hint);
+    }
+
+    // In-run research
+    if (researchRows.length) {
+      setText(researchNote ?? undefined, `${fmt(s.research)} R&D`);
+      for (const r of researchRows) {
+        const lvl = s.researchNodes[r.id] ?? 0;
+        setText(r.level, "Lv " + lvl);
+        const cost = researchCost(s, r.id);
+        const maxed = !isFinite(cost);
+        setText(r.cost, maxed ? "MAX" : fmt(cost) + " R&D");
+        const afford = !maxed && s.research >= cost;
+        setDisabled(r.button, !afford);
+        setFlag(r.root, "is-afford", afford);
+      }
+    }
+
     // Prestige tree
     for (const p of prestigeRows) {
       const lvl = s.prestigeUpgrades[p.def.id] ?? 0;
@@ -642,7 +787,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     powerBar.style.width = pct(powerFrac);
     const browningOut = d.powerThrottle < 1;
     setFlag(powerBar, "is-hot", browningOut);
-    const gridRatio = d.gridPrice / TUNING.basePowerRate;
+    const gridRatio = d.gridMarket / TUNING.basePowerRate;
     const gridWord =
       gridRatio > 1.12 ? "peak" : gridRatio < 0.88 ? "off-peak" : "normal";
     setText(
@@ -851,6 +996,70 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           ? `${active.length} active${d.contracts.streak >= 2 ? ` · ${d.contracts.streak}× streak` : ""}`
           : "Demand market",
       );
+    }
+
+    // Reputation standing (tier badge + progress + perks)
+    const tierInfo = d.repTier;
+    setText(standingTier ?? undefined, tierInfo.name);
+    if (tierInfo.nextAt != null) {
+      setText(
+        standingNext ?? undefined,
+        `${fmt(s.reputation)} / ${fmt(tierInfo.nextAt)} → ${tierInfo.nextName}`,
+      );
+    } else {
+      setText(standingNext ?? undefined, "Top tier");
+    }
+    if (standingBar) standingBar.style.width = pct(tierInfo.progress);
+    const tierDef = REPUTATION_TIERS[tierInfo.index];
+    setText(
+      standingPerks ?? undefined,
+      tierInfo.index === 0
+        ? "Baseline standing — climb for bigger contracts and fewer incidents."
+        : `+${pct(tierDef.priceBonus - 1)} price · ${tierDef.contractScale.toFixed(1)}× contract size · fewer incidents`,
+    );
+
+    // Objectives (campaign goals)
+    if (goalRows.length) {
+      let done = 0;
+      for (const g of goalRows) {
+        const has = s.goals.includes(g.def.id);
+        if (has) done++;
+        setFlag(g.root, "is-locked", !has);
+        setFlag(g.root, "is-done", has);
+        setText(g.mark, has ? "●" : "○");
+      }
+      setText(goalsNote ?? undefined, `${done} / ${goalRows.length}`);
+    }
+
+    // Endless toggle (revealed once the final goal is complete)
+    if (endlessBtn) {
+      endlessBtn.hidden = !d.endlessUnlocked;
+      if (d.endlessUnlocked) {
+        setText(
+          endlessBtn,
+          d.endless
+            ? `Endless ×${d.endlessMult} — stand down`
+            : "Engage Endless",
+        );
+        setFlag(endlessBtn, "is-active", d.endless);
+      }
+    }
+
+    // Maintenance (hardware wear)
+    if (wearBar) {
+      const w = d.wear;
+      wearBar.style.width = pct(w);
+      setFlag(wearBar, "is-hot", w >= 0.5);
+      const worn = w > 0.02;
+      setText(
+        wearLabel ?? undefined,
+        worn ? `${pct(w)} worn — output ${pct(1 - d.wearPenalty)}` : "Nominal",
+      );
+      setText(wearNote ?? undefined, worn ? `${pct(w)} worn` : "Nominal");
+      if (serviceBtn) {
+        setText(serviceBtn, `Service · ${money(d.serviceCost)}`);
+        setDisabled(serviceBtn, w <= 0 || s.money < d.serviceCost);
+      }
     }
   }
 

@@ -59,6 +59,58 @@ export interface WorkloadDef {
   powerFactor?: number;
 }
 
+/** A node in the per-run research tree (idea #6). Funded by R&D points that
+    accrue from live compute and reset on prestige, so it's a mid-run agency
+    layer that sits between "buy a building" and the once-per-reset prestige.
+    Each owned level multiplies one lever; effects stack with everything else. */
+export interface ResearchDef {
+  id: string;
+  name: string;
+  desc: string;
+  baseCost: number; // in R&D points
+  costGrowth: number;
+  maxLevel?: number;
+
+  // Per-level modifiers (compounded by level in derive()).
+  multComputePer?: number; // +x compute per level (0.08 = +8%/level)
+  multPricePer?: number; // +x sell price per level
+  multCoolingPer?: number; // +x cooling capacity per level
+  powerDrawFactorPer?: number; // ×x producer power draw per level (0.95 = -5%)
+}
+
+/** A campaign objective (idea #5). Same state-driven `check` shape as a
+    milestone, but goals form an ordered ladder and the `final` one unlocks
+    Endless mode — a global difficulty/reward modifier for the late game. */
+export interface GoalDef {
+  id: string;
+  name: string;
+  desc: string;
+  check: (s: GameState, d: Derived) => boolean;
+  /** Completing the final goal unlocks the Endless toggle. */
+  final?: boolean;
+}
+
+/** A named reputation tier (idea #8). Reputation already drives sell price;
+    tiers turn the slow climb into visible standing with concrete perks:
+    bigger contracts, fewer incidents, a small price premium. Derived from
+    `reputation` alone, so no new persisted state is needed. */
+export interface ReputationTierDef {
+  id: string;
+  name: string;
+  /** Reputation required to reach this tier. */
+  minRep: number;
+  /** Multiplier on contract required/reward (bigger deals at higher tiers). */
+  contractScale: number;
+  /** Multiplier on the gap between incidents (>1 = quieter). */
+  incidentGapMult: number;
+  /** Small standing premium on sell price. */
+  priceBonus: number;
+}
+
+/** Which electricity deal the farm is on (idea #7). Default "spot" preserves
+    the original swinging-grid behaviour for existing saves. */
+export type PowerContract = "flat" | "spot" | "green";
+
 export interface UpgradeDef {
   id: string;
   name: string;
@@ -191,6 +243,22 @@ export interface GameState {
   // weights (normalised in derive). Empty = everything on the first workload.
   allocation: Record<string, number>;
 
+  // Power strategy (idea #7): which electricity contract the farm runs on.
+  powerContract: PowerContract;
+
+  // In-run research (idea #6): R&D points accrue from live compute and are
+  // spent on the research tree; both reset on prestige.
+  research: number; // current spendable points
+  researchNodes: Record<string, number>; // node id -> level (this run)
+
+  // Hardware wear (idea #9): producers age, shaving compute until serviced.
+  wear: number; // 0..1 aggregate wear across the floor
+  servicedCount: number; // lifetime services, for the milestone predicate
+
+  // Campaign objectives + Endless (idea #5).
+  goals: string[]; // completed goal ids
+  endless: boolean; // Endless difficulty/reward modifier engaged
+
   overclockUntil: number; // epoch ms, while > now the burst is active
   overclockReadyAt: number; // epoch ms, cooldown gate
   lastTick: number; // epoch ms, for offline catch-up
@@ -238,13 +306,37 @@ export interface Derived {
   spaceCap: number; // rack units of floor space available
   spaceUsed: number; // rack units occupied by installed equipment
   price: number; // blended $/FLOP after reputation + mults + workload split
-  gridPrice: number; // current electricity price, $/kW/s
+  gridPrice: number; // billed electricity price under the active contract, $/kW/s
+  gridMarket: number; // raw spot-market price (drives the peak/off-peak read-out)
   grossPerSec: number; // revenue before the electricity bill
   powerCost: number; // electricity bill, $/s
   moneyPerSec: number; // net income = grossPerSec - powerCost
   pendingCredits: number; // credits gained if prestiging now
   overclockActive: boolean;
   computeMult: number; // combined compute multiplier (debug/preview)
+
+  // Hardware wear (idea #9).
+  wear: number; // 0..1, echoed for the UI gauge
+  wearPenalty: number; // fraction of compute currently lost to wear
+  serviceCost: number; // cash to service the floor back to nominal
+
+  // Power strategy (idea #7): the live contract + whether a surge is shrugged off.
+  powerContract: PowerContract;
+  gridSurgeImmune: boolean; // true on the green contract during a grid surge
+
+  // Reputation standing (idea #8).
+  repTier: {
+    index: number;
+    name: string;
+    nextName: string | null; // null at the top tier
+    nextAt: number | null; // reputation needed for the next tier
+    progress: number; // 0..1 toward the next tier
+  };
+
+  // Campaign objectives + Endless (idea #5).
+  endlessUnlocked: boolean; // the final goal has been completed
+  endless: boolean; // Endless modifier currently engaged
+  endlessMult: number; // the live difficulty/reward multiplier (1 when off)
 
   /** Per-workload split as the UI needs it: normalised share + live price. */
   workloads: {
