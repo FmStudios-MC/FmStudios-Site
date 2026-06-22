@@ -5,7 +5,7 @@ import { installAdmin } from "./admin";
 import { BUILDING_BY_ID, EVENT_BY_ID, TUNING, UPGRADES } from "./config";
 import {
   acceptContract,
-  buyBuilding,
+  buyBuildingBulk,
   buyPrestige,
   buyResearch,
   buyUpgrade,
@@ -25,8 +25,9 @@ import {
   toggleEndless,
   triggerOverclock,
 } from "./engine";
-import { RESEARCH_BY_ID } from "./config";
+import { RESEARCH_BY_ID, SCRIPTED_BY_ID } from "./config";
 import { duration, fmt, money, pct } from "./format";
+import { sound } from "./sound";
 import { defaultState } from "./state";
 import {
   exportSave,
@@ -36,16 +37,22 @@ import {
   wipe,
 } from "./storage";
 import type { GameState } from "./types";
-import { createUI } from "./ui";
+import { createUI, type Handlers } from "./ui";
 
 export function startGame(root: HTMLElement) {
   const loaded = load();
   let state: GameState = loaded.state;
 
-  const ui = createUI(root, {
-    onBuyBuilding: (id) => {
-      if (buyBuilding(state, id)) {
-        ui.pushLog(`+ ${BUILDING_BY_ID[id]?.name ?? id} online`, "good");
+  const handlers: Handlers = {
+    onBuyBuilding: (id, mult) => {
+      const n = buyBuildingBulk(state, id, mult);
+      if (n > 0) {
+        const name = BUILDING_BY_ID[id]?.name ?? id;
+        ui.pushLog(
+          n > 1 ? `+ ${name} ×${n} online` : `+ ${name} online`,
+          "good",
+        );
+        sound.buy();
         renderNow();
       }
     },
@@ -182,7 +189,9 @@ export function startGame(root: HTMLElement) {
       ui.pushLog("↥ Save imported", "good");
       renderNow();
     },
-  });
+  };
+
+  const ui = createUI(root, handlers);
 
   function renderNow() {
     const now = Date.now();
@@ -208,20 +217,25 @@ export function startGame(root: HTMLElement) {
 
   ui.pushLog("▣ Systems online", "good");
 
-  // Welcome-back toast + log for offline earnings.
-  if (loaded.offlineEarnings > 1 && loaded.offlineSec > 5) {
-    ui.toast(
-      `Welcome back. Your farm earned ${money(
-        loaded.offlineEarnings,
-      )} over ${duration(loaded.offlineSec)}.`,
-      7000,
-    );
+  // Welcome-back: a full breakdown modal for a real absence, a light toast for
+  // a short gap. Either way, log it to the activity feed.
+  if (loaded.offline && loaded.offlineEarnings > 1 && loaded.offlineSec > 5) {
     ui.pushLog(
       `↩ Offline earnings: ${money(loaded.offlineEarnings)} over ${duration(
         loaded.offlineSec,
       )}`,
       "gold",
     );
+    if (loaded.offlineSec >= 60) {
+      ui.showOfflineSummary(loaded.offline);
+    } else {
+      ui.toast(
+        `Welcome back. Your farm earned ${money(
+          loaded.offlineEarnings,
+        )} over ${duration(loaded.offlineSec)}.`,
+        7000,
+      );
+    }
   }
 
   // Activity watcher: log state transitions and lifetime milestones, sampled
@@ -237,6 +251,8 @@ export function startGame(root: HTMLElement) {
   let prevPeak = gridPrice(Date.now()) / TUNING.basePowerRate > 1.12;
   let prevTier = reputationTier(state.reputation).index;
   let prevWorn = false;
+  let prevScriptId: string | null = state.activeScript?.id ?? null;
+  let prevScriptsCompleted = state.scriptsCompleted;
   let milestoneExp =
     state.lifetimeEarnings >= 1000
       ? Math.floor(Math.log10(state.lifetimeEarnings)) + 1
@@ -250,10 +266,15 @@ export function startGame(root: HTMLElement) {
   setInterval(() => {
     const d = derive(state, Date.now());
 
+    // Statistics sparklines + the audio hum both sample on this 1s cadence.
+    ui.recordHistory(d);
+    sound.setLoad(d.heatLoad);
+
     const overheat = d.heatThrottle < 0.999;
-    if (overheat && !prevOverheat)
+    if (overheat && !prevOverheat) {
       ui.pushLog(`⚠ Overheating — output ${pct(d.heatThrottle)}`, "warn");
-    else if (!overheat && prevOverheat)
+      sound.klaxon();
+    } else if (!overheat && prevOverheat)
       ui.pushLog("✓ Heat back to nominal", "good");
     prevOverheat = overheat;
 
@@ -328,6 +349,7 @@ export function startGame(root: HTMLElement) {
     if (state.contractsCompleted > prevCompleted) {
       ui.pushLog("✦ Contract fulfilled — bonus + reputation paid", "gold");
       ui.toast("Contract fulfilled.");
+      sound.chime();
     }
     if (state.contractsFailed > prevFailed) {
       ui.pushLog("✕ Contract failed — reputation lost", "warn");
@@ -367,6 +389,35 @@ export function startGame(root: HTMLElement) {
       ui.pushLog(`⚠ Hardware worn — output ${pct(1 - d.wearPenalty)}, service to restore`, "warn");
     else if (!worn && prevWorn) ui.pushLog("✓ Hardware serviced — wear cleared", "good");
     prevWorn = worn;
+
+    // Scripted opportunities (idea #15): announce a fresh one; on resolution,
+    // distinguish a win (scriptsCompleted ticked up) from a lapsed window.
+    const curScript = d.script;
+    const curScriptId = curScript?.id ?? null;
+    if (curScriptId && curScriptId !== prevScriptId) {
+      ui.pushLog(
+        `◈ Opportunity — ${curScript!.name}: ${curScript!.goal}`,
+        "gold",
+      );
+      ui.toast(`${curScript!.name}. ${curScript!.goal}`, 7000);
+    } else if (
+      !curScriptId &&
+      prevScriptId &&
+      state.scriptsCompleted === prevScriptsCompleted
+    ) {
+      ui.pushLog(
+        `◇ Opportunity lapsed — ${SCRIPTED_BY_ID[prevScriptId]?.name ?? "scripted op"}`,
+        "",
+      );
+    }
+    prevScriptId = curScriptId;
+
+    if (state.scriptsCompleted > prevScriptsCompleted) {
+      ui.pushLog("★ Opportunity won — payout banked", "gold");
+      ui.toast("Opportunity won. Payout banked.");
+      sound.chime();
+    }
+    prevScriptsCompleted = state.scriptsCompleted;
   }, 1000);
 
   // Economy loop: fixed cadence, delta from real timestamps (robust to
@@ -384,6 +435,41 @@ export function startGame(root: HTMLElement) {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  // Keyboard shortcuts (idea #13): action verbs + the buy multiplier. Ignored
+  // when a modifier is held (so the admin Ctrl+Shift+A chord and browser
+  // shortcuts pass through) or when a text field has focus. The action handlers
+  // each no-op when their target isn't available, so stray presses are safe.
+  window.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (e.target as HTMLElement | null)?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    switch (e.key.toLowerCase()) {
+      case "o":
+        handlers.onOverclock();
+        break;
+      case "r":
+        handlers.onRespondEvent();
+        break;
+      case "b":
+        handlers.onRebalance();
+        break;
+      case "m":
+        handlers.onServiceHardware();
+        break;
+      case "1":
+        ui.setBuyMult(1);
+        break;
+      case "2":
+        ui.setBuyMult(10);
+        break;
+      case "3":
+        ui.setBuyMult("max");
+        break;
+      default:
+        return;
+    }
+  });
 
   // Autosave + save on exit.
   setInterval(() => save(state), TUNING.saveEveryMs);

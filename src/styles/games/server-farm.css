@@ -2313,6 +2313,286 @@
   cursor: not-allowed;
 }
 
+/* ==== Tier 3: polish, retention, presentation ======================== */
+
+/* ---- Bulk-buy multiplier (×1 / ×10 / Max) -------------------------- */
+.sft-buymult {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: oklch(0.16 0.01 75 / 0.6);
+}
+.sft-buymult__opt {
+  padding: var(--space-3xs) var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background-color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-buymult__opt:hover {
+  color: var(--gold);
+}
+.sft-buymult__opt.is-active {
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+}
+
+/* ---- Keyboard hint line -------------------------------------------- */
+.sft-ops__keys {
+  margin: 0 0 var(--space-s);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  line-height: 1.7;
+}
+.sft-ops__keys kbd {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+}
+@media (max-width: 560px) {
+  .sft-ops__keys {
+    display: none; /* no physical keyboard — the buttons carry the actions */
+  }
+}
+
+/* ---- Statistics sparklines ----------------------------------------- */
+.sft-sparks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+.sft-spark {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+.sft-spark__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+.sft-spark__name {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-spark__value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.sft-spark__svg {
+  display: block;
+  width: 100%;
+  height: 40px;
+  overflow: visible;
+}
+.sft-spark__line {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.sft-spark__area {
+  fill: var(--gold-glow);
+  stroke: none;
+  opacity: 0.6;
+}
+.sft-spark__foot {
+  display: flex;
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Scripted opportunity banner ----------------------------------- */
+/* Reuses the incident-banner chrome (.sft-event) in the gold "opportunity"
+   hue — these are valuable deals, so gold is the right voice. */
+.sft-event--script {
+  --accent: var(--gold);
+  align-items: flex-start;
+}
+.sft-event--script .sft-event__name {
+  color: var(--gold-bright);
+}
+.sft-script__track {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-top: var(--space-2xs);
+}
+.sft-script__track .sft-bar {
+  flex: 1 1 auto;
+}
+.sft-event--script .sft-bar__fill {
+  background: var(--gold-sheen);
+}
+.sft-script__hold {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--sft-hot);
+  font-variant-numeric: tabular-nums;
+}
+.sft-script__hold.is-holding {
+  color: var(--sft-ok);
+}
+.sft-script__reward {
+  display: block;
+  margin-top: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--gold-bright);
+}
+
+/* ---- Sound toggle --------------------------------------------------- */
+.sft-ctl--toggle {
+  width: 100%;
+  margin-bottom: var(--space-2xs);
+  cursor: pointer;
+}
+.sft-ctl--toggle.is-active {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+/* ---- Reactive data-hall: hotspot + wear (idea #10) ----------------- */
+/* A live hotspot flares the affected floor amber and unsettles the LEDs;
+   worn hardware desaturates + dims the producer cells, reading as age. */
+[data-hall][data-hotspot="1"] .sft-cab--producer .sft-cab__frame {
+  border-color: color-mix(in oklch, var(--sft-warn) 55%, var(--line-strong));
+}
+[data-hall][data-hotspot="1"] .sft-cab--producer .sft-u.is-on::before {
+  background: var(--sft-warn);
+  box-shadow: 0 0 6px var(--sft-warn);
+  animation: sft-blink 0.7s steps(2, jump-none) infinite;
+}
+[data-hall][data-wear="1"] .sft-cab--producer .sft-u.is-on {
+  filter: saturate(calc(1 - var(--sft-wear, 0) * 0.5))
+    brightness(calc(1 - var(--sft-wear, 0) * 0.25));
+}
+
+/* ---- Offline summary modal (idea #12) ------------------------------ */
+.sft-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-l);
+  background: oklch(0.08 0.006 75 / 0.74);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out-quart);
+}
+.sft-modal-scrim[hidden] {
+  display: none;
+}
+.sft-modal-scrim.is-open {
+  opacity: 1;
+}
+.sft-modal {
+  width: min(92vw, 440px);
+  padding: var(--space-l);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-l);
+  background: oklch(0.16 0.012 75 / 0.98);
+  box-shadow: 0 30px 80px -30px var(--gold-glow);
+  transform: translateY(10px) scale(0.98);
+  transition: transform var(--dur-mid) var(--ease-out-expo);
+}
+.sft-modal-scrim.is-open .sft-modal {
+  transform: none;
+}
+.sft-modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-2);
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+}
+.sft-modal__sub {
+  margin: var(--space-3xs) 0 var(--space-m);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+.sft-modal__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-s);
+  margin-bottom: var(--space-m);
+}
+.sft-modal__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+}
+.sft-modal__metric-val {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.sft-modal__metric-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-modal__note {
+  margin: 0 0 var(--space-m);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+.sft-modal__close {
+  width: 100%;
+  padding: var(--space-s);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out-quart);
+}
+.sft-modal__close:hover {
+  filter: brightness(1.08);
+}
+
 /* ---- Motion + accessibility ---------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   [data-hall][data-tier="hot"] .sft-cab--producer .sft-u.is-on::before,
@@ -2327,6 +2607,7 @@
   .sft-cab--spine .sft-cab__units::before,
   [data-hall][data-power="low"] .sft-cab--power .sft-u.is-on,
   [data-hall][data-oc="1"] .sft-cab__frame,
+  [data-hall][data-hotspot="1"] .sft-cab--producer .sft-u.is-on::before,
   .sft-cab,
   .sft-scene__wall::after,
   .sft-event,
@@ -2338,7 +2619,9 @@
   .sft-u,
   .sft-row,
   .sft-toast,
-  .sft-scene__glow {
+  .sft-scene__glow,
+  .sft-modal,
+  .sft-modal-scrim {
     transition: none;
   }
 }

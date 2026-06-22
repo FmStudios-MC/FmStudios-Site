@@ -11,6 +11,7 @@ import type {
   GoalDef,
   PowerContract,
   ReputationTierDef,
+  ScriptedEventDef,
   WorkloadDef,
 } from "./types";
 import {
@@ -27,6 +28,8 @@ import {
   REPUTATION_TIERS,
   RESEARCH,
   RESEARCH_BY_ID,
+  SCRIPTED_BY_ID,
+  SCRIPTED_EVENTS,
   TUNING,
   UPGRADES,
   WORKLOADS,
@@ -66,11 +69,64 @@ export function floorSpace(s: GameState): { used: number; cap: number } {
   return { used, cap };
 }
 
+/** Effective per-unit cost-growth for a building, after Bulk Procurement. */
+function effectiveGrowth(s: GameState, def: BuildingDef): number {
+  const reduction = plevel(s, "bulk") * 0.01;
+  return Math.max(1.05, def.growth - reduction);
+}
+
 /** Cost of the next unit of a building, after prestige cost-growth reduction. */
 export function buildingCost(s: GameState, def: BuildingDef): number {
-  const reduction = plevel(s, "bulk") * 0.01;
-  const growth = Math.max(1.05, def.growth - reduction);
-  return Math.ceil(def.baseCost * Math.pow(growth, owned(s, def.id)));
+  return Math.ceil(
+    def.baseCost * Math.pow(effectiveGrowth(s, def), owned(s, def.id)),
+  );
+}
+
+export type BuyMult = 1 | 10 | "max";
+
+/** How many of a building to buy at the given multiplier, and the total cost,
+    respecting floor space and (for "max") available cash. ×1/×10 report the
+    full amount so the caller can afford-gate it; "max" stops at what fits and
+    what the player can pay. Costs are summed per-unit to match buildingCost. */
+export function bulkBuyInfo(
+  s: GameState,
+  def: BuildingDef,
+  mult: BuyMult,
+): { count: number; cost: number } {
+  const growth = effectiveGrowth(s, def);
+  const ownedNow = owned(s, def.id);
+  // Floor space is a hard ceiling on physical equipment.
+  let spaceLeft = Infinity;
+  if (def.space) {
+    const { used, cap } = floorSpace(s);
+    spaceLeft = Math.max(0, Math.floor((cap - used) / def.space));
+  }
+  const hardCap = mult === "max" ? spaceLeft : Math.min(mult, spaceLeft);
+  let cost = 0;
+  let count = 0;
+  for (let i = 0; i < hardCap && count < 100_000; i++) {
+    const unit = Math.ceil(def.baseCost * Math.pow(growth, ownedNow + i));
+    if (mult === "max" && cost + unit > s.money) break;
+    cost += unit;
+    count += 1;
+  }
+  return { count, cost };
+}
+
+/** Buy several units at once (×1, ×10, or as many as cash + space allow).
+    Returns how many were actually installed. */
+export function buyBuildingBulk(
+  s: GameState,
+  id: string,
+  mult: BuyMult,
+): number {
+  const def = BUILDING_BY_ID[id];
+  if (!def) return 0;
+  const { count, cost } = bulkBuyInfo(s, def, mult);
+  if (count <= 0 || s.money < cost) return 0;
+  s.money -= cost;
+  s.buildings[id] = owned(s, id) + count;
+  return count;
 }
 
 /** Whether a prestige node's prerequisite branch nodes are satisfied. */
@@ -338,6 +394,69 @@ export function hotspotClearCost(grossPerSec: number): number {
     TUNING.hotspotClearMin,
     Math.ceil(grossPerSec * TUNING.hotspotClearSeconds),
   );
+}
+
+// --- Scripted opportunity scheduler -------------------------------------
+
+/** Set the next scripted-event timestamp from a deterministic gap. Rarer than
+    incidents; the cadence is independent of reputation. */
+function scheduleNextScript(s: GameState, now: number): void {
+  const r = rng(s.scriptSeed ^ 0x1b873593);
+  const gap =
+    TUNING.scriptMinGapMs + r * (TUNING.scriptMaxGapMs - TUNING.scriptMinGapMs);
+  s.nextScriptAt = now + gap;
+}
+
+/** Pick an eligible scripted event deterministically from the current seed. */
+function rollScript(s: GameState): ScriptedEventDef | null {
+  const pool = SCRIPTED_EVENTS.filter((e) => !e.relevant || e.relevant(s));
+  if (pool.length === 0) return null;
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let r = rng(s.scriptSeed ^ 0x2545f491) * total;
+  for (const e of pool) {
+    r -= e.weight;
+    if (r <= 0) return e;
+  }
+  return pool[pool.length - 1];
+}
+
+/** Advance scripted-event scheduling up to `now`, mirroring advanceEvents:
+    a window that closed without success expires quietly, then a new one opens
+    when due, the farm is established and one is relevant. A window that fully
+    elapsed offline is consumed (never auto-resolved) so absence can't win it. */
+function advanceScripts(s: GameState, now: number): void {
+  if (s.nextScriptAt === 0) {
+    scheduleNextScript(s, now);
+    return;
+  }
+  if (s.activeScript && now >= s.activeScript.endsAt) {
+    s.activeScript = null;
+    scheduleNextScript(s, now);
+  }
+  if (!s.activeScript && now >= s.nextScriptAt) {
+    if (s.lifetimeEarnings < TUNING.scriptMinEarnings) {
+      scheduleNextScript(s, now);
+      return;
+    }
+    const def = rollScript(s);
+    if (!def) {
+      scheduleNextScript(s, now);
+      return;
+    }
+    const endsAt = s.nextScriptAt + def.windowSec * 1000;
+    s.scriptSeed += 1;
+    if (now < endsAt) {
+      s.activeScript = {
+        id: def.id,
+        startedAt: s.nextScriptAt,
+        endsAt,
+        heldMs: 0,
+        lastHold: false,
+      };
+    } else {
+      scheduleNextScript(s, now);
+    }
+  }
 }
 
 // --- Contract scheduler -------------------------------------------------
@@ -670,6 +789,33 @@ export function derive(s: GameState, now: number): Derived {
         }
       : null;
 
+  // Surface the live scripted opportunity for the UI banner. `holding` reads
+  // the value the last tick recorded (the render loop runs ahead of the tick),
+  // so the indicator tracks the goal without re-evaluating it here.
+  let script: Derived["script"] = null;
+  const liveScript =
+    s.activeScript && now < s.activeScript.endsAt ? s.activeScript : null;
+  if (liveScript) {
+    const sdef = SCRIPTED_BY_ID[liveScript.id];
+    if (sdef) {
+      script = {
+        id: sdef.id,
+        name: sdef.name,
+        goal: sdef.goal,
+        endsAt: liveScript.endsAt,
+        holdSec: sdef.holdSec,
+        heldSec: Math.min(sdef.holdSec, liveScript.heldMs / 1000),
+        progress:
+          sdef.holdSec > 0
+            ? Math.min(1, liveScript.heldMs / (sdef.holdSec * 1000))
+            : 1,
+        holding: liveScript.lastHold,
+        reward: Math.ceil(grossPerSec * sdef.rewardGrossSec),
+        rewardRep: sdef.rewardRep,
+      };
+    }
+  }
+
   // Surface the demand market: jobs in progress + the offers on the board,
   // with timers + progress resolved against `now` so the UI only paints.
   const active = s.contracts.map((c) => ({
@@ -736,6 +882,7 @@ export function derive(s: GameState, now: number): Derived {
     endlessMult: endlessM,
     workloads,
     hotspot,
+    script,
     event,
     contracts: {
       streak: s.contractStreak,
@@ -790,6 +937,7 @@ export function tick(
   // before reading the economy off state.
   advanceEvents(s, now);
   advanceHotspots(s, now);
+  advanceScripts(s, now);
   advanceContracts(s, now);
   const d = derive(s, now);
 
@@ -848,6 +996,32 @@ export function tick(
         s.contractStreak = 0;
         s.contracts.splice(i, 1);
       }
+    }
+  }
+
+  // Scripted opportunity progression (idea #15): accrue continuous hold toward
+  // the goal while the condition holds, paying out on success. Live play only —
+  // offline catch-up can't fairly evaluate a continuous-hold condition over a
+  // single replayed window, so the schedule advances but never auto-resolves.
+  if (s.activeScript && efficiency >= 1 && now < s.activeScript.endsAt) {
+    const def = SCRIPTED_BY_ID[s.activeScript.id];
+    if (def) {
+      const holding = def.hold(s, d);
+      // A break in the condition resets the continuous-hold accumulator.
+      s.activeScript.heldMs = holding ? s.activeScript.heldMs + dtSec * 1000 : 0;
+      s.activeScript.lastHold = holding;
+      if (s.activeScript.heldMs >= def.holdSec * 1000) {
+        const reward = Math.ceil(d.grossPerSec * def.rewardGrossSec);
+        s.money += reward;
+        s.runEarnings += reward;
+        s.lifetimeEarnings += reward;
+        s.reputation += def.rewardRep;
+        s.scriptsCompleted += 1;
+        s.activeScript = null;
+        scheduleNextScript(s, now);
+      }
+    } else {
+      s.activeScript = null;
     }
   }
 
@@ -918,6 +1092,9 @@ export function doPrestige(s: GameState, now: number): boolean {
   s.activeEvent = null;
   s.hotspot = null;
   s.nextHotspotAt = 0;
+  // A scripted opportunity was sized for the old farm — drop it and reschedule.
+  s.activeScript = null;
+  s.nextScriptAt = 0;
   // Likewise drop any contracts/offers: the deals were sized for the old farm.
   s.contracts = [];
   s.contractOffers = [];

@@ -4,12 +4,13 @@ import type {
   ActiveContract,
   ActiveEvent,
   ActiveHotspot,
+  ActiveScript,
   ContractOffer,
   GameState,
 } from "./types";
-import { EVENT_BY_ID, TUNING, WORKLOADS } from "./config";
+import { EVENT_BY_ID, SCRIPTED_BY_ID, TUNING, WORKLOADS } from "./config";
 
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export function defaultState(now = Date.now()): GameState {
   return {
@@ -44,6 +45,10 @@ export function defaultState(now = Date.now()): GameState {
     nextHotspotAt: 0,
     hotspotSeed: 0,
     hotspotsCleared: 0,
+    activeScript: null,
+    nextScriptAt: 0,
+    scriptSeed: 0,
+    scriptsCompleted: 0,
     achievements: [],
     contracts: [],
     contractOffers: [],
@@ -106,6 +111,22 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
   if (o.hotspot && typeof o.hotspot === "object") {
     const h = o.hotspot as Record<string, unknown>;
     hotspot = { startedAt: num(h.startedAt, now), endsAt: num(h.endsAt, now) };
+  }
+
+  // Only keep a live scripted event if its id is still recognisable; the
+  // scheduler expires/replaces it on the next tick regardless.
+  let activeScript: ActiveScript | null = null;
+  if (o.activeScript && typeof o.activeScript === "object") {
+    const a = o.activeScript as Record<string, unknown>;
+    if (typeof a.id === "string" && SCRIPTED_BY_ID[a.id]) {
+      activeScript = {
+        id: a.id,
+        startedAt: num(a.startedAt, now),
+        endsAt: num(a.endsAt, now),
+        heldMs: Math.max(0, num(a.heldMs, 0)),
+        lastHold: a.lastHold === true,
+      };
+    }
   }
 
   const achievements = Array.isArray(o.achievements)
@@ -207,6 +228,10 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     nextHotspotAt: num(o.nextHotspotAt, 0),
     hotspotSeed: Math.max(0, Math.floor(num(o.hotspotSeed, 0))),
     hotspotsCleared: Math.max(0, Math.floor(num(o.hotspotsCleared, 0))),
+    activeScript,
+    nextScriptAt: num(o.nextScriptAt, 0),
+    scriptSeed: Math.max(0, Math.floor(num(o.scriptSeed, 0))),
+    scriptsCompleted: Math.max(0, Math.floor(num(o.scriptsCompleted, 0))),
     achievements,
     contracts,
     contractOffers,

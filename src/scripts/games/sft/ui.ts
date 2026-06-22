@@ -18,7 +18,8 @@ import {
   WORKLOADS,
 } from "./config";
 import {
-  buildingCost,
+  bulkBuyInfo,
+  type BuyMult,
   creditScale,
   prestigeCost,
   prestigeUnlocked,
@@ -26,6 +27,8 @@ import {
   startingMoney,
 } from "./engine";
 import { duration, fmt, money, pct, rate } from "./format";
+import { sound } from "./sound";
+import type { OfflineSummary } from "./storage";
 
 /* The power-contract options, in the order they appear in the selector. */
 const POWER_OPTIONS: { id: PowerContract; name: string; desc: string }[] = [
@@ -35,7 +38,7 @@ const POWER_OPTIONS: { id: PowerContract; name: string; desc: string }[] = [
 ];
 
 export interface Handlers {
-  onBuyBuilding(id: string): void;
+  onBuyBuilding(id: string, mult: BuyMult): void;
   onBuyUpgrade(id: string): void;
   onBuyPrestige(id: string): void;
   onPrestige(): void;
@@ -243,6 +246,37 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     }
   }
 
+  // --- Bulk-buy multiplier (×1 / ×10 / Max) -----------------------------
+  // A segmented control in the Operations header sets how many units a row
+  // buys per click. The choice also drives the cost shown on each row.
+  let buyMult: BuyMult = 1;
+  const BUY_MULTS: { id: BuyMult; label: string }[] = [
+    { id: 1, label: "×1" },
+    { id: 10, label: "×10" },
+    { id: "max", label: "Max" },
+  ];
+  const buyMultWrap = root.querySelector<HTMLElement>("[data-buymult]");
+  const buyMultBtns: { id: BuyMult; root: HTMLButtonElement }[] = [];
+  function setBuyMult(m: BuyMult) {
+    buyMult = m;
+    for (const b of buyMultBtns) {
+      const on = b.id === m;
+      setFlag(b.root, "is-active", on);
+      b.root.setAttribute("aria-checked", on ? "true" : "false");
+    }
+  }
+  if (buyMultWrap) {
+    for (const opt of BUY_MULTS) {
+      const btn = el("button", "sft-buymult__opt", opt.label) as HTMLButtonElement;
+      btn.type = "button";
+      btn.setAttribute("role", "radio");
+      btn.addEventListener("click", () => setBuyMult(opt.id));
+      buyMultWrap.appendChild(btn);
+      buyMultBtns.push({ id: opt.id, root: btn });
+    }
+    setBuyMult(1);
+  }
+
   // --- Building rows, grouped by category ------------------------------
   const buildingRows: BuildingRow[] = [];
   (["producer", "power", "cooling", "network", "space", "staff"] as const).forEach((cat) => {
@@ -252,7 +286,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       const rowEl = el("button", "sft-row");
       rowEl.type = "button";
       (rowEl as HTMLButtonElement).addEventListener("click", () =>
-        handlers.onBuyBuilding(def.id),
+        handlers.onBuyBuilding(def.id, buyMult),
       );
 
       const main = el("span", "sft-row__main");
@@ -487,6 +521,242 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const rebalanceBtn = root.querySelector<HTMLButtonElement>("[data-hotspot-clear]");
   rebalanceBtn?.addEventListener("click", () => handlers.onRebalance());
 
+  // --- Scripted opportunity banner --------------------------------------
+  const scriptBanner = root.querySelector<HTMLElement>("[data-script]");
+  const scriptName = root.querySelector<HTMLElement>("[data-script-name]");
+  const scriptGoal = root.querySelector<HTMLElement>("[data-script-goal]");
+  const scriptTimer = root.querySelector<HTMLElement>("[data-script-timer]");
+  const scriptBar = root.querySelector<HTMLElement>("[data-script-bar]");
+  const scriptHold = root.querySelector<HTMLElement>("[data-script-hold]");
+  const scriptReward = root.querySelector<HTMLElement>("[data-script-reward]");
+
+  // --- Statistics sparklines (idea #11) ---------------------------------
+  // Three rolling sparklines sampled once a second by index.ts. Built once;
+  // each repaint only rewrites two SVG point strings + two labels.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const SPARK_LEN = 60;
+  interface Spark {
+    data: number[];
+    fixed?: [number, number];
+    fmt: (n: number) => string;
+    value: HTMLElement;
+    range: HTMLElement;
+    line: SVGPolylineElement;
+    area: SVGPolygonElement;
+  }
+  const SPARK_DEFS: {
+    key: string;
+    name: string;
+    fixed?: [number, number];
+    fmt: (n: number) => string;
+  }[] = [
+    { key: "income", name: "Net income", fmt: (n) => "$" + fmt(n) + "/s" },
+    { key: "compute", name: "Compute", fmt: (n) => rate(n, " FLOP") },
+    { key: "output", name: "Output", fixed: [0, 1], fmt: (n) => pct(n) },
+  ];
+  const sparkWrap = root.querySelector<HTMLElement>("[data-spark-list]");
+  const sparks: Record<string, Spark> = {};
+  if (sparkWrap) {
+    for (const def of SPARK_DEFS) {
+      const card = el("div", "sft-spark");
+      const top = el("div", "sft-spark__top");
+      const name = el("span", "sft-spark__name", def.name);
+      const value = el("span", "sft-spark__value", "—");
+      top.append(name, value);
+
+      const svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("class", "sft-spark__svg");
+      svg.setAttribute("viewBox", "0 0 100 30");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("aria-hidden", "true");
+      const area = document.createElementNS(SVG_NS, "polygon");
+      area.setAttribute("class", "sft-spark__area");
+      const line = document.createElementNS(SVG_NS, "polyline");
+      line.setAttribute("class", "sft-spark__line");
+      svg.append(area, line);
+
+      const foot = el("div", "sft-spark__foot");
+      const range = el("span", "sft-spark__range", "Sampling…");
+      foot.append(range);
+
+      card.append(top, svg, foot);
+      sparkWrap.appendChild(card);
+      sparks[def.key] = {
+        data: [],
+        fixed: def.fixed,
+        fmt: def.fmt,
+        value,
+        range,
+        line,
+        area,
+      };
+    }
+  }
+
+  function paintSpark(sp: Spark) {
+    const n = sp.data.length;
+    const latest = n ? sp.data[n - 1] : 0;
+    setText(sp.value, n ? sp.fmt(latest) : "—");
+    if (n < 2) {
+      setText(sp.range, "Sampling…");
+      return;
+    }
+    let lo: number;
+    let hi: number;
+    if (sp.fixed) {
+      [lo, hi] = sp.fixed;
+    } else {
+      lo = Math.min(...sp.data);
+      hi = Math.max(...sp.data);
+      if (hi - lo < 1e-9) {
+        hi += 1;
+        lo = Math.max(0, lo - 1);
+      }
+    }
+    const span = hi - lo || 1;
+    const pts: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const x = (i / (SPARK_LEN - 1)) * 100;
+      const norm = Math.min(1, Math.max(0, (sp.data[i] - lo) / span));
+      const y = 29 - norm * 28; // 1px breathing room top + bottom
+      pts.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+    }
+    const lineStr = pts.join(" ");
+    if (sp.line.getAttribute("points") !== lineStr)
+      sp.line.setAttribute("points", lineStr);
+    const lastX = ((n - 1) / (SPARK_LEN - 1)) * 100;
+    sp.area.setAttribute("points", `0,30 ${lineStr} ${lastX.toFixed(2)},30`);
+    setText(sp.range, `${sp.fmt(lo)} – ${sp.fmt(hi)}`);
+  }
+
+  function recordHistory(d: Derived) {
+    if (!sparkWrap) return;
+    const output =
+      d.heatThrottle *
+      d.powerThrottle *
+      d.bandwidthThrottle *
+      (1 - d.wearPenalty);
+    const push = (key: string, v: number) => {
+      const sp = sparks[key];
+      if (!sp) return;
+      sp.data.push(v);
+      if (sp.data.length > SPARK_LEN) sp.data.shift();
+      paintSpark(sp);
+    };
+    push("income", Math.max(0, d.moneyPerSec));
+    push("compute", d.compute);
+    push("output", Math.min(1, Math.max(0, output)));
+  }
+
+  // --- Sound toggle (idea #14) ------------------------------------------
+  // Opt-in; ships off. Clicking is the user gesture WebAudio needs to start.
+  const soundBtn = root.querySelector<HTMLButtonElement>("[data-sound]");
+  function syncSound() {
+    if (!soundBtn) return;
+    const on = sound.isEnabled();
+    setText(soundBtn, on ? "Sound: On" : "Sound: Off");
+    setFlag(soundBtn, "is-active", on);
+    soundBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  soundBtn?.addEventListener("click", () => {
+    sound.setEnabled(!sound.isEnabled());
+    syncSound();
+  });
+
+  // --- Offline summary modal (idea #12) ---------------------------------
+  // A dismissible breakdown of what the farm did while away — the welcome-back
+  // toast made permanent for longer absences. Built once, filled on demand.
+  const offlineSlots: Record<string, HTMLElement> = {};
+  let offlineScrim: HTMLElement | null = null;
+  {
+    const scrim = el("div", "sft-modal-scrim");
+    scrim.setAttribute("role", "dialog");
+    scrim.setAttribute("aria-modal", "true");
+    scrim.setAttribute("aria-label", "Offline summary");
+    scrim.hidden = true;
+
+    const card = el("div", "sft-modal");
+    const head = el("div", "sft-modal__head");
+    head.append(
+      el("h2", "sft-modal__title", "Welcome back"),
+      el("p", "sft-modal__sub", ""),
+    );
+    offlineSlots.sub = head.lastChild as HTMLElement;
+
+    const grid = el("div", "sft-modal__grid");
+    const metric = (key: string, label: string) => {
+      const cell = el("div", "sft-modal__metric");
+      const v = el("span", "sft-modal__metric-val", "—");
+      const l = el("span", "sft-modal__metric-label", label);
+      cell.append(v, l);
+      grid.appendChild(cell);
+      offlineSlots[key] = v;
+    };
+    metric("earnings", "Earnings");
+    metric("netCash", "Net cash");
+    metric("reputation", "Reputation");
+    metric("research", "R&D banked");
+    metric("contracts", "Contracts");
+    metric("rate", "Avg / hr");
+
+    const note = el(
+      "p",
+      "sft-modal__note",
+      "Offline farms run at reduced efficiency. Warm Spares narrows the gap.",
+    );
+    const close = el(
+      "button",
+      "sft-modal__close",
+      "Back to the floor",
+    ) as HTMLButtonElement;
+    close.type = "button";
+
+    card.append(head, grid, note, close);
+    scrim.appendChild(card);
+    root.appendChild(scrim);
+    offlineScrim = scrim;
+
+    const dismiss = () => {
+      scrim.classList.remove("is-open");
+      setTimeout(() => {
+        scrim.hidden = true;
+      }, 280);
+    };
+    close.addEventListener("click", dismiss);
+    scrim.addEventListener("click", (e) => {
+      if (e.target === scrim) dismiss();
+    });
+    scrim.addEventListener("keydown", (e) => {
+      if ((e as KeyboardEvent).key === "Escape") dismiss();
+    });
+    offlineSlots.close = close;
+  }
+
+  function showOfflineSummary(o: OfflineSummary) {
+    if (!offlineScrim) return;
+    setText(offlineSlots.sub, `Your farm ran for ${duration(o.sec)}.`);
+    setText(offlineSlots.earnings, money(o.earnings));
+    setText(
+      offlineSlots.netCash,
+      (o.netCash < 0 ? "-" : "+") + money(Math.abs(o.netCash)).slice(1),
+    );
+    setText(offlineSlots.reputation, "+" + fmt(o.reputation));
+    setText(offlineSlots.research, "+" + fmt(o.research));
+    setText(
+      offlineSlots.contracts,
+      o.contractsCompleted + o.contractsFailed > 0
+        ? `${o.contractsCompleted} done · ${o.contractsFailed} lost`
+        : "—",
+    );
+    setText(
+      offlineSlots.rate,
+      money(o.sec > 0 ? (o.earnings / o.sec) * 3600 : 0),
+    );
+    offlineScrim.hidden = false;
+    requestAnimationFrame(() => offlineScrim!.classList.add("is-open"));
+    (offlineSlots.close as HTMLButtonElement).focus();
+  }
+
   // --- Contracts card ---------------------------------------------------
   // A board of offers plus the concurrent jobs in progress. Rows are keyed by
   // contract id and reconciled each frame (create new, drop gone, patch the
@@ -645,21 +915,26 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setDisabled(r.button, true);
         continue;
       }
-      const cost = buildingCost(s, r.def);
       setText(r.owned, "x" + count);
       // Floor space gates physical equipment before money does: once the rack
       // units are gone, the only fix is a facility expansion.
-      const noSpace =
-        r.def.space != null && d.spaceUsed + r.def.space > d.spaceCap;
-      setFlag(r.root, "is-nospace", noSpace);
-      if (noSpace) {
+      const oneFits =
+        r.def.space == null || d.spaceUsed + r.def.space <= d.spaceCap;
+      setFlag(r.root, "is-nospace", !oneFits);
+      if (!oneFits) {
         setText(r.cost, "Floor full");
         setDisabled(r.button, true);
         setFlag(r.root, "is-afford", false);
         continue;
       }
-      setText(r.cost, money(cost));
-      const afford = s.money >= cost;
+      // Cost + count reflect the active buy multiplier; ×N annotates the count.
+      const info = bulkBuyInfo(s, r.def, buyMult);
+      const display = info.count > 0 ? info.cost : bulkBuyInfo(s, r.def, 1).cost;
+      setText(
+        r.cost,
+        info.count > 1 ? `${money(display)} ·${info.count}` : money(display),
+      );
+      const afford = info.count > 0 && s.money >= info.cost;
       setDisabled(r.button, !afford);
       setFlag(r.root, "is-afford", afford);
     }
@@ -841,6 +1116,13 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     if (hallEl.dataset.net !== netState) hallEl.dataset.net = netState;
     const ocState = d.overclockActive ? "1" : "0";
     if (hallEl.dataset.oc !== ocState) hallEl.dataset.oc = ocState;
+    // A live hotspot flares the producer floor; worn hardware ages its look.
+    const hotspotState = d.hotspot != null ? "1" : "0";
+    if (hallEl.dataset.hotspot !== hotspotState)
+      hallEl.dataset.hotspot = hotspotState;
+    setVar("--sft-wear", d.wear.toFixed(3));
+    const wearState = d.wear >= 0.4 ? "1" : "0";
+    if (hallEl.dataset.wear !== wearState) hallEl.dataset.wear = wearState;
     setFlag(hallEmpty, "is-hidden", producerCount > 0);
 
     // Fans spin faster as the floor heats up (clamped to a sane range).
@@ -908,6 +1190,31 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           setText(rebalanceBtn, `Rebalance · ${money(hs.clearCost)}`);
           setDisabled(rebalanceBtn, s.money < hs.clearCost);
         }
+      }
+    }
+
+    // Scripted opportunity banner
+    if (scriptBanner) {
+      const sc = d.script;
+      setFlag(scriptBanner, "is-shown", sc != null);
+      if (sc) {
+        setText(scriptName, sc.name);
+        setText(scriptGoal, sc.goal);
+        setText(scriptTimer, duration((sc.endsAt - now) / 1000));
+        if (scriptBar) scriptBar.style.width = pct(sc.progress);
+        if (scriptHold) {
+          setText(
+            scriptHold,
+            sc.holding
+              ? `Holding · ${Math.floor(sc.heldSec)} / ${sc.holdSec}s`
+              : "Out of spec — output throttled",
+          );
+          setFlag(scriptHold, "is-holding", sc.holding);
+        }
+        setText(
+          scriptReward,
+          `Pays ${money(sc.reward)} + ${fmt(sc.rewardRep)} rep`,
+        );
       }
     }
 
@@ -1063,5 +1370,14 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     }
   }
 
-  return { render, toast, pushLog };
+  syncSound();
+
+  return {
+    render,
+    toast,
+    pushLog,
+    recordHistory,
+    showOfflineSummary,
+    setBuyMult,
+  };
 }

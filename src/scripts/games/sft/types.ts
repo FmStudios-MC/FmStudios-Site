@@ -181,6 +181,43 @@ export interface ActiveHotspot {
   endsAt: number; // epoch ms
 }
 
+/** A scripted opportunity event (idea #15). Unlike a random incident, it sets a
+    goal the player works toward over a window for a one-off payout — a tiny
+    state machine over the existing scheduler scaffolding. The condition must
+    hold continuously for `holdSec` before the window (`windowSec`) closes. */
+export interface ScriptedEventDef {
+  id: string;
+  name: string;
+  /** One-line setup, shown when the event opens. */
+  desc: string;
+  /** Functional line naming the goal the player must hold. */
+  goal: string;
+  /** Seconds the player has to satisfy the hold before it lapses. */
+  windowSec: number;
+  /** Seconds the condition must hold (continuously) to succeed. */
+  holdSec: number;
+  /** The success condition, read live from state + derived each tick. */
+  hold: (s: GameState, d: Derived) => boolean;
+  /** Reputation paid on success. */
+  rewardRep: number;
+  /** Cash paid on success = this many seconds of live gross (scales to farm). */
+  rewardGrossSec: number;
+  /** Relative likelihood among eligible scripted events. */
+  weight: number;
+  /** Only rolled when this holds (keeps irrelevant chains from firing). */
+  relevant?: (s: GameState) => boolean;
+}
+
+/** The live scripted event, persisted so it survives reloads. `heldMs`
+    accumulates while the condition holds and resets to 0 when it breaks. */
+export interface ActiveScript {
+  id: string;
+  startedAt: number; // epoch ms
+  endsAt: number; // epoch ms the window closes
+  heldMs: number; // continuous hold accrued toward the goal
+  lastHold: boolean; // whether the condition held at the previous tick
+}
+
 /** A compute-delivery contract on the demand market, before it is accepted.
     Params are baked at offer time from a live snapshot, so the deal the player
     sees is the deal they get. Generated deterministically by the scheduler. */
@@ -275,6 +312,12 @@ export interface GameState {
   hotspotSeed: number; // monotonic counter seeding the deterministic rolls
   hotspotsCleared: number; // lifetime count, for the milestone predicate
 
+  // Scripted opportunity events (deterministic scheduler — see advanceScripts).
+  activeScript: ActiveScript | null;
+  nextScriptAt: number; // epoch ms the next scripted event is due (0 = unscheduled)
+  scriptSeed: number; // monotonic counter seeding the deterministic rolls
+  scriptsCompleted: number; // lifetime count, for the milestone predicate
+
   // Milestones (persist across rebuilds).
   achievements: string[]; // earned achievement ids
 
@@ -349,6 +392,21 @@ export interface Derived {
 
   /** The live rack hotspot, or null. `severity` is the cooling fraction lost. */
   hotspot: { endsAt: number; severity: number; clearCost: number } | null;
+
+  /** The live scripted opportunity (idea #15), or null. `progress` is hold
+      accrued toward the goal; `reward` is the cash it would pay at the moment. */
+  script: {
+    id: string;
+    name: string;
+    goal: string;
+    endsAt: number;
+    holdSec: number;
+    heldSec: number;
+    progress: number; // 0..1 toward the hold goal
+    holding: boolean; // is the condition met right now
+    reward: number; // cash payout on success, at the live gross
+    rewardRep: number;
+  } | null;
 
   /** The live incident as the UI needs it, or null. */
   event: {

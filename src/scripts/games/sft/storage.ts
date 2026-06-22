@@ -7,11 +7,27 @@ import { TUNING } from "./config";
 
 const KEY = "fmi.sft.v1";
 
+/** A breakdown of what the farm did while the player was away (idea #12),
+    captured by snapshotting state across the offline catch-up tick. */
+export interface OfflineSummary {
+  sec: number;
+  /** Gross the farm produced (production + contracts), pre-bill. */
+  earnings: number;
+  /** Net change in cash on hand (earnings less the electricity bill). */
+  netCash: number;
+  reputation: number;
+  research: number;
+  contractsCompleted: number;
+  contractsFailed: number;
+}
+
 export interface LoadResult {
   state: GameState;
   /** Money earned while away, if any (for the welcome-back toast). */
   offlineEarnings: number;
   offlineSec: number;
+  /** Full offline breakdown for the summary modal (null if nothing happened). */
+  offline: OfflineSummary | null;
 }
 
 export function load(now = Date.now()): LoadResult {
@@ -41,17 +57,40 @@ export function load(now = Date.now()): LoadResult {
     }
   }
 
-  const before = state.money;
+  // Snapshot the fields the summary reports across the catch-up tick.
+  const before = {
+    money: state.money,
+    lifetime: state.lifetimeEarnings,
+    reputation: state.reputation,
+    research: state.research,
+    completed: state.contractsCompleted,
+    failed: state.contractsFailed,
+  };
   if (elapsedSec > 1) {
     tick(state, elapsedSec, now, offlineEfficiency(state));
   } else {
     state.lastTick = now;
   }
 
+  const offlineEarnings = state.money - before.money;
+  const offline: OfflineSummary | null =
+    elapsedSec > 1
+      ? {
+          sec: elapsedSec,
+          earnings: state.lifetimeEarnings - before.lifetime,
+          netCash: offlineEarnings,
+          reputation: state.reputation - before.reputation,
+          research: state.research - before.research,
+          contractsCompleted: state.contractsCompleted - before.completed,
+          contractsFailed: state.contractsFailed - before.failed,
+        }
+      : null;
+
   return {
     state,
-    offlineEarnings: state.money - before,
+    offlineEarnings,
     offlineSec: elapsedSec,
+    offline,
   };
 }
 

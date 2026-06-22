@@ -100,6 +100,28 @@ const buyLists: { cat: string; label: string }[] = [
           </button>
         </div>
 
+        <!-- Scripted opportunity banner: a multi-step goal for a one-off payout -->
+        <div
+          class="sft-event sft-event--script"
+          data-script
+          role="status"
+          aria-live="polite"
+        >
+          <span class="sft-event__pulse" aria-hidden="true"></span>
+          <div class="sft-event__body">
+            <span class="sft-event__name" data-script-name>Opportunity</span>
+            <span class="sft-event__desc" data-script-goal></span>
+            <div class="sft-script__track">
+              <div class="sft-bar">
+                <span class="sft-bar__fill" data-script-bar></span>
+              </div>
+              <span class="sft-script__hold" data-script-hold></span>
+            </div>
+            <span class="sft-script__reward" data-script-reward></span>
+          </div>
+          <span class="sft-event__timer" data-script-timer></span>
+        </div>
+
         <!-- Data Hall: front-elevation server room, fills as you build -->
         <section class="sft-panel sft-hall" aria-label="Data hall">
           <header class="sft-panel__head">
@@ -160,8 +182,19 @@ const buyLists: { cat: string; label: string }[] = [
             <section class="sft-panel">
               <header class="sft-panel__head">
                 <h2 class="sft-panel__title">Operations</h2>
-                <span class="sft-panel__note">Build the farm</span>
+                <div
+                  class="sft-buymult"
+                  data-buymult
+                  role="radiogroup"
+                  aria-label="Buy quantity"
+                >
+                </div>
               </header>
+              <p class="sft-ops__keys">
+                <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> quantity ·
+                <kbd>O</kbd> overclock · <kbd>R</kbd> respond ·
+                <kbd>B</kbd> rebalance · <kbd>M</kbd> service
+              </p>
               {
                 buyLists.map((b) => (
                   <>
@@ -218,6 +251,14 @@ const buyLists: { cat: string; label: string }[] = [
                 <span class="sft-panel__note">Live</span>
               </header>
               <ul class="sft-log" data-log aria-live="polite"></ul>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Statistics</h2>
+                <span class="sft-panel__note">Last 60s</span>
+              </header>
+              <div class="sft-sparks" data-spark-list></div>
             </section>
 
             <section class="sft-panel sft-contract">
@@ -305,6 +346,14 @@ const buyLists: { cat: string; label: string }[] = [
                 <h2 class="sft-panel__title">Save</h2>
                 <span class="sft-panel__note">Local only</span>
               </header>
+              <button
+                class="sft-ctl sft-ctl--toggle"
+                data-sound
+                type="button"
+                aria-pressed="false"
+              >
+                Sound: Off
+              </button>
               <div class="sft-controls">
                 <button class="sft-ctl" data-save type="button">Save</button>
                 <button class="sft-ctl" data-export type="button">Export</button>

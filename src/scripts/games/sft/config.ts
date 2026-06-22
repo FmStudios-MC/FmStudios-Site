@@ -9,6 +9,7 @@ import type {
   PrestigeDef,
   ReputationTierDef,
   ResearchDef,
+  ScriptedEventDef,
   UpgradeDef,
   WorkloadDef,
 } from "./types";
@@ -122,6 +123,13 @@ export const TUNING = {
   // toggle that scales challenge (incident/hotspot frequency, contract size)
   // and reward (sell price, credit gain) together — spice for mastery players.
   endlessMult: 1.4,
+
+  // Scripted opportunity events (idea #15): a deterministic scheduler offers a
+  // multi-step goal the player works toward over a window for a one-off payout.
+  // Rarer than incidents, and only once the farm is properly established.
+  scriptMinEarnings: 50_000, // lifetime earnings before scripted ops appear
+  scriptMinGapMs: 150_000, // shortest quiet stretch between scripted events
+  scriptMaxGapMs: 300_000, // longest quiet stretch between scripted events
 } as const;
 
 // --- Reputation tiers (idea #8) ----------------------------------------
@@ -765,6 +773,47 @@ export const EVENT_BY_ID: Record<string, EventDef> = Object.fromEntries(
   EVENTS.map((e) => [e.id, e]),
 );
 
+// --- Scripted opportunity events (idea #15) ----------------------------
+// Multi-step chains the player works toward, not random shocks. Each poses a
+// condition that must hold *continuously* for `holdSec` before its `windowSec`
+// closes; succeed and it pays a lump of cash + reputation. They reward an
+// over-provisioned, resilient farm — the headroom you can't see paying off.
+export const SCRIPTED_EVENTS: ScriptedEventDef[] = [
+  {
+    id: "evaluation",
+    name: "Customer Evaluation",
+    desc: "A major customer is watching. Keep output uncapped to win the deal.",
+    goal: "Hold output at full (no throttling) for the window.",
+    windowSec: 70,
+    holdSec: 35,
+    // No heat/power/bandwidth throttle in play — the farm runs wide open.
+    hold: (_s, d) =>
+      d.heatThrottle >= 0.9 &&
+      d.powerThrottle >= 0.99 &&
+      d.bandwidthThrottle >= 0.99,
+    rewardRep: 60,
+    rewardGrossSec: 90,
+    weight: 3,
+    relevant: (s) => producerCount(s) >= 10,
+  },
+  {
+    id: "marathon",
+    name: "Thermal Marathon",
+    desc: "Press demands a sustained cold run. Keep heat perfectly nominal.",
+    goal: "Hold heat fully nominal across the window.",
+    windowSec: 80,
+    holdSec: 40,
+    hold: (_s, d) => d.heatThrottle >= 0.999,
+    rewardRep: 95,
+    rewardGrossSec: 120,
+    weight: 2,
+    relevant: (s) => producerCount(s) >= 25,
+  },
+];
+
+export const SCRIPTED_BY_ID: Record<string, ScriptedEventDef> =
+  Object.fromEntries(SCRIPTED_EVENTS.map((e) => [e.id, e]));
+
 // --- Milestones --------------------------------------------------------
 const ownedAll = (s: { buildings: Record<string, number> }, ids: string[]) =>
   ids.every((id) => (s.buildings[id] ?? 0) > 0);
@@ -956,6 +1005,14 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     check: (s) => s.endless,
     buff: { multCompute: 1.05 },
     buffNote: "+5% compute",
+  },
+  {
+    id: "headline-act",
+    name: "Headline Act",
+    desc: "Win a scripted customer opportunity.",
+    check: (s) => s.scriptsCompleted >= 1,
+    buff: { multPrice: 1.04 },
+    buffNote: "+4% sell price",
   },
 ];
 
