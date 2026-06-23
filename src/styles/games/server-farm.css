@@ -1,7 +1,11 @@
-/* Server-Farm Tycoon - scoped game styles.
-   Built on the FMI tokens (tokens.css). The look is a server NOC console:
-   mono telemetry, hairline panels, warm-gold status light. Two functional
-   status hues are introduced here and used only for warnings. */
+/* Server-Farm Tycoon — scoped game styles.
+   Built on the FMI tokens (tokens.css). The rework is a calm "sidebar
+   workspace": a persistent rail (identity · section nav · always-on vitals ·
+   farm controls · data dock) beside a content column that shows one focused
+   section at a time. Mono is reserved for real numbers/telemetry; names and
+   titles use the display/body voice so it reads like a considered product, not
+   a terminal. Two functional status hues (warn/hot) are scoped here and used
+   only for warnings; the equipment art keeps its informative per-machine hues. */
 
 .sft {
   /* Functional status colours, scoped to the game. */
@@ -10,7 +14,14 @@
   --sft-hot: oklch(0.63 0.2 28);
   --sft-hot-glow: oklch(0.63 0.2 28 / 0.35);
 
-  /* Clearance for the site's sticky nav, so the HUD docks beneath it. */
+  /* Calm surface ramp for the chrome — aliases onto the brand tokens so the
+     game stays of-a-piece with the site. */
+  --sft-panel: var(--surface);
+  --sft-panel-2: var(--surface-2);
+  --sft-rail: var(--bg-deep);
+  --sft-track: var(--surface-2); /* bar tracks: a neutral warm well */
+
+  /* Clearance for the site's sticky nav, so the rail + top bar dock beneath it. */
   --sft-nav-h: 90px;
 
   position: relative;
@@ -24,128 +35,9 @@
   }
 }
 
-/* ---- HUD ------------------------------------------------------------- */
-/* A sticky telemetry bar with a clear hierarchy: cash + net income lead at
-   display size; everything else rides alongside as compact mono chips. */
-.sft-hud {
-  position: sticky;
-  top: var(--sft-nav-h);
-  z-index: calc(var(--z-sticky) - 1);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-s) var(--space-l);
-  padding: var(--space-s) var(--space-m);
-  margin-bottom: var(--space-m);
-  background: oklch(0.13 0.009 75 / 0.86);
-  backdrop-filter: blur(14px) saturate(1.3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-}
-
-/* Primary pair: cash + net income. */
-.sft-hud__lead {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-l);
-  min-width: 0;
-}
-.sft-hud__cash,
-.sft-hud__rate {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.sft-hud__cash-label,
-.sft-hud__rate-label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-.sft-hud__cash-val {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--step-3);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--gold-bright);
-  font-variant-numeric: tabular-nums;
-}
-.sft-hud__rate-val {
-  font-family: var(--font-mono);
-  font-size: var(--step-1);
-  line-height: 1.1;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Secondary chips. */
-.sft-hud__metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-s) var(--space-l);
-}
-
-.sft-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.sft-stat__label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-.sft-stat__value {
-  font-family: var(--font-mono);
-  font-size: var(--step-0);
-  font-weight: 500;
-  line-height: 1.15;
-  color: var(--ink);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.sft-stat.is-warn .sft-stat__value {
-  color: var(--sft-hot);
-}
-
-@media (max-width: 640px) {
-  .sft-hud {
-    gap: var(--space-s) var(--space-m);
-  }
-  .sft-hud__metrics {
-    gap: var(--space-xs) var(--space-m);
-  }
-}
-
-/* ---- Layout --------------------------------------------------------- */
-/* The page reads as: a full-width HUD and alert band, then a console shell —
-   a station rail (system switcher + utility dock) beside the main view. The
-   main view leads with an always-on ops band (data hall hero + live log) and
-   shows one station's controls beneath it. */
-
-/* Alerts: incident / hotspot / opportunity banners stack here when live. */
-.sft-alerts {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-.sft-alerts:empty {
-  display: none;
-}
-
-/* ---- Console shell -------------------------------------------------- */
-/* A station rail beside the main view. The rail is quiet chrome; the main
-   column carries the hero and the active station. */
+/* ===================================================================
+   Shell: rail + content column
+   =================================================================== */
 .sft-shell {
   position: relative;
   z-index: 1;
@@ -155,116 +47,172 @@
 }
 @media (min-width: 980px) {
   .sft-shell {
-    grid-template-columns: minmax(176px, 208px) 1fr;
+    grid-template-columns: 250px 1fr;
     gap: var(--space-l);
   }
 }
 
-/* Station rail: vertical list of systems + a utility dock at the foot. */
-.sft-nav {
+/* ---- Rail ---------------------------------------------------------- */
+.sft-rail {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
-  min-width: 0;
+  padding: var(--space-m) var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--sft-rail);
 }
 @media (min-width: 980px) {
-  .sft-nav {
+  .sft-rail {
     position: sticky;
-    top: calc(var(--sft-nav-h) + 112px);
-    max-height: calc(100vh - var(--sft-nav-h) - 132px);
+    top: calc(var(--sft-nav-h) + var(--space-s));
+    align-self: start;
+    max-height: calc(100vh - var(--sft-nav-h) - var(--space-l));
     overflow-y: auto;
     scrollbar-width: none;
-    padding-right: var(--space-2xs);
   }
-  .sft-nav::-webkit-scrollbar {
+  .sft-rail::-webkit-scrollbar {
     display: none;
   }
 }
 
-.sft-nav__brand {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+.sft-rail__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
   padding: 0 var(--space-2xs);
 }
+.sft-rail__mark {
+  display: grid;
+  place-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-s);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+.sft-rail__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
 
-.sft-nav__stations {
+/* ---- Section nav --------------------------------------------------- */
+.sft-rail__sections {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
 }
 
-/* A station button reads as a console entry: status LED · icon · label. */
-.sft-station {
+.sft-navitem {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: var(--space-xs);
   min-height: 44px;
   padding: var(--space-2xs) var(--space-s);
-  border: 1px solid transparent;
-  border-radius: var(--radius-s);
+  border: 0;
+  border-radius: var(--radius-m);
   background: none;
   color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  font-weight: 500;
+  text-align: left;
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out-quart),
-    background-color var(--dur-fast) var(--ease-out-quart),
-    border-color var(--dur-fast) var(--ease-out-quart);
+    background-color var(--dur-fast) var(--ease-out-quart);
 }
-/* Leading status LED — dark until the station is selected. */
-.sft-station::before {
+/* Selected-tab indicator: a gold bar grown from the left. */
+.sft-navitem::before {
   content: "";
-  flex: 0 0 auto;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--line-strong);
-  transition:
-    background-color var(--dur-fast) var(--ease-out-quart),
-    box-shadow var(--dur-fast) var(--ease-out-quart);
-}
-.sft-station__icon {
-  flex: 0 0 auto;
-  width: 18px;
+  position: absolute;
+  left: 0;
+  top: 50%;
   height: 18px;
-  opacity: 0.85;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--gold);
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center;
+  transition: transform var(--dur-fast) var(--ease-out-quart);
 }
-.sft-station__label {
+.sft-navitem__icon {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  opacity: 0.8;
+}
+.sft-navitem__label {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.sft-station:hover {
-  color: var(--gold);
+.sft-navitem:hover {
   background: var(--surface);
+  color: var(--ink);
 }
-.sft-station.is-active {
+.sft-navitem.is-active {
   background: var(--surface-2);
-  border-color: var(--line-strong);
   color: var(--gold-bright);
 }
-.sft-station.is-active::before {
-  background: var(--gold);
-  box-shadow: 0 0 7px var(--gold-glow);
+.sft-navitem.is-active::before {
+  transform: translateY(-50%) scaleY(1);
 }
-.sft-station.is-active .sft-station__icon {
+.sft-navitem.is-active .sft-navitem__icon {
   opacity: 1;
   color: var(--gold);
 }
-.sft-station:focus-visible {
+.sft-navitem:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
-/* Utility dock: sound + save/data, pinned to the foot of the rail. */
-.sft-nav__util {
+/* ---- Always-on vitals + farm actions ------------------------------- */
+.sft-vitals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding-top: var(--space-s);
+  border-top: 1px solid var(--line);
+}
+.sft-vital__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-3xs);
+}
+.sft-vital__name {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-vital__label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sft-vitals__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-top: var(--space-3xs);
+}
+
+/* ---- Data dock ----------------------------------------------------- */
+.sft-rail__dock {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
@@ -272,65 +220,218 @@
   padding-top: var(--space-s);
   border-top: 1px solid var(--line);
 }
-.sft-nav__util .sft-ctl--toggle {
-  width: 100%;
-  margin-bottom: 0;
-}
-.sft-nav__data {
+.sft-rail__data {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3xs);
 }
 
-/* ---- Main view ------------------------------------------------------ */
-.sft-main {
+.sft-ctl {
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  background: none;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-ctl:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.sft-ctl--danger:hover {
+  border-color: var(--sft-hot);
+  color: var(--sft-hot);
+}
+.sft-ctl--toggle.is-active {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+/* ---- Compact rail on narrow viewports ------------------------------ */
+@media (max-width: 979px) {
+  .sft-rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+  }
+  .sft-rail__brand {
+    margin-right: auto;
+  }
+  .sft-rail__nav {
+    flex: 1 1 100%;
+    order: 3;
+  }
+  .sft-rail__sections {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: var(--space-3xs);
+  }
+  .sft-rail__sections::-webkit-scrollbar {
+    display: none;
+  }
+  .sft-navitem {
+    flex: 0 0 auto;
+  }
+  .sft-navitem::before {
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    height: 3px;
+    width: 18px;
+    transform: translateX(-50%) scaleX(0);
+  }
+  .sft-navitem.is-active::before {
+    transform: translateX(-50%) scaleX(1);
+  }
+  .sft-vitals {
+    flex: 1 1 100%;
+    order: 4;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-s) var(--space-m);
+    border-top: 0;
+    padding-top: 0;
+  }
+  .sft-vitals__actions {
+    flex-direction: row;
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+  .sft-vitals__actions > * {
+    flex: 1 1 0;
+  }
+  .sft-rail__dock {
+    order: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .sft-rail__data {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* ===================================================================
+   Content column
+   =================================================================== */
+.sft-content {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
 }
 
-/* Ops band: data hall hero beside the live activity log. */
-.sft-ops {
-  display: grid;
-  gap: var(--space-m);
-  align-items: start;
+/* ---- Top bar: the economy ------------------------------------------ */
+.sft-topbar {
+  position: sticky;
+  top: var(--sft-nav-h);
+  z-index: calc(var(--z-sticky) - 1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s) var(--space-l);
+  padding: var(--space-s) var(--space-m);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--sft-panel);
 }
-.sft-ops .sft-panel {
-  margin-bottom: 0;
+.sft-topbar__lead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-l);
+  min-width: 0;
 }
-@media (min-width: 1140px) {
-  .sft-ops {
-    grid-template-columns: 1fr minmax(232px, 288px);
-  }
-}
-
-.sft-activity {
+.sft-money,
+.sft-rate {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-@media (min-width: 1140px) {
-  .sft-activity .sft-log {
-    flex: 1 1 auto;
-    max-height: none;
+.sft-money__label,
+.sft-rate__label,
+.sft-read__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-money__val {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.sft-rate__val {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.sft-topbar__reads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s) var(--space-l);
+}
+.sft-read {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sft-read__val {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.15;
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.sft-read.is-warn .sft-read__val {
+  color: var(--sft-hot);
+}
+
+@media (max-width: 560px) {
+  .sft-topbar__lead {
+    gap: var(--space-m);
+    flex: 1 1 100%;
   }
 }
 
-/* ---- Active station ------------------------------------------------- */
-.sft-workspace {
+/* ---- Sections (one shown at a time) -------------------------------- */
+.sft-sections {
   position: relative;
-  z-index: 1;
 }
-.sft-workspace .sft-panel:last-child {
-  margin-bottom: 0;
+.sft-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
 }
-.sft-tabpanel[hidden] {
+.sft-section[hidden] {
   display: none;
 }
-.sft-tabpanel.is-active {
-  animation: sft-tab-in var(--dur-mid) var(--ease-out-quart);
+.sft-section.is-active {
+  animation: sft-section-in var(--dur-mid) var(--ease-out-quart);
 }
-@keyframes sft-tab-in {
+@keyframes sft-section-in {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -341,252 +442,150 @@
   }
 }
 
-/* Compact layout: the rail becomes a horizontal bar above the main view. */
-@media (max-width: 979px) {
-  .sft-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2xs) var(--space-s);
-  }
-  .sft-nav__brand {
-    display: none;
-  }
-  .sft-nav__stations {
-    flex-direction: row;
-    flex: 1 1 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: var(--space-3xs);
-  }
-  .sft-nav__stations::-webkit-scrollbar {
-    display: none;
-  }
-  .sft-station {
-    flex: 0 0 auto;
-  }
-  .sft-nav__util {
-    flex: 1 1 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-top: 0;
-  }
-  .sft-nav__util .sft-ctl--toggle {
-    width: auto;
-  }
-  .sft-nav__data {
-    display: flex;
-    flex-wrap: wrap;
-  }
-}
-
+/* ===================================================================
+   Panel primitive
+   =================================================================== */
 .sft-panel {
   position: relative;
   border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-  /* Translucent so the ambient scene glows through. */
-  background: oklch(0.2 0.013 72 / 0.86);
-  backdrop-filter: blur(9px) saturate(1.1);
+  border-radius: var(--radius-l);
+  background: var(--sft-panel);
   padding: var(--space-m);
-  margin-bottom: var(--space-l);
-  overflow: hidden;
 }
-
-/* CRT scanline sheen — reserved for the hero surfaces (hall + HUD) so the
-   working panels stay calm and legible. */
-.sft-hall::after,
-.sft-hud::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 2px,
-    oklch(0 0 0 / 0.13) 2px 3px
-  );
-  opacity: 0.6;
-}
-.sft-panel > *,
-.sft-hud > * {
-  position: relative;
-  z-index: 1;
-}
-
 .sft-panel__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-s);
-  margin-bottom: var(--space-s);
-  padding-bottom: var(--space-xs);
-  border-bottom: 1px solid var(--line-strong);
+  margin-bottom: var(--space-m);
 }
-
 .sft-panel__title {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
-
 .sft-panel__note {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--ink-faint);
+  text-align: right;
 }
-
 .sft-subhead {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin: var(--space-s) 0 var(--space-2xs);
-}
-.sft-subhead:first-child {
-  margin-top: 0;
+  margin: 0 0 var(--space-2xs);
 }
 
-/* ---- Buy rows ------------------------------------------------------- */
-.sft-list {
+/* ---- Bars (shared) ------------------------------------------------- */
+.sft-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--sft-track);
+  overflow: hidden;
+}
+.sft-bar__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--sft-ok);
+  transition:
+    width var(--dur-mid) var(--ease-out-quart),
+    background-color var(--dur-fast) linear;
+}
+.sft-bar__fill.is-hot {
+  background: var(--sft-hot);
+}
+
+/* ===================================================================
+   FLOOR: the data hall hero + the activity log
+   =================================================================== */
+.sft-section--floor {
+  display: grid;
+  gap: var(--space-m);
+  align-items: start;
+}
+@media (min-width: 1080px) {
+  .sft-section--floor {
+    grid-template-columns: 1fr minmax(248px, 320px);
+  }
+}
+.sft-section--floor .sft-hall {
+  padding-bottom: var(--space-m);
+}
+.sft-activity {
   display: flex;
   flex-direction: column;
 }
-
-.sft-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-s);
-  width: 100%;
-  text-align: left;
-  padding: var(--space-xs) var(--space-s);
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  background: none;
-  color: inherit;
-  transition: background-color var(--dur-fast) var(--ease-out-quart);
+@media (min-width: 1080px) {
+  .sft-activity {
+    height: 100%;
+  }
 }
 
-.sft-row.is-afford {
-  cursor: pointer;
-}
-.sft-row.is-afford:hover {
-  background: var(--surface-2);
-}
-
-.sft-row:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.sft-row.is-locked {
-  opacity: 0.4;
-}
-
-.sft-row__main {
+/* Activity log */
+.sft-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 1px;
-  min-width: 0;
-}
-.sft-row__name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--step-0);
-  letter-spacing: -0.01em;
-}
-.sft-row__desc {
-  font-size: 0.78rem;
-  color: var(--ink-faint);
-  line-height: 1.35;
-}
-
-.sft-row__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-  flex-shrink: 0;
+  max-height: 340px;
+  overflow: hidden;
   font-family: var(--font-mono);
+  font-size: 0.74rem;
 }
-.sft-row__owned {
-  font-size: 0.72rem;
+.sft-log__row {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid color-mix(in oklch, var(--line) 45%, transparent);
+  animation: sft-log-in var(--dur-mid) var(--ease-out-quart);
+}
+.sft-log__row:last-child {
+  border-bottom: 0;
+}
+.sft-log__time {
+  flex-shrink: 0;
   color: var(--ink-faint);
+  font-size: 0.66rem;
 }
-.sft-row__cost {
-  font-size: var(--step-0);
+.sft-log__msg {
   color: var(--ink-muted);
+  overflow-wrap: anywhere;
 }
-.sft-row.is-afford .sft-row__cost {
-  color: var(--gold-bright);
+.sft-log__row--good .sft-log__msg {
+  color: var(--sft-ok);
 }
-/* Out of floor space: the gate is rack units, not cash — flag it in red. */
-.sft-row.is-nospace .sft-row__cost {
+.sft-log__row--warn .sft-log__msg {
   color: var(--sft-hot);
 }
-
-/* ---- Upgrades ------------------------------------------------------- */
-.sft-upgrades {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-xs);
-}
-
-.sft-upgrade {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3xs);
-  text-align: left;
-  padding: var(--space-s);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
-  color: inherit;
-}
-.sft-upgrade.is-hidden {
-  display: none;
-}
-.sft-upgrade.is-afford {
-  cursor: pointer;
-  border-color: var(--gold);
-}
-.sft-upgrade.is-afford:hover {
-  background: oklch(0.27 0.015 72);
-}
-.sft-upgrade:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-.sft-upgrade__name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--step-0);
-}
-.sft-upgrade__desc {
-  font-size: 0.76rem;
-  color: var(--ink-muted);
-  line-height: 1.35;
-}
-.sft-upgrade__cost {
-  margin-top: auto;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
+.sft-log__row--gold .sft-log__msg {
   color: var(--gold-bright);
 }
-.sft-upgrades:empty::after,
-.sft-upgrades-empty {
-  content: "No upgrades available yet.";
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
+.sft-log__empty {
   color: var(--ink-faint);
+  padding: 4px 0;
+}
+@keyframes sft-log-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
+/* The hand-built data-hall front-elevation art is preserved verbatim. */
 /* ---- Data Hall: front-elevation server room ------------------------ */
 /* The centrepiece. A row of equipment cabinets standing on a lit floor;
    each cabinet is one building type and fills with unit modules as you buy.
@@ -1594,58 +1593,32 @@
   }
 }
 
-/* ---- Telemetry: bars ----------------------------------------------- */
-.sft-gauge {
-  margin-top: var(--space-s);
+/* Hall reactive: live hotspot flares the floor; wear ages producer cells. */
+[data-hall][data-hotspot="1"] .sft-cab--producer .sft-cab__frame {
+  border-color: color-mix(in oklch, var(--sft-warn) 55%, var(--line-strong));
 }
-.sft-gauge__top {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-s);
-  margin-bottom: var(--space-3xs);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+[data-hall][data-hotspot="1"] .sft-cab--producer .sft-u.is-on::before {
+  background: var(--sft-warn);
+  box-shadow: 0 0 6px var(--sft-warn);
+  animation: sft-blink 0.7s steps(2, jump-none) infinite;
 }
-.sft-gauge__name {
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-.sft-gauge__label {
-  color: var(--ink-muted);
-  text-align: right;
-}
-.sft-bar {
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: oklch(0.26 0.01 72);
-  overflow: hidden;
-}
-.sft-bar__fill {
-  height: 100%;
-  width: 0;
-  border-radius: var(--radius-pill);
-  background: var(--sft-ok);
-  transition:
-    width var(--dur-mid) var(--ease-out-quart),
-    background-color var(--dur-fast) linear;
-}
-.sft-bar__fill.is-hot {
-  background: var(--sft-hot);
+[data-hall][data-wear="1"] .sft-cab--producer .sft-u.is-on {
+  filter: saturate(calc(1 - var(--sft-wear, 0) * 0.5))
+    brightness(calc(1 - var(--sft-wear, 0) * 0.25));
 }
 
-/* ---- Overclock + actions ------------------------------------------- */
+/* ---- Overclock + Service (rail actions) ---------------------------- */
 .sft-overclock {
   width: 100%;
-  margin-top: var(--space-s);
-  padding: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
   border: 1px solid var(--gold);
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
   color: var(--gold-bright);
   background: none;
+  cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease-out-quart),
     color var(--dur-fast) var(--ease-out-quart);
@@ -1664,375 +1637,218 @@
   color: var(--gold-ink);
   border-color: transparent;
 }
-
-/* ---- Prestige ------------------------------------------------------- */
-.sft-prestige__preview {
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  color: var(--ink-muted);
-  margin-bottom: var(--space-xs);
-  line-height: 1.4;
-}
-.sft-prestige__go {
+.sft-service {
   width: 100%;
-  margin-bottom: var(--space-m);
-  padding: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-pill);
-  background: var(--gold-sheen);
-  color: var(--gold-ink);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  background: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
 }
-.sft-prestige__go:disabled {
+.sft-service:not(:disabled) {
+  cursor: pointer;
+}
+.sft-service:not(:disabled):hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.sft-service:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  filter: grayscale(0.7);
-  opacity: 0.6;
 }
 
-.sft-prow {
+/* ===================================================================
+   BUILD: equipment + upgrades
+   =================================================================== */
+.sft-equip {
+  display: grid;
+  gap: var(--space-m) var(--space-l);
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+.sft-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sft-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-s);
   width: 100%;
   text-align: left;
-  padding: var(--space-xs) var(--space-2xs);
+  padding: var(--space-s);
   border: 0;
-  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius-m);
   background: none;
   color: inherit;
+  transition: background-color var(--dur-fast) var(--ease-out-quart);
 }
-.sft-prow.is-afford {
+.sft-row + .sft-row {
+  margin-top: 2px;
+}
+.sft-row.is-afford {
   cursor: pointer;
 }
-.sft-prow.is-afford:hover {
-  background: var(--surface-2);
+.sft-row.is-afford:hover {
+  background: var(--sft-panel-2);
 }
-.sft-prow:disabled {
+.sft-row:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
-.sft-prow.is-locked {
-  opacity: 0.45;
+.sft-row.is-locked {
+  opacity: 0.4;
 }
-.sft-prow.is-locked .sft-prow__cost {
-  font-size: 0.66rem;
-  color: var(--ink-faint);
-}
-.sft-prow__main {
+.sft-row__main {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
-.sft-prow__name {
+.sft-row__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--step-0);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
-.sft-prow__desc {
-  font-size: 0.74rem;
+.sft-row__desc {
+  font-size: 0.8rem;
   color: var(--ink-faint);
-  line-height: 1.35;
+  line-height: 1.4;
 }
-.sft-prow__meta {
+.sft-row__meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  font-family: var(--font-mono);
+  gap: 2px;
   flex-shrink: 0;
+  font-family: var(--font-mono);
 }
-.sft-prow__level {
+.sft-row__owned {
   font-size: 0.72rem;
   color: var(--ink-faint);
 }
-.sft-prow__cost {
-  font-size: 0.85rem;
+.sft-row__cost {
+  font-size: var(--step-0);
+  color: var(--ink-muted);
+}
+.sft-row.is-afford .sft-row__cost {
   color: var(--gold-bright);
 }
-
-/* ---- Data controls -------------------------------------------------- */
-.sft-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2xs);
-  margin-top: var(--space-s);
-}
-.sft-ctl {
-  flex: 1 1 auto;
-  padding: var(--space-2xs) var(--space-xs);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--ink-muted);
-  background: none;
-  transition: border-color var(--dur-fast) var(--ease-out-quart);
-}
-.sft-ctl:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-.sft-ctl--danger:hover {
-  border-color: var(--sft-hot);
+.sft-row.is-nospace .sft-row__cost {
   color: var(--sft-hot);
 }
 
-/* ---- Toasts --------------------------------------------------------- */
-.sft-toasts {
-  position: fixed;
-  bottom: var(--space-m);
-  right: var(--space-m);
-  z-index: var(--z-toast);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-  max-width: min(92vw, 360px);
-}
-.sft-toast {
-  padding: var(--space-xs) var(--space-s);
-  border: 1px solid var(--gold);
-  border-radius: var(--radius-s);
-  background: oklch(0.16 0.012 75 / 0.96);
-  backdrop-filter: blur(8px);
-  font-size: 0.82rem;
-  color: var(--ink);
-  box-shadow: 0 12px 40px -16px var(--gold-glow);
-  opacity: 0;
-  transform: translateY(0.75rem);
-  transition:
-    opacity var(--dur-mid) var(--ease-out-quart),
-    transform var(--dur-mid) var(--ease-out-expo);
-}
-.sft-toast.is-in {
-  opacity: 1;
-  transform: none;
-}
-
-/* ---- Incident banner ----------------------------------------------- */
-/* Hidden until the engine reports a live event; data-kind switches the
-   accent between the warn (bad) and ok (good) hue. */
-.sft-event {
-  display: none;
-  align-items: center;
-  gap: var(--space-s);
-  margin-bottom: var(--space-l);
-  padding: var(--space-xs) var(--space-s);
-  border: 1px solid var(--accent, var(--sft-hot));
-  border-radius: var(--radius-m);
-  background: oklch(0.16 0.012 75 / 0.9);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 12px 40px -18px var(--accent, var(--sft-hot));
-  --accent: var(--sft-hot);
-}
-.sft-event.is-shown {
-  display: flex;
-  animation: sft-event-in var(--dur-mid) var(--ease-out-expo);
-}
-.sft-event[data-kind="good"] {
-  --accent: var(--sft-ok);
-}
-
-.sft-event__pulse {
-  flex-shrink: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  animation: sft-pulse 1.3s ease-in-out infinite;
-}
-.sft-event__body {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-.sft-event__name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--step-0);
-  color: var(--accent);
-}
-.sft-event__desc {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--ink-muted);
-  overflow-wrap: anywhere;
-}
-.sft-event__timer {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--ink-faint);
-  font-variant-numeric: tabular-nums;
-}
-.sft-event__respond {
-  flex-shrink: 0;
-  padding: var(--space-2xs) var(--space-s);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  color: var(--accent);
-  background: none;
-  transition:
-    background-color var(--dur-fast) var(--ease-out-quart),
-    color var(--dur-fast) var(--ease-out-quart);
-}
-.sft-event__respond:not(:disabled):hover {
-  background: var(--accent);
-  color: var(--gold-ink);
-  cursor: pointer;
-}
-.sft-event__respond:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.sft-event__respond.is-hidden {
-  display: none;
-}
-
-@media (max-width: 560px) {
-  .sft-event {
-    flex-wrap: wrap;
-  }
-  .sft-event__respond {
-    flex: 1 1 100%;
-  }
-}
-
-@keyframes sft-event-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* ---- Contracts (demand market) ------------------------------------- */
-.sft-contract__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-.sft-contract__idle.is-hidden,
-.sft-contract__offer.is-hidden,
-.sft-contract__active.is-hidden {
-  display: none;
-}
-.sft-contract__idle {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  line-height: 1.4;
-  color: var(--ink-faint);
-}
-.sft-contract__list {
-  display: flex;
-  flex-direction: column;
+/* ---- Upgrades ------------------------------------------------------ */
+.sft-upgrades {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: var(--space-s);
 }
-.sft-contract__list:empty {
-  display: none;
-}
-.sft-contract__offer,
-.sft-contract__active {
+.sft-upgrade {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
-  padding: var(--space-xs);
+  text-align: left;
+  padding: var(--space-s);
   border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
+  border-radius: var(--radius-m);
+  background: var(--sft-panel-2);
+  color: inherit;
 }
-.sft-contract__line {
-  margin: 0;
+.sft-upgrade.is-hidden {
+  display: none;
+}
+.sft-upgrade.is-afford {
+  cursor: pointer;
+  border-color: var(--gold);
+}
+.sft-upgrade.is-afford:hover {
+  background: color-mix(in oklch, var(--gold) 8%, var(--sft-panel-2));
+}
+.sft-upgrade:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.sft-upgrade__name {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--step-0);
-  line-height: 1.3;
   color: var(--ink);
 }
-.sft-contract__reward {
-  margin: 0;
-  font-family: var(--font-mono);
+.sft-upgrade__desc {
   font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+.sft-upgrade__cost {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
   color: var(--gold-bright);
 }
-.sft-contract__risk {
-  margin: 0;
+.sft-upgrades:empty::after {
+  content: "No upgrades available yet.";
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--sft-hot);
-}
-.sft-contract__expiry,
-.sft-contract__progress {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--ink-faint);
 }
-.sft-contract__active .sft-bar {
-  margin: var(--space-3xs) 0;
-}
-.sft-contract__actions {
-  display: flex;
-  gap: var(--space-2xs);
-  margin-top: var(--space-2xs);
-}
-.sft-contract__accept {
-  flex: 1 1 auto;
-  padding: var(--space-2xs) var(--space-s);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--gold-sheen);
-  color: var(--gold-ink);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter var(--dur-fast) var(--ease-out-quart);
-}
-.sft-contract__accept:hover {
-  filter: brightness(1.08);
-}
-.sft-contract__decline {
-  flex: 0 0 auto;
-  padding: var(--space-2xs) var(--space-s);
+
+/* ---- Bulk-buy multiplier (×1 / ×10 / Max) -------------------------- */
+.sft-buymult {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-pill);
+  background: var(--bg-deep);
+}
+.sft-buymult__opt {
+  padding: var(--space-3xs) var(--space-xs);
+  border: 0;
+  border-radius: var(--radius-pill);
   background: none;
-  color: var(--ink-muted);
+  color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition:
-    border-color var(--dur-fast) var(--ease-out-quart),
-    color var(--dur-fast) var(--ease-out-quart);
+    color var(--dur-fast) var(--ease-out-quart),
+    background-color var(--dur-fast) var(--ease-out-quart);
 }
-.sft-contract__decline:hover {
-  border-color: var(--sft-hot);
-  color: var(--sft-hot);
+.sft-buymult__opt:hover {
+  color: var(--gold);
+}
+.sft-buymult__opt.is-active {
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
 }
 
-/* ---- Workloads (capacity allocation) ------------------------------- */
+/* ===================================================================
+   OPERATE: workloads · power · research
+   =================================================================== */
 .sft-workloads {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2xs);
 }
 .sft-wl {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
-  padding: var(--space-xs) var(--space-2xs);
-  border-bottom: 1px solid var(--line);
+  padding: var(--space-s) var(--space-2xs);
+  border-radius: var(--radius-m);
 }
-.sft-wl:last-child {
-  border-bottom: 0;
+.sft-wl.is-active {
+  background: color-mix(in oklch, var(--sft-panel-2) 60%, transparent);
 }
 .sft-wl__head {
   display: flex;
@@ -2044,10 +1860,11 @@
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--step-0);
+  color: var(--ink);
 }
 .sft-wl__price {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -2058,14 +1875,14 @@
   color: var(--sft-hot);
 }
 .sft-wl__desc {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   color: var(--ink-faint);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 .sft-wl__bar {
   height: 6px;
   border-radius: var(--radius-pill);
-  background: oklch(0.26 0.01 72);
+  background: var(--sft-track);
   overflow: hidden;
 }
 .sft-wl__fill {
@@ -2087,13 +1904,13 @@
   min-width: 3.5ch;
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--gold-bright);
   font-variant-numeric: tabular-nums;
 }
 .sft-wl__step {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-s);
   background: none;
@@ -2115,283 +1932,7 @@
   cursor: not-allowed;
 }
 
-/* Hotspot banner reuses the incident-banner chrome in the warn (amber) hue. */
-.sft-event--hotspot {
-  --accent: var(--sft-warn);
-}
-
-/* ---- Milestones ----------------------------------------------------- */
-.sft-ach .sft-panel__head {
-  cursor: pointer;
-  margin-bottom: var(--space-s);
-}
-/* A caret that flips when collapsed. */
-.sft-ach .sft-panel__note::after {
-  content: " ▾";
-  color: var(--ink-faint);
-}
-.sft-ach.is-collapsed .sft-panel__note::after {
-  content: " ▸";
-}
-.sft-ach.is-collapsed .sft-ach__grid {
-  display: none;
-}
-
-.sft-ach__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-xs);
-  max-height: 340px;
-  overflow-y: auto;
-}
-.sft-ach__chip {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-xs) var(--space-s);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
-}
-.sft-ach__chip.is-unlocked {
-  border-color: var(--gold);
-  background: oklch(0.24 0.02 80 / 0.6);
-}
-.sft-ach__chip.is-locked {
-  opacity: 0.5;
-}
-.sft-ach__name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.86rem;
-  color: var(--ink);
-}
-.sft-ach__chip.is-unlocked .sft-ach__name {
-  color: var(--gold-bright);
-}
-.sft-ach__desc {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--ink-faint);
-  line-height: 1.35;
-}
-.sft-ach__buff {
-  margin-top: 2px;
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.04em;
-  color: var(--sft-ok);
-}
-
-/* ---- No-JS fallback ------------------------------------------------- */
-.sft-nojs {
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-m);
-  padding: var(--space-l);
-  background: var(--surface);
-  color: var(--ink-muted);
-}
-.no-js .sft-app {
-  display: none;
-}
-.sft-nojs {
-  display: none;
-}
-.no-js .sft-nojs {
-  display: block;
-}
-
-/* ---- Ambient data-center scene ------------------------------------- */
-/* A faux server-room corridor behind the UI. Driven by two custom props
-   set from the render loop: --sft-glow (0..1, farm size) brightens it, and
-   --sft-heat-pct shifts the accent from gold toward the overload red. */
-.sft-scene {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  border-radius: var(--radius-m);
-  /* Accent eases from gold to hot-red as the farm overheats. */
-  --accent: color-mix(
-    in oklch,
-    var(--gold),
-    var(--sft-hot) var(--sft-heat-pct, 0%)
-  );
-}
-
-/* Vanishing-point glow at the end of the hall. */
-.sft-scene__glow {
-  position: absolute;
-  left: 50%;
-  top: 34%;
-  width: min(46vw, 620px);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--accent), transparent 62%);
-  filter: blur(26px);
-  opacity: calc(0.14 + var(--sft-glow, 0) * 0.5);
-  transition: opacity var(--dur-slow) linear;
-}
-
-/* Perspective floor grid. */
-.sft-scene__floor {
-  position: absolute;
-  left: -25%;
-  right: -25%;
-  bottom: -12%;
-  height: 60%;
-  background:
-    repeating-linear-gradient(
-      to right,
-      color-mix(in oklch, var(--accent) 28%, transparent) 0 1px,
-      transparent 1px 70px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklch, var(--accent) 20%, transparent) 0 1px,
-      transparent 1px 52px
-    );
-  transform: perspective(440px) rotateX(67deg);
-  transform-origin: bottom center;
-  opacity: calc(0.14 + var(--sft-glow, 0) * 0.34);
-  -webkit-mask-image: linear-gradient(to top, black, transparent 85%);
-  mask-image: linear-gradient(to top, black, transparent 85%);
-}
-
-/* Two angled rack walls converging toward the vanishing point. */
-.sft-scene__wall {
-  position: absolute;
-  top: -12%;
-  bottom: 8%;
-  width: 46%;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 10px,
-      oklch(0 0 0 / 0.45) 10px 12px
-    ),
-    repeating-linear-gradient(
-      to right,
-      color-mix(in oklch, var(--surface-2) 92%, transparent) 0 40px,
-      oklch(0 0 0 / 0.5) 40px 44px
-    );
-  opacity: calc(0.28 + var(--sft-glow, 0) * 0.42);
-}
-.sft-scene__wall::after {
-  /* Rows of status LEDs studding the racks. */
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    circle,
-    var(--accent) 0 1.5px,
-    transparent 2.5px
-  );
-  background-size: 44px 24px;
-  background-position: 10px 5px;
-  opacity: calc(0.3 + var(--sft-glow, 0) * 0.6);
-  animation: sft-flicker 2.6s steps(1, end) infinite;
-}
-.sft-scene__wall--l {
-  left: -8%;
-  transform: perspective(520px) rotateY(40deg);
-  transform-origin: left center;
-}
-.sft-scene__wall--r {
-  right: -8%;
-  transform: perspective(520px) rotateY(-40deg);
-  transform-origin: right center;
-}
-
-/* Depth haze: fades the corridor into the dark and keeps panels readable. */
-.sft-scene__haze {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(125% 80% at 50% 32%, transparent 46%, var(--bg-deep) 96%),
-    linear-gradient(
-      to bottom,
-      oklch(0.15 0.01 75 / 0.55) 0%,
-      transparent 26%,
-      transparent 70%,
-      var(--bg) 100%
-    );
-}
-
-/* ---- Activity log --------------------------------------------------- */
-.sft-log {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  max-height: 200px;
-  overflow: hidden;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-}
-.sft-log__row {
-  display: flex;
-  gap: var(--space-2xs);
-  align-items: baseline;
-  padding: 3px 0;
-  border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
-  animation: sft-log-in var(--dur-mid) var(--ease-out-quart);
-}
-.sft-log__row:last-child {
-  border-bottom: 0;
-}
-.sft-log__time {
-  flex-shrink: 0;
-  color: var(--ink-faint);
-  font-size: 0.66rem;
-}
-.sft-log__msg {
-  color: var(--ink-muted);
-  overflow-wrap: anywhere;
-}
-.sft-log__row--good .sft-log__msg {
-  color: var(--sft-ok);
-}
-.sft-log__row--warn .sft-log__msg {
-  color: var(--sft-hot);
-}
-.sft-log__row--gold .sft-log__msg {
-  color: var(--gold-bright);
-}
-.sft-log__empty {
-  color: var(--ink-faint);
-  padding: 3px 0;
-}
-
-/* ---- Keyframes ------------------------------------------------------ */
-@keyframes sft-flicker {
-  0%,
-  100% {
-    opacity: calc(0.3 + var(--sft-glow, 0) * 0.6);
-  }
-  48% {
-    opacity: calc(0.18 + var(--sft-glow, 0) * 0.5);
-  }
-  52% {
-    opacity: calc(0.34 + var(--sft-glow, 0) * 0.62);
-  }
-}
-@keyframes sft-log-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* ---- Power strategy (contract selector) ---------------------------- */
+/* ---- Power strategy ------------------------------------------------ */
 .sft-pwr {
   display: flex;
   flex-direction: column;
@@ -2402,9 +1943,9 @@
   flex-direction: column;
   gap: 2px;
   text-align: left;
-  padding: var(--space-xs) var(--space-s);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
+  padding: var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
   background: none;
   color: inherit;
   cursor: pointer;
@@ -2417,51 +1958,238 @@
 }
 .sft-pwr__opt.is-active {
   border-color: var(--gold);
-  background: oklch(0.24 0.02 80 / 0.6);
+  background: color-mix(in oklch, var(--gold) 12%, transparent);
 }
 .sft-pwr__name {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--step-0);
+  color: var(--ink);
 }
 .sft-pwr__opt.is-active .sft-pwr__name {
   color: var(--gold-bright);
 }
 .sft-pwr__desc {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--ink-faint);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 .sft-pwr__hint {
   margin: var(--space-s) 0 0;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--ink-muted);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* ---- Research (in-run) --------------------------------------------- */
+/* ---- Research ------------------------------------------------------ */
 .sft-research__lede {
-  margin: 0 0 var(--space-xs);
+  margin: 0 0 var(--space-s);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--ink-faint);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .sft-research {
   display: flex;
   flex-direction: column;
 }
 
-/* ---- Objectives + reputation standing ------------------------------ */
+/* ===================================================================
+   Prestige / research rows (shared .sft-prow chrome)
+   =================================================================== */
+.sft-prow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-s) var(--space-2xs);
+  border: 0;
+  border-radius: var(--radius-m);
+  background: none;
+  color: inherit;
+}
+.sft-prow + .sft-prow {
+  margin-top: 2px;
+}
+.sft-prow.is-afford {
+  cursor: pointer;
+}
+.sft-prow.is-afford:hover {
+  background: var(--sft-panel-2);
+}
+.sft-prow:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sft-prow.is-locked {
+  opacity: 0.45;
+}
+.sft-prow.is-locked .sft-prow__cost {
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+}
+.sft-prow__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sft-prow__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  color: var(--ink);
+}
+.sft-prow__desc {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+.sft-prow__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.sft-prow__level {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.sft-prow__cost {
+  font-size: 0.85rem;
+  color: var(--gold-bright);
+}
+/* Branch subheads inside the prestige list reuse .sft-subhead spacing. */
+.sft-prow-list .sft-subhead {
+  margin-top: var(--space-s);
+}
+.sft-prow-list .sft-subhead:first-child {
+  margin-top: 0;
+}
+
+/* ===================================================================
+   CONTRACTS: demand market
+   =================================================================== */
+.sft-contract__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+.sft-contract__idle.is-hidden,
+.sft-contract__offer.is-hidden,
+.sft-contract__active.is-hidden {
+  display: none;
+}
+.sft-contract__idle {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+.sft-contract__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+.sft-contract__list:empty {
+  display: none;
+}
+.sft-contract__offer,
+.sft-contract__active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding: var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--sft-panel-2);
+}
+.sft-contract__line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  line-height: 1.3;
+  color: var(--ink);
+}
+.sft-contract__reward {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-bright);
+}
+.sft-contract__risk {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--sft-hot);
+}
+.sft-contract__expiry,
+.sft-contract__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+.sft-contract__active .sft-bar {
+  margin: var(--space-3xs) 0;
+}
+.sft-contract__actions {
+  display: flex;
+  gap: var(--space-2xs);
+  margin-top: var(--space-2xs);
+}
+.sft-contract__accept {
+  flex: 1 1 auto;
+  padding: var(--space-2xs) var(--space-s);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out-quart);
+}
+.sft-contract__accept:hover {
+  filter: brightness(1.08);
+}
+.sft-contract__decline {
+  flex: 0 0 auto;
+  padding: var(--space-2xs) var(--space-s);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-contract__decline:hover {
+  border-color: var(--sft-hot);
+  color: var(--sft-hot);
+}
+
+/* ===================================================================
+   PROGRESS: standing · objectives · statistics · rebuild · milestones
+   =================================================================== */
 .sft-standing {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  padding-bottom: var(--space-s);
-  margin-bottom: var(--space-s);
-  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: var(--space-m);
+  margin-bottom: var(--space-m);
+  border-bottom: 1px solid var(--line);
 }
 .sft-standing__top {
   display: flex;
@@ -2478,7 +2206,7 @@
 }
 .sft-standing__next {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--ink-faint);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -2486,9 +2214,9 @@
 .sft-standing__perks {
   margin: 2px 0 0;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--ink-muted);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .sft-goals__list {
@@ -2501,7 +2229,7 @@
   align-items: flex-start;
   gap: var(--space-xs);
   padding: var(--space-2xs) 0;
-  border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
+  border-bottom: 1px solid color-mix(in oklch, var(--line) 45%, transparent);
 }
 .sft-goal:last-child {
   border-bottom: 0;
@@ -2510,7 +2238,7 @@
   flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--ink-faint);
 }
 .sft-goal.is-done .sft-goal__mark {
@@ -2525,7 +2253,7 @@
 .sft-goal__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--ink);
 }
 .sft-goal.is-locked .sft-goal__name {
@@ -2536,20 +2264,20 @@
 }
 .sft-goal__desc {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--ink-faint);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .sft-endless {
   width: 100%;
-  margin-top: var(--space-s);
+  margin-top: var(--space-m);
   padding: var(--space-xs);
   border: 1px solid var(--gold);
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--gold-bright);
   background: none;
   cursor: pointer;
@@ -2570,94 +2298,10 @@
   display: none;
 }
 
-/* ---- Maintenance (service action) ---------------------------------- */
-.sft-service {
-  width: 100%;
-  margin-top: var(--space-s);
-  padding: var(--space-xs);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--ink-muted);
-  background: none;
-  transition:
-    border-color var(--dur-fast) var(--ease-out-quart),
-    color var(--dur-fast) var(--ease-out-quart);
-}
-.sft-service:not(:disabled) {
-  cursor: pointer;
-}
-.sft-service:not(:disabled):hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-.sft-service:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ==== Tier 3: polish, retention, presentation ======================== */
-
-/* ---- Bulk-buy multiplier (×1 / ×10 / Max) -------------------------- */
-.sft-buymult {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: oklch(0.16 0.01 75 / 0.6);
-}
-.sft-buymult__opt {
-  padding: var(--space-3xs) var(--space-xs);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition:
-    color var(--dur-fast) var(--ease-out-quart),
-    background-color var(--dur-fast) var(--ease-out-quart);
-}
-.sft-buymult__opt:hover {
-  color: var(--gold);
-}
-.sft-buymult__opt.is-active {
-  background: var(--gold-sheen);
-  color: var(--gold-ink);
-}
-
-/* ---- Keyboard hint line -------------------------------------------- */
-.sft-ops__keys {
-  margin: 0 0 var(--space-s);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--ink-faint);
-  line-height: 1.7;
-}
-.sft-ops__keys kbd {
-  display: inline-block;
-  padding: 0 5px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
-  color: var(--ink-muted);
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-}
-@media (max-width: 560px) {
-  .sft-ops__keys {
-    display: none; /* no physical keyboard — the buttons carry the actions */
-  }
-}
-
 /* ---- Statistics sparklines ----------------------------------------- */
 .sft-sparks {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-m);
 }
 .sft-spark {
@@ -2687,7 +2331,7 @@
 .sft-spark__svg {
   display: block;
   width: 100%;
-  height: 40px;
+  height: 44px;
   overflow: visible;
 }
 .sft-spark__line {
@@ -2712,9 +2356,187 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Scripted opportunity banner ----------------------------------- */
-/* Reuses the incident-banner chrome (.sft-event) in the gold "opportunity"
-   hue — these are valuable deals, so gold is the right voice. */
+/* ---- Rebuild (prestige) -------------------------------------------- */
+.sft-prestige__preview {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin: 0 0 var(--space-s);
+  line-height: 1.45;
+}
+.sft-prestige__go {
+  width: 100%;
+  margin-bottom: var(--space-m);
+  padding: var(--space-s);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  color: var(--gold-ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sft-prestige__go:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.6;
+}
+
+/* ---- Milestones (collapsible) -------------------------------------- */
+.sft-ach .sft-panel__head {
+  cursor: pointer;
+}
+.sft-ach .sft-panel__note::after {
+  content: " ▾";
+  color: var(--ink-faint);
+}
+.sft-ach.is-collapsed .sft-panel__note::after {
+  content: " ▸";
+}
+.sft-ach.is-collapsed .sft-ach__grid {
+  display: none;
+}
+.sft-ach__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-s);
+  max-height: 360px;
+  overflow-y: auto;
+}
+.sft-ach__chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--sft-panel-2);
+}
+.sft-ach__chip.is-unlocked {
+  border-color: var(--gold);
+  background: color-mix(in oklch, var(--gold) 10%, var(--sft-panel-2));
+}
+.sft-ach__chip.is-locked {
+  opacity: 0.5;
+}
+.sft-ach__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.sft-ach__chip.is-unlocked .sft-ach__name {
+  color: var(--gold-bright);
+}
+.sft-ach__desc {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+.sft-ach__buff {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--sft-ok);
+}
+
+/* ===================================================================
+   Alerts: incident / hotspot / opportunity banners
+   =================================================================== */
+.sft-alerts {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+.sft-alerts:empty {
+  display: none;
+}
+.sft-event {
+  display: none;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  border: 1px solid var(--accent, var(--sft-hot));
+  border-radius: var(--radius-l);
+  background: var(--sft-panel);
+  --accent: var(--sft-hot);
+}
+.sft-event.is-shown {
+  display: flex;
+  animation: sft-event-in var(--dur-mid) var(--ease-out-expo);
+}
+.sft-event[data-kind="good"] {
+  --accent: var(--sft-ok);
+}
+.sft-event__pulse {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: sft-pulse 1.3s ease-in-out infinite;
+}
+.sft-event__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.sft-event__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  color: var(--accent);
+}
+.sft-event__desc {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+.sft-event__timer {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.sft-event__respond {
+  flex-shrink: 0;
+  padding: var(--space-2xs) var(--space-s);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  background: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-event__respond:not(:disabled):hover {
+  background: var(--accent);
+  color: var(--gold-ink);
+  cursor: pointer;
+}
+.sft-event__respond:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sft-event__respond.is-hidden {
+  display: none;
+}
+.sft-event--hotspot {
+  --accent: var(--sft-warn);
+}
+/* Opportunity: a valuable deal, so gold is the right voice. */
 .sft-event--script {
   --accent: var(--gold);
   align-items: flex-start;
@@ -2737,7 +2559,7 @@
 .sft-script__hold {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--sft-hot);
   font-variant-numeric: tabular-nums;
 }
@@ -2748,38 +2570,64 @@
   display: block;
   margin-top: var(--space-2xs);
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--gold-bright);
 }
-
-/* ---- Sound toggle --------------------------------------------------- */
-.sft-ctl--toggle {
-  width: 100%;
-  margin-bottom: var(--space-2xs);
-  cursor: pointer;
+@media (max-width: 560px) {
+  .sft-event {
+    flex-wrap: wrap;
+  }
+  .sft-event__respond {
+    flex: 1 1 100%;
+  }
 }
-.sft-ctl--toggle.is-active {
-  border-color: var(--gold);
-  color: var(--gold-bright);
-}
-
-/* ---- Reactive data-hall: hotspot + wear (idea #10) ----------------- */
-/* A live hotspot flares the affected floor amber and unsettles the LEDs;
-   worn hardware desaturates + dims the producer cells, reading as age. */
-[data-hall][data-hotspot="1"] .sft-cab--producer .sft-cab__frame {
-  border-color: color-mix(in oklch, var(--sft-warn) 55%, var(--line-strong));
-}
-[data-hall][data-hotspot="1"] .sft-cab--producer .sft-u.is-on::before {
-  background: var(--sft-warn);
-  box-shadow: 0 0 6px var(--sft-warn);
-  animation: sft-blink 0.7s steps(2, jump-none) infinite;
-}
-[data-hall][data-wear="1"] .sft-cab--producer .sft-u.is-on {
-  filter: saturate(calc(1 - var(--sft-wear, 0) * 0.5))
-    brightness(calc(1 - var(--sft-wear, 0) * 0.25));
+@keyframes sft-event-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* ---- Offline summary modal (idea #12) ------------------------------ */
+/* ===================================================================
+   Toasts
+   =================================================================== */
+.sft-toasts {
+  position: fixed;
+  bottom: var(--space-m);
+  right: var(--space-m);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-width: min(92vw, 360px);
+}
+.sft-toast {
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-m);
+  background: color-mix(in oklch, var(--bg), transparent 5%);
+  backdrop-filter: blur(8px);
+  font-size: 0.85rem;
+  color: var(--ink);
+  box-shadow: 0 12px 40px -16px var(--gold-glow);
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition:
+    opacity var(--dur-mid) var(--ease-out-quart),
+    transform var(--dur-mid) var(--ease-out-expo);
+}
+.sft-toast.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ===================================================================
+   Offline summary modal
+   =================================================================== */
 .sft-modal-scrim {
   position: fixed;
   inset: 0;
@@ -2787,7 +2635,7 @@
   display: grid;
   place-items: center;
   padding: var(--space-l);
-  background: oklch(0.08 0.006 75 / 0.74);
+  background: color-mix(in oklch, var(--bg-deep) 72%, transparent);
   backdrop-filter: blur(6px);
   opacity: 0;
   transition: opacity var(--dur-mid) var(--ease-out-quart);
@@ -2803,7 +2651,7 @@
   padding: var(--space-l);
   border: 1px solid var(--gold);
   border-radius: var(--radius-l);
-  background: oklch(0.16 0.012 75 / 0.98);
+  background: color-mix(in oklch, var(--bg), transparent 2%);
   box-shadow: 0 30px 80px -30px var(--gold-glow);
   transform: translateY(10px) scale(0.98);
   transition: transform var(--dur-mid) var(--ease-out-expo);
@@ -2837,8 +2685,8 @@
   gap: 2px;
   padding: var(--space-s);
   border: 1px solid var(--line);
-  border-radius: var(--radius-s);
-  background: var(--surface-2);
+  border-radius: var(--radius-m);
+  background: var(--sft-panel-2);
 }
 .sft-modal__metric-val {
   font-family: var(--font-mono);
@@ -2856,7 +2704,7 @@
 .sft-modal__note {
   margin: 0 0 var(--space-m);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--ink-faint);
   line-height: 1.5;
 }
@@ -2877,7 +2725,91 @@
   filter: brightness(1.08);
 }
 
-/* ---- Motion + accessibility ---------------------------------------- */
+/* ===================================================================
+   Quiet ambient backdrop — soft warm depth, not a busy corridor.
+   Driven by --sft-glow (farm size) and --sft-heat-pct (overload tint),
+   both set from the render loop on the .sft root.
+   =================================================================== */
+.sft-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius-l);
+  --accent: color-mix(
+    in oklch,
+    var(--gold),
+    var(--sft-hot) var(--sft-heat-pct, 0%)
+  );
+}
+.sft-scene__glow {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  width: min(52vw, 680px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent), transparent 64%);
+  filter: blur(40px);
+  opacity: calc(0.06 + var(--sft-glow, 0) * 0.22);
+  transition: opacity var(--dur-slow) linear;
+}
+.sft-scene__floor {
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: -12%;
+  height: 58%;
+  background:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in oklch, var(--accent) 22%, transparent) 0 1px,
+      transparent 1px 74px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--accent) 16%, transparent) 0 1px,
+      transparent 1px 56px
+    );
+  transform: perspective(460px) rotateX(68deg);
+  transform-origin: bottom center;
+  opacity: calc(0.05 + var(--sft-glow, 0) * 0.16);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 82%);
+  mask-image: linear-gradient(to top, black, transparent 82%);
+}
+.sft-scene__haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    130% 90% at 50% 24%,
+    transparent 52%,
+    var(--bg-deep) 100%
+  );
+}
+
+/* ===================================================================
+   No-JS fallback
+   =================================================================== */
+.sft-nojs {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-m);
+  padding: var(--space-l);
+  background: var(--surface);
+  color: var(--ink-muted);
+  display: none;
+}
+.no-js .sft-app {
+  display: none;
+}
+.no-js .sft-nojs {
+  display: block;
+}
+
+/* ===================================================================
+   Motion + accessibility
+   =================================================================== */
 @media (prefers-reduced-motion: reduce) {
   [data-hall][data-tier="hot"] .sft-cab--producer .sft-u.is-on::before,
   .sft-cab--fan .sft-u.is-on::after,
@@ -2893,15 +2825,18 @@
   [data-hall][data-oc="1"] .sft-cab__frame,
   [data-hall][data-hotspot="1"] .sft-cab--producer .sft-u.is-on::before,
   .sft-cab,
-  .sft-scene__wall::after,
   .sft-event,
   .sft-event__pulse,
+  .sft-section.is-active,
   .sft-log__row {
     animation: none;
   }
   .sft-bar__fill,
+  .sft-wl__fill,
   .sft-u,
   .sft-row,
+  .sft-navitem,
+  .sft-navitem::before,
   .sft-toast,
   .sft-scene__glow,
   .sft-modal,

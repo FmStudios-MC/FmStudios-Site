@@ -3,17 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import "../../styles/games/server-farm.css";
 
-// Compact telemetry chips shown in the HUD's secondary row. Cash + net income
-// are the primary pair and rendered separately; these are the at-a-glance
-// supporting reads. R&D and Prestige credits live in their own tabs.
-const metrics = [
-  { key: "compute", label: "Compute", value: "0 FLOP/s" },
-  { key: "power", label: "Power", value: "0 / 0 kW" },
-  { key: "space", label: "Floor", value: "0 / 24 RU" },
-  { key: "bill", label: "Power bill", value: "$0/s" },
-  { key: "reputation", label: "Reputation", value: "0 · Startup" },
-];
-
+// Equipment lists shown in the Build section, one block per category.
 const buyLists: { cat: string; label: string }[] = [
   { cat: "producer", label: "Producers" },
   { cat: "power", label: "Power" },
@@ -23,11 +13,15 @@ const buyLists: { cat: string; label: string }[] = [
   { cat: "staff", label: "Staff" },
 ];
 
-// Console stations. Each is one system; only the active one is shown. The
-// rail replaces the old horizontal tab strip — it reads as equipment, not a
-// web widget. Icons are inline line-SVGs (stroke = currentColor) so they
-// inherit the rail's active-state gold.
-const stations: { id: string; label: string; icon: string }[] = [
+// Console sections. The rail switches between them and only the active one is
+// shown — one focused screen at a time. Icons are inline line-SVGs (stroke =
+// currentColor) so they inherit the rail's active-state gold.
+const sections: { id: string; label: string; icon: string }[] = [
+  {
+    id: "floor",
+    label: "Floor",
+    icon: '<rect x="3.5" y="3.5" width="7" height="17" rx="1.3"/><rect x="13.5" y="3.5" width="7" height="17" rx="1.3"/><line x1="5.4" y1="7.2" x2="8.6" y2="7.2"/><line x1="5.4" y1="10.2" x2="8.6" y2="10.2"/><line x1="15.4" y1="7.2" x2="18.6" y2="7.2"/><line x1="15.4" y1="10.2" x2="18.6" y2="10.2"/>',
+  },
   {
     id: "build",
     label: "Build",
@@ -36,7 +30,7 @@ const stations: { id: string; label: string; icon: string }[] = [
   {
     id: "operate",
     label: "Operate",
-    icon: '<line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.3" fill="var(--bg)"/><circle cx="15" cy="16" r="2.3" fill="var(--bg)"/>',
+    icon: '<line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.3" fill="var(--sft-panel)"/><circle cx="15" cy="16" r="2.3" fill="var(--sft-panel)"/>',
   },
   {
     id: "contracts",
@@ -46,12 +40,7 @@ const stations: { id: string; label: string; icon: string }[] = [
   {
     id: "progress",
     label: "Progress",
-    icon: '<circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="3.4"/>',
-  },
-  {
-    id: "rebuild",
-    label: "Rebuild",
-    icon: '<path d="M20 11.5a8 8 0 1 0-1.9 5.4"/><path d="M20 5.5v5h-5"/>',
+    icon: '<path d="M4 19.5V4"/><path d="M4 19.5h16"/><rect x="7" y="12" width="3" height="5" rx=".6"/><rect x="12.5" y="8.5" width="3" height="8.5" rx=".6"/><rect x="18" y="5.5" width="3" height="11.5" rx=".6" transform="translate(-1 0)"/>',
   },
 ];
 ---
@@ -77,216 +66,96 @@ const stations: { id: string; label: string; icon: string }[] = [
       </div>
 
       <div class="sft sft-app" data-sft>
-        <!-- Ambient data-center scene (reacts to farm size + heat) -->
+        <!-- Quiet ambient backdrop (a soft warm depth, not a busy corridor). -->
         <div class="sft-scene" aria-hidden="true">
-          <div class="sft-scene__floor"></div>
-          <div class="sft-scene__wall sft-scene__wall--l"></div>
-          <div class="sft-scene__wall sft-scene__wall--r"></div>
           <div class="sft-scene__glow"></div>
+          <div class="sft-scene__floor"></div>
           <div class="sft-scene__haze"></div>
         </div>
 
-        <!-- HUD: a primary cash/income pair plus a row of telemetry chips -->
-        <div class="sft-hud" role="status" aria-label="Farm telemetry">
-          <div class="sft-hud__lead">
-            <div class="sft-hud__cash">
-              <span class="sft-hud__cash-label">Cash on hand</span>
-              <span class="sft-hud__cash-val" data-stat="money">$0</span>
-            </div>
-            <div class="sft-hud__rate">
-              <span class="sft-hud__rate-label">Net income</span>
-              <span class="sft-hud__rate-val" data-stat="rate">$0/s</span>
-            </div>
-          </div>
-          <div class="sft-hud__metrics">
-            {
-              metrics.map((m) => (
-                <div class="sft-stat">
-                  <span class="sft-stat__label">{m.label}</span>
-                  <span class="sft-stat__value" data-stat={m.key}>
-                    {m.value}
-                  </span>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-
-        <!-- Incident / hotspot / opportunity banners (shown only when live) -->
-        <div class="sft-alerts">
-          <div class="sft-event" data-event role="alert" aria-live="assertive">
-            <span class="sft-event__pulse" aria-hidden="true"></span>
-            <div class="sft-event__body">
-              <span class="sft-event__name" data-event-name>Incident</span>
-              <span class="sft-event__desc" data-event-desc></span>
-            </div>
-            <span class="sft-event__timer" data-event-timer></span>
-            <button class="sft-event__respond" data-event-respond type="button">
-              Respond
-            </button>
-          </div>
-
-          <div
-            class="sft-event sft-event--hotspot"
-            data-hotspot
-            role="alert"
-            aria-live="assertive"
-          >
-            <span class="sft-event__pulse" aria-hidden="true"></span>
-            <div class="sft-event__body">
-              <span class="sft-event__name">Rack Hotspot</span>
-              <span class="sft-event__desc" data-hotspot-desc></span>
-            </div>
-            <span class="sft-event__timer" data-hotspot-timer></span>
-            <button class="sft-event__respond" data-hotspot-clear type="button">
-              Rebalance
-            </button>
-          </div>
-
-          <div
-            class="sft-event sft-event--script"
-            data-script
-            role="status"
-            aria-live="polite"
-          >
-            <span class="sft-event__pulse" aria-hidden="true"></span>
-            <div class="sft-event__body">
-              <span class="sft-event__name" data-script-name>Opportunity</span>
-              <span class="sft-event__desc" data-script-goal></span>
-              <div class="sft-script__track">
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-script-bar></span>
-                </div>
-                <span class="sft-script__hold" data-script-hold></span>
-              </div>
-              <span class="sft-script__reward" data-script-reward></span>
-            </div>
-            <span class="sft-event__timer" data-script-timer></span>
-          </div>
-        </div>
-
-        <!-- Console shell: a station rail beside the main operations view. -->
         <div class="sft-shell">
-          <!-- Station rail: pick one system; doubles as the utility dock. -->
-          <nav class="sft-nav" aria-label="Console">
-            <span class="sft-nav__brand">Ops Console</span>
-            <div
-              class="sft-nav__stations"
-              data-tabs
-              role="tablist"
-              aria-orientation="vertical"
-              aria-label="Game systems"
-            >
-              {
-                stations.map((s, i) => (
-                  <button
-                    class:list={["sft-station", { "is-active": i === 0 }]}
-                    data-tab={s.id}
-                    id={`sft-tab-${s.id}`}
-                    role="tab"
-                    type="button"
-                    aria-selected={i === 0 ? "true" : "false"}
-                    aria-controls={`sft-tabpanel-${s.id}`}
-                    tabindex={i === 0 ? "0" : "-1"}
-                  >
-                    <svg
-                      class="sft-station__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      set:html={s.icon}
-                    />
-                    <span class="sft-station__label">{s.label}</span>
-                  </button>
-                ))
-              }
+          <!-- ============================ RAIL ============================ -->
+          <!-- Persistent: identity, section nav, always-on vitals + the two
+               farm actions, and the data dock. Stays put while you work. -->
+          <aside class="sft-rail">
+            <div class="sft-rail__brand">
+              <span class="sft-rail__mark" aria-hidden="true">SF</span>
+              <span class="sft-rail__name">
+                Server-Farm<br />Tycoon
+              </span>
             </div>
 
-            <div class="sft-nav__util">
-              <button
-                class="sft-ctl sft-ctl--toggle"
-                data-sound
-                type="button"
-                aria-pressed="false"
+            <nav class="sft-rail__nav" aria-label="Console">
+              <div
+                class="sft-rail__sections"
+                data-tabs
+                role="tablist"
+                aria-orientation="vertical"
+                aria-label="Game systems"
               >
-                Sound: Off
-              </button>
-              <div class="sft-nav__data">
-                <button class="sft-ctl" data-save type="button">Save</button>
-                <button class="sft-ctl" data-export type="button">Export</button>
-                <button class="sft-ctl" data-import type="button">Import</button>
-                <button class="sft-ctl sft-ctl--danger" data-reset type="button">
-                  Reset
-                </button>
+                {
+                  sections.map((s, i) => (
+                    <button
+                      class:list={["sft-navitem", { "is-active": i === 0 }]}
+                      data-tab={s.id}
+                      id={`sft-tab-${s.id}`}
+                      role="tab"
+                      type="button"
+                      aria-selected={i === 0 ? "true" : "false"}
+                      aria-controls={`sft-tabpanel-${s.id}`}
+                      tabindex={i === 0 ? "0" : "-1"}
+                    >
+                      <svg
+                        class="sft-navitem__icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                        set:html={s.icon}
+                      />
+                      <span class="sft-navitem__label">{s.label}</span>
+                    </button>
+                  ))
+                }
               </div>
-            </div>
-          </nav>
+            </nav>
 
-          <div class="sft-main">
-            <!-- Ops band: the data hall (hero) beside a live activity log. -->
-            <div class="sft-ops">
-              <section class="sft-panel sft-hall" aria-label="Data hall">
-            <header class="sft-panel__head">
-              <h2 class="sft-panel__title">Data Hall</h2>
-              <span class="sft-panel__note" data-rack-note>0 servers</span>
-            </header>
-
-            <div class="sft-hall__scene">
-              <div class="sft-hall__tray" aria-hidden="true"></div>
-              <div class="sft-hall__floor" aria-hidden="true"></div>
-              <div class="sft-hall__row" data-hall aria-hidden="true"></div>
-              <p class="sft-hall__empty" data-hall-empty>
-                The floor is dark. Open the <strong>Build</strong> station and
-                add a Mini Rack to bring the first cabinet online.
-              </p>
-            </div>
-
-            <div class="sft-hall__telemetry">
-              <div class="sft-gauge">
-                <div class="sft-gauge__top">
-                  <span class="sft-gauge__name">Heat</span>
-                  <span class="sft-gauge__label" data-label-heat>Nominal</span>
+            <!-- Always-on vitals: the farm's physical health + its two live
+                 controls, readable from every section. -->
+            <div class="sft-vitals" aria-label="Farm vitals">
+              <div class="sft-vital">
+                <div class="sft-vital__top">
+                  <span class="sft-vital__name">Heat</span>
+                  <span class="sft-vital__label" data-label-heat>Nominal</span>
                 </div>
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-bar-heat></span>
-                </div>
+                <div class="sft-bar"><span class="sft-bar__fill" data-bar-heat></span></div>
               </div>
-
-              <div class="sft-gauge">
-                <div class="sft-gauge__top">
-                  <span class="sft-gauge__name">Power</span>
-                  <span class="sft-gauge__label" data-label-power>0 kW</span>
+              <div class="sft-vital">
+                <div class="sft-vital__top">
+                  <span class="sft-vital__name">Power</span>
+                  <span class="sft-vital__label" data-label-power>0 kW</span>
                 </div>
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-bar-power></span>
-                </div>
+                <div class="sft-bar"><span class="sft-bar__fill" data-bar-power></span></div>
               </div>
-
-              <div class="sft-gauge">
-                <div class="sft-gauge__top">
-                  <span class="sft-gauge__name">Network</span>
-                  <span class="sft-gauge__label" data-label-net>0 Gb/s</span>
+              <div class="sft-vital">
+                <div class="sft-vital__top">
+                  <span class="sft-vital__name">Network</span>
+                  <span class="sft-vital__label" data-label-net>0 Gb/s</span>
                 </div>
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-bar-net></span>
-                </div>
+                <div class="sft-bar"><span class="sft-bar__fill" data-bar-net></span></div>
               </div>
-
-              <div class="sft-gauge">
-                <div class="sft-gauge__top">
-                  <span class="sft-gauge__name">Wear</span>
-                  <span class="sft-gauge__label" data-label-wear>Nominal</span>
+              <div class="sft-vital">
+                <div class="sft-vital__top">
+                  <span class="sft-vital__name">Wear</span>
+                  <span class="sft-vital__label" data-label-wear>Nominal</span>
                 </div>
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-bar-wear></span>
-                </div>
+                <div class="sft-bar"><span class="sft-bar__fill" data-bar-wear></span></div>
               </div>
 
-              <div class="sft-hall__actions">
+              <div class="sft-vitals__actions">
                 <button class="sft-overclock" data-overclock type="button">
                   Overclock
                 </button>
@@ -295,214 +164,338 @@ const stations: { id: string; label: string; icon: string }[] = [
                 </button>
               </div>
             </div>
-          </section>
 
-              <aside class="sft-panel sft-activity" aria-label="Activity">
-                <header class="sft-panel__head">
-                  <h2 class="sft-panel__title">Activity</h2>
-                  <span class="sft-panel__note">Live</span>
-                </header>
-                <ul class="sft-log" data-log aria-live="polite"></ul>
-              </aside>
-            </div>
-
-            <!-- Active station -->
-            <div class="sft-workspace">
-          <!-- Build -->
-          <section
-            class="sft-tabpanel is-active"
-            data-tabpanel="build"
-            id="sft-tabpanel-build"
-            role="tabpanel"
-            aria-labelledby="sft-tab-build"
-            tabindex="0"
-          >
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Equipment</h2>
-                <div
-                  class="sft-buymult"
-                  data-buymult
-                  role="radiogroup"
-                  aria-label="Buy quantity"
-                >
-                </div>
-              </header>
-              {
-                buyLists.map((b) => (
-                  <>
-                    <p class="sft-subhead">{b.label}</p>
-                    <div class="sft-list" data-list={b.cat} />
-                  </>
-                ))
-              }
-            </section>
-
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Upgrades</h2>
-                <span class="sft-panel__note">One-time</span>
-              </header>
-              <div class="sft-upgrades" data-upgrades></div>
-            </section>
-          </section>
-
-          <!-- Operate -->
-          <section
-            class="sft-tabpanel"
-            data-tabpanel="operate"
-            id="sft-tabpanel-operate"
-            role="tabpanel"
-            aria-labelledby="sft-tab-operate"
-            tabindex="0"
-            hidden
-          >
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Workloads</h2>
-                <span class="sft-panel__note">Capacity split</span>
-              </header>
-              <div class="sft-workloads" data-workloads></div>
-            </section>
-
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Power Strategy</h2>
-                <span class="sft-panel__note" data-power-note>Spot market</span>
-              </header>
-              <div
-                class="sft-pwr"
-                data-power-contracts
-                role="radiogroup"
-                aria-label="Power contract"
-              >
-              </div>
-              <p class="sft-pwr__hint" data-power-hint></p>
-            </section>
-
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Research</h2>
-                <span class="sft-panel__note" data-research-note>0 R&amp;D</span>
-              </header>
-              <p class="sft-research__lede">
-                R&amp;D points accrue from live compute. Spent here for the run;
-                a rebuild clears the lab.
-              </p>
-              <div class="sft-research" data-research-list></div>
-            </section>
-          </section>
-
-          <!-- Contracts -->
-          <section
-            class="sft-tabpanel"
-            data-tabpanel="contracts"
-            id="sft-tabpanel-contracts"
-            role="tabpanel"
-            aria-labelledby="sft-tab-contracts"
-            tabindex="0"
-            hidden
-          >
-            <section class="sft-panel sft-contract">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Contracts</h2>
-                <span class="sft-panel__note" data-contract-note>
-                  Demand market
-                </span>
-              </header>
-              <div class="sft-contract__body" data-contract-body></div>
-            </section>
-          </section>
-
-          <!-- Progress -->
-          <section
-            class="sft-tabpanel"
-            data-tabpanel="progress"
-            id="sft-tabpanel-progress"
-            role="tabpanel"
-            aria-labelledby="sft-tab-progress"
-            tabindex="0"
-            hidden
-          >
-            <section class="sft-panel sft-goals">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Objectives</h2>
-                <span class="sft-panel__note" data-goals-note>0 / 0</span>
-              </header>
-
-              <div class="sft-standing">
-                <div class="sft-standing__top">
-                  <span class="sft-standing__tier" data-standing-tier>
-                    Startup
-                  </span>
-                  <span class="sft-standing__next" data-standing-next></span>
-                </div>
-                <div class="sft-bar">
-                  <span class="sft-bar__fill" data-standing-bar></span>
-                </div>
-                <p class="sft-standing__perks" data-standing-perks></p>
-              </div>
-
-              <div class="sft-goals__list" data-goals-list></div>
-
-              <button class="sft-endless" data-endless type="button" hidden>
-                Engage Endless
-              </button>
-            </section>
-
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Statistics</h2>
-                <span class="sft-panel__note">Last 60s</span>
-              </header>
-              <div class="sft-sparks" data-spark-list></div>
-            </section>
-
-            <section class="sft-panel sft-ach">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Milestones</h2>
-                <span class="sft-panel__note" data-ach-note>0 / 0</span>
-              </header>
-              <div class="sft-ach__grid" data-achievements></div>
-            </section>
-          </section>
-
-          <!-- Rebuild (prestige) -->
-          <section
-            class="sft-tabpanel"
-            data-tabpanel="rebuild"
-            id="sft-tabpanel-rebuild"
-            role="tabpanel"
-            aria-labelledby="sft-tab-rebuild"
-            tabindex="0"
-            hidden
-          >
-            <section class="sft-panel">
-              <header class="sft-panel__head">
-                <h2 class="sft-panel__title">Rebuild</h2>
-                <span class="sft-panel__note">
-                  <span data-stat="credits">0</span> ⬡ prestige
-                </span>
-              </header>
-              <p class="sft-prestige__preview" data-prestige-preview>
-                Earn enough this run to unlock a rebuild.
-              </p>
+            <!-- Data dock. -->
+            <div class="sft-rail__dock">
               <button
-                class="sft-prestige__go"
-                data-prestige-go
+                class="sft-ctl sft-ctl--toggle"
+                data-sound
                 type="button"
-                disabled
+                aria-pressed="false"
               >
-                Decommission &amp; Rebuild
+                Sound: Off
               </button>
-              <div class="sft-prow-list" data-prestige-list></div>
-            </section>
-            </section>
+              <div class="sft-rail__data">
+                <button class="sft-ctl" data-save type="button">Save</button>
+                <button class="sft-ctl" data-export type="button">Export</button>
+                <button class="sft-ctl" data-import type="button">Import</button>
+                <button class="sft-ctl sft-ctl--danger" data-reset type="button">
+                  Reset
+                </button>
+              </div>
             </div>
+          </aside>
+
+          <!-- ========================== CONTENT ========================== -->
+          <div class="sft-content">
+            <!-- Top bar: the economy at a glance. -->
+            <header class="sft-topbar" role="status" aria-label="Farm economy">
+              <div class="sft-topbar__lead">
+                <div class="sft-money">
+                  <span class="sft-money__label">Cash on hand</span>
+                  <span class="sft-money__val" data-stat="money">$0</span>
+                </div>
+                <div class="sft-rate">
+                  <span class="sft-rate__label">Net income</span>
+                  <span class="sft-rate__val" data-stat="rate">$0/s</span>
+                </div>
+              </div>
+              <div class="sft-topbar__reads">
+                <div class="sft-read">
+                  <span class="sft-read__label">Compute</span>
+                  <span class="sft-read__val" data-stat="compute">0 FLOP/s</span>
+                </div>
+                <div class="sft-read">
+                  <span class="sft-read__label">Reputation</span>
+                  <span class="sft-read__val" data-stat="reputation">0 · Startup</span>
+                </div>
+                <div class="sft-read">
+                  <span class="sft-read__label">Power bill</span>
+                  <span class="sft-read__val" data-stat="bill">$0/s</span>
+                </div>
+                <div class="sft-read">
+                  <span class="sft-read__label">Floor</span>
+                  <span class="sft-read__val" data-stat="space">0 / 24 RU</span>
+                </div>
+              </div>
+            </header>
+
+            <!-- Incident / hotspot / opportunity banners (shown only when live). -->
+            <div class="sft-alerts">
+              <div class="sft-event" data-event role="alert" aria-live="assertive">
+                <span class="sft-event__pulse" aria-hidden="true"></span>
+                <div class="sft-event__body">
+                  <span class="sft-event__name" data-event-name>Incident</span>
+                  <span class="sft-event__desc" data-event-desc></span>
+                </div>
+                <span class="sft-event__timer" data-event-timer></span>
+                <button class="sft-event__respond" data-event-respond type="button">
+                  Respond
+                </button>
+              </div>
+
+              <div
+                class="sft-event sft-event--hotspot"
+                data-hotspot
+                role="alert"
+                aria-live="assertive"
+              >
+                <span class="sft-event__pulse" aria-hidden="true"></span>
+                <div class="sft-event__body">
+                  <span class="sft-event__name">Rack Hotspot</span>
+                  <span class="sft-event__desc" data-hotspot-desc></span>
+                </div>
+                <span class="sft-event__timer" data-hotspot-timer></span>
+                <button class="sft-event__respond" data-hotspot-clear type="button">
+                  Rebalance
+                </button>
+              </div>
+
+              <div
+                class="sft-event sft-event--script"
+                data-script
+                role="status"
+                aria-live="polite"
+              >
+                <span class="sft-event__pulse" aria-hidden="true"></span>
+                <div class="sft-event__body">
+                  <span class="sft-event__name" data-script-name>Opportunity</span>
+                  <span class="sft-event__desc" data-script-goal></span>
+                  <div class="sft-script__track">
+                    <div class="sft-bar">
+                      <span class="sft-bar__fill" data-script-bar></span>
+                    </div>
+                    <span class="sft-script__hold" data-script-hold></span>
+                  </div>
+                  <span class="sft-script__reward" data-script-reward></span>
+                </div>
+                <span class="sft-event__timer" data-script-timer></span>
+              </div>
+            </div>
+
+            <!-- Sections: one is shown at a time. -->
+            <div class="sft-sections">
+              <!-- ===================== FLOOR (home) ===================== -->
+              <section
+                class="sft-section sft-section--floor is-active"
+                data-tabpanel="floor"
+                id="sft-tabpanel-floor"
+                role="tabpanel"
+                aria-labelledby="sft-tab-floor"
+                tabindex="0"
+              >
+                <section class="sft-panel sft-hall" aria-label="Data hall">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Data Hall</h2>
+                    <span class="sft-panel__note" data-rack-note>0 servers</span>
+                  </header>
+                  <div class="sft-hall__scene">
+                    <div class="sft-hall__tray" aria-hidden="true"></div>
+                    <div class="sft-hall__floor" aria-hidden="true"></div>
+                    <div class="sft-hall__row" data-hall aria-hidden="true"></div>
+                    <p class="sft-hall__empty" data-hall-empty>
+                      The floor is dark. Open the <strong>Build</strong> section
+                      and add a Mini Rack to bring the first cabinet online.
+                    </p>
+                  </div>
+                </section>
+
+                <aside class="sft-panel sft-activity" aria-label="Activity">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Activity</h2>
+                    <span class="sft-panel__note">Live</span>
+                  </header>
+                  <ul class="sft-log" data-log aria-live="polite"></ul>
+                </aside>
+              </section>
+
+              <!-- ======================== BUILD ======================== -->
+              <section
+                class="sft-section"
+                data-tabpanel="build"
+                id="sft-tabpanel-build"
+                role="tabpanel"
+                aria-labelledby="sft-tab-build"
+                tabindex="0"
+                hidden
+              >
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Equipment</h2>
+                    <div
+                      class="sft-buymult"
+                      data-buymult
+                      role="radiogroup"
+                      aria-label="Buy quantity"
+                    >
+                    </div>
+                  </header>
+                  <div class="sft-equip">
+                    {
+                      buyLists.map((b) => (
+                        <div class="sft-equip__group">
+                          <p class="sft-subhead">{b.label}</p>
+                          <div class="sft-list" data-list={b.cat} />
+                        </div>
+                      ))
+                    }
+                  </div>
+                </section>
+
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Upgrades</h2>
+                    <span class="sft-panel__note">One-time</span>
+                  </header>
+                  <div class="sft-upgrades" data-upgrades></div>
+                </section>
+              </section>
+
+              <!-- ======================= OPERATE ======================= -->
+              <section
+                class="sft-section"
+                data-tabpanel="operate"
+                id="sft-tabpanel-operate"
+                role="tabpanel"
+                aria-labelledby="sft-tab-operate"
+                tabindex="0"
+                hidden
+              >
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Workloads</h2>
+                    <span class="sft-panel__note">Capacity split</span>
+                  </header>
+                  <div class="sft-workloads" data-workloads></div>
+                </section>
+
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Power Strategy</h2>
+                    <span class="sft-panel__note" data-power-note>Spot market</span>
+                  </header>
+                  <div
+                    class="sft-pwr"
+                    data-power-contracts
+                    role="radiogroup"
+                    aria-label="Power contract"
+                  >
+                  </div>
+                  <p class="sft-pwr__hint" data-power-hint></p>
+                </section>
+
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Research</h2>
+                    <span class="sft-panel__note" data-research-note>0 R&amp;D</span>
+                  </header>
+                  <p class="sft-research__lede">
+                    R&amp;D points accrue from live compute. Spent here for the
+                    run; a rebuild clears the lab.
+                  </p>
+                  <div class="sft-research" data-research-list></div>
+                </section>
+              </section>
+
+              <!-- ====================== CONTRACTS ====================== -->
+              <section
+                class="sft-section"
+                data-tabpanel="contracts"
+                id="sft-tabpanel-contracts"
+                role="tabpanel"
+                aria-labelledby="sft-tab-contracts"
+                tabindex="0"
+                hidden
+              >
+                <section class="sft-panel sft-contract">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Contracts</h2>
+                    <span class="sft-panel__note" data-contract-note>
+                      Demand market
+                    </span>
+                  </header>
+                  <div class="sft-contract__body" data-contract-body></div>
+                </section>
+              </section>
+
+              <!-- ======================= PROGRESS ====================== -->
+              <section
+                class="sft-section"
+                data-tabpanel="progress"
+                id="sft-tabpanel-progress"
+                role="tabpanel"
+                aria-labelledby="sft-tab-progress"
+                tabindex="0"
+                hidden
+              >
+                <section class="sft-panel sft-goals">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Standing &amp; Objectives</h2>
+                    <span class="sft-panel__note" data-goals-note>0 / 0</span>
+                  </header>
+
+                  <div class="sft-standing">
+                    <div class="sft-standing__top">
+                      <span class="sft-standing__tier" data-standing-tier>
+                        Startup
+                      </span>
+                      <span class="sft-standing__next" data-standing-next></span>
+                    </div>
+                    <div class="sft-bar">
+                      <span class="sft-bar__fill" data-standing-bar></span>
+                    </div>
+                    <p class="sft-standing__perks" data-standing-perks></p>
+                  </div>
+
+                  <div class="sft-goals__list" data-goals-list></div>
+
+                  <button class="sft-endless" data-endless type="button" hidden>
+                    Engage Endless
+                  </button>
+                </section>
+
+                <section class="sft-panel">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Statistics</h2>
+                    <span class="sft-panel__note">Last 60s</span>
+                  </header>
+                  <div class="sft-sparks" data-spark-list></div>
+                </section>
+
+                <section class="sft-panel sft-rebuild">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Rebuild</h2>
+                    <span class="sft-panel__note">
+                      <span data-stat="credits">0</span> ⬡ prestige
+                    </span>
+                  </header>
+                  <p class="sft-prestige__preview" data-prestige-preview>
+                    Earn enough this run to unlock a rebuild.
+                  </p>
+                  <button
+                    class="sft-prestige__go"
+                    data-prestige-go
+                    type="button"
+                    disabled
+                  >
+                    Decommission &amp; Rebuild
+                  </button>
+                  <div class="sft-prow-list" data-prestige-list></div>
+                </section>
+
+                <section class="sft-panel sft-ach">
+                  <header class="sft-panel__head">
+                    <h2 class="sft-panel__title">Milestones</h2>
+                    <span class="sft-panel__note" data-ach-note>0 / 0</span>
+                  </header>
+                  <div class="sft-ach__grid" data-achievements></div>
+                </section>
+              </section>
+            </div>
+
+            <div class="sft-toasts" data-toasts aria-live="polite"></div>
           </div>
         </div>
-
-        <div class="sft-toasts" data-toasts aria-live="polite"></div>
       </div>
     </div>
   </section>
@@ -519,7 +512,7 @@ const stations: { id: string; label: string; icon: string }[] = [
 
   /* Accessible tablist: click + arrow-key navigation, roving tabindex.
      Panels are kept in the DOM (the game patches them every frame) and only
-     toggled visible, so switching tabs is instant and loses no state. */
+     toggled visible, so switching sections is instant and loses no state. */
   function initTabs(root: HTMLElement) {
     const tabs = Array.from(
       root.querySelectorAll<HTMLButtonElement>("[data-tab]"),
