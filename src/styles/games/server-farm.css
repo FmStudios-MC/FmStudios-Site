@@ -25,19 +25,69 @@
 }
 
 /* ---- HUD ------------------------------------------------------------- */
+/* A sticky telemetry bar with a clear hierarchy: cash + net income lead at
+   display size; everything else rides alongside as compact mono chips. */
 .sft-hud {
   position: sticky;
   top: var(--sft-nav-h);
   z-index: calc(var(--z-sticky) - 1);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--space-xs);
-  padding: var(--space-s);
-  margin-bottom: var(--space-l);
-  background: oklch(0.13 0.009 75 / 0.82);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s) var(--space-l);
+  padding: var(--space-s) var(--space-m);
+  margin-bottom: var(--space-m);
+  background: oklch(0.13 0.009 75 / 0.86);
   backdrop-filter: blur(14px) saturate(1.3);
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
+}
+
+/* Primary pair: cash + net income. */
+.sft-hud__lead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-l);
+  min-width: 0;
+}
+.sft-hud__cash,
+.sft-hud__rate {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.sft-hud__cash-label,
+.sft-hud__rate-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-hud__cash-val {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.sft-hud__rate-val {
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Secondary chips. */
+.sft-hud__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s) var(--space-l);
 }
 
 .sft-stat {
@@ -46,52 +96,288 @@
   gap: 2px;
   min-width: 0;
 }
-
 .sft-stat__label {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-
 .sft-stat__value {
   font-family: var(--font-mono);
-  font-size: var(--step-1);
+  font-size: var(--step-0);
   font-weight: 500;
-  line-height: 1.1;
+  line-height: 1.15;
   color: var(--ink);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
-
-.sft-stat--key .sft-stat__value {
-  color: transparent;
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
 .sft-stat.is-warn .sft-stat__value {
   color: var(--sft-hot);
 }
 
+@media (max-width: 640px) {
+  .sft-hud {
+    gap: var(--space-s) var(--space-m);
+  }
+  .sft-hud__metrics {
+    gap: var(--space-xs) var(--space-m);
+  }
+}
+
 /* ---- Layout --------------------------------------------------------- */
-.sft-grid {
+/* The page reads as: a full-width HUD and alert band, then a console shell —
+   a station rail (system switcher + utility dock) beside the main view. The
+   main view leads with an always-on ops band (data hall hero + live log) and
+   shows one station's controls beneath it. */
+
+/* Alerts: incident / hotspot / opportunity banners stack here when live. */
+.sft-alerts {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+.sft-alerts:empty {
+  display: none;
+}
+
+/* ---- Console shell -------------------------------------------------- */
+/* A station rail beside the main view. The rail is quiet chrome; the main
+   column carries the hero and the active station. */
+.sft-shell {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: var(--space-l);
+  gap: var(--space-m);
   align-items: start;
 }
-
-@media (min-width: 920px) {
-  .sft-grid {
-    grid-template-columns: 1fr minmax(300px, 360px);
+@media (min-width: 980px) {
+  .sft-shell {
+    grid-template-columns: minmax(176px, 208px) 1fr;
+    gap: var(--space-l);
   }
-  .sft-dash {
+}
+
+/* Station rail: vertical list of systems + a utility dock at the foot. */
+.sft-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  min-width: 0;
+}
+@media (min-width: 980px) {
+  .sft-nav {
     position: sticky;
-    /* Clear both the site nav and the docked HUD strip. */
-    top: calc(var(--sft-nav-h) + 96px);
+    top: calc(var(--sft-nav-h) + 112px);
+    max-height: calc(100vh - var(--sft-nav-h) - 132px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-right: var(--space-2xs);
+  }
+  .sft-nav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.sft-nav__brand {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0 var(--space-2xs);
+}
+
+.sft-nav__stations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+/* A station button reads as a console entry: status LED · icon · label. */
+.sft-station {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-s);
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background-color var(--dur-fast) var(--ease-out-quart),
+    border-color var(--dur-fast) var(--ease-out-quart);
+}
+/* Leading status LED — dark until the station is selected. */
+.sft-station::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition:
+    background-color var(--dur-fast) var(--ease-out-quart),
+    box-shadow var(--dur-fast) var(--ease-out-quart);
+}
+.sft-station__icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+.sft-station__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sft-station:hover {
+  color: var(--gold);
+  background: var(--surface);
+}
+.sft-station.is-active {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  color: var(--gold-bright);
+}
+.sft-station.is-active::before {
+  background: var(--gold);
+  box-shadow: 0 0 7px var(--gold-glow);
+}
+.sft-station.is-active .sft-station__icon {
+  opacity: 1;
+  color: var(--gold);
+}
+.sft-station:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Utility dock: sound + save/data, pinned to the foot of the rail. */
+.sft-nav__util {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-top: auto;
+  padding-top: var(--space-s);
+  border-top: 1px solid var(--line);
+}
+.sft-nav__util .sft-ctl--toggle {
+  width: 100%;
+  margin-bottom: 0;
+}
+.sft-nav__data {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3xs);
+}
+
+/* ---- Main view ------------------------------------------------------ */
+.sft-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+
+/* Ops band: data hall hero beside the live activity log. */
+.sft-ops {
+  display: grid;
+  gap: var(--space-m);
+  align-items: start;
+}
+.sft-ops .sft-panel {
+  margin-bottom: 0;
+}
+@media (min-width: 1140px) {
+  .sft-ops {
+    grid-template-columns: 1fr minmax(232px, 288px);
+  }
+}
+
+.sft-activity {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 1140px) {
+  .sft-activity .sft-log {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}
+
+/* ---- Active station ------------------------------------------------- */
+.sft-workspace {
+  position: relative;
+  z-index: 1;
+}
+.sft-workspace .sft-panel:last-child {
+  margin-bottom: 0;
+}
+.sft-tabpanel[hidden] {
+  display: none;
+}
+.sft-tabpanel.is-active {
+  animation: sft-tab-in var(--dur-mid) var(--ease-out-quart);
+}
+@keyframes sft-tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Compact layout: the rail becomes a horizontal bar above the main view. */
+@media (max-width: 979px) {
+  .sft-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-s);
+  }
+  .sft-nav__brand {
+    display: none;
+  }
+  .sft-nav__stations {
+    flex-direction: row;
+    flex: 1 1 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: var(--space-3xs);
+  }
+  .sft-nav__stations::-webkit-scrollbar {
+    display: none;
+  }
+  .sft-station {
+    flex: 0 0 auto;
+  }
+  .sft-nav__util {
+    flex: 1 1 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0;
+  }
+  .sft-nav__util .sft-ctl--toggle {
+    width: auto;
+  }
+  .sft-nav__data {
+    display: flex;
+    flex-wrap: wrap;
   }
 }
 
@@ -107,8 +393,9 @@
   overflow: hidden;
 }
 
-/* CRT scanline sheen over the console surfaces (subtle, static). */
-.sft-panel::after,
+/* CRT scanline sheen — reserved for the hero surfaces (hall + HUD) so the
+   working panels stay calm and legible. */
+.sft-hall::after,
 .sft-hud::after {
   content: "";
   position: absolute;
@@ -178,25 +465,20 @@
   gap: var(--space-s);
   width: 100%;
   text-align: left;
-  padding: var(--space-xs) var(--space-2xs);
+  padding: var(--space-xs) var(--space-s);
   border: 0;
   border-bottom: 1px solid var(--line);
-  border-left: 2px solid transparent;
+  border-radius: var(--radius-s);
   background: none;
   color: inherit;
-  transition:
-    border-color var(--dur-fast) var(--ease-out-quart),
-    background-color var(--dur-fast) var(--ease-out-quart),
-    padding-left var(--dur-fast) var(--ease-out-quart);
+  transition: background-color var(--dur-fast) var(--ease-out-quart);
 }
 
 .sft-row.is-afford {
   cursor: pointer;
 }
 .sft-row.is-afford:hover {
-  border-left-color: var(--gold);
   background: var(--surface-2);
-  padding-left: var(--space-xs);
 }
 
 .sft-row:disabled {
@@ -1225,34 +1507,40 @@
 /* ---- Telemetry strip under the hall -------------------------------- */
 .sft-hall__telemetry {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: repeat(4, 1fr);
   align-items: end;
-  gap: var(--space-m);
+  gap: var(--space-s) var(--space-m);
   margin-top: var(--space-m);
 }
 .sft-hall__telemetry .sft-gauge {
   margin-top: 0;
 }
-.sft-hall__telemetry .sft-overclock {
+/* Overclock + Service share one full-width action row beneath the gauges. */
+.sft-hall__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-s);
+  margin-top: var(--space-2xs);
+}
+.sft-hall__actions > .sft-overclock,
+.sft-hall__actions > .sft-service {
+  flex: 1 1 0;
   width: auto;
   margin-top: 0;
-  padding: var(--space-2xs) var(--space-m);
-  align-self: end;
 }
 
 @media (max-width: 820px) {
   .sft-hall__telemetry {
     grid-template-columns: 1fr 1fr;
   }
-  .sft-hall__telemetry .sft-overclock {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 460px) {
   .sft-hall__telemetry {
     grid-template-columns: 1fr;
+  }
+  .sft-hall__actions {
+    flex-direction: column;
   }
 }
 
@@ -1530,7 +1818,6 @@
   margin-bottom: var(--space-l);
   padding: var(--space-xs) var(--space-s);
   border: 1px solid var(--accent, var(--sft-hot));
-  border-left-width: 3px;
   border-radius: var(--radius-m);
   background: oklch(0.16 0.012 75 / 0.9);
   backdrop-filter: blur(8px);
@@ -1863,12 +2150,11 @@
   gap: 2px;
   padding: var(--space-xs) var(--space-s);
   border: 1px solid var(--line);
-  border-left: 2px solid var(--line-strong);
   border-radius: var(--radius-s);
   background: var(--surface-2);
 }
 .sft-ach__chip.is-unlocked {
-  border-left-color: var(--gold);
+  border-color: var(--gold);
   background: oklch(0.24 0.02 80 / 0.6);
 }
 .sft-ach__chip.is-locked {
@@ -2118,7 +2404,6 @@
   text-align: left;
   padding: var(--space-xs) var(--space-s);
   border: 1px solid var(--line-strong);
-  border-left: 2px solid transparent;
   border-radius: var(--radius-s);
   background: none;
   color: inherit;
@@ -2132,7 +2417,6 @@
 }
 .sft-pwr__opt.is-active {
   border-color: var(--gold);
-  border-left-color: var(--gold);
   background: oklch(0.24 0.02 80 / 0.6);
 }
 .sft-pwr__name {
