@@ -851,15 +851,30 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   });
 
   // --- Toasts -----------------------------------------------------------
+  // Capped stack: a burst of events (offline catch-up, a milestone cascade,
+  // several contracts landing at once) must never pile past a few cards, or the
+  // column buries the screen — fatal on mobile, where it would cover the nav.
+  // The activity log keeps the full history, so dropping the oldest is safe.
+  // Cards are click-to-dismiss for anyone who wants the corner cleared sooner.
   const toastWrap = $("[data-toasts]");
+  const MAX_TOASTS = 4;
+  function dismissToast(t: HTMLElement) {
+    if (t.dataset.leaving) return;
+    t.dataset.leaving = "1";
+    t.classList.remove("is-in");
+    setTimeout(() => t.remove(), 400);
+  }
   function toast(message: string, ms = 5000) {
     const t = el("div", "sft-toast", message);
+    t.addEventListener("click", () => dismissToast(t));
     toastWrap.appendChild(t);
+    // Cut the oldest cards instantly once over the cap (they're being buried
+    // anyway), so the stack never grows tall enough to swamp the layout.
+    while (toastWrap.children.length > MAX_TOASTS) {
+      toastWrap.firstElementChild?.remove();
+    }
     requestAnimationFrame(() => t.classList.add("is-in"));
-    setTimeout(() => {
-      t.classList.remove("is-in");
-      setTimeout(() => t.remove(), 400);
-    }, ms);
+    setTimeout(() => dismissToast(t), ms);
   }
 
   // --- Render -----------------------------------------------------------
@@ -881,11 +896,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     setText(stats.reputation, `${fmt(s.reputation)} · ${d.repTier.name}`);
     setText(stats.research, fmt(s.research));
     setText(stats.credits, fmt(s.credits));
-    setText(
-      stats.power,
-      `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW`,
-    );
-    setFlag(stats.power?.parentElement ?? root, "is-warn", d.powerThrottle < 1);
+    // Power draw/cap lives in the rail vitals (below), not the top bar.
     setText(stats.space, `${fmt(d.spaceUsed)} / ${fmt(d.spaceCap)} RU`);
     // Warn once the floor is full enough that the cheapest cabinet won't fit.
     setFlag(

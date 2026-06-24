@@ -2614,11 +2614,15 @@
   font-size: 0.85rem;
   color: var(--ink);
   box-shadow: 0 12px 40px -16px var(--gold-glow);
+  cursor: pointer;
   opacity: 0;
   transform: translateY(0.75rem);
   transition:
     opacity var(--dur-mid) var(--ease-out-quart),
     transform var(--dur-mid) var(--ease-out-expo);
+}
+.sft-toast:hover {
+  border-color: var(--gold-bright);
 }
 .sft-toast.is-in {
   opacity: 1;
