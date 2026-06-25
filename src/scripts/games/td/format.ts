@@ -20,3 +20,8 @@ export function secs(n: number): string {
 export function dec(n: number, places = 1): string {
   return n.toFixed(places);
 }
+
+/** A 0..1 ratio as a whole percent: 0.834 -> "83%". */
+export function pct(n: number): string {
+  return Math.round(n * 100) + "%";
+}

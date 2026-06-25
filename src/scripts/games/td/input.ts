@@ -4,16 +4,25 @@
 
 import { TUNING } from "./config";
 
+export type Command =
+  | "build"
+  | "start"
+  | "speed"
+  | "pause"
+  | "deselect"
+  | "overclock"
+  | "surge"
+  | "mute"
+  | "help";
+
 export interface InputHandlers {
-  /** A click/tap landed on grid cell (c, r) — place or select. */
-  tapCell(c: number, r: number): void;
+  /** A click/tap landed on grid cell (c, r). `touch` is true for non-mouse
+      pointers, which commit via a tap-preview-then-confirm flow. */
+  tapCell(c: number, r: number, touch: boolean): void;
   /** The pointer is hovering grid cell (c, r), or null when it leaves. */
   hoverCell(c: number, r: number | null): void;
   /** Named keyboard command. `build` carries the 0-based tower index. */
-  command(
-    name: "build" | "start" | "speed" | "pause" | "deselect",
-    index?: number,
-  ): void;
+  command(name: Command, index?: number): void;
 }
 
 export function attachInput(canvas: HTMLCanvasElement, h: InputHandlers) {
@@ -30,11 +39,11 @@ export function attachInput(canvas: HTMLCanvasElement, h: InputHandlers) {
     const cell = cellAt(e.clientX, e.clientY);
     if (cell) {
       e.preventDefault();
-      h.tapCell(cell.c, cell.r);
+      h.tapCell(cell.c, cell.r, e.pointerType !== "mouse");
     }
   });
 
-  // Hover ghost — mouse only; on touch the tap itself is the commit.
+  // Hover ghost — mouse only; on touch the tap itself drives the preview flow.
   canvas.addEventListener("pointermove", (e) => {
     if (e.pointerType !== "mouse") return;
     const cell = cellAt(e.clientX, e.clientY);
@@ -51,6 +60,7 @@ export function attachInput(canvas: HTMLCanvasElement, h: InputHandlers) {
       case "2":
       case "3":
       case "4":
+      case "5":
         h.command("build", Number(e.key) - 1);
         break;
       case " ":
@@ -64,6 +74,23 @@ export function attachInput(canvas: HTMLCanvasElement, h: InputHandlers) {
       case "p":
       case "P":
         h.command("pause");
+        break;
+      case "q":
+      case "Q":
+        h.command("overclock");
+        break;
+      case "e":
+      case "E":
+        h.command("surge");
+        break;
+      case "m":
+      case "M":
+        h.command("mute");
+        break;
+      case "?":
+      case "h":
+      case "H":
+        h.command("help");
         break;
       case "Escape":
         h.command("deselect");

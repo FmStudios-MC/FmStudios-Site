@@ -1,11 +1,12 @@
 /* The only canvas module: draws a GameState to a 2D context each frame. The
-   static board (grid, path, core housing, spawn gate) is rendered once to an
-   offscreen canvas and blitted; only the live entities are drawn per frame.
+   static board (grid, path, core housing, spawn gate) is rendered once per map
+   to an offscreen canvas and blitted; only the live entities are drawn per
+   frame. Geometry comes off state.map, so a new map re-bakes the static layer.
    Grid coords: integer (c, r) = a cell centre, so pixel(gx) = (gx + 0.5) * cell. */
 
-import { CORE, ENEMIES, TOWER_BY_ID, TUNING, WAYPOINTS, isOpenCell } from "./config";
+import { ENEMIES, TOWER_BY_ID, TUNING, TUNING as T, inBounds, isOpenCell } from "./config";
 import { towerStats } from "./engine";
-import type { Enemy, GameState, Tower, TowerId } from "./types";
+import type { Enemy, GameState, MapRuntime, Tower, TowerId } from "./types";
 
 const C = {
   bg: "oklch(0.15 0.01 75)",
@@ -24,6 +25,7 @@ const C = {
   steel: "oklch(0.6 0.03 250)",
   steelLite: "oklch(0.74 0.03 250)",
   steelDark: "oklch(0.46 0.03 255)",
+  mend: "oklch(0.64 0.05 195)", // healer's cool teal — still off the gold
 };
 
 const DPR = () => Math.min(2, window.devicePixelRatio || 1);
@@ -40,6 +42,8 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   let cell = 1;
   let W = 1;
   let H = 1;
+  let staticMapId = "";
+  let staticCell = 0;
 
   const px = (gx: number) => (gx + 0.5) * cell;
   const py = (gy: number) => (gy + 0.5) * cell;
@@ -68,18 +72,18 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawStatic();
+    staticMapId = ""; // force a static rebuild at the new size
   }
 
-  // --- Static board ------------------------------------------------------
-  function tracePath(c: CanvasRenderingContext2D) {
+  // --- Static board (per map) -------------------------------------------
+  function tracePath(c: CanvasRenderingContext2D, map: MapRuntime) {
+    const wp = map.waypoints;
     c.beginPath();
-    c.moveTo(px(WAYPOINTS[0][0]), py(WAYPOINTS[0][1]));
-    for (let i = 1; i < WAYPOINTS.length; i++)
-      c.lineTo(px(WAYPOINTS[i][0]), py(WAYPOINTS[i][1]));
+    c.moveTo(px(wp[0][0]), py(wp[0][1]));
+    for (let i = 1; i < wp.length; i++) c.lineTo(px(wp[i][0]), py(wp[i][1]));
   }
 
-  function drawStatic() {
+  function drawStatic(map: MapRuntime) {
     const c = sctx;
     c.clearRect(0, 0, W, H);
 
@@ -96,7 +100,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     c.fillStyle = "oklch(0.5 0.012 78 / 0.16)";
     for (let r = 0; r < TUNING.rows; r++) {
       for (let col = 0; col < TUNING.cols; col++) {
-        if (!isOpenCell(col, r)) continue;
+        if (!isOpenCell(map, col, r)) continue;
         c.beginPath();
         c.arc(px(col), py(r), Math.max(1, cell * 0.04), 0, Math.PI * 2);
         c.fill();
@@ -106,38 +110,48 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     // Etched path: a recessed channel with a faint lit centre trace.
     c.lineJoin = "round";
     c.lineCap = "round";
-    tracePath(c);
+    tracePath(c, map);
     c.strokeStyle = C.bgDeep;
     c.lineWidth = cell * 0.84;
     c.stroke();
-    tracePath(c);
+    tracePath(c, map);
     c.strokeStyle = "oklch(0.24 0.013 72 / 0.9)";
     c.lineWidth = cell * 0.6;
     c.stroke();
-    tracePath(c);
+    tracePath(c, map);
     c.strokeStyle = "oklch(0.55 0.03 80 / 0.35)";
     c.lineWidth = Math.max(1, cell * 0.05);
     c.setLineDash([cell * 0.32, cell * 0.34]);
     c.stroke();
     c.setLineDash([]);
 
-    // Spawn gate bracket at the first on-board path cell.
-    const gx = px(0);
-    const gy = py(1);
+    // Spawn gate bracket at the first on-board path cell, facing travel.
+    const wp = map.waypoints;
+    let ex = wp[0][0];
+    let ey = wp[0][1];
+    const sdx = Math.sign(wp[1][0] - wp[0][0]);
+    const sdy = Math.sign(wp[1][1] - wp[0][1]);
+    while (!inBounds(ex, ey)) {
+      ex += sdx;
+      ey += sdy;
+    }
+    const ang = Math.atan2(sdy, sdx);
+    c.save();
+    c.translate(px(ex), py(ey));
+    c.rotate(ang);
     c.strokeStyle = C.inkMuted;
     c.lineWidth = Math.max(1.5, cell * 0.06);
     const g = cell * 0.34;
     c.beginPath();
-    c.moveTo(gx - g, gy - g);
-    c.lineTo(gx - g * 1.4, gy - g);
-    c.moveTo(gx - g, gy - g);
-    c.lineTo(gx - g, gy + g);
-    c.moveTo(gx - g, gy + g);
-    c.lineTo(gx - g * 1.4, gy + g);
+    c.moveTo(-g - g * 0.4, -g);
+    c.lineTo(-g, -g);
+    c.lineTo(-g, g);
+    c.lineTo(-g - g * 0.4, g);
     c.stroke();
+    c.restore();
 
     // Core housing (octagonal plate); the live core glows over it each frame.
-    polygon(c, px(CORE.c), py(CORE.r), cell * 0.62, 8, Math.PI / 8);
+    polygon(c, px(map.core.c), py(map.core.r), cell * 0.62, 8, Math.PI / 8);
     c.fillStyle = C.surface;
     c.fill();
     c.strokeStyle = C.lineStrong;
@@ -145,8 +159,17 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     c.stroke();
   }
 
+  function ensureStatic(map: MapRuntime) {
+    if (map.id !== staticMapId || cell !== staticCell) {
+      drawStatic(map);
+      staticMapId = map.id;
+      staticCell = cell;
+    }
+  }
+
   // --- Per-frame ---------------------------------------------------------
   function draw(s: GameState, opts: DrawOpts) {
+    ensureStatic(s.map);
     ctx.clearRect(0, 0, W, H);
 
     let dx = 0;
@@ -165,16 +188,18 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     drawDamperFields(s);
     drawSelectionOrGhost(s);
     for (const t of s.towers) drawTower(t, s);
-    for (const e of s.enemies) drawEnemy(e);
+    for (const e of s.enemies) drawEnemy(e, opts);
     drawProjectiles(s);
     drawEffects(s, opts);
 
     ctx.restore();
+
+    if (s.overclock > 0) drawOverclock(s, opts);
   }
 
   function drawCore(s: GameState, opts: DrawOpts) {
-    const x = px(CORE.c);
-    const y = py(CORE.r);
+    const x = px(s.map.core.c);
+    const y = py(s.map.core.r);
     const pulse = opts.reducedMotion ? 0.5 : 0.5 + 0.5 * Math.sin(opts.time * 2.2);
     const hurt = s.lives / s.maxLives;
     const glow = ctx.createRadialGradient(x, y, cell * 0.1, x, y, cell * (0.9 + pulse * 0.3));
@@ -210,21 +235,36 @@ export function createRenderer(canvas: HTMLCanvasElement) {
   function drawSelectionOrGhost(s: GameState) {
     if (s.selected != null) {
       const t = s.towers.find((x) => x.id === s.selected);
-      if (t) ring(px(t.c), py(t.r), towerStats(t.defId, t.tier).range * cell, C.gold, 0.06);
+      if (t) {
+        const rng = towerStats(t.defId, t.tier).range;
+        if (rng > 0) ring(px(t.c), py(t.r), rng * cell, C.gold, 0.06);
+      }
     }
-    if (s.build && s.hover) {
-      const { c, r } = s.hover;
+
+    // Surge reticle follows the hover cell while armed.
+    if (s.surgeArm && s.hover) {
+      ring(px(s.hover.c), py(s.hover.r), T.surgeRadius * cell, C.gold, 0.05);
+    }
+
+    // Placement ghost: mouse hover, or a tapped-but-unconfirmed touch preview.
+    const cellPos = s.hover ?? s.preview;
+    if (s.build && cellPos) {
+      const { c, r } = cellPos;
       const occupied = s.towers.some((t) => t.c === c && t.r === r);
-      const valid = isOpenCell(c, r) && !occupied && s.cash >= TOWER_BY_ID[s.build].cost;
+      const valid = isOpenCell(s.map, c, r) && !occupied && s.cash >= TOWER_BY_ID[s.build].cost;
       const col = valid ? C.gold : C.hot;
-      ring(px(c), py(r), towerStats(s.build, 0).range * cell, col, valid ? 0.07 : 0.05);
+      const rng = towerStats(s.build, 0).range;
+      if (rng > 0) ring(px(c), py(r), rng * cell, col, valid ? 0.07 : 0.05);
       ctx.globalAlpha = 0.55;
       drawTowerGlyph(s.build, px(c), py(r), 0, valid ? C.gold : C.hot, true);
       ctx.globalAlpha = 1;
       ctx.strokeStyle = col;
       ctx.lineWidth = Math.max(1.5, cell * 0.05);
       const h = cell * 0.42;
+      // The touch preview gets a dashed "tap again" frame to read as pending.
+      if (!s.hover && s.preview) ctx.setLineDash([cell * 0.16, cell * 0.12]);
       ctx.strokeRect(px(c) - h, py(r) - h, h * 2, h * 2);
+      ctx.setLineDash([]);
     }
   }
 
@@ -282,7 +322,18 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       ctx.beginPath();
       ctx.arc(0, 0, u * 0.08, 0, Math.PI * 2);
       ctx.fill();
+    } else if (id === "generator") {
+      // A charge cell: a rounded housing with a "+" terminal.
+      ctx.strokeStyle = lit ? accent : C.steelLite;
+      ctx.lineWidth = Math.max(1.5, u * 0.045);
+      roundRect(ctx, -u * 0.2, -u * 0.18, u * 0.4, u * 0.36, u * 0.06);
+      ctx.stroke();
+      ctx.fillStyle = lit ? accent : C.steelLite;
+      const b = u * 0.045;
+      ctx.fillRect(-b, -u * 0.11, b * 2, u * 0.22); // vertical bar
+      ctx.fillRect(-u * 0.11, -b, u * 0.22, b * 2); // horizontal bar
     } else {
+      // driver
       ctx.rotate(angle);
       ctx.fillStyle = C.steelDark;
       roundRect(ctx, -u * 0.18, -u * 0.1, u * 0.5, u * 0.2, u * 0.04);
@@ -294,7 +345,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     ctx.restore();
   }
 
-  function drawEnemy(e: Enemy) {
+  function drawEnemy(e: Enemy, opts: DrawOpts) {
     const x = px(e.x);
     const y = py(e.y);
     const rad = e.size * cell;
@@ -302,8 +353,22 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     let fill = C.steel;
     if (e.kind === "mote") fill = C.steelLite;
     else if (e.kind === "hauler") fill = C.steelDark;
+    else if (e.kind === "rusher") fill = C.steelLite;
+    else if (e.kind === "healer") fill = C.mend;
     else if (e.kind === "daemon") fill = "oklch(0.4 0.05 280)";
     const stroke = e.kind === "plated" ? C.lineStrong : C.steelDark;
+    const def = ENEMIES[e.kind];
+
+    // Rusher speed-glow while bursting (direction-agnostic, so no wrong-way streak).
+    if (e.rushing && !opts.reducedMotion) {
+      const halo = ctx.createRadialGradient(x, y, rad * 0.4, x, y, rad * 1.7);
+      halo.addColorStop(0, "oklch(0.82 0.04 235 / 0.32)");
+      halo.addColorStop(1, "oklch(0.82 0.04 235 / 0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(x, y, rad * 1.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.save();
     ctx.translate(x, y);
@@ -311,7 +376,7 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     ctx.strokeStyle = flash ? C.ink : stroke;
     ctx.lineWidth = Math.max(1, cell * 0.03);
 
-    const shape = ENEMIES[e.kind].shape;
+    const shape = def.shape;
     if (shape === "square") {
       roundRect(ctx, -rad, -rad, rad * 2, rad * 2, rad * 0.22);
       ctx.fill();
@@ -323,7 +388,21 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     } else if (shape === "triangle") {
       polygon(ctx, 0, 0, rad, 3, -Math.PI / 2);
       ctx.fill();
+    } else if (shape === "diamond") {
+      polygon(ctx, 0, 0, rad, 4, 0);
+      ctx.fill();
+      // a split seam, hinting it breaks apart
+      ctx.strokeStyle = flash ? C.ink : C.bgDeep;
+      ctx.lineWidth = Math.max(1, cell * 0.035);
+      ctx.beginPath();
+      ctx.moveTo(0, -rad * 0.8);
+      ctx.lineTo(0, rad * 0.8);
+      ctx.stroke();
+    } else if (shape === "pentagon") {
+      polygon(ctx, 0, 0, rad, 5, -Math.PI / 2);
+      ctx.fill();
     } else {
+      // hex (hauler / daemon / healer)
       polygon(ctx, 0, 0, rad, 6, Math.PI / 6);
       ctx.fill();
       ctx.stroke();
@@ -331,9 +410,38 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.fillStyle = flash ? C.ink : "oklch(0.6 0.12 290)";
         polygon(ctx, 0, 0, rad * 0.42, 6, Math.PI / 6);
         ctx.fill();
+      } else if (e.kind === "healer") {
+        // a "+" cross, so the mender reads at a glance even in greyscale
+        ctx.strokeStyle = flash ? C.ink : "oklch(0.86 0.04 195)";
+        ctx.lineWidth = Math.max(1.5, cell * 0.05);
+        ctx.beginPath();
+        ctx.moveTo(-rad * 0.45, 0);
+        ctx.lineTo(rad * 0.45, 0);
+        ctx.moveTo(0, -rad * 0.45);
+        ctx.lineTo(0, rad * 0.45);
+        ctx.stroke();
       }
     }
     ctx.restore();
+
+    // Shield arc (shielded): a ring whose strength tracks remaining shield.
+    if (e.maxShield > 0 && e.shield > 0) {
+      const sa = e.shield / e.maxShield;
+      ctx.strokeStyle = `oklch(0.82 0.04 235 / ${0.35 + sa * 0.45})`;
+      ctx.lineWidth = Math.max(1.5, cell * 0.05);
+      ctx.beginPath();
+      ctx.arc(x, y, rad * 1.32, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sa);
+      ctx.stroke();
+    }
+
+    // Stun ring (frozen by Surge).
+    if (e.stun > 0) {
+      ctx.strokeStyle = "oklch(0.9 0.09 92 / 0.7)";
+      ctx.lineWidth = Math.max(1, cell * 0.03);
+      ctx.beginPath();
+      ctx.arc(x, y, rad * 1.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     if (e.hp < e.maxHp) {
       const w = rad * 2.1;
@@ -351,17 +459,10 @@ export function createRenderer(canvas: HTMLCanvasElement) {
     for (const p of s.projectiles) {
       const x = px(p.x);
       const y = py(p.y);
-      if (p.kind === "driver") {
-        ctx.fillStyle = C.goldBright;
-        ctx.beginPath();
-        ctx.arc(x, y, cell * 0.1, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.fillStyle = C.gold;
-        ctx.beginPath();
-        ctx.arc(x, y, cell * 0.06, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.fillStyle = C.gold;
+      ctx.beginPath();
+      ctx.arc(x, y, cell * 0.06, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -376,12 +477,36 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         ctx.moveTo(px(f.pts[0]), py(f.pts[1]));
         for (let i = 2; i < f.pts.length; i += 2) ctx.lineTo(px(f.pts[i]), py(f.pts[i + 1]));
         ctx.stroke();
+      } else if (f.kind === "rail" && f.pts) {
+        // Driver railgun trace: a bright, fast-fading line.
+        ctx.strokeStyle = `oklch(0.95 0.08 92 / ${k})`;
+        ctx.lineCap = "round";
+        ctx.lineWidth = Math.max(1, cell * 0.09 * k + 0.5);
+        ctx.beginPath();
+        ctx.moveTo(px(f.pts[0]), py(f.pts[1]));
+        ctx.lineTo(px(f.pts[2]), py(f.pts[3]));
+        ctx.stroke();
+      } else if (f.kind === "surge") {
+        // Overload pulse: an expanding gold ring out to its radius.
+        const grow = (1 - k) * (f.radius ?? 2.4);
+        ctx.strokeStyle = `oklch(0.86 0.1 92 / ${k * 0.85})`;
+        ctx.lineWidth = cell * 0.1 * k + 1;
+        ctx.beginPath();
+        ctx.arc(px(f.x), py(f.y), grow * cell, 0, Math.PI * 2);
+        ctx.stroke();
       } else if (f.kind === "leak") {
         ctx.strokeStyle = `oklch(0.62 0.19 28 / ${k * 0.8})`;
         ctx.lineWidth = cell * 0.12 * (1 - k) + 1;
         ctx.beginPath();
         ctx.arc(px(f.x), py(f.y), cell * (0.4 + (1 - k) * 0.9), 0, Math.PI * 2);
         ctx.stroke();
+      } else if (f.kind === "float" && f.text) {
+        const rise = opts.reducedMotion ? 0 : (1 - k) * cell * 0.8;
+        ctx.fillStyle = `oklch(0.9 0.095 92 / ${Math.min(1, k * 1.4)})`;
+        ctx.font = `600 ${Math.round(cell * 0.34)}px ui-monospace, monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(f.text, px(f.x), py(f.y) - cell * 0.4 - rise);
       } else if (f.kind === "burst" && !opts.reducedMotion) {
         ctx.fillStyle = `oklch(0.74 0.03 250 / ${k * 0.8})`;
         const n = 5;
@@ -394,6 +519,20 @@ export function createRenderer(canvas: HTMLCanvasElement) {
         }
       }
     }
+  }
+
+  /** A restrained gold frame while Overclock is live — signals the buff without
+      flooding the board (One Voice Rule). */
+  function drawOverclock(s: GameState, opts: DrawOpts) {
+    const pulse = opts.reducedMotion ? 0.5 : 0.5 + 0.5 * Math.sin(opts.time * 6);
+    const a = 0.1 + pulse * 0.08;
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, `oklch(0.8 0.13 80 / ${a})`);
+    grad.addColorStop(0.12, "oklch(0.8 0.13 80 / 0)");
+    grad.addColorStop(0.88, "oklch(0.8 0.13 80 / 0)");
+    grad.addColorStop(1, `oklch(0.8 0.13 80 / ${a})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
   }
 
   return { resize, draw };

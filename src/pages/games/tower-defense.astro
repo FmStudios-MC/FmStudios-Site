@@ -58,9 +58,31 @@ const stats = [
               aria-label="Signal Defense board. Use the build tray and on-screen controls to play."
               role="img"></canvas>
 
+            <div class="td-streak" data-streak hidden></div>
+
             <div class="td-paused" aria-hidden="true">
               <span class="td-paused__tag">Paused</span>
             </div>
+
+            <!-- Controls legend (toggled with ? / the Controls button) -->
+            <div class="td-help" data-help>
+              <h3 class="td-help__title">Controls</h3>
+              <ul class="td-help__list">
+                <li><kbd>1</kbd>–<kbd>5</kbd> Build a node</li>
+                <li><kbd>Space</kbd> Call the next wave</li>
+                <li><kbd>P</kbd> Pause · <kbd>F</kbd> Fast-forward</li>
+                <li><kbd>Q</kbd> Overclock · <kbd>E</kbd> Surge</li>
+                <li><kbd>M</kbd> Mute · <kbd>?</kbd> This panel</li>
+                <li><kbd>Esc</kbd> Deselect</li>
+              </ul>
+              <p class="td-help__note">
+                Tap a placed node to retarget, upgrade, or sell. On touch, tap an
+                open cell once to preview range, again to confirm.
+              </p>
+            </div>
+
+            <!-- Pre-run setup (difficulty + map); filled by ui.ts -->
+            <div class="td-setup" data-setup hidden></div>
 
             <div class="td-end" data-end hidden></div>
           </div>
@@ -72,6 +94,9 @@ const stats = [
                 type="button"
                 class="td-btn td-btn--primary"
                 data-start>Start wave 1</button>
+
+              <div class="td-intel" data-intel aria-label="Next wave"></div>
+
               <div class="td-controls__row">
                 <button type="button" class="td-btn" data-pause aria-pressed="false">
                   Pause
@@ -79,6 +104,36 @@ const stats = [
                 <button type="button" class="td-btn" data-speed aria-pressed="false">
                   1&times;
                 </button>
+              </div>
+
+              <div class="td-abilities">
+                <button type="button" class="td-ability" data-overclock>
+                  <span class="td-ability__fill" data-fill></span>
+                  <span class="td-ability__body">
+                    <span class="td-ability__name">Overclock <kbd>Q</kbd></span>
+                    <span class="td-ability__tag" data-tag>Ready</span>
+                  </span>
+                </button>
+                <button type="button" class="td-ability" data-surge>
+                  <span class="td-ability__fill" data-fill></span>
+                  <span class="td-ability__body">
+                    <span class="td-ability__name">Surge <kbd>E</kbd></span>
+                    <span class="td-ability__tag" data-tag>Ready</span>
+                  </span>
+                </button>
+              </div>
+
+              <div class="td-controls__util">
+                <button
+                  type="button"
+                  class="td-btn td-btn--ghost"
+                  data-mute
+                  aria-pressed="true">Sound on</button>
+                <button
+                  type="button"
+                  class="td-btn td-btn--ghost td-btn--icon"
+                  data-help-btn
+                  aria-label="Show controls">?</button>
               </div>
             </section>
 

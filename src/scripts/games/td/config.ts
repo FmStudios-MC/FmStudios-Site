@@ -1,8 +1,19 @@
 /* Signal Defense - balancing data + map geometry. Pure data and the few
    map-derived helpers (path rasterisation, position-along-path). No logic that
-   reads or mutates a live GameState lives here. */
+   reads or mutates a live GameState lives here. Geometry is per-map: a GameMap
+   is just a waypoint chain; buildMap() bakes it into a MapRuntime that the
+   engine + renderer read off GameState (keeps the simulation free of globals). */
 
-import type { EnemyDef, EnemyKind, TowerDef, TowerId, WaveDef } from "./types";
+import type {
+  DifficultyDef,
+  EnemyDef,
+  EnemyKind,
+  GameMap,
+  MapRuntime,
+  TowerDef,
+  TowerId,
+  WaveDef,
+} from "./types";
 
 export const TUNING = {
   cols: 16,
@@ -12,7 +23,7 @@ export const TUNING = {
   startLives: 20,
 
   sellRefund: 0.7, // fraction of total spend returned on sell
-  projectileSpeed: 15, // cells/sec for homing shots (bolt/driver)
+  projectileSpeed: 15, // cells/sec for homing shots (bolt)
 
   lullSec: 12, // auto-start countdown between waves
   earlyCallRate: 2, // cash per second of lull skipped when calling early
@@ -20,65 +31,108 @@ export const TUNING = {
   waveClearPer: 6, // + this much per wave number
   scoreLifeWeight: 3, // bonus score per surviving life, each wave clear (rewards clean play)
 
-  authoredWaves: 12, // after this, waves are generated endlessly
+  // Flawless-streak: each consecutive no-leak clear adds streakStep to a score
+  // multiplier on the clear bonus, capped at streakMax steps.
+  streakStep: 0.12,
+  streakMax: 6,
+
+  // Active abilities (seconds / multipliers).
+  overclockDur: 5, // how long Overclock lasts
+  overclockCd: 30, // cooldown after it fires
+  overclockRate: 1.85, // fire-rate (and damper DoT) multiplier while active
+  surgeCd: 26, // Surge cooldown
+  surgeRadius: 2.4, // AoE radius in cells
+  surgeDmg: 130, // flat damage to everything caught
+  surgeStun: 1.1, // seconds the caught enemies are frozen
+
+  authoredWaves: 16, // after this, waves are generated endlessly
 } as const;
 
-// --- Map -----------------------------------------------------------------
-// Axis-aligned switchback. Integer (c, r) points are cell centres; the first
-// point sits off the left edge so enemies slide in. The last point is the core.
+// --- Maps ----------------------------------------------------------------
+// Each map is an axis-aligned waypoint chain (every segment changes only c OR
+// r). The first point sits off an edge so enemies slide in; the last point is
+// the core. buildMap() rasterises the path and measures it.
 
-export const WAYPOINTS: [number, number][] = [
-  [-1, 1],
-  [14, 1],
-  [14, 3],
-  [2, 3],
-  [2, 5],
-  [14, 5],
-  [14, 7],
-  [6, 7],
+export const MAPS: GameMap[] = [
+  {
+    id: "switchback",
+    name: "Switchback",
+    desc: "Long horizontal sweeps.",
+    waypoints: [
+      [-1, 1],
+      [14, 1],
+      [14, 3],
+      [2, 3],
+      [2, 5],
+      [14, 5],
+      [14, 7],
+      [6, 7],
+    ],
+  },
+  {
+    id: "spiral",
+    name: "Spiral",
+    desc: "Winds to a central core.",
+    waypoints: [
+      [-1, 1],
+      [14, 1],
+      [14, 7],
+      [1, 7],
+      [1, 3],
+      [12, 3],
+      [12, 5],
+      [4, 5],
+      [4, 4],
+      [8, 4],
+    ],
+  },
+  {
+    id: "serpent",
+    name: "Serpent",
+    desc: "Tight vertical lanes; longest route.",
+    waypoints: [
+      [1, -1],
+      [1, 7],
+      [5, 7],
+      [5, 1],
+      [9, 1],
+      [9, 7],
+      [13, 7],
+      [13, 2],
+      [11, 2],
+    ],
+  },
 ];
 
-export const CORE = {
-  c: WAYPOINTS[WAYPOINTS.length - 1][0],
-  r: WAYPOINTS[WAYPOINTS.length - 1][1],
-};
+export const MAP_BY_ID: Record<string, GameMap> = Object.fromEntries(
+  MAPS.map((m) => [m.id, m]),
+);
 
-/** Cumulative path length at each waypoint, in cells. */
-const SEG = (() => {
-  const cum: number[] = [0];
-  for (let i = 1; i < WAYPOINTS.length; i++) {
-    const dx = WAYPOINTS[i][0] - WAYPOINTS[i - 1][0];
-    const dy = WAYPOINTS[i][1] - WAYPOINTS[i - 1][1];
-    cum.push(cum[i - 1] + Math.hypot(dx, dy));
-  }
-  return cum;
-})();
+export const cellKey = (c: number, r: number) => `${c},${r}`;
 
-export const PATH_LENGTH = SEG[SEG.length - 1];
-
-/** Grid position at a given distance along the path (clamped to its ends). */
-export function posAt(dist: number): { x: number; y: number } {
-  const d = Math.max(0, Math.min(PATH_LENGTH, dist));
-  let i = 1;
-  while (i < SEG.length - 1 && SEG[i] < d) i++;
-  const t = (d - SEG[i - 1]) / (SEG[i] - SEG[i - 1] || 1);
-  return {
-    x: WAYPOINTS[i - 1][0] + (WAYPOINTS[i][0] - WAYPOINTS[i - 1][0]) * t,
-    y: WAYPOINTS[i - 1][1] + (WAYPOINTS[i][1] - WAYPOINTS[i - 1][1]) * t,
-  };
+export function inBounds(c: number, r: number): boolean {
+  return c >= 0 && c < TUNING.cols && r >= 0 && r < TUNING.rows;
 }
 
-/** Cells the path covers (so they can't be built on). Rasterised from the
-    axis-aligned segments; off-board cells are skipped. */
-export const PATH_CELLS: Set<string> = (() => {
-  const set = new Set<string>();
+/** Bake a GameMap into the geometry the engine + renderer read each frame. */
+export function buildMap(id: string): MapRuntime {
+  const def = MAP_BY_ID[id] ?? MAPS[0];
+  const wp = def.waypoints;
+
+  const seg: number[] = [0];
+  for (let i = 1; i < wp.length; i++) {
+    const dx = wp[i][0] - wp[i - 1][0];
+    const dy = wp[i][1] - wp[i - 1][1];
+    seg.push(seg[i - 1] + Math.hypot(dx, dy));
+  }
+
+  const pathCells = new Set<string>();
   const add = (c: number, r: number) => {
-    if (c >= 0 && c < TUNING.cols && r >= 0 && r < TUNING.rows)
-      set.add(`${c},${r}`);
+    if (inBounds(c, r)) pathCells.add(cellKey(c, r));
   };
-  for (let i = 1; i < WAYPOINTS.length; i++) {
-    let [c, r] = WAYPOINTS[i - 1];
-    const [tc, tr] = WAYPOINTS[i];
+  for (let i = 1; i < wp.length; i++) {
+    let [c, r] = wp[i - 1];
+    const [tc, tr] = wp[i];
     const sc = Math.sign(tc - c);
     const sr = Math.sign(tr - r);
     add(c, r);
@@ -88,19 +142,68 @@ export const PATH_CELLS: Set<string> = (() => {
       add(c, r);
     }
   }
-  return set;
-})();
 
-export const cellKey = (c: number, r: number) => `${c},${r}`;
-
-export function inBounds(c: number, r: number): boolean {
-  return c >= 0 && c < TUNING.cols && r >= 0 && r < TUNING.rows;
+  return {
+    id: def.id,
+    name: def.name,
+    waypoints: wp,
+    seg,
+    pathLength: seg[seg.length - 1],
+    pathCells,
+    core: { c: wp[wp.length - 1][0], r: wp[wp.length - 1][1] },
+  };
 }
 
-/** A cell can host a tower if it's on the board and not on the path/core. */
-export function isOpenCell(c: number, r: number): boolean {
-  return inBounds(c, r) && !PATH_CELLS.has(cellKey(c, r));
+/** Grid position at a given distance along a map's path (clamped to its ends). */
+export function posAt(map: MapRuntime, dist: number): { x: number; y: number } {
+  const { seg, waypoints: wp, pathLength } = map;
+  const d = Math.max(0, Math.min(pathLength, dist));
+  let i = 1;
+  while (i < seg.length - 1 && seg[i] < d) i++;
+  const t = (d - seg[i - 1]) / (seg[i] - seg[i - 1] || 1);
+  return {
+    x: wp[i - 1][0] + (wp[i][0] - wp[i - 1][0]) * t,
+    y: wp[i - 1][1] + (wp[i][1] - wp[i - 1][1]) * t,
+  };
 }
+
+/** A cell can host a tower if it's on the board and not on this map's path. */
+export function isOpenCell(map: MapRuntime, c: number, r: number): boolean {
+  return inBounds(c, r) && !map.pathCells.has(cellKey(c, r));
+}
+
+// --- Difficulty ----------------------------------------------------------
+
+export const DIFFICULTIES: DifficultyDef[] = [
+  {
+    id: "calm",
+    name: "Calm",
+    desc: "More lives, gentler curve.",
+    startCash: 180,
+    startLives: 30,
+    hpScale: 0.82,
+  },
+  {
+    id: "standard",
+    name: "Standard",
+    desc: "The intended balance.",
+    startCash: 150,
+    startLives: 20,
+    hpScale: 1,
+  },
+  {
+    id: "relentless",
+    name: "Relentless",
+    desc: "Fewer lives, steeper waves.",
+    startCash: 130,
+    startLives: 12,
+    hpScale: 1.18,
+  },
+];
+
+export const DIFFICULTY_BY_ID = Object.fromEntries(
+  DIFFICULTIES.map((d) => [d.id, d]),
+) as Record<DifficultyDef["id"], DifficultyDef>;
 
 // --- Towers --------------------------------------------------------------
 
@@ -154,7 +257,7 @@ export const TOWERS: TowerDef[] = [
     id: "driver",
     name: "Driver",
     role: "Heavy",
-    desc: "Slow, long-range, armour-piercing hits. The answer to plating.",
+    desc: "Slow railgun. The shot pierces every intrusion on its line.",
     cost: 140,
     dmg: 60,
     range: 3.8,
@@ -163,6 +266,21 @@ export const TOWERS: TowerDef[] = [
     upgrades: [
       { cost: 120, note: "+ damage, + pierce", mods: { dmgMul: 1.5, pierceAdd: 0.15 } },
       { cost: 230, note: "+ damage, + range", mods: { dmgMul: 1.6, rangeMul: 1.1 } },
+    ],
+  },
+  {
+    id: "generator",
+    name: "Generator",
+    role: "Economy",
+    desc: "No attack. Pays a dividend each wave you clear — invest early.",
+    cost: 90,
+    dmg: 0,
+    range: 0,
+    rate: 0,
+    special: { kind: "generator", dividend: 24 },
+    upgrades: [
+      { cost: 90, note: "+ dividend", mods: { dividendMul: 1.7 } },
+      { cost: 170, note: "+ dividend", mods: { dividendMul: 1.7 } },
     ],
   },
 ];
@@ -235,80 +353,173 @@ export const ENEMIES: Record<EnemyKind, EnemyDef> = {
     size: 0.74,
     boss: true,
   },
+  // --- behavioural roster ---
+  splitter: {
+    kind: "splitter",
+    name: "Splitter",
+    hp: 60,
+    speed: 1.55,
+    armor: 1,
+    bounty: 11,
+    score: 18,
+    leak: 1,
+    shape: "diamond",
+    size: 0.46,
+    splitInto: { kind: "mote", count: 3 },
+  },
+  shielded: {
+    kind: "shielded",
+    name: "Shielded",
+    hp: 70,
+    speed: 1.4,
+    armor: 2,
+    bounty: 15,
+    score: 24,
+    leak: 1,
+    shape: "pentagon",
+    size: 0.46,
+    shield: 60, // soaks 60 post-armour damage before HP is touched
+  },
+  healer: {
+    kind: "healer",
+    name: "Mender",
+    hp: 120,
+    speed: 1.2,
+    armor: 2,
+    bounty: 22,
+    score: 34,
+    leak: 2,
+    shape: "hex",
+    size: 0.5,
+    regen: 14, // HP/sec mended to nearby allies (and itself)
+    healRadius: 2.2,
+  },
+  rusher: {
+    kind: "rusher",
+    name: "Rusher",
+    hp: 46,
+    speed: 1.2,
+    armor: 0,
+    bounty: 9,
+    score: 16,
+    leak: 1,
+    shape: "triangle",
+    size: 0.42,
+    rush: { interval: 2.4, duration: 0.9, mult: 3.2 },
+  },
 };
 
 // --- Waves ---------------------------------------------------------------
 // The authored opening teaches the roster in order: packets, then motes, the
-// first boss, haulers, plated, and escalating mixes. After TUNING.authoredWaves
-// the generator (below) takes over forever.
+// first boss, haulers, plated, the behavioural archetypes, and escalating
+// mixes. After TUNING.authoredWaves the generator (below) takes over forever.
 
 export const WAVES: WaveDef[] = [
-  { groups: [{ kind: "packet", count: 8, gap: 0.9, delay: 0 }] },
-  { groups: [{ kind: "packet", count: 12, gap: 0.7, delay: 0 }] },
+  { theme: "Probe", groups: [{ kind: "packet", count: 8, gap: 0.9, delay: 0 }] },
+  { theme: "Probe", groups: [{ kind: "packet", count: 12, gap: 0.7, delay: 0 }] },
   {
+    theme: "Swarm",
     groups: [
       { kind: "packet", count: 6, gap: 0.8, delay: 0 },
       { kind: "mote", count: 10, gap: 0.35, delay: 2 },
     ],
   },
   {
+    theme: "Armour",
     groups: [
       { kind: "packet", count: 8, gap: 0.7, delay: 0 },
       { kind: "plated", count: 4, gap: 1.4, delay: 3 },
     ],
   },
   {
+    theme: "Boss",
     groups: [
       { kind: "packet", count: 8, gap: 0.6, delay: 0 },
       { kind: "daemon", count: 1, gap: 0, delay: 4 },
     ],
   },
   {
+    theme: "Heavy",
     groups: [
       { kind: "hauler", count: 4, gap: 1.8, delay: 0 },
       { kind: "mote", count: 12, gap: 0.3, delay: 2 },
     ],
   },
   {
+    theme: "Fracture", // introduces the splitter
     groups: [
-      { kind: "packet", count: 10, gap: 0.5, delay: 0 },
-      { kind: "plated", count: 5, gap: 1.1, delay: 2 },
-      { kind: "mote", count: 10, gap: 0.3, delay: 5 },
+      { kind: "packet", count: 8, gap: 0.6, delay: 0 },
+      { kind: "splitter", count: 5, gap: 1.1, delay: 2 },
     ],
   },
   {
+    theme: "Swarm",
     groups: [
       { kind: "mote", count: 20, gap: 0.22, delay: 0 },
       { kind: "plated", count: 6, gap: 0.9, delay: 3 },
     ],
   },
   {
+    theme: "Warded", // introduces the shielded
     groups: [
-      { kind: "hauler", count: 5, gap: 1.4, delay: 0 },
-      { kind: "plated", count: 8, gap: 0.8, delay: 2 },
+      { kind: "shielded", count: 6, gap: 1.0, delay: 0 },
+      { kind: "packet", count: 10, gap: 0.5, delay: 2 },
+    ],
+  },
+  {
+    theme: "Blitz", // introduces the rusher
+    groups: [
+      { kind: "rusher", count: 8, gap: 0.7, delay: 0 },
+      { kind: "splitter", count: 4, gap: 1.2, delay: 3 },
+    ],
+  },
+  {
+    theme: "Mended", // introduces the healer
+    groups: [
+      { kind: "healer", count: 2, gap: 2.2, delay: 0 },
+      { kind: "plated", count: 8, gap: 0.7, delay: 1 },
       { kind: "mote", count: 12, gap: 0.28, delay: 4 },
     ],
   },
   {
+    theme: "Boss",
     groups: [
       { kind: "packet", count: 10, gap: 0.4, delay: 0 },
       { kind: "daemon", count: 2, gap: 3, delay: 3 },
-      { kind: "plated", count: 6, gap: 0.9, delay: 5 },
+      { kind: "shielded", count: 6, gap: 0.9, delay: 5 },
     ],
   },
   {
+    theme: "Heavy",
     groups: [
       { kind: "hauler", count: 6, gap: 1.2, delay: 0 },
-      { kind: "mote", count: 24, gap: 0.2, delay: 1 },
+      { kind: "rusher", count: 10, gap: 0.4, delay: 1 },
       { kind: "plated", count: 8, gap: 0.7, delay: 3 },
     ],
   },
   {
+    theme: "Fracture",
     groups: [
-      { kind: "packet", count: 16, gap: 0.35, delay: 0 },
+      { kind: "splitter", count: 10, gap: 0.6, delay: 0 },
+      { kind: "healer", count: 2, gap: 2.5, delay: 2 },
+      { kind: "mote", count: 16, gap: 0.2, delay: 4 },
+    ],
+  },
+  {
+    theme: "Warded",
+    groups: [
+      { kind: "shielded", count: 10, gap: 0.7, delay: 0 },
+      { kind: "hauler", count: 4, gap: 1.4, delay: 2 },
+      { kind: "rusher", count: 8, gap: 0.5, delay: 4 },
+    ],
+  },
+  {
+    theme: "Onslaught",
+    groups: [
+      { kind: "packet", count: 16, gap: 0.32, delay: 0 },
       { kind: "hauler", count: 6, gap: 1.1, delay: 1 },
-      { kind: "plated", count: 10, gap: 0.6, delay: 3 },
-      { kind: "mote", count: 20, gap: 0.2, delay: 4 },
+      { kind: "splitter", count: 8, gap: 0.7, delay: 3 },
+      { kind: "shielded", count: 8, gap: 0.6, delay: 4 },
     ],
   },
 ];
@@ -317,9 +528,9 @@ export const WAVES: WaveDef[] = [
     then compounds for the endless tail. */
 export function waveHpMult(n: number): number {
   const a = TUNING.authoredWaves;
-  if (n <= a) return 1 + (n - 1) * 0.06;
-  const top = 1 + (a - 1) * 0.06;
-  return top * Math.pow(1.14, n - a);
+  if (n <= a) return 1 + (n - 1) * 0.05;
+  const top = 1 + (a - 1) * 0.05;
+  return top * Math.pow(1.13, n - a);
 }
 
 /** Cash scaling, kept under the health curve so the economy stays tight. */
@@ -327,21 +538,50 @@ export function waveBountyMult(n: number): number {
   return Math.sqrt(waveHpMult(n));
 }
 
-/** Procedural wave for n > authoredWaves. Boss on every 5th. */
+/** Procedural wave for n > authoredWaves. Cycles a handful of themes so the
+    endless tail isn't one enemy with bigger numbers; boss on every 5th. */
 export function generateWave(n: number): WaveDef {
-  const k = n - TUNING.authoredWaves;
+  const k = n - TUNING.authoredWaves; // 1, 2, 3, ...
+  const theme = k % 5; // 0..4, a rotating accent on the baseline
   const groups: WaveDef["groups"] = [
-    { kind: "packet", count: 10 + k * 2, gap: 0.4, delay: 0 },
-    { kind: "mote", count: 12 + k * 3, gap: 0.2, delay: 1 },
-    { kind: "plated", count: 4 + k, gap: 0.8, delay: 2 },
+    { kind: "packet", count: 8 + k * 2, gap: 0.4, delay: 0 },
+    { kind: "plated", count: 3 + k, gap: 0.8, delay: 2 },
   ];
-  if (k % 2 === 0) {
-    groups.push({ kind: "hauler", count: 3 + Math.floor(k / 2), gap: 1.2, delay: 0 });
+  let label = "Mixed";
+
+  if (theme === 0) {
+    // Swarm: a wall of motes + rushers.
+    groups.push({ kind: "mote", count: 18 + k * 4, gap: 0.16, delay: 1 });
+    groups.push({ kind: "rusher", count: 6 + k, gap: 0.4, delay: 3 });
+    label = "Swarm";
+  } else if (theme === 1) {
+    // Armour column: haulers + shielded, slow and tanky.
+    groups.push({ kind: "hauler", count: 4 + Math.floor(k / 2), gap: 1.1, delay: 1 });
+    groups.push({ kind: "shielded", count: 5 + k, gap: 0.7, delay: 3 });
+    label = "Armour";
+  } else if (theme === 2) {
+    // Fracture: splitters, with menders keeping them topped up.
+    groups.push({ kind: "splitter", count: 8 + k * 2, gap: 0.5, delay: 1 });
+    groups.push({ kind: "healer", count: 1 + Math.floor(k / 3), gap: 2.2, delay: 2 });
+    label = "Fracture";
+  } else if (theme === 3) {
+    // Blitz: rusher-heavy speed test.
+    groups.push({ kind: "rusher", count: 12 + k * 2, gap: 0.32, delay: 1 });
+    groups.push({ kind: "mote", count: 10 + k * 2, gap: 0.2, delay: 2 });
+    label = "Blitz";
+  } else {
+    // Mixed bag of everything.
+    groups.push({ kind: "mote", count: 12 + k * 2, gap: 0.2, delay: 1 });
+    groups.push({ kind: "shielded", count: 4 + k, gap: 0.7, delay: 2 });
+    groups.push({ kind: "splitter", count: 4 + k, gap: 0.7, delay: 3 });
+    label = "Mixed";
   }
+
   if (n % 5 === 0) {
     groups.push({ kind: "daemon", count: Math.floor(n / 10) + 1, gap: 3, delay: 3 });
+    label = "Boss";
   }
-  return { groups };
+  return { groups, theme: label };
 }
 
 /** The wave definition for any wave number (authored or generated). */
