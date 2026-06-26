@@ -10,7 +10,7 @@ import type {
 } from "./types";
 import { EVENT_BY_ID, SCRIPTED_BY_ID, TUNING, WORKLOADS } from "./config";
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export function defaultState(now = Date.now()): GameState {
   return {
@@ -18,6 +18,8 @@ export function defaultState(now = Date.now()): GameState {
     money: TUNING.startMoney,
     reputation: 0,
     credits: 0,
+    influence: 0,
+    corporateUpgrades: {},
     runEarnings: 0,
     lifetimeEarnings: 0,
     prestigeCount: 0,
@@ -34,6 +36,7 @@ export function defaultState(now = Date.now()): GameState {
     servicedCount: 0,
     goals: [],
     endless: false,
+    ascension: 0,
     overclockUntil: 0,
     overclockReadyAt: 0,
     lastTick: now,
@@ -153,6 +156,8 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
       tag: typeof c.tag === "string" ? c.tag : "Contract",
       required: Math.max(0, num(c.required, 0)),
       delivered: Math.max(0, num(c.delivered, 0)),
+      // Reserve is new in v7; default a moderate slice for migrated jobs.
+      reserve: Math.max(0, Math.min(1, num(c.reserve, 0.3))),
       reward: Math.max(0, num(c.reward, 0)),
       repReward: Math.max(0, num(c.repReward, 0)),
       repPenalty: Math.max(0, num(c.repPenalty, 0)),
@@ -168,6 +173,7 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
       id: co.id,
       tag: typeof co.tag === "string" ? co.tag : "Contract",
       required: Math.max(0, num(co.required, 0)),
+      reserve: Math.max(0, Math.min(1, num(co.reserve, 0.3))),
       reward: Math.max(0, num(co.reward, 0)),
       repReward: Math.max(0, num(co.repReward, 0)),
       repPenalty: Math.max(0, num(co.repPenalty, 0)),
@@ -201,6 +207,8 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     money: num(o.money, base.money),
     reputation: num(o.reputation, 0),
     credits: num(o.credits, 0),
+    influence: Math.max(0, num(o.influence, 0)),
+    corporateUpgrades: countMap(o.corporateUpgrades),
     runEarnings: num(o.runEarnings, 0),
     lifetimeEarnings: num(o.lifetimeEarnings, 0),
     prestigeCount: num(o.prestigeCount, 0),
@@ -217,6 +225,7 @@ export function sanitize(raw: unknown, now = Date.now()): GameState | null {
     servicedCount: Math.max(0, Math.floor(num(o.servicedCount, 0))),
     goals,
     endless: o.endless === true,
+    ascension: Math.max(0, Math.floor(num(o.ascension, 0))),
     overclockUntil: num(o.overclockUntil, 0),
     overclockReadyAt: num(o.overclockReadyAt, 0),
     lastTick: num(o.lastTick, now),

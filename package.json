@@ -7,7 +7,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sim": "tsx tools/sft-balance-sim.ts"
   },
   "dependencies": {
     "astro": "^5.7.0",
@@ -15,7 +19,11 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "playwright": "^1.60.0"
+    "@astrojs/check": "^0.9.9",
+    "playwright": "^1.60.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
   },
   "allowScripts": {
     "sharp@0.34.5": true,

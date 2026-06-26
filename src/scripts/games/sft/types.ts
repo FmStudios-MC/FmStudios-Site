@@ -57,6 +57,13 @@ export interface WorkloadDef {
   heatFactor?: number;
   /** Extra power drawn at full allocation (fraction added to producer draw). */
   powerFactor?: number;
+  /** Demand saturation (idea #1): the share of capacity (0..1) above which this
+      market's marginal price starts to decay. Undefined = it never saturates,
+      so it stays the unsaturating baseline (web) and the early game is unchanged. */
+  satCap?: number;
+  /** How hard the price decays once concentration passes `satCap`; bigger =
+      steeper falloff when you pour the whole farm into this one market. */
+  satStrength?: number;
 }
 
 /** A node in the per-run research tree (idea #6). Funded by R&D points that
@@ -86,8 +93,34 @@ export interface GoalDef {
   name: string;
   desc: string;
   check: (s: GameState, d: Derived) => boolean;
+  /** Live read-out for the pinned objective (idea #3): the current value and the
+      target it climbs toward, so the topbar can show "420 / 1,000 FLOP/s". */
+  metric?: (s: GameState, d: Derived) => { value: number; target: number; unit: string };
   /** Completing the final goal unlocks the Endless toggle. */
   final?: boolean;
+}
+
+/** A post-campaign ascension tier (idea #4): each successive compute milestone
+    beyond the final goal lifts the Endless multiplier a notch, so "endless"
+    actually escalates instead of sitting at a flat ×1.4. */
+export interface AscensionDef {
+  id: string;
+  name: string;
+  /** Effective compute required to reach this tier. */
+  compute: number;
+}
+
+/** A cross-run permanent bought with the second prestige currency (idea #4).
+    Influence accrues per rebuild once the studio is established; the Corporate
+    tree buys things the per-run credit tree can't — starting research, a
+    passive overclock, an extra contract slot — so it never resets. */
+export interface CorporateDef {
+  id: string;
+  name: string;
+  desc: string;
+  baseCost: number; // in influence
+  costGrowth: number;
+  maxLevel?: number;
 }
 
 /** A named reputation tier (idea #8). Reputation already drives sell price;
@@ -229,6 +262,9 @@ export interface ContractOffer {
   repReward: number; // reputation gained on fulfilment
   repPenalty: number; // reputation lost if accepted then failed
   durationSec: number; // time allowed once accepted
+  /** Share of effective compute (0..1) the job ties up while active (idea #2):
+      that slice is pulled from auto-sell, so accepting is a real commitment. */
+  reserve: number;
   expiresAt: number; // epoch ms the offer is withdrawn if not accepted
 }
 
@@ -239,6 +275,7 @@ export interface ActiveContract {
   tag: string;
   required: number;
   delivered: number;
+  reserve: number; // share of compute this job ties up while active (idea #2)
   reward: number;
   repReward: number;
   repPenalty: number;
@@ -268,6 +305,11 @@ export interface GameState {
   money: number;
   reputation: number;
   credits: number; // prestige currency (research credits)
+  // Corporate layer (idea #4): a second prestige currency earned per rebuild
+  // once the studio is established, spent on cross-run permanents. Persists
+  // across rebuilds, like credits.
+  influence: number;
+  corporateUpgrades: Record<string, number>; // corporate node id -> level
   runEarnings: number; // money earned since last prestige (drives credit payout)
   lifetimeEarnings: number; // all-time, for unlocks + stats
   prestigeCount: number;
@@ -295,6 +337,7 @@ export interface GameState {
   // Campaign objectives + Endless (idea #5).
   goals: string[]; // completed goal ids
   endless: boolean; // Endless difficulty/reward modifier engaged
+  ascension: number; // post-campaign ascension tiers reached (idea #4); each lifts Endless
 
   overclockUntil: number; // epoch ms, while > now the burst is active
   overclockReadyAt: number; // epoch ms, cooldown gate
@@ -376,17 +419,23 @@ export interface Derived {
     progress: number; // 0..1 toward the next tier
   };
 
-  // Campaign objectives + Endless (idea #5).
+  // Campaign objectives + Endless (idea #5) + ascension (idea #4).
   endlessUnlocked: boolean; // the final goal has been completed
   endless: boolean; // Endless modifier currently engaged
   endlessMult: number; // the live difficulty/reward multiplier (1 when off)
+  ascension: number; // post-campaign ascension tiers reached
+
+  // Contracts now reserve compute (idea #2): the share of effective compute
+  // currently tied up by active jobs and removed from auto-sell.
+  reservedFrac: number;
 
   /** Per-workload split as the UI needs it: normalised share + live price. */
   workloads: {
     id: string;
     name: string;
     alloc: number; // 0..1 share of capacity
-    price: number; // effective $/FLOP for this workload right now
+    price: number; // effective $/FLOP for this workload right now (after saturation)
+    saturation: number; // 0..1 fraction of price currently lost to demand saturation (idea #1)
     trend: "up" | "down" | "flat";
   }[];
 
@@ -429,6 +478,7 @@ export interface Derived {
       tag: string;
       required: number;
       delivered: number;
+      reserve: number; // share of compute this job ties up (idea #2)
       progress: number; // 0..1
       reward: number;
       repReward: number;
@@ -438,6 +488,7 @@ export interface Derived {
       id: string;
       tag: string;
       required: number;
+      reserve: number; // share of compute this job would tie up (idea #2)
       reward: number;
       repReward: number;
       repPenalty: number;

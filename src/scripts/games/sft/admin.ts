@@ -9,7 +9,14 @@
    (#admin), or once the persisted flag is set. Everything operates on the
    live game state and re-renders. */
 
-import { BUILDINGS, BUILDING_BY_ID, GOALS, PRESTIGE, UPGRADES } from "./config";
+import {
+  BUILDINGS,
+  BUILDING_BY_ID,
+  CORPORATE,
+  GOALS,
+  PRESTIGE,
+  UPGRADES,
+} from "./config";
 import { creditScale, derive, doPrestige, tick } from "./engine";
 import type { GameState } from "./types";
 
@@ -41,6 +48,8 @@ export function installAdmin(ctx: AdminCtx): void {
         "  sft.setCash(n)         set money",
         "  sft.credits(n=100)     add research credits ⬡",
         "  sft.setCredits(n)      set research credits",
+        "  sft.influence(n=50)    add corporate influence ◈",
+        "  sft.maxCorp(l=5)       max out every corporate node",
         "  sft.rep(n=1000)        add reputation",
         "  sft.research(n=500)    add in-run R&D points",
         "  sft.wear(f=0)          set hardware wear (0..1)",
@@ -78,6 +87,17 @@ export function installAdmin(ctx: AdminCtx): void {
     setCredits(n: number) {
       st().credits = n;
       return done(`credits = ${n}`);
+    },
+    influence(n = 50) {
+      st().influence += n;
+      return done(`+${n} ◈ influence`);
+    },
+    maxCorp(lvl = 5) {
+      const s = st();
+      for (const c of CORPORATE)
+        s.corporateUpgrades[c.id] =
+          c.maxLevel != null ? Math.min(lvl, c.maxLevel) : lvl;
+      return done(`corporate nodes maxed`);
     },
     rep(n = 1000) {
       st().reputation += n;
@@ -162,6 +182,7 @@ export function installAdmin(ctx: AdminCtx): void {
       const s = st();
       s.money += 1e9;
       s.credits += 1000;
+      s.influence += 100;
       s.research += 5000;
       s.wear = 0;
       s.lifetimeEarnings = Math.max(s.lifetimeEarnings, 1e13);
@@ -182,7 +203,7 @@ export function installAdmin(ctx: AdminCtx): void {
       } catch {
         /* ignore */
       }
-      delete (window as Record<string, unknown>).sft;
+      delete (window as unknown as Record<string, unknown>).sft;
       return "admin console off (reload to fully remove)";
     },
   };
@@ -196,7 +217,7 @@ export function installAdmin(ctx: AdminCtx): void {
       } catch {
         /* ignore */
       }
-      (window as Record<string, unknown>).sft = api;
+      (window as unknown as Record<string, unknown>).sft = api;
       // eslint-disable-next-line no-console
       console.log(
         "%cSFT admin enabled%c — type sft.help()",
@@ -208,7 +229,7 @@ export function installAdmin(ctx: AdminCtx): void {
   }
 
   // The always-present gatekeeper. Discoverable only if you know the name.
-  (window as Record<string, unknown>).sftAdmin = enable;
+  (window as unknown as Record<string, unknown>).sftAdmin = enable;
 
   // Hidden hotkey: Ctrl+Shift+A flips the console on without the dev console.
   window.addEventListener("keydown", (e) => {

@@ -5,9 +5,11 @@
 import type { Derived, GameState, PowerContract } from "./types";
 import {
   ACHIEVEMENTS,
+  ASCENSION,
   BUILDINGS,
   BUILDING_BY_ID,
   CATEGORY_LABELS,
+  CORPORATE,
   GOALS,
   PRESTIGE,
   PRESTIGE_BRANCH_LABELS,
@@ -20,6 +22,8 @@ import {
 import {
   bulkBuyInfo,
   type BuyMult,
+  corporateCost,
+  corporateUnlocked,
   creditScale,
   prestigeCost,
   prestigeUnlocked,
@@ -41,11 +45,13 @@ export interface Handlers {
   onBuyBuilding(id: string, mult: BuyMult): void;
   onBuyUpgrade(id: string): void;
   onBuyPrestige(id: string): void;
+  onBuyCorporate(id: string): void;
   onPrestige(): void;
   onOverclock(): void;
   onRespondEvent(): void;
   onRebalance(): void;
   onSetAllocation(id: string, delta: number): void;
+  onSetAllocationShare(id: string, frac: number): void;
   onAcceptContract(id: string): void;
   onDeclineContract(id: string): void;
   onSetPowerContract(id: PowerContract): void;
@@ -131,6 +137,8 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const $ = <T extends HTMLElement>(sel: string) =>
     root.querySelector<T>(sel)!;
 
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
   // --- Static slot references (rendered by the page) --------------------
   const stats: Record<string, HTMLElement> = {};
   root.querySelectorAll<HTMLElement>("[data-stat]").forEach((node) => {
@@ -138,6 +146,68 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   });
 
   const rackNote = $("[data-rack-note]");
+
+  // --- Pinned objective (idea #3) ---------------------------------------
+  // The first incomplete campaign goal, echoed with live progress in the top
+  // bar so there's always a visible "what now?". Falls back to a done state.
+  const objectiveEl = root.querySelector<HTMLElement>("[data-objective]");
+  const objectiveName = root.querySelector<HTMLElement>("[data-objective-name]");
+  const objectiveProgress = root.querySelector<HTMLElement>("[data-objective-progress]");
+  const objectiveBar = root.querySelector<HTMLElement>("[data-objective-bar]");
+
+  // --- Progressive section gating (idea #3) -----------------------------
+  // The rail reveals its systems in layers: a section stays dimmed + locked
+  // until the farm earns it, so a new player isn't handed all five at once.
+  // initTabs (in the page script) reads data-locked to refuse selection.
+  const SECTION_GATES: Record<
+    string,
+    (s: GameState, d: Derived) => { unlocked: boolean; hint: string }
+  > = {
+    operate: (s) => ({
+      unlocked: s.lifetimeEarnings >= TUNING.operateMinEarnings,
+      hint: `Unlocks at ${money(TUNING.operateMinEarnings)} earned`,
+    }),
+    contracts: (s) => ({
+      unlocked: s.lifetimeEarnings >= TUNING.contractMinEarnings,
+      hint: `Unlocks at ${money(TUNING.contractMinEarnings)} earned`,
+    }),
+    progress: (s, d) => ({
+      unlocked:
+        s.prestigeCount > 0 ||
+        s.goals.length > 0 ||
+        d.pendingCredits > 0 ||
+        s.lifetimeEarnings >= creditScale(s) * TUNING.progressUnlockFraction,
+      hint: "Unlocks as your first rebuild comes into reach",
+    }),
+  };
+  const navItems = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-tab]"),
+  ).map((btn) => {
+    // A padlock that only shows while the section is locked (CSS-gated). Stroke
+    // icon, so it sits in the same visual family as the section icons.
+    const lock = document.createElementNS(SVG_NS, "svg");
+    lock.setAttribute("class", "sft-navitem__lock");
+    lock.setAttribute("viewBox", "0 0 24 24");
+    lock.setAttribute("fill", "none");
+    lock.setAttribute("stroke", "currentColor");
+    lock.setAttribute("stroke-width", "1.7");
+    lock.setAttribute("stroke-linecap", "round");
+    lock.setAttribute("stroke-linejoin", "round");
+    lock.setAttribute("aria-hidden", "true");
+    const r = document.createElementNS(SVG_NS, "rect");
+    r.setAttribute("x", "5");
+    r.setAttribute("y", "11");
+    r.setAttribute("width", "14");
+    r.setAttribute("height", "9");
+    r.setAttribute("rx", "1.6");
+    const p = document.createElementNS(SVG_NS, "path");
+    p.setAttribute("d", "M8 11V7.5a4 4 0 0 1 8 0V11");
+    lock.append(r, p);
+    btn.appendChild(lock);
+    return { id: btn.dataset.tab!, root: btn };
+  });
+  const navUnlocked: Record<string, boolean> = {};
+  let navFirstRender = true;
 
   // --- Data Hall: one cabinet per producer/cooling/power building -------
   // Cabinets are built once (hidden until owned), then only their fill level
@@ -335,11 +405,19 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   interface WorkloadRow {
     root: HTMLElement;
     price: HTMLElement;
+    sat: HTMLElement;
     share: HTMLElement;
     bar: HTMLElement;
+    slider: HTMLElement;
+    thumb: HTMLElement;
     minus: HTMLButtonElement;
     plus: HTMLButtonElement;
     id: string;
+    // Inline price sparkline (idea #9): lets players read the wave and time
+    // crypto's volatility rather than gamble on it. Sampled by recordHistory.
+    sparkData: number[];
+    sparkLine: SVGPolylineElement;
+    sparkArea: SVGPolygonElement;
   }
   const workloadWrap = root.querySelector<HTMLElement>("[data-workloads]");
   const workloadRows: WorkloadRow[] = [];
@@ -348,14 +426,77 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       const rowEl = el("div", "sft-wl");
       const head = el("div", "sft-wl__head");
       const name = el("span", "sft-wl__name", def.name);
+      const headRight = el("div", "sft-wl__head-right");
       const price = el("span", "sft-wl__price", "");
-      head.append(name, price);
+      const sat = el("span", "sft-wl__sat", "");
+      headRight.append(price, sat);
+      head.append(name, headRight);
 
       const desc = el("span", "sft-wl__desc", def.desc);
 
+      // Inline price sparkline.
+      const svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("class", "sft-wl__spark");
+      svg.setAttribute("viewBox", "0 0 100 24");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("aria-hidden", "true");
+      const sparkArea = document.createElementNS(SVG_NS, "polygon");
+      sparkArea.setAttribute("class", "sft-wl__spark-area");
+      const sparkLine = document.createElementNS(SVG_NS, "polyline");
+      sparkLine.setAttribute("class", "sft-wl__spark-line");
+      svg.append(sparkArea, sparkLine);
+
+      // Drag-to-set capacity slider (track + fill + grabbable thumb). Dragging
+      // anywhere along it sets this workload's share directly; the +/- steppers
+      // stay for fine, one-unit nudges. Built as a slider so pointer + keyboard
+      // both drive the same allocation.
+      const slider = el("div", "sft-wl__slider");
+      slider.setAttribute("role", "slider");
+      slider.tabIndex = 0;
+      slider.setAttribute("aria-label", `${def.name} capacity share`);
+      slider.setAttribute("aria-valuemin", "0");
+      slider.setAttribute("aria-valuemax", "100");
       const barWrap = el("div", "sft-wl__bar");
       const bar = el("span", "sft-wl__fill");
       barWrap.appendChild(bar);
+      const thumb = el("span", "sft-wl__thumb");
+      slider.append(barWrap, thumb);
+
+      let dragging = false;
+      const fracFromEvent = (e: PointerEvent) => {
+        const rect = barWrap.getBoundingClientRect();
+        if (rect.width <= 0) return 0;
+        return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      };
+      slider.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        slider.classList.add("is-dragging");
+        slider.setPointerCapture(e.pointerId);
+        handlers.onSetAllocationShare(def.id, fracFromEvent(e));
+        e.preventDefault();
+      });
+      slider.addEventListener("pointermove", (e) => {
+        if (dragging) handlers.onSetAllocationShare(def.id, fracFromEvent(e));
+      });
+      const endDrag = (e: PointerEvent) => {
+        if (!dragging) return;
+        dragging = false;
+        slider.classList.remove("is-dragging");
+        if (slider.hasPointerCapture(e.pointerId))
+          slider.releasePointerCapture(e.pointerId);
+      };
+      slider.addEventListener("pointerup", endDrag);
+      slider.addEventListener("pointercancel", endDrag);
+      slider.addEventListener("keydown", (e) => {
+        const k = (e as KeyboardEvent).key;
+        if (k === "ArrowLeft" || k === "ArrowDown") {
+          handlers.onSetAllocation(def.id, -1);
+          e.preventDefault();
+        } else if (k === "ArrowRight" || k === "ArrowUp") {
+          handlers.onSetAllocation(def.id, 1);
+          e.preventDefault();
+        }
+      });
 
       const ctrls = el("div", "sft-wl__ctrls");
       const minus = el("button", "sft-wl__step", "–") as HTMLButtonElement;
@@ -367,9 +508,23 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       plus.addEventListener("click", () => handlers.onSetAllocation(def.id, 1));
       ctrls.append(minus, share, plus);
 
-      rowEl.append(head, desc, barWrap, ctrls);
+      rowEl.append(head, desc, svg, slider, ctrls);
       workloadWrap.appendChild(rowEl);
-      workloadRows.push({ root: rowEl, price, share, bar, minus, plus, id: def.id });
+      workloadRows.push({
+        root: rowEl,
+        price,
+        sat,
+        share,
+        bar,
+        slider,
+        thumb,
+        minus,
+        plus,
+        id: def.id,
+        sparkData: [],
+        sparkLine,
+        sparkArea,
+      });
     }
   }
 
@@ -501,10 +656,60 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     });
   }
 
+  // --- Corporate tree (second prestige currency, idea #4) ---------------
+  // Reuses the .sft-prow chrome; paid in influence. The whole panel is hidden
+  // until the Corporate layer unlocks (a handful of rebuilds in).
+  interface CorporateRow {
+    root: HTMLElement;
+    level: HTMLElement;
+    cost: HTMLElement;
+    button: HTMLButtonElement;
+    id: string;
+  }
+  const corpPanel = root.querySelector<HTMLElement>("[data-corporate]");
+  const corpListWrap = root.querySelector<HTMLElement>("[data-corporate-list]");
+  const corpNote = root.querySelector<HTMLElement>("[data-corporate-note]");
+  const corporateRows: CorporateRow[] = [];
+  if (corpListWrap) {
+    for (const def of CORPORATE) {
+      const rowEl = el("button", "sft-prow");
+      rowEl.type = "button";
+      (rowEl as HTMLButtonElement).addEventListener("click", () =>
+        handlers.onBuyCorporate(def.id),
+      );
+      const main = el("span", "sft-prow__main");
+      main.append(
+        el("span", "sft-prow__name", def.name),
+        el("span", "sft-prow__desc", def.desc),
+      );
+      const meta = el("span", "sft-prow__meta");
+      const level = el("span", "sft-prow__level", "Lv 0");
+      const cost = el("span", "sft-prow__cost", "");
+      meta.append(level, cost);
+      rowEl.append(main, meta);
+      corpListWrap.appendChild(rowEl);
+      corporateRows.push({
+        root: rowEl,
+        level,
+        cost,
+        button: rowEl as HTMLButtonElement,
+        id: def.id,
+      });
+    }
+  }
+
+  // --- Ascension (post-campaign Endless escalation, idea #4) ------------
+  const ascEl = root.querySelector<HTMLElement>("[data-ascension]");
+  const ascTier = root.querySelector<HTMLElement>("[data-ascension-tier]");
+  const ascNext = root.querySelector<HTMLElement>("[data-ascension-next]");
+  const ascBar = root.querySelector<HTMLElement>("[data-ascension-bar]");
+
   const prestigeBtn = $<HTMLButtonElement>("[data-prestige-go]");
   const prestigePreview = $("[data-prestige-preview]");
   prestigeBtn.addEventListener("click", () => handlers.onPrestige());
   overclockBtn.addEventListener("click", () => handlers.onOverclock());
+  // The burst runs the floor hot (idea #5) — note the trade-off on the control.
+  overclockBtn.title = `×${TUNING.overclockMult} output, but heat and wear surge while it runs — time it for thermal headroom.`;
 
   // --- Incident banner --------------------------------------------------
   const eventBanner = root.querySelector<HTMLElement>("[data-event]");
@@ -533,7 +738,6 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   // --- Statistics sparklines (idea #11) ---------------------------------
   // Three rolling sparklines sampled once a second by index.ts. Built once;
   // each repaint only rewrites two SVG point strings + two labels.
-  const SVG_NS = "http://www.w3.org/2000/svg";
   const SPARK_LEN = 60;
   interface Spark {
     data: number[];
@@ -629,7 +833,48 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     setText(sp.range, `${sp.fmt(lo)} – ${sp.fmt(hi)}`);
   }
 
+  function paintWorkloadSpark(r: WorkloadRow) {
+    const data = r.sparkData;
+    const n = data.length;
+    if (n < 2) {
+      if (r.sparkLine.getAttribute("points")) r.sparkLine.setAttribute("points", "");
+      if (r.sparkArea.getAttribute("points")) r.sparkArea.setAttribute("points", "");
+      return;
+    }
+    let lo = Math.min(...data);
+    let hi = Math.max(...data);
+    if (hi - lo < 1e-9) {
+      hi += 1;
+      lo = Math.max(0, lo - 1);
+    }
+    const span = hi - lo || 1;
+    const pts: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const x = (i / (SPARK_LEN - 1)) * 100;
+      const norm = Math.min(1, Math.max(0, (data[i] - lo) / span));
+      pts.push(`${x.toFixed(2)},${(23 - norm * 22).toFixed(2)}`);
+    }
+    const lineStr = pts.join(" ");
+    if (r.sparkLine.getAttribute("points") !== lineStr)
+      r.sparkLine.setAttribute("points", lineStr);
+    const lastX = ((n - 1) / (SPARK_LEN - 1)) * 100;
+    r.sparkArea.setAttribute("points", `0,24 ${lineStr} ${lastX.toFixed(2)},24`);
+  }
+
   function recordHistory(d: Derived) {
+    // Per-workload price sparklines (idea #9) — recorded independently of the
+    // statistics panel so they tick even when Progress is locked/hidden.
+    if (workloadRows.length) {
+      const priceById: Record<string, number> = {};
+      for (const w of d.workloads) priceById[w.id] = w.price;
+      for (const r of workloadRows) {
+        const price = priceById[r.id];
+        if (price == null) continue;
+        r.sparkData.push(price);
+        if (r.sparkData.length > SPARK_LEN) r.sparkData.shift();
+        paintWorkloadSpark(r);
+      }
+    }
     if (!sparkWrap) return;
     const output =
       d.heatThrottle *
@@ -769,12 +1014,14 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     title: HTMLElement;
     fill: HTMLElement;
     progress: HTMLElement;
+    reserve: HTMLElement;
     reward: HTMLElement;
     timer: HTMLElement;
   }
   interface OfferRow {
     root: HTMLElement;
     title: HTMLElement;
+    reserve: HTMLElement;
     reward: HTMLElement;
     risk: HTMLElement;
     expiry: HTMLElement;
@@ -796,15 +1043,17 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     const fill = el("span", "sft-bar__fill");
     barWrap.appendChild(fill);
     const progress = el("p", "sft-contract__progress");
+    const reserve = el("p", "sft-contract__reserve");
     const reward = el("p", "sft-contract__reward");
     const timer = el("p", "sft-contract__expiry");
-    rootEl.append(title, barWrap, progress, reward, timer);
-    return { root: rootEl, title, fill, progress, reward, timer };
+    rootEl.append(title, barWrap, progress, reserve, reward, timer);
+    return { root: rootEl, title, fill, progress, reserve, reward, timer };
   }
 
   function makeOfferRow(id: string): OfferRow {
     const rootEl = el("div", "sft-contract__offer");
     const title = el("p", "sft-contract__line");
+    const reserve = el("p", "sft-contract__reserve");
     const reward = el("p", "sft-contract__reward");
     const risk = el("p", "sft-contract__risk");
     const expiry = el("p", "sft-contract__expiry");
@@ -816,8 +1065,8 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     accept.addEventListener("click", () => handlers.onAcceptContract(id));
     decline.addEventListener("click", () => handlers.onDeclineContract(id));
     actions.append(accept, decline);
-    rootEl.append(title, reward, risk, expiry, actions);
-    return { root: rootEl, title, reward, risk, expiry, accept };
+    rootEl.append(title, reserve, reward, risk, expiry, actions);
+    return { root: rootEl, title, reserve, reward, risk, expiry, accept };
   }
 
   // --- Milestones (collapsible) ----------------------------------------
@@ -972,8 +1221,17 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setText(r.price, `$${fmt(w.price)} ${arrow}`);
         setFlag(r.price, "is-up", w.trend === "up");
         setFlag(r.price, "is-down", w.trend === "down");
-        r.bar.style.width = pct(w.alloc);
-        setText(r.share, pct(w.alloc));
+        // Demand saturation (idea #1): flag when concentration is decaying the
+        // price, so spreading vs concentrating reads as a live trade-off.
+        const satPct = Math.round(w.saturation * 100);
+        setText(r.sat, satPct >= 3 ? `−${satPct}% saturated` : "");
+        setFlag(r.root, "is-saturated", satPct >= 3);
+        const allocPct = pct(w.alloc);
+        r.bar.style.width = allocPct;
+        r.thumb.style.left = allocPct;
+        setText(r.share, allocPct);
+        r.slider.setAttribute("aria-valuenow", String(Math.round(w.alloc * 100)));
+        r.slider.setAttribute("aria-valuetext", allocPct);
         const weight = Math.max(0, Math.floor(s.allocation[r.id] ?? 0));
         setDisabled(r.minus, weight <= 0);
         setDisabled(r.plus, weight >= TUNING.allocationMax);
@@ -1262,6 +1520,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           r.progress,
           `${fmt(ac.delivered)} / ${fmt(ac.required)} FLOP · ${pct(ac.progress)}`,
         );
+        setText(r.reserve, `Reserves ${pct(ac.reserve)} of compute from spot`);
         setText(r.reward, `Pays ${money(ac.reward)} + ${fmt(ac.repReward)} rep`);
         setText(r.timer, `${duration(ac.remainingSec)} remaining`);
       }
@@ -1286,6 +1545,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           r.title,
           `${of.tag} · ${fmt(of.required)} FLOP in ${duration(of.durationSec)}`,
         );
+        setText(r.reserve, `Reserves ${pct(of.reserve)} of compute while active`);
         setText(r.reward, `Pays ${money(of.reward)} + ${fmt(of.repReward)} rep`);
         setText(r.risk, `Failure costs ${fmt(of.repPenalty)} reputation`);
         setText(r.expiry, `Withdrawn in ${duration(of.expiresSec)}`);
@@ -1311,7 +1571,9 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       setText(
         contractNote ?? undefined,
         active.length
-          ? `${active.length} active${d.contracts.streak >= 2 ? ` · ${d.contracts.streak}× streak` : ""}`
+          ? `${active.length} active · ${pct(d.reservedFrac)} reserved${
+              d.contracts.streak >= 2 ? ` · ${d.contracts.streak}× streak` : ""
+            }`
           : "Demand market",
       );
     }
@@ -1356,10 +1618,36 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setText(
           endlessBtn,
           d.endless
-            ? `Endless ×${d.endlessMult} — stand down`
-            : "Engage Endless",
+            ? `Endless ×${d.endlessMult.toFixed(1)} — stand down`
+            : `Engage Endless ×${(TUNING.endlessMult + d.ascension * TUNING.ascensionStep).toFixed(1)}`,
         );
         setFlag(endlessBtn, "is-active", d.endless);
+      }
+    }
+
+    // Ascension (idea #4): post-campaign tiers that escalate the Endless
+    // multiplier. Hidden until the campaign is complete.
+    if (ascEl) {
+      setFlag(ascEl, "is-hidden", !d.endlessUnlocked);
+      if (d.endlessUnlocked) {
+        const liveMult = (TUNING.endlessMult + d.ascension * TUNING.ascensionStep).toFixed(1);
+        const tierName =
+          d.ascension > 0 ? ASCENSION[Math.min(d.ascension, ASCENSION.length) - 1].name : "Unascended";
+        setText(ascTier ?? undefined, `${tierName} · Endless ×${liveMult}`);
+        const nextTier = ASCENSION[d.ascension];
+        if (nextTier) {
+          setText(
+            ascNext ?? undefined,
+            `${rate(d.compute, " FLOP")} / ${rate(nextTier.compute, " FLOP")} → ${nextTier.name} (×${(
+              TUNING.endlessMult +
+              (d.ascension + 1) * TUNING.ascensionStep
+            ).toFixed(1)})`,
+          );
+          if (ascBar) ascBar.style.width = pct(Math.min(1, d.compute / nextTier.compute));
+        } else {
+          setText(ascNext ?? undefined, "Maximum ascension reached.");
+          if (ascBar) ascBar.style.width = "100%";
+        }
       }
     }
 
@@ -1377,6 +1665,81 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       if (serviceBtn) {
         setText(serviceBtn, `Service · ${money(d.serviceCost)}`);
         setDisabled(serviceBtn, w <= 0 || s.money < d.serviceCost);
+      }
+    }
+
+    // Pinned objective (idea #3): the first incomplete goal, with live progress.
+    if (objectiveEl) {
+      const next = GOALS.find((g) => !s.goals.includes(g.id));
+      if (!next) {
+        setFlag(objectiveEl, "is-complete", true);
+        setText(objectiveName ?? undefined, "Campaign complete");
+        setText(
+          objectiveProgress ?? undefined,
+          d.endlessUnlocked && !s.endless ? "Engage Endless for more" : "All objectives cleared",
+        );
+        if (objectiveBar) objectiveBar.style.width = "100%";
+      } else {
+        setFlag(objectiveEl, "is-complete", false);
+        setText(objectiveName ?? undefined, next.name);
+        const m = next.metric?.(s, d);
+        if (m) {
+          setText(
+            objectiveProgress ?? undefined,
+            `${fmt(m.value)} / ${fmt(m.target)} ${m.unit}`,
+          );
+          if (objectiveBar)
+            objectiveBar.style.width = pct(m.target > 0 ? Math.min(1, m.value / m.target) : 0);
+        } else {
+          setText(objectiveProgress ?? undefined, next.desc);
+          if (objectiveBar) objectiveBar.style.width = "0%";
+        }
+      }
+    }
+
+    // Progressive rail gating (idea #3): lock sections until the farm earns
+    // them; initTabs (page script) reads data-locked to refuse selection.
+    for (const item of navItems) {
+      const gate = SECTION_GATES[item.id];
+      if (!gate) continue;
+      const { unlocked, hint } = gate(s, d);
+      const wasUnlocked = navUnlocked[item.id] ?? true;
+      setFlag(item.root, "is-locked", !unlocked);
+      if (!unlocked) {
+        item.root.dataset.locked = "1";
+        item.root.setAttribute("aria-disabled", "true");
+        if (item.root.title !== hint) item.root.title = hint;
+      } else {
+        if (item.root.dataset.locked) delete item.root.dataset.locked;
+        if (item.root.getAttribute("aria-disabled")) item.root.removeAttribute("aria-disabled");
+        if (item.root.title) item.root.title = "";
+      }
+      if (!navFirstRender && unlocked && !wasUnlocked) {
+        const label =
+          item.root.querySelector(".sft-navitem__label")?.textContent ?? item.id;
+        pushLog(`▣ ${label} unlocked`, "gold");
+        toast(`${label} unlocked.`);
+      }
+      navUnlocked[item.id] = unlocked;
+    }
+    navFirstRender = false;
+
+    // Corporate layer (idea #4): a second prestige tree, hidden until unlocked.
+    if (corpPanel) {
+      const unlockedCorp = corporateUnlocked(s);
+      setFlag(corpPanel, "is-hidden", !unlockedCorp);
+      if (unlockedCorp) {
+        setText(corpNote ?? undefined, `${fmt(s.influence)} ◈ influence`);
+        for (const r of corporateRows) {
+          const lvl = s.corporateUpgrades[r.id] ?? 0;
+          setText(r.level, "Lv " + lvl);
+          const cost = corporateCost(s, r.id);
+          const maxed = !isFinite(cost);
+          setText(r.cost, maxed ? "MAX" : fmt(cost) + " ◈");
+          const afford = !maxed && s.influence >= cost;
+          setDisabled(r.button, !afford);
+          setFlag(r.root, "is-afford", afford);
+        }
       }
     }
   }

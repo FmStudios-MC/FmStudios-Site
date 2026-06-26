@@ -3,6 +3,7 @@
 
 import type {
   AchievementDef,
+  AscensionDef,
   BuildingDef,
   ContractOffer,
   Derived,
@@ -17,9 +18,11 @@ import type {
 import {
   ACHIEVEMENTS,
   ACHIEVEMENT_BY_ID,
+  ASCENSION,
   BUILDINGS,
   BUILDING_BY_ID,
   CONTRACT_ARCHETYPES,
+  CORPORATE_BY_ID,
   EVENT_BY_ID,
   EVENTS,
   FINAL_GOAL_ID,
@@ -38,6 +41,8 @@ import {
 const owned = (s: GameState, id: string) => s.buildings[id] ?? 0;
 const plevel = (s: GameState, id: string) => s.prestigeUpgrades[id] ?? 0;
 const hasUpgrade = (s: GameState, id: string) => s.upgrades.includes(id);
+/** Level of a Corporate (second-currency) node (idea #4). */
+const corpLevel = (s: GameState, id: string) => s.corporateUpgrades[id] ?? 0;
 
 const PRODUCER_IDS = BUILDINGS.filter((b) => b.category === "producer").map(
   (b) => b.id,
@@ -126,6 +131,7 @@ export function buyBuildingBulk(
   if (count <= 0 || s.money < cost) return 0;
   s.money -= cost;
   s.buildings[id] = owned(s, id) + count;
+  invalidateDerive();
   return count;
 }
 
@@ -174,9 +180,42 @@ export function gridPrice(now: number): number {
 }
 
 /** The Endless modifier (idea #5): a single multiplier that scales both
-    challenge and reward once the player has engaged it. 1 when off. */
+    challenge and reward once the player has engaged it. 1 when off. Ascension
+    tiers (idea #4) each lift it a notch, so the late game keeps escalating. */
 export function endlessMult(s: GameState): number {
-  return s.endless ? TUNING.endlessMult : 1;
+  return s.endless ? TUNING.endlessMult + s.ascension * TUNING.ascensionStep : 1;
+}
+
+/** Whether the Corporate layer (idea #4) has been unlocked: influence begins
+    accruing once the studio has rebuilt this many times. */
+export function corporateUnlocked(s: GameState): boolean {
+  return s.prestigeCount >= TUNING.corporateUnlockRebuilds;
+}
+
+/** Cost of the next level of a Corporate node, in influence. */
+export function corporateCost(s: GameState, id: string): number {
+  const def = CORPORATE_BY_ID[id];
+  if (!def) return Infinity;
+  const lvl = corpLevel(s, id);
+  if (def.maxLevel != null && lvl >= def.maxLevel) return Infinity;
+  return Math.ceil(def.baseCost * Math.pow(def.costGrowth, lvl));
+}
+
+/** How many contracts can run at once — Account Management (Corporate) adds slots. */
+export function maxActiveContracts(s: GameState): number {
+  return TUNING.contractMaxActive + corpLevel(s, "corp-accounts");
+}
+
+/** Demand saturation (idea #1): a workload's marginal price multiplier as a
+    function of its share of capacity. 1 (no decay) below `satCap` or for the
+    unsaturating baseline (web); falls toward 1/(1+satStrength) as share → 1, so
+    flooding one market eats its price and spreading keeps every margin high. */
+export function saturationFactor(def: WorkloadDef, frac: number): number {
+  if (!def.satStrength || def.satCap == null) return 1;
+  const span = 1 - def.satCap;
+  if (span <= 0) return 1;
+  const over = Math.max(0, frac - def.satCap);
+  return 1 / (1 + def.satStrength * (over / span));
 }
 
 /** The reputation tier the farm currently stands in, plus progress toward the
@@ -276,7 +315,55 @@ export function setAllocation(s: GameState, id: string, delta: number): boolean 
   const next = Math.max(0, Math.min(TUNING.allocationMax, cur + delta));
   if (next === cur) return false;
   s.allocation[id] = next;
+  invalidateDerive();
   return true;
+}
+
+/** Set a workload's *share* of capacity directly to `frac` in [0, 1] — the
+    drag interaction. The dragged workload takes `frac` of the allocationMax
+    budget; the remainder is split among the others in proportion to their
+    current weights (evenly if all are zero), so the displayed bar tracks the
+    pointer while the rest of the split holds its shape. */
+export function setAllocationShare(s: GameState, id: string, frac: number): boolean {
+  if (!WORKLOADS.some((w) => w.id === id)) return false;
+  const M = TUNING.allocationMax;
+  const wi = Math.round(Math.max(0, Math.min(1, frac)) * M);
+  const remaining = M - wi;
+
+  const others = WORKLOADS.filter((w) => w.id !== id);
+  const next: Record<string, number> = { [id]: wi };
+  if (others.length) {
+    const otherSum = others.reduce(
+      (n, w) => n + Math.max(0, s.allocation[w.id] ?? 0),
+      0,
+    );
+    // Real-valued targets, then largest-remainder rounding so the integer
+    // weights sum to exactly `remaining` (keeps the dragged share accurate).
+    const raw = others.map((w) =>
+      otherSum > 0
+        ? (Math.max(0, s.allocation[w.id] ?? 0) / otherSum) * remaining
+        : remaining / others.length,
+    );
+    const floored = raw.map((v) => Math.floor(v));
+    let leftover = remaining - floored.reduce((a, b) => a + b, 0);
+    const order = raw
+      .map((v, i) => ({ i, rem: v - Math.floor(v) }))
+      .sort((a, b) => b.rem - a.rem);
+    for (let k = 0; leftover > 0 && order.length; k++, leftover--) {
+      floored[order[k % order.length].i]++;
+    }
+    others.forEach((w, i) => (next[w.id] = floored[i]));
+  }
+
+  let changed = false;
+  for (const w of WORKLOADS) {
+    if ((s.allocation[w.id] ?? 0) !== next[w.id]) {
+      s.allocation[w.id] = next[w.id];
+      changed = true;
+    }
+  }
+  if (changed) invalidateDerive();
+  return changed;
 }
 
 // --- Incident scheduler -------------------------------------------------
@@ -474,7 +561,7 @@ function scheduleNextOffer(s: GameState, now: number): void {
     shaped by a rotating archetype, so the board holds a mix of deal shapes.
     Returns null when there's nothing meaningful to ask for yet (no compute). */
 function generateOffer(s: GameState, now: number): ContractOffer | null {
-  const d = derive(s, now);
+  const d = deriveImpl(s, now);
   if (d.compute <= 0) return null;
 
   const arch = CONTRACT_ARCHETYPES[s.contractSeed % CONTRACT_ARCHETYPES.length];
@@ -486,18 +573,22 @@ function generateOffer(s: GameState, now: number): ContractOffer | null {
 
   const durationSec = TUNING.contractDurationsSec[arch.durIdx];
 
-  // Required output is a slice of full-throughput production over the window;
-  // the archetype sets the centre, a jittered factor adds variety. Higher
-  // reputation tiers (idea #8) post bigger jobs; Endless (idea #5) bigger still.
+  // The job reserves a share of the farm (idea #2) and asks for exactly what
+  // that slice produces over the window — so it's deliverable if you commit the
+  // capacity, and the reserve is what it costs you in spot income. Higher
+  // reputation tiers (idea #8) + Endless (idea #5) scale the ask (and reward) up.
+  const reserve = Math.max(
+    0.1,
+    Math.min(TUNING.contractReserveCap, arch.reserve * (0.85 + r2 * 0.3)),
+  );
   const tierScale = reputationTier(s.reputation).def.contractScale;
-  const targetMult = arch.target * (0.85 + r2 * 0.3);
   const required = Math.max(
     1,
-    d.compute * durationSec * targetMult * tierScale * endlessMult(s),
+    d.compute * reserve * durationSec * tierScale * endlessMult(s),
   );
 
-  // Reward beats letting that compute auto-sell, paid as a lump sum; Standing
-  // Orders (prestige) sweetens every payout.
+  // Reward beats letting that reserved compute auto-sell, paid as a lump sum;
+  // Standing Orders (prestige) sweetens every payout.
   const standing = plevel(s, "standing-orders") > 0 ? 1.25 : 1;
   const bonus = arch.reward * (0.9 + r3 * 0.2);
   const reward = Math.ceil(required * d.price * bonus * standing);
@@ -517,6 +608,7 @@ function generateOffer(s: GameState, now: number): ContractOffer | null {
     repReward,
     repPenalty,
     durationSec,
+    reserve,
     expiresAt: now + TUNING.contractOfferTtlMs,
   };
 }
@@ -549,8 +641,34 @@ function streakMult(s: GameState): number {
   return 1 + Math.min(TUNING.contractStreakMax, s.contractStreak) * TUNING.contractStreakStep;
 }
 
-/** Everything the UI and tick need, computed from state. */
+// --- Derived memoisation (idea #8) -------------------------------------
+// derive() is re-run from the render frame (every rAF), the 1s watcher and each
+// action — often at the same `now`. A one-entry cache keyed on (state, now,
+// epoch) lets those share one computation; any state mutation bumps the epoch.
+// Internal callers that derive *mid-mutation* use deriveImpl directly, so the
+// cache never serves a stale value built between two writes inside one tick.
+let _deriveCache: { s: GameState; now: number; epoch: number; d: Derived } | null =
+  null;
+let _deriveEpoch = 0;
+
+/** Invalidate the memoised derive cache. Called by tick + every mutator. */
+export function invalidateDerive(): void {
+  _deriveEpoch++;
+  _deriveCache = null;
+}
+
+/** Everything the UI and tick need, computed from state (memoised). */
 export function derive(s: GameState, now: number): Derived {
+  const c = _deriveCache;
+  if (c !== null && c.s === s && c.now === now && c.epoch === _deriveEpoch) {
+    return c.d;
+  }
+  const d = deriveImpl(s, now);
+  _deriveCache = { s, now, epoch: _deriveEpoch, d };
+  return d;
+}
+
+function deriveImpl(s: GameState, now: number): Derived {
   let computeBase = 0;
   let powerCap = TUNING.basePowerCap;
   let powerDraw = 0;
@@ -593,9 +711,11 @@ export function derive(s: GameState, now: number): Derived {
   }
 
   // In-run research (idea #6): each owned level compounds one lever. These
-  // reset on prestige, so they're a mid-run boost rather than a permanent one.
+  // reset on prestige, so they're a mid-run boost rather than a permanent one —
+  // except a Standing Lab (Corporate, idea #4) seeds every node a few levels.
+  const corpLab = corpLevel(s, "corp-lab");
   for (const def of RESEARCH) {
-    const lvl = s.researchNodes[def.id] ?? 0;
+    const lvl = (s.researchNodes[def.id] ?? 0) + corpLab;
     if (lvl <= 0) continue;
     if (def.multComputePer) upgradeComputeMult *= Math.pow(1 + def.multComputePer, lvl);
     if (def.multPricePer) upgradePriceMult *= Math.pow(1 + def.multPricePer, lvl);
@@ -614,9 +734,13 @@ export function derive(s: GameState, now: number): Derived {
   const ease = (m: number) => 1 + (m - 1) * (1 - soften);
   const evCoolingMult = ease(evDef?.coolingMult ?? 1);
   // The green power contract (idea #7) shrugs off the Grid Surge price spike.
-  const gridSurgeImmune =
-    s.powerContract === "green" && (evDef?.gridPriceMult ?? 1) > 1;
-  const evGridMult = gridSurgeImmune ? 1 : ease(evDef?.gridPriceMult ?? 1);
+  const isGridSurge = (evDef?.gridPriceMult ?? 1) > 1;
+  const gridSurgeImmune = s.powerContract === "green" && isGridSurge;
+  let evGridMult = gridSurgeImmune ? 1 : ease(evDef?.gridPriceMult ?? 1);
+  // An N+1 Power Feed (idea #9) eases a grid surge halfway back toward neutral.
+  if (!gridSurgeImmune && isGridSurge && owned(s, "redundancy") > 0) {
+    evGridMult = 1 + (evGridMult - 1) * 0.5;
+  }
   const evPowerCapMult = ease(evDef?.powerCapMult ?? 1);
   const evComputeMult = ease(evDef?.computeMult ?? 1);
   const evPriceMult = evDef?.priceMult ?? 1; // good-only, never softened
@@ -648,19 +772,28 @@ export function derive(s: GameState, now: number): Derived {
     if (def.multUptime) uptimeBonus += def.multUptime * n;
   }
 
+  const overclockActive = now < s.overclockUntil;
+
   // Workload split: the blend sets the effective sell price and the extra heat
-  // and power the chosen markets drive (AI training runs hot and hungry).
+  // and power the chosen markets drive (AI training runs hot and hungry). Each
+  // workload's contribution is scaled by its demand saturation (idea #1), so
+  // concentrating in one market decays its marginal price.
   const fractions = allocationFractions(s);
   let workloadPriceMult = 0;
   let workloadHeatExtra = 0;
   let workloadPowerExtra = 0;
   for (const { def, frac } of fractions) {
-    workloadPriceMult += frac * workloadPrice(def, now);
+    workloadPriceMult += frac * workloadPrice(def, now) * saturationFactor(def, frac);
     if (def.heatFactor) workloadHeatExtra += frac * def.heatFactor;
     if (def.powerFactor) workloadPowerExtra += frac * def.powerFactor;
   }
   heatGen *= 1 + workloadHeatExtra;
   powerDraw += producerPowerDraw * workloadPowerExtra;
+
+  // Overclock cost (idea #5): the burst runs the floor hot, so heat generation
+  // is amplified while it's live — you time it for thermal headroom (and can't
+  // safely mash it during a cold-run scripted op).
+  if (overclockActive) heatGen *= TUNING.overclockHeatMult;
 
   coolingCap *= coolingCapMult * evCoolingMult;
   powerCap *= evPowerCapMult;
@@ -690,15 +823,17 @@ export function derive(s: GameState, now: number): Derived {
       ? bandwidthCap / bandwidthDraw
       : 1;
 
-  // Prestige + upgrade + staff compute multipliers, plus active overclock.
+  // Prestige + upgrade + staff compute multipliers, plus active overclock and
+  // the Standing Overclock (Corporate, idea #4) permanent baseline boost.
   const prestigeComputeMult =
     (1 + 0.25 * plevel(s, "dist-arch")) * (1 + 0.35 * plevel(s, "hyperthread"));
-  const overclockActive = now < s.overclockUntil;
+  const corpComputeMult = 1 + 0.08 * corpLevel(s, "corp-overclock");
   const overclock = overclockActive ? TUNING.overclockMult : 1;
   const computeMult =
     (1 + engineerMult) *
     upgradeComputeMult *
     prestigeComputeMult *
+    corpComputeMult *
     overclock *
     evComputeMult;
 
@@ -713,6 +848,14 @@ export function derive(s: GameState, now: number): Derived {
     powerThrottle *
     bandwidthThrottle *
     (1 - wearPenalty);
+
+  // Contracts reserve a slice of compute (idea #2): the summed reserve across
+  // active jobs, capped so the spot market is never fully starved. That slice
+  // is pulled out of auto-sell; tick() draws contract delivery from it.
+  let reserveSum = 0;
+  for (const c of s.contracts) reserveSum += c.reserve;
+  const reservedFrac = Math.min(TUNING.contractReserveCap, reserveSum);
+  const sellCompute = compute * (1 - reservedFrac);
 
   // Reputation standing (idea #8) + Endless (idea #5) both lift sell price.
   const tier = reputationTier(s.reputation);
@@ -737,14 +880,19 @@ export function derive(s: GameState, now: number): Derived {
   // (idea #7); the raw market still drives the peak/off-peak read-out.
   const gridMarket = gridPrice(now);
   const grid = effectiveGridPrice(s, now) * evGridMult;
-  const grossPerSec = compute * price;
+  // Only the un-reserved compute auto-sells (idea #2); the rest is delivering
+  // contracts. Total compute still drives goals, reputation and research.
+  const grossPerSec = sellCompute * price;
   const powerCost = powerDraw * grid;
 
-  // Per-workload view for the UI: normalised share + live effective $/FLOP.
+  // Per-workload view for the UI: normalised share + live effective $/FLOP,
+  // after demand saturation (idea #1) so the row shows the price you'd actually
+  // get at the current concentration.
   const workloads = fractions.map(({ def, frac }) => {
     const slope = Math.cos((now / def.cycleMs) * Math.PI * 2);
     const trend: "up" | "down" | "flat" =
       def.swing < 0.08 ? "flat" : slope > 0.15 ? "up" : slope < -0.15 ? "down" : "flat";
+    const sat = saturationFactor(def, frac);
     return {
       id: def.id,
       name: def.name,
@@ -758,7 +906,9 @@ export function derive(s: GameState, now: number): Derived {
         prestigePriceMult *
         evPriceMult *
         standingMult *
-        workloadPrice(def, now),
+        workloadPrice(def, now) *
+        sat,
+      saturation: 1 - sat,
       trend,
     };
   });
@@ -823,6 +973,7 @@ export function derive(s: GameState, now: number): Derived {
     tag: c.tag,
     required: c.required,
     delivered: c.delivered,
+    reserve: c.reserve,
     progress: c.required > 0 ? Math.min(1, c.delivered / c.required) : 1,
     reward: c.reward,
     repReward: c.repReward,
@@ -834,6 +985,7 @@ export function derive(s: GameState, now: number): Derived {
       id: o.id,
       tag: o.tag,
       required: o.required,
+      reserve: o.reserve,
       reward: o.reward,
       repReward: o.repReward,
       repPenalty: o.repPenalty,
@@ -880,13 +1032,15 @@ export function derive(s: GameState, now: number): Derived {
     endlessUnlocked: s.goals.includes(FINAL_GOAL_ID),
     endless: s.endless,
     endlessMult: endlessM,
+    ascension: s.ascension,
+    reservedFrac,
     workloads,
     hotspot,
     script,
     event,
     contracts: {
       streak: s.contractStreak,
-      canAccept: s.contracts.length < TUNING.contractMaxActive,
+      canAccept: s.contracts.length < maxActiveContracts(s),
       active,
       offers,
     },
@@ -904,6 +1058,7 @@ export function claimAchievements(s: GameState, d: Derived): AchievementDef[] {
       granted.push(a);
     }
   }
+  if (granted.length) invalidateDerive(); // buffs change derive
   return granted;
 }
 
@@ -918,6 +1073,21 @@ export function claimGoals(s: GameState, d: Derived): GoalDef[] {
       granted.push(g);
     }
   }
+  if (granted.length) invalidateDerive();
+  return granted;
+}
+
+/** Grant any newly-reached ascension tiers (idea #4). Only counts once the
+    campaign is complete; each tier lifts the live Endless multiplier. Mirrors
+    claimGoals — the caller logs/toasts the returned defs. */
+export function claimAscension(s: GameState, d: Derived): AscensionDef[] {
+  if (!s.goals.includes(FINAL_GOAL_ID)) return [];
+  const granted: AscensionDef[] = [];
+  while (s.ascension < ASCENSION.length && d.compute >= ASCENSION[s.ascension].compute) {
+    granted.push(ASCENSION[s.ascension]);
+    s.ascension += 1;
+  }
+  if (granted.length) invalidateDerive();
   return granted;
 }
 
@@ -929,6 +1099,7 @@ export function tick(
   now: number,
   efficiency = 1,
 ): GameState {
+  invalidateDerive();
   if (dtSec <= 0) {
     s.lastTick = now;
     return s;
@@ -939,7 +1110,7 @@ export function tick(
   advanceHotspots(s, now);
   advanceScripts(s, now);
   advanceContracts(s, now);
-  const d = derive(s, now);
+  const d = deriveImpl(s, now);
 
   // Revenue feeds earnings/credits; the electricity bill is a cash drain only,
   // so it never pushes lifetime/run earnings (and the unlocks they gate)
@@ -965,9 +1136,11 @@ export function tick(
     const heatStress = 1 + (1 - d.heatThrottle) * TUNING.wearHeatStress;
     const techSlow = 1 / (1 + owned(s, "technician") * TUNING.wearTechSlow);
     const offline = efficiency < 1 ? TUNING.wearOfflineMult : 1;
+    // An active overclock (idea #5) ages the floor faster — part of its cost.
+    const oc = now < s.overclockUntil ? TUNING.overclockWearMult : 1;
     s.wear = Math.min(
       1,
-      s.wear + TUNING.wearRatePerSec * heatStress * techSlow * offline * dtSec,
+      s.wear + TUNING.wearRatePerSec * heatStress * techSlow * offline * oc * dtSec,
     );
   }
 
@@ -977,11 +1150,20 @@ export function tick(
   // (paying a streak-boosted reputation reward); fails the instant it lapses.
   if (s.contracts.length) {
     const windowStart = now - dtSec * 1000;
+    // Each job draws on the compute it reserved (idea #2). When the stack of
+    // reserves exceeds the cap, scale them down proportionally so total
+    // delivery matches the compute actually pulled from auto-sell.
+    let reserveSum = 0;
+    for (const c of s.contracts) reserveSum += c.reserve;
+    const reserveScale =
+      reserveSum > 0
+        ? Math.min(TUNING.contractReserveCap, reserveSum) / reserveSum
+        : 0;
     for (let i = s.contracts.length - 1; i >= 0; i--) {
       const c = s.contracts[i];
       const deliverSec =
         Math.max(0, Math.min(now, c.endsAt) - windowStart) / 1000;
-      c.delivered += d.compute * deliverSec * efficiency;
+      c.delivered += d.compute * c.reserve * reserveScale * deliverSec * efficiency;
       if (c.delivered >= c.required) {
         s.money += c.reward;
         s.runEarnings += c.reward;
@@ -1044,6 +1226,7 @@ export function buyBuilding(s: GameState, id: string): boolean {
   if (s.money < cost) return false;
   s.money -= cost;
   s.buildings[id] = owned(s, id) + 1;
+  invalidateDerive();
   return true;
 }
 
@@ -1053,6 +1236,7 @@ export function buyUpgrade(s: GameState, id: string): boolean {
   if (s.money < def.cost) return false;
   s.money -= def.cost;
   s.upgrades.push(id);
+  invalidateDerive();
   return true;
 }
 
@@ -1062,6 +1246,18 @@ export function buyPrestige(s: GameState, id: string): boolean {
   if (!isFinite(cost) || s.credits < cost) return false;
   s.credits -= cost;
   s.prestigeUpgrades[id] = plevel(s, id) + 1;
+  invalidateDerive();
+  return true;
+}
+
+/** Buy a level of a Corporate node with influence (idea #4). */
+export function buyCorporate(s: GameState, id: string): boolean {
+  if (!corporateUnlocked(s)) return false;
+  const cost = corporateCost(s, id);
+  if (!isFinite(cost) || s.influence < cost) return false;
+  s.influence -= cost;
+  s.corporateUpgrades[id] = corpLevel(s, id) + 1;
+  invalidateDerive();
   return true;
 }
 
@@ -1071,6 +1267,12 @@ export function doPrestige(s: GameState, now: number): boolean {
   if (gain <= 0) return false;
   s.credits += gain;
   s.prestigeCount += 1;
+  // Corporate influence (idea #4) accrues per rebuild once the studio is
+  // established, scaled a little by the size of the run just banked.
+  if (s.prestigeCount >= TUNING.corporateUnlockRebuilds) {
+    s.influence +=
+      TUNING.corporateGainBase + Math.floor(gain / TUNING.corporateGainDivisor);
+  }
   s.money = startingMoney(s);
   s.reputation = 0;
   s.runEarnings = 0;
@@ -1101,6 +1303,7 @@ export function doPrestige(s: GameState, now: number): boolean {
   s.contractStreak = 0;
   s.nextOfferAt = 0;
   s.lastTick = now;
+  invalidateDerive();
   return true;
 }
 
@@ -1110,30 +1313,32 @@ export function respondEvent(s: GameState, now: number): boolean {
   if (!ev || now >= ev.endsAt || ev.responded) return false;
   const def = EVENT_BY_ID[ev.id];
   if (!def || def.kind !== "bad") return false;
-  const cost = eventRespondCost(s, derive(s, now).grossPerSec);
+  const cost = eventRespondCost(s, deriveImpl(s, now).grossPerSec);
   if (s.money < cost) return false;
   s.money -= cost;
   s.activeEvent = null;
   s.eventsResponded += 1;
   scheduleNextEvent(s, now);
+  invalidateDerive();
   return true;
 }
 
 /** Spend cash to immediately clear the live rack hotspot. */
 export function rebalanceRacks(s: GameState, now: number): boolean {
   if (!s.hotspot || now >= s.hotspot.endsAt) return false;
-  const cost = hotspotClearCost(derive(s, now).grossPerSec);
+  const cost = hotspotClearCost(deriveImpl(s, now).grossPerSec);
   if (s.money < cost) return false;
   s.money -= cost;
   s.hotspot = null;
   s.hotspotsCleared += 1;
   scheduleNextHotspot(s, now);
+  invalidateDerive();
   return true;
 }
 
 /** Take an offer off the board, starting its delivery clock from `now`. */
 export function acceptContract(s: GameState, now: number, id: string): boolean {
-  if (s.contracts.length >= TUNING.contractMaxActive) return false;
+  if (s.contracts.length >= maxActiveContracts(s)) return false;
   const idx = s.contractOffers.findIndex((o) => o.id === id);
   if (idx < 0) return false;
   const o = s.contractOffers[idx];
@@ -1143,6 +1348,7 @@ export function acceptContract(s: GameState, now: number, id: string): boolean {
     tag: o.tag,
     required: o.required,
     delivered: 0,
+    reserve: o.reserve,
     reward: o.reward,
     repReward: o.repReward,
     repPenalty: o.repPenalty,
@@ -1150,6 +1356,7 @@ export function acceptContract(s: GameState, now: number, id: string): boolean {
     endsAt: now + o.durationSec * 1000,
   });
   s.contractOffers.splice(idx, 1);
+  invalidateDerive();
   return true;
 }
 
@@ -1158,6 +1365,7 @@ export function declineContract(s: GameState, _now: number, id: string): boolean
   const idx = s.contractOffers.findIndex((o) => o.id === id);
   if (idx < 0) return false;
   s.contractOffers.splice(idx, 1);
+  invalidateDerive();
   return true;
 }
 
@@ -1165,6 +1373,7 @@ export function triggerOverclock(s: GameState, now: number): boolean {
   if (now < s.overclockReadyAt) return false;
   s.overclockUntil = now + TUNING.overclockDurationMs;
   s.overclockReadyAt = now + TUNING.overclockCooldownMs;
+  invalidateDerive();
   return true;
 }
 
@@ -1172,6 +1381,7 @@ export function triggerOverclock(s: GameState, now: number): boolean {
 export function setPowerContract(s: GameState, contract: PowerContract): boolean {
   if (s.powerContract === contract) return false;
   s.powerContract = contract;
+  invalidateDerive();
   return true;
 }
 
@@ -1181,17 +1391,19 @@ export function buyResearch(s: GameState, id: string): boolean {
   if (!isFinite(cost) || s.research < cost) return false;
   s.research -= cost;
   s.researchNodes[id] = (s.researchNodes[id] ?? 0) + 1;
+  invalidateDerive();
   return true;
 }
 
 /** Spend cash to service the floor back to nominal, clearing wear (idea #9). */
 export function serviceHardware(s: GameState, now: number): boolean {
   if (s.wear <= 0) return false;
-  const cost = serviceCost(s, derive(s, now).grossPerSec);
+  const cost = serviceCost(s, deriveImpl(s, now).grossPerSec);
   if (s.money < cost) return false;
   s.money -= cost;
   s.wear = 0;
   s.servicedCount += 1;
+  invalidateDerive();
   return true;
 }
 
@@ -1199,5 +1411,6 @@ export function serviceHardware(s: GameState, now: number): boolean {
 export function toggleEndless(s: GameState): boolean {
   if (!s.goals.includes(FINAL_GOAL_ID)) return false;
   s.endless = !s.endless;
+  invalidateDerive();
   return true;
 }

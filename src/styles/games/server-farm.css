@@ -1879,7 +1879,28 @@
   color: var(--ink-faint);
   line-height: 1.4;
 }
+/* Drag-to-set capacity slider: a tall, grabbable hit zone wrapping the thin
+   track, with a thumb that rides the fill's leading edge. */
+.sft-wl__slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  margin-top: var(--space-3xs);
+  cursor: ew-resize;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.sft-wl__slider:focus-visible {
+  outline: none;
+}
+.sft-wl__slider:focus-visible .sft-wl__bar {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
 .sft-wl__bar {
+  width: 100%;
   height: 6px;
   border-radius: var(--radius-pill);
   background: var(--sft-track);
@@ -1892,6 +1913,37 @@
   border-radius: var(--radius-pill);
   background: var(--gold-sheen);
   transition: width var(--dur-mid) var(--ease-out-quart);
+}
+.sft-wl__thumb {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  border: 2px solid var(--sft-panel);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--gold) 50%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition:
+    left var(--dur-mid) var(--ease-out-quart),
+    box-shadow var(--dur-fast) var(--ease-out-quart);
+}
+.sft-wl__slider:hover .sft-wl__thumb,
+.sft-wl__slider:focus-visible .sft-wl__thumb {
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--gold) 28%, transparent);
+}
+/* While dragging, drop the easing so the bar + thumb track the pointer 1:1. */
+.sft-wl__slider.is-dragging {
+  cursor: grabbing;
+}
+.sft-wl__slider.is-dragging .sft-wl__fill,
+.sft-wl__slider.is-dragging .sft-wl__thumb {
+  transition: box-shadow var(--dur-fast) var(--ease-out-quart);
+}
+.sft-wl__slider.is-dragging .sft-wl__thumb {
+  box-shadow: 0 0 0 5px color-mix(in oklch, var(--gold) 32%, transparent);
 }
 .sft-wl__ctrls {
   display: flex;
@@ -2812,6 +2864,232 @@
 }
 
 /* ===================================================================
+   Pinned objective (idea #3) — always-visible "what now?"
+   =================================================================== */
+.sft-objective {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-2xs) var(--space-m);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--sft-panel);
+}
+.sft-objective__label {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.sft-objective.is-complete .sft-objective__label {
+  color: var(--sft-ok);
+}
+.sft-objective__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sft-objective__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+.sft-objective__name {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-0);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sft-objective__progress {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sft-objective__track {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--sft-track);
+  overflow: hidden;
+}
+.sft-objective__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--gold-sheen);
+  transition: width var(--dur-mid) var(--ease-out-quart);
+}
+.sft-objective.is-complete .sft-objective__fill {
+  background: var(--sft-ok);
+}
+
+/* ===================================================================
+   Section lock (idea #3) — progressive disclosure of the rail
+   =================================================================== */
+.sft-navitem__lock {
+  display: none;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin-left: auto;
+  color: var(--ink-faint);
+}
+.sft-navitem.is-locked {
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+.sft-navitem.is-locked .sft-navitem__icon {
+  opacity: 0.4;
+}
+.sft-navitem.is-locked:hover {
+  background: none;
+  color: var(--ink-faint);
+}
+.sft-navitem.is-locked .sft-navitem__lock {
+  display: block;
+}
+.sft-navitem.is-denied {
+  animation: sft-nudge 0.3s var(--ease-out-quart);
+}
+@keyframes sft-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+/* ===================================================================
+   Workload price sparkline + saturation tag (ideas #1 + #9)
+   =================================================================== */
+.sft-wl__head-right {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2xs);
+  flex-shrink: 0;
+}
+.sft-wl__sat {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--sft-warn);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sft-wl__sat:empty {
+  display: none;
+}
+.sft-wl__spark {
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin: 2px 0 4px;
+  overflow: visible;
+}
+.sft-wl__spark-line {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.sft-wl.is-active .sft-wl__spark-line {
+  stroke: var(--gold);
+}
+.sft-wl__spark-area {
+  fill: var(--gold-glow);
+  stroke: none;
+  opacity: 0.12;
+}
+.sft-wl.is-active .sft-wl__spark-area {
+  opacity: 0.32;
+}
+
+/* Contract reservation read-out (idea #2). */
+.sft-contract__reserve {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+
+/* ===================================================================
+   Corporate layer + ascension (idea #4)
+   =================================================================== */
+.sft-corp.is-hidden {
+  display: none;
+}
+.sft-corp__lede {
+  margin: 0 0 var(--space-s);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.sft-ascension {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin-top: var(--space-m);
+  padding-top: var(--space-m);
+  border-top: 1px solid var(--line);
+}
+.sft-ascension.is-hidden {
+  display: none;
+}
+.sft-ascension__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+.sft-ascension__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-ascension__tier {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+.sft-ascension__next {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .sft-objective {
+    padding: var(--space-2xs) var(--space-s);
+  }
+}
+
+/* ===================================================================
    Motion + accessibility
    =================================================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -2832,11 +3110,13 @@
   .sft-event,
   .sft-event__pulse,
   .sft-section.is-active,
+  .sft-navitem.is-denied,
   .sft-log__row {
     animation: none;
   }
   .sft-bar__fill,
   .sft-wl__fill,
+  .sft-objective__fill,
   .sft-u,
   .sft-row,
   .sft-navitem,

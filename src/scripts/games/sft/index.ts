@@ -6,26 +6,30 @@ import { BUILDING_BY_ID, EVENT_BY_ID, TUNING, UPGRADES } from "./config";
 import {
   acceptContract,
   buyBuildingBulk,
+  buyCorporate,
   buyPrestige,
   buyResearch,
   buyUpgrade,
   claimAchievements,
+  claimAscension,
   claimGoals,
   declineContract,
   derive,
   doPrestige,
   gridPrice,
+  invalidateDerive,
   rebalanceRacks,
   reputationTier,
   respondEvent,
   serviceHardware,
   setAllocation,
+  setAllocationShare,
   setPowerContract,
   tick,
   toggleEndless,
   triggerOverclock,
 } from "./engine";
-import { RESEARCH_BY_ID, SCRIPTED_BY_ID } from "./config";
+import { CORPORATE_BY_ID, RESEARCH_BY_ID, SCRIPTED_BY_ID } from "./config";
 import { duration, fmt, money, pct } from "./format";
 import { sound } from "./sound";
 import { defaultState } from "./state";
@@ -64,6 +68,16 @@ export function startGame(root: HTMLElement) {
       }
     },
     onBuyPrestige: (id) => buyPrestige(state, id) && renderNow(),
+    onBuyCorporate: (id) => {
+      if (buyCorporate(state, id)) {
+        const lvl = state.corporateUpgrades[id] ?? 0;
+        ui.pushLog(
+          `◈ Corporate: ${CORPORATE_BY_ID[id]?.name ?? id} → Lv ${lvl}`,
+          "gold",
+        );
+        renderNow();
+      }
+    },
     onOverclock: () => {
       if (triggerOverclock(state, Date.now())) {
         ui.pushLog(`⚡ Overclock engaged ×${TUNING.overclockMult}`, "gold");
@@ -88,6 +102,9 @@ export function startGame(root: HTMLElement) {
     },
     onSetAllocation: (id, delta) => {
       if (setAllocation(state, id, delta)) renderNow();
+    },
+    onSetAllocationShare: (id, frac) => {
+      if (setAllocationShare(state, id, frac)) renderNow();
     },
     onAcceptContract: (id) => {
       const o = state.contractOffers.find((x) => x.id === id);
@@ -147,10 +164,18 @@ export function startGame(root: HTMLElement) {
         )
       )
         return;
+      const infBefore = state.influence;
       if (doPrestige(state, Date.now())) {
+        const infGain = state.influence - infBefore;
+        const infTag = infGain > 0 ? ` · +${infGain} ◈` : "";
         save(state);
-        ui.toast(`Rebuilt. +${gain} ⬡ banked.`);
-        ui.pushLog(`⟳ Data center rebuilt — +${gain} ⬡ banked`, "gold");
+        ui.toast(`Rebuilt. +${gain} ⬡${infTag} banked.`);
+        ui.pushLog(
+          `⟳ Data center rebuilt — +${gain} ⬡${
+            infGain > 0 ? ` · +${infGain} ◈ influence` : ""
+          } banked`,
+          "gold",
+        );
         renderNow();
       }
     },
@@ -202,6 +227,8 @@ export function startGame(root: HTMLElement) {
   installAdmin({
     getState: () => state,
     commit: () => {
+      // Admin mutates raw state, so drop the memoised derive before repainting.
+      invalidateDerive();
       save(state);
       renderNow();
     },
@@ -373,6 +400,13 @@ export function startGame(root: HTMLElement) {
         ui.pushLog("★ Campaign complete — Endless mode unlocked", "gold");
         ui.toast("Campaign complete. Endless mode unlocked.", 7000);
       }
+    }
+
+    // Ascension tiers (idea #4): post-campaign milestones that escalate Endless.
+    for (const a of claimAscension(state, d)) {
+      ui.pushLog(`★ Ascension — ${a.name} reached, Endless escalated`, "gold");
+      ui.toast(`Ascension: ${a.name}.`, 6000);
+      sound.chime();
     }
 
     // Reputation tier-ups: announce new standing.

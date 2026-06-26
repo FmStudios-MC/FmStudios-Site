@@ -3,7 +3,9 @@
 
 import type {
   AchievementDef,
+  AscensionDef,
   BuildingDef,
+  CorporateDef,
   EventDef,
   GoalDef,
   PrestigeDef,
@@ -38,6 +40,12 @@ export const TUNING = {
   overclockMult: 2.5, // burst output multiplier
   overclockDurationMs: 15_000,
   overclockCooldownMs: 90_000,
+  // Overclock now has a cost (idea #5): the burst runs the floor hot, so you
+  // time it for when you have thermal headroom (and can't safely mash it during
+  // a cold-run scripted op). Heat generation is amplified while it's live, and
+  // hardware wears faster, so it's a timed decision rather than a free click.
+  overclockHeatMult: 1.7, // heat generation ×this during the burst
+  overclockWearMult: 2.4, // wear accrues ×this during the burst
 
   // Operating cost: electricity is billed per kW of draw, every second. The
   // grid price drifts between off-peak and peak on a slow, deterministic cycle,
@@ -75,6 +83,11 @@ export const TUNING = {
   contractMaxActive: 3, // how many contracts can run concurrently
   contractStreakStep: 0.1, // reputation bonus per consecutive fulfilment
   contractStreakMax: 10, // streak length the bonus caps out at
+  // Contracts now reserve a share of compute (idea #2): an accepted job pulls
+  // its `reserve` slice out of auto-sell for the duration, so taking one is a
+  // real capacity trade, not free money. Total reservation is capped so a
+  // stack of jobs can never fully starve the spot market.
+  contractReserveCap: 0.85,
 
   // Workloads: the player splits capacity across markets (integer weights up to
   // this max each); the blend sets the effective sell price and the load the
@@ -122,7 +135,25 @@ export const TUNING = {
   // Campaign / Endless (idea #5): completing the final goal unlocks Endless, a
   // toggle that scales challenge (incident/hotspot frequency, contract size)
   // and reward (sell price, credit gain) together — spice for mastery players.
+  // `endlessMult` is the *base* multiplier; ascension tiers (idea #4) each add
+  // `ascensionStep` on top, so engaging Endless escalates instead of capping.
   endlessMult: 1.4,
+  ascensionStep: 0.2,
+
+  // Section gating (idea #3): the console reveals its systems in layers instead
+  // of dumping all five at once. Operate opens once the farm earns its keep;
+  // Contracts shares the board's own threshold; Progress opens as a rebuild
+  // comes into reach. All thresholds read off lifetime/persisted state so a
+  // section never re-locks under a returning or post-rebuild player.
+  operateMinEarnings: 50,
+  progressUnlockFraction: 0.3, // open Progress at this fraction of the first rebuild
+
+  // Corporate layer (idea #4): a second prestige currency, "influence", earned
+  // per rebuild once the studio has rebuilt a few times. Spent on cross-run
+  // permanents the per-run credit tree can't touch.
+  corporateUnlockRebuilds: 4, // rebuilds before influence starts accruing
+  corporateGainBase: 1, // influence per rebuild, before the run-size bonus
+  corporateGainDivisor: 24, // +1 influence per this many pending credits banked
 
   // Scripted opportunity events (idea #15): a deterministic scheduler offers a
   // multi-step goal the player works toward over a window for a one-off payout.
@@ -193,39 +224,92 @@ export const GOALS: GoalDef[] = [
     name: "First Hum",
     desc: "Run 10 producers at once.",
     check: (s) => producerCount(s) >= 10,
+    metric: (s) => ({ value: producerCount(s), target: 10, unit: "producers" }),
   },
   {
     id: "g-kiloflop",
     name: "Kiloscale",
     desc: "Reach 1K FLOP/s of effective compute.",
     check: (_s, d) => d.compute >= 1_000,
+    metric: (_s, d) => ({ value: d.compute, target: 1_000, unit: "FLOP/s" }),
   },
   {
     id: "g-contracts",
     name: "Trusted Supplier",
     desc: "Fulfil 10 compute contracts.",
     check: (s) => s.contractsCompleted >= 10,
+    metric: (s) => ({ value: s.contractsCompleted, target: 10, unit: "contracts" }),
   },
   {
     id: "g-megaflop",
     name: "Megascale",
     desc: "Reach 250K FLOP/s of effective compute.",
     check: (_s, d) => d.compute >= 250_000,
+    metric: (_s, d) => ({ value: d.compute, target: 250_000, unit: "FLOP/s" }),
   },
   {
     id: "g-tier1",
     name: "Tier-1 Operator",
     desc: "Reach Tier-1 reputation standing.",
     check: (s) => s.reputation >= 5_000,
+    metric: (s) => ({ value: s.reputation, target: 5_000, unit: "rep" }),
   },
   {
     id: "g-gigafarm",
     name: "The Gigafarm",
     desc: "Reach 5M FLOP/s of effective compute.",
     check: (_s, d) => d.compute >= 5_000_000,
+    metric: (_s, d) => ({ value: d.compute, target: 5_000_000, unit: "FLOP/s" }),
     final: true,
   },
 ];
+
+// --- Ascension tiers (idea #4) -----------------------------------------
+// Post-campaign compute milestones. Each one reached lifts the Endless
+// multiplier by TUNING.ascensionStep, so the late game keeps escalating
+// instead of flattening at a single ×1.4 toggle.
+export const ASCENSION: AscensionDef[] = [
+  { id: "asc-1", name: "Ascendant I", compute: 25_000_000 },
+  { id: "asc-2", name: "Ascendant II", compute: 120_000_000 },
+  { id: "asc-3", name: "Ascendant III", compute: 600_000_000 },
+  { id: "asc-4", name: "Ascendant IV", compute: 3_000_000_000 },
+  { id: "asc-5", name: "Ascendant V", compute: 15_000_000_000 },
+];
+
+// --- Corporate layer (idea #4) -----------------------------------------
+// A second prestige tree bought with influence — cross-run permanents the
+// per-run credit tree can't grant. Scarce by design (influence trickles in
+// per rebuild), so these are slow, meaningful commitments.
+export const CORPORATE: CorporateDef[] = [
+  {
+    id: "corp-lab",
+    name: "Standing Lab",
+    desc: "Every run starts with +1 level in all research, per level.",
+    baseCost: 1,
+    costGrowth: 2.2,
+    maxLevel: 3,
+  },
+  {
+    id: "corp-overclock",
+    name: "Standing Overclock",
+    desc: "+8% permanent compute per level — a passive baseline boost.",
+    baseCost: 1,
+    costGrowth: 2.4,
+    maxLevel: 4,
+  },
+  {
+    id: "corp-accounts",
+    name: "Account Management",
+    desc: "+1 concurrent contract slot per level.",
+    baseCost: 2,
+    costGrowth: 3.5,
+    maxLevel: 2,
+  },
+];
+
+export const CORPORATE_BY_ID: Record<string, CorporateDef> = Object.fromEntries(
+  CORPORATE.map((c) => [c.id, c]),
+);
 
 export const FINAL_GOAL_ID = GOALS.find((g) => g.final)!.id;
 
@@ -242,21 +326,27 @@ export const WORKLOADS: WorkloadDef[] = [
   {
     id: "ai",
     name: "AI Training",
-    desc: "Pays the most — and runs the hardware hottest.",
+    desc: "Pays the most — but the market saturates if you flood it.",
     priceMult: 1.55,
     swing: 0.18,
     cycleMs: 70_000,
     heatFactor: 0.6,
     powerFactor: 0.25,
+    // Lucrative but thin: concentrate past ~35% of the farm and the marginal
+    // price decays hard, so it no longer dominates a spread allocation.
+    satCap: 0.35,
+    satStrength: 1.35,
   },
   {
     id: "crypto",
     name: "Crypto / Batch",
-    desc: "Volatile spot price. Feast or famine.",
+    desc: "Volatile spot price. Feast or famine — and it saturates too.",
     priceMult: 1.1,
     swing: 0.6,
     cycleMs: 50_000,
     powerFactor: 0.15,
+    satCap: 0.45,
+    satStrength: 0.85,
   },
 ];
 
@@ -267,11 +357,13 @@ export const WORKLOAD_BY_ID: Record<string, WorkloadDef> = Object.fromEntries(
 // --- Contract archetypes -----------------------------------------------
 // The board fills with a rotating mix of these so the player is choosing
 // between shapes of deal, not just accept/decline. `durIdx` indexes
-// TUNING.contractDurationsSec; `target`/`reward`/`rep` weight the generator.
+// TUNING.contractDurationsSec; `reward`/`rep` weight the generator; `reserve`
+// is the share of compute the job ties up (idea #2) and now also sizes the
+// required delivery, so a deal asks for exactly the slice it reserves.
 export const CONTRACT_ARCHETYPES = [
-  { tag: "Rush", durIdx: 0, target: 0.6, reward: 1.5, rep: 1.0 },
-  { tag: "Bulk", durIdx: 2, target: 1.25, reward: 1.95, rep: 0.85 },
-  { tag: "Reputation", durIdx: 1, target: 0.9, reward: 1.25, rep: 2.4 },
+  { tag: "Rush", durIdx: 0, reserve: 0.3, reward: 1.5, rep: 1.0 },
+  { tag: "Bulk", durIdx: 2, reserve: 0.65, reward: 1.95, rep: 0.85 },
+  { tag: "Reputation", durIdx: 1, reserve: 0.45, reward: 1.25, rep: 2.4 },
 ] as const;
 
 export const BUILDINGS: BuildingDef[] = [
@@ -377,6 +469,20 @@ export const BUILDINGS: BuildingDef[] = [
     growth: 1.18,
     space: 3,
     unlockAt: 28_000,
+  },
+  {
+    // Insurance, not capacity (idea #9): a second utility feed that pre-empts
+    // Feeder Brownouts entirely and halves Grid Surge bills. One is enough —
+    // the cost climbs steeply so a second is wasted. Makes resilience a build
+    // decision instead of a reactive "pay to skip".
+    id: "redundancy",
+    name: "N+1 Power Feed",
+    desc: "Redundant utility feed. Pre-empts Feeder Brownouts; softens Grid Surges. One is enough.",
+    category: "power",
+    baseCost: 110_000,
+    growth: 3,
+    space: 4,
+    unlockAt: 75_000,
   },
   {
     id: "reactor",
@@ -747,6 +853,9 @@ export const EVENTS: EventDef[] = [
     durationSec: 30,
     weight: 2,
     powerCapMult: 0.6,
+    // An N+1 Power Feed (idea #9) pre-empts brownouts: once installed, the
+    // incident is no longer eligible to roll.
+    relevant: (s) => (s.buildings["redundancy"] ?? 0) < 1,
   },
   {
     id: "hardware-fault",
@@ -1013,6 +1122,22 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     check: (s) => s.scriptsCompleted >= 1,
     buff: { multPrice: 1.04 },
     buffNote: "+4% sell price",
+  },
+  {
+    id: "fail-safe",
+    name: "Fail-Safe",
+    desc: "Install an N+1 Power Feed to pre-empt brownouts.",
+    check: (s) => (s.buildings["redundancy"] ?? 0) > 0,
+    buff: { multCompute: 1.02 },
+    buffNote: "+2% compute",
+  },
+  {
+    id: "ascendant",
+    name: "Ascendant",
+    desc: "Reach the first ascension tier beyond the campaign.",
+    check: (s) => s.ascension >= 1,
+    buff: { multCompute: 1.05 },
+    buffNote: "+5% compute",
   },
 ];
 
