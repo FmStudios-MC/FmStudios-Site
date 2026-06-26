@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
 import "../../styles/games/server-farm.css";
 
-// Equipment lists shown in the Build section, one block per category.
+// Equipment lists shown in the Build drawer, one block per category.
 const buyLists: { cat: string; label: string }[] = [
   { cat: "producer", label: "Producers" },
   { cat: "power", label: "Power" },
@@ -13,15 +13,12 @@ const buyLists: { cat: string; label: string }[] = [
   { cat: "staff", label: "Staff" },
 ];
 
-// Console sections. The rail switches between them and only the active one is
-// shown — one focused screen at a time. Icons are inline line-SVGs (stroke =
-// currentColor) so they inherit the rail's active-state gold.
-const sections: { id: string; label: string; icon: string }[] = [
-  {
-    id: "floor",
-    label: "Floor",
-    icon: '<rect x="3.5" y="3.5" width="7" height="17" rx="1.3"/><rect x="13.5" y="3.5" width="7" height="17" rx="1.3"/><line x1="5.4" y1="7.2" x2="8.6" y2="7.2"/><line x1="5.4" y1="10.2" x2="8.6" y2="10.2"/><line x1="15.4" y1="7.2" x2="18.6" y2="7.2"/><line x1="15.4" y1="10.2" x2="18.6" y2="10.2"/>',
-  },
+// The four deep tools. The cockpit is the always-on home screen; each tool
+// opens as a slide-over drawer on top of it, so the living farm never leaves.
+// Icons are inline line-SVGs (stroke = currentColor) so they inherit gold on
+// the active/hover state. The Build tool is always open; the other three gate
+// behind progress (the UI sets data-locked, the page script refuses to open).
+const tools: { id: string; label: string; icon: string }[] = [
   {
     id: "build",
     label: "Build",
@@ -42,6 +39,16 @@ const sections: { id: string; label: string; icon: string }[] = [
     label: "Progress",
     icon: '<path d="M4 19.5V4"/><path d="M4 19.5h16"/><rect x="7" y="12" width="3" height="5" rx=".6"/><rect x="12.5" y="8.5" width="3" height="8.5" rx=".6"/><rect x="18" y="5.5" width="3" height="11.5" rx=".6" transform="translate(-1 0)"/>',
   },
+];
+
+// The four live vitals, rendered as a gauge strip beneath the hall. Each is a
+// fixed two-row cell (name + compact value, then a bar, then a status note) so
+// the readout can never wrap — the bug the old rail vitals had.
+const gauges: { id: string; name: string }[] = [
+  { id: "heat", name: "Heat" },
+  { id: "power", name: "Power" },
+  { id: "net", name: "Network" },
+  { id: "wear", name: "Wear" },
 ];
 ---
 
@@ -73,471 +80,489 @@ const sections: { id: string; label: string; icon: string }[] = [
           <div class="sft-scene__haze"></div>
         </div>
 
-        <div class="sft-shell">
-          <!-- ============================ RAIL ============================ -->
-          <!-- Persistent: identity, section nav, always-on vitals + the two
-               farm actions, and the data dock. Stays put while you work. -->
-          <aside class="sft-rail">
-            <div class="sft-rail__brand">
-              <span class="sft-rail__mark" aria-hidden="true">SF</span>
-              <span class="sft-rail__name">
-                Server-Farm<br />Tycoon
+        <!-- ========================== COCKPIT ========================== -->
+        <!-- The always-on home screen: economy HUD, objective, live hall, the
+             activity feed, the vitals gauge strip, and the tool bar. -->
+        <div class="sft-cockpit">
+          <!-- HUD: the economy at a glance + the system menu. -->
+          <header class="sft-hud" role="status" aria-label="Farm economy">
+            <div class="sft-hud__brand">
+              <span class="sft-hud__mark" aria-hidden="true">SF</span>
+              <span class="sft-hud__name">Server-Farm Tycoon</span>
+            </div>
+
+            <div class="sft-hud__money">
+              <span class="sft-hud__cash" data-stat="money">$0</span>
+              <span class="sft-hud__rate">
+                <span class="sft-hud__rate-val" data-stat="rate">$0/s</span>
+                <span class="sft-hud__rate-label">net / sec</span>
               </span>
             </div>
 
-            <nav class="sft-rail__nav" aria-label="Console">
-              <div
-                class="sft-rail__sections"
-                data-tabs
-                role="tablist"
-                aria-orientation="vertical"
-                aria-label="Game systems"
+            <div class="sft-hud__reads">
+              <div class="sft-read">
+                <span class="sft-read__label">Compute</span>
+                <span class="sft-read__val" data-stat="compute">0 FLOP/s</span>
+              </div>
+              <div class="sft-read">
+                <span class="sft-read__label">Reputation</span>
+                <span class="sft-read__val" data-stat="reputation">0 · Startup</span>
+              </div>
+              <div class="sft-read">
+                <span class="sft-read__label">Power bill</span>
+                <span class="sft-read__val" data-stat="bill">$0/s</span>
+              </div>
+              <div class="sft-read">
+                <span class="sft-read__label">Floor</span>
+                <span class="sft-read__val" data-stat="space">0 / 24 RU</span>
+              </div>
+            </div>
+
+            <!-- System menu trigger (data controls + sound live in the popover). -->
+            <div class="sft-sys">
+              <button
+                class="sft-sys__btn"
+                data-sysmenu-toggle
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="sft-sysmenu"
+                aria-label="System menu"
               >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  />
+                </svg>
+              </button>
+
+              <div class="sft-sysmenu" id="sft-sysmenu" data-sysmenu hidden>
+                <button
+                  class="sft-ctl sft-ctl--toggle"
+                  data-sound
+                  type="button"
+                  aria-pressed="false"
+                >
+                  Sound: Off
+                </button>
+                <button class="sft-ctl" data-save type="button">Save</button>
+                <button class="sft-ctl" data-export type="button">Export save</button>
+                <button class="sft-ctl" data-import type="button">Import save</button>
+                <button class="sft-ctl sft-ctl--danger" data-reset type="button">
+                  Reset game
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <!-- Pinned objective: an always-visible "what now?", the first
+               incomplete campaign goal echoed with live progress. -->
+          <div class="sft-objective" data-objective>
+            <span class="sft-objective__label">Objective</span>
+            <div class="sft-objective__body">
+              <div class="sft-objective__line">
+                <span class="sft-objective__name" data-objective-name>—</span>
+                <span class="sft-objective__progress" data-objective-progress></span>
+              </div>
+              <div class="sft-objective__track">
+                <span class="sft-objective__fill" data-objective-bar></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Incident / hotspot / opportunity banners (shown only when live). -->
+          <div class="sft-alerts">
+            <div class="sft-event" data-event role="alert" aria-live="assertive">
+              <span class="sft-event__pulse" aria-hidden="true"></span>
+              <div class="sft-event__body">
+                <span class="sft-event__name" data-event-name>Incident</span>
+                <span class="sft-event__desc" data-event-desc></span>
+              </div>
+              <span class="sft-event__timer" data-event-timer></span>
+              <button class="sft-event__respond" data-event-respond type="button">
+                Respond
+              </button>
+            </div>
+
+            <div
+              class="sft-event sft-event--hotspot"
+              data-hotspot
+              role="alert"
+              aria-live="assertive"
+            >
+              <span class="sft-event__pulse" aria-hidden="true"></span>
+              <div class="sft-event__body">
+                <span class="sft-event__name">Rack Hotspot</span>
+                <span class="sft-event__desc" data-hotspot-desc></span>
+              </div>
+              <span class="sft-event__timer" data-hotspot-timer></span>
+              <button class="sft-event__respond" data-hotspot-clear type="button">
+                Rebalance
+              </button>
+            </div>
+
+            <div
+              class="sft-event sft-event--script"
+              data-script
+              role="status"
+              aria-live="polite"
+            >
+              <span class="sft-event__pulse" aria-hidden="true"></span>
+              <div class="sft-event__body">
+                <span class="sft-event__name" data-script-name>Opportunity</span>
+                <span class="sft-event__desc" data-script-goal></span>
+                <div class="sft-script__track">
+                  <div class="sft-bar">
+                    <span class="sft-bar__fill" data-script-bar></span>
+                  </div>
+                  <span class="sft-script__hold" data-script-hold></span>
+                </div>
+                <span class="sft-script__reward" data-script-reward></span>
+              </div>
+              <span class="sft-event__timer" data-script-timer></span>
+            </div>
+          </div>
+
+          <!-- Vitals gauge strip: fixed cells that can't wrap, plus the two
+               live farm controls (overclock burst + hardware service). Sits
+               under the HUD so the economy + vitals read as one status band. -->
+          <div class="sft-gauges" aria-label="Farm vitals">
+            {
+              gauges.map((g) => (
+                <div class="sft-gauge" data-gauge={g.id}>
+                  <div class="sft-gauge__top">
+                    <span class="sft-gauge__name">{g.name}</span>
+                    <span class="sft-gauge__val" data-label={g.id} set:html="—" />
+                  </div>
+                  <div class="sft-bar">
+                    <span class="sft-bar__fill" data-bar={g.id} />
+                  </div>
+                  <span class="sft-gauge__note" data-note={g.id} />
+                </div>
+              ))
+            }
+            <div class="sft-gauge__actions">
+              <button class="sft-overclock" data-overclock type="button">
+                Overclock
+              </button>
+              <button class="sft-service" data-service type="button" disabled>
+                Service Hardware
+              </button>
+            </div>
+          </div>
+
+          <!-- Main stage: the living data hall (hero) + the activity feed. -->
+          <div class="sft-stage">
+            <section class="sft-panel sft-hall" aria-label="Data hall">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Data Hall</h2>
+                <span class="sft-panel__note" data-rack-note>0 servers</span>
+              </header>
+              <div class="sft-hall__scene">
+                <div class="sft-hall__tray" aria-hidden="true"></div>
+                <div class="sft-hall__floor" aria-hidden="true"></div>
+                <div class="sft-hall__row" data-hall aria-hidden="true"></div>
+                <p class="sft-hall__empty" data-hall-empty>
+                  The floor is dark. Open <strong>Build</strong> and add a Mini
+                  Rack to bring the first cabinet online.
+                </p>
+              </div>
+            </section>
+
+            <aside class="sft-panel sft-activity" aria-label="Activity">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Activity</h2>
+                <span class="sft-panel__note">Live</span>
+              </header>
+              <ul class="sft-log" data-log aria-live="polite"></ul>
+            </aside>
+          </div>
+
+          <!-- Tool bar: opens the deep tools as slide-over drawers. -->
+          <nav
+            class="sft-actionbar"
+            data-tabs
+            aria-label="Tools"
+          >
+            {
+              tools.map((t) => (
+                <button
+                  class="sft-act"
+                  data-tab={t.id}
+                  id={`sft-act-${t.id}`}
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-controls={`sft-drawer-${t.id}`}
+                  aria-expanded="false"
+                >
+                  <svg
+                    class="sft-act__icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    set:html={t.icon}
+                  />
+                  <span class="sft-navitem__label">{t.label}</span>
+                </button>
+              ))
+            }
+          </nav>
+        </div>
+
+        <!-- ========================== DRAWERS ========================== -->
+        <!-- One scrim shared by all; one panel per tool. The page script
+             handles open/close, focus trap, Escape, and locked-tool refusal. -->
+        <div class="sft-drawer-scrim" data-drawer-scrim hidden></div>
+
+        <!-- Build -->
+        <aside
+          class="sft-drawer"
+          data-drawer="build"
+          id="sft-drawer-build"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sft-drawer-build-title"
+          hidden
+        >
+          <header class="sft-drawer__head">
+            <h2 class="sft-drawer__title" id="sft-drawer-build-title">Build</h2>
+            <button class="sft-drawer__close" data-drawer-close type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+            </button>
+          </header>
+          <div class="sft-drawer__body">
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Equipment</h2>
+                <div
+                  class="sft-buymult"
+                  data-buymult
+                  role="radiogroup"
+                  aria-label="Buy quantity"
+                >
+                </div>
+              </header>
+              <div class="sft-equip">
                 {
-                  sections.map((s, i) => (
-                    <button
-                      class:list={["sft-navitem", { "is-active": i === 0 }]}
-                      data-tab={s.id}
-                      id={`sft-tab-${s.id}`}
-                      role="tab"
-                      type="button"
-                      aria-selected={i === 0 ? "true" : "false"}
-                      aria-controls={`sft-tabpanel-${s.id}`}
-                      tabindex={i === 0 ? "0" : "-1"}
-                    >
-                      <svg
-                        class="sft-navitem__icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.6"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                        set:html={s.icon}
-                      />
-                      <span class="sft-navitem__label">{s.label}</span>
-                    </button>
+                  buyLists.map((b) => (
+                    <div class="sft-equip__group">
+                      <p class="sft-subhead">{b.label}</p>
+                      <div class="sft-list" data-list={b.cat} />
+                    </div>
                   ))
                 }
               </div>
-            </nav>
+            </section>
 
-            <!-- Always-on vitals: the farm's physical health + its two live
-                 controls, readable from every section. -->
-            <div class="sft-vitals" aria-label="Farm vitals">
-              <div class="sft-vital">
-                <div class="sft-vital__top">
-                  <span class="sft-vital__name">Heat</span>
-                  <span class="sft-vital__label" data-label-heat>Nominal</span>
-                </div>
-                <div class="sft-bar"><span class="sft-bar__fill" data-bar-heat></span></div>
-              </div>
-              <div class="sft-vital">
-                <div class="sft-vital__top">
-                  <span class="sft-vital__name">Power</span>
-                  <span class="sft-vital__label" data-label-power>0 kW</span>
-                </div>
-                <div class="sft-bar"><span class="sft-bar__fill" data-bar-power></span></div>
-              </div>
-              <div class="sft-vital">
-                <div class="sft-vital__top">
-                  <span class="sft-vital__name">Network</span>
-                  <span class="sft-vital__label" data-label-net>0 Gb/s</span>
-                </div>
-                <div class="sft-bar"><span class="sft-bar__fill" data-bar-net></span></div>
-              </div>
-              <div class="sft-vital">
-                <div class="sft-vital__top">
-                  <span class="sft-vital__name">Wear</span>
-                  <span class="sft-vital__label" data-label-wear>Nominal</span>
-                </div>
-                <div class="sft-bar"><span class="sft-bar__fill" data-bar-wear></span></div>
-              </div>
-
-              <div class="sft-vitals__actions">
-                <button class="sft-overclock" data-overclock type="button">
-                  Overclock
-                </button>
-                <button class="sft-service" data-service type="button" disabled>
-                  Service Hardware
-                </button>
-              </div>
-            </div>
-
-            <!-- Data dock. -->
-            <div class="sft-rail__dock">
-              <button
-                class="sft-ctl sft-ctl--toggle"
-                data-sound
-                type="button"
-                aria-pressed="false"
-              >
-                Sound: Off
-              </button>
-              <div class="sft-rail__data">
-                <button class="sft-ctl" data-save type="button">Save</button>
-                <button class="sft-ctl" data-export type="button">Export</button>
-                <button class="sft-ctl" data-import type="button">Import</button>
-                <button class="sft-ctl sft-ctl--danger" data-reset type="button">
-                  Reset
-                </button>
-              </div>
-            </div>
-          </aside>
-
-          <!-- ========================== CONTENT ========================== -->
-          <div class="sft-content">
-            <!-- Top bar: the economy at a glance. -->
-            <header class="sft-topbar" role="status" aria-label="Farm economy">
-              <div class="sft-topbar__lead">
-                <div class="sft-money">
-                  <span class="sft-money__label">Cash on hand</span>
-                  <span class="sft-money__val" data-stat="money">$0</span>
-                </div>
-                <div class="sft-rate">
-                  <span class="sft-rate__label">Net income</span>
-                  <span class="sft-rate__val" data-stat="rate">$0/s</span>
-                </div>
-              </div>
-              <div class="sft-topbar__reads">
-                <div class="sft-read">
-                  <span class="sft-read__label">Compute</span>
-                  <span class="sft-read__val" data-stat="compute">0 FLOP/s</span>
-                </div>
-                <div class="sft-read">
-                  <span class="sft-read__label">Reputation</span>
-                  <span class="sft-read__val" data-stat="reputation">0 · Startup</span>
-                </div>
-                <div class="sft-read">
-                  <span class="sft-read__label">Power bill</span>
-                  <span class="sft-read__val" data-stat="bill">$0/s</span>
-                </div>
-                <div class="sft-read">
-                  <span class="sft-read__label">Floor</span>
-                  <span class="sft-read__val" data-stat="space">0 / 24 RU</span>
-                </div>
-              </div>
-            </header>
-
-            <!-- Pinned objective (idea #3): an always-visible "what now?", the
-                 first incomplete campaign goal echoed with live progress. -->
-            <div class="sft-objective" data-objective>
-              <span class="sft-objective__label">Objective</span>
-              <div class="sft-objective__body">
-                <div class="sft-objective__line">
-                  <span class="sft-objective__name" data-objective-name>—</span>
-                  <span class="sft-objective__progress" data-objective-progress></span>
-                </div>
-                <div class="sft-objective__track">
-                  <span class="sft-objective__fill" data-objective-bar></span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Incident / hotspot / opportunity banners (shown only when live). -->
-            <div class="sft-alerts">
-              <div class="sft-event" data-event role="alert" aria-live="assertive">
-                <span class="sft-event__pulse" aria-hidden="true"></span>
-                <div class="sft-event__body">
-                  <span class="sft-event__name" data-event-name>Incident</span>
-                  <span class="sft-event__desc" data-event-desc></span>
-                </div>
-                <span class="sft-event__timer" data-event-timer></span>
-                <button class="sft-event__respond" data-event-respond type="button">
-                  Respond
-                </button>
-              </div>
-
-              <div
-                class="sft-event sft-event--hotspot"
-                data-hotspot
-                role="alert"
-                aria-live="assertive"
-              >
-                <span class="sft-event__pulse" aria-hidden="true"></span>
-                <div class="sft-event__body">
-                  <span class="sft-event__name">Rack Hotspot</span>
-                  <span class="sft-event__desc" data-hotspot-desc></span>
-                </div>
-                <span class="sft-event__timer" data-hotspot-timer></span>
-                <button class="sft-event__respond" data-hotspot-clear type="button">
-                  Rebalance
-                </button>
-              </div>
-
-              <div
-                class="sft-event sft-event--script"
-                data-script
-                role="status"
-                aria-live="polite"
-              >
-                <span class="sft-event__pulse" aria-hidden="true"></span>
-                <div class="sft-event__body">
-                  <span class="sft-event__name" data-script-name>Opportunity</span>
-                  <span class="sft-event__desc" data-script-goal></span>
-                  <div class="sft-script__track">
-                    <div class="sft-bar">
-                      <span class="sft-bar__fill" data-script-bar></span>
-                    </div>
-                    <span class="sft-script__hold" data-script-hold></span>
-                  </div>
-                  <span class="sft-script__reward" data-script-reward></span>
-                </div>
-                <span class="sft-event__timer" data-script-timer></span>
-              </div>
-            </div>
-
-            <!-- Sections: one is shown at a time. -->
-            <div class="sft-sections">
-              <!-- ===================== FLOOR (home) ===================== -->
-              <section
-                class="sft-section sft-section--floor is-active"
-                data-tabpanel="floor"
-                id="sft-tabpanel-floor"
-                role="tabpanel"
-                aria-labelledby="sft-tab-floor"
-                tabindex="0"
-              >
-                <section class="sft-panel sft-hall" aria-label="Data hall">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Data Hall</h2>
-                    <span class="sft-panel__note" data-rack-note>0 servers</span>
-                  </header>
-                  <div class="sft-hall__scene">
-                    <div class="sft-hall__tray" aria-hidden="true"></div>
-                    <div class="sft-hall__floor" aria-hidden="true"></div>
-                    <div class="sft-hall__row" data-hall aria-hidden="true"></div>
-                    <p class="sft-hall__empty" data-hall-empty>
-                      The floor is dark. Open the <strong>Build</strong> section
-                      and add a Mini Rack to bring the first cabinet online.
-                    </p>
-                  </div>
-                </section>
-
-                <aside class="sft-panel sft-activity" aria-label="Activity">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Activity</h2>
-                    <span class="sft-panel__note">Live</span>
-                  </header>
-                  <ul class="sft-log" data-log aria-live="polite"></ul>
-                </aside>
-              </section>
-
-              <!-- ======================== BUILD ======================== -->
-              <section
-                class="sft-section"
-                data-tabpanel="build"
-                id="sft-tabpanel-build"
-                role="tabpanel"
-                aria-labelledby="sft-tab-build"
-                tabindex="0"
-                hidden
-              >
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Equipment</h2>
-                    <div
-                      class="sft-buymult"
-                      data-buymult
-                      role="radiogroup"
-                      aria-label="Buy quantity"
-                    >
-                    </div>
-                  </header>
-                  <div class="sft-equip">
-                    {
-                      buyLists.map((b) => (
-                        <div class="sft-equip__group">
-                          <p class="sft-subhead">{b.label}</p>
-                          <div class="sft-list" data-list={b.cat} />
-                        </div>
-                      ))
-                    }
-                  </div>
-                </section>
-
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Upgrades</h2>
-                    <span class="sft-panel__note">One-time</span>
-                  </header>
-                  <div class="sft-upgrades" data-upgrades></div>
-                </section>
-              </section>
-
-              <!-- ======================= OPERATE ======================= -->
-              <section
-                class="sft-section"
-                data-tabpanel="operate"
-                id="sft-tabpanel-operate"
-                role="tabpanel"
-                aria-labelledby="sft-tab-operate"
-                tabindex="0"
-                hidden
-              >
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Workloads</h2>
-                    <span class="sft-panel__note">Capacity split</span>
-                  </header>
-                  <div class="sft-workloads" data-workloads></div>
-                </section>
-
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Power Strategy</h2>
-                    <span class="sft-panel__note" data-power-note>Spot market</span>
-                  </header>
-                  <div
-                    class="sft-pwr"
-                    data-power-contracts
-                    role="radiogroup"
-                    aria-label="Power contract"
-                  >
-                  </div>
-                  <p class="sft-pwr__hint" data-power-hint></p>
-                </section>
-
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Research</h2>
-                    <span class="sft-panel__note" data-research-note>0 R&amp;D</span>
-                  </header>
-                  <p class="sft-research__lede">
-                    R&amp;D points accrue from live compute. Spent here for the
-                    run; a rebuild clears the lab.
-                  </p>
-                  <div class="sft-research" data-research-list></div>
-                </section>
-              </section>
-
-              <!-- ====================== CONTRACTS ====================== -->
-              <section
-                class="sft-section"
-                data-tabpanel="contracts"
-                id="sft-tabpanel-contracts"
-                role="tabpanel"
-                aria-labelledby="sft-tab-contracts"
-                tabindex="0"
-                hidden
-              >
-                <section class="sft-panel sft-contract">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Contracts</h2>
-                    <span class="sft-panel__note" data-contract-note>
-                      Demand market
-                    </span>
-                  </header>
-                  <div class="sft-contract__body" data-contract-body></div>
-                </section>
-              </section>
-
-              <!-- ======================= PROGRESS ====================== -->
-              <section
-                class="sft-section"
-                data-tabpanel="progress"
-                id="sft-tabpanel-progress"
-                role="tabpanel"
-                aria-labelledby="sft-tab-progress"
-                tabindex="0"
-                hidden
-              >
-                <section class="sft-panel sft-goals">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Standing &amp; Objectives</h2>
-                    <span class="sft-panel__note" data-goals-note>0 / 0</span>
-                  </header>
-
-                  <div class="sft-standing">
-                    <div class="sft-standing__top">
-                      <span class="sft-standing__tier" data-standing-tier>
-                        Startup
-                      </span>
-                      <span class="sft-standing__next" data-standing-next></span>
-                    </div>
-                    <div class="sft-bar">
-                      <span class="sft-bar__fill" data-standing-bar></span>
-                    </div>
-                    <p class="sft-standing__perks" data-standing-perks></p>
-                  </div>
-
-                  <div class="sft-goals__list" data-goals-list></div>
-
-                  <button class="sft-endless" data-endless type="button" hidden>
-                    Engage Endless
-                  </button>
-
-                  <!-- Ascension (idea #4): post-campaign tiers escalate Endless. -->
-                  <div class="sft-ascension is-hidden" data-ascension>
-                    <div class="sft-ascension__top">
-                      <span class="sft-ascension__label">Ascension</span>
-                      <span class="sft-ascension__tier" data-ascension-tier></span>
-                    </div>
-                    <div class="sft-bar">
-                      <span class="sft-bar__fill" data-ascension-bar></span>
-                    </div>
-                    <p class="sft-ascension__next" data-ascension-next></p>
-                  </div>
-                </section>
-
-                <section class="sft-panel">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Statistics</h2>
-                    <span class="sft-panel__note">Last 60s</span>
-                  </header>
-                  <div class="sft-sparks" data-spark-list></div>
-                </section>
-
-                <section class="sft-panel sft-rebuild">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Rebuild</h2>
-                    <span class="sft-panel__note">
-                      <span data-stat="credits">0</span> ⬡ prestige
-                    </span>
-                  </header>
-                  <p class="sft-prestige__preview" data-prestige-preview>
-                    Earn enough this run to unlock a rebuild.
-                  </p>
-                  <button
-                    class="sft-prestige__go"
-                    data-prestige-go
-                    type="button"
-                    disabled
-                  >
-                    Decommission &amp; Rebuild
-                  </button>
-                  <div class="sft-prow-list" data-prestige-list></div>
-                </section>
-
-                <!-- Corporate layer (idea #4): a second prestige currency.
-                     Hidden until influence starts accruing (a few rebuilds in). -->
-                <section class="sft-panel sft-corp is-hidden" data-corporate>
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Corporate</h2>
-                    <span class="sft-panel__note" data-corporate-note>0 ◈</span>
-                  </header>
-                  <p class="sft-corp__lede">
-                    Influence accrues each rebuild once the studio is
-                    established. Spent here on cross-run permanents the credit
-                    tree can't grant — and it never resets.
-                  </p>
-                  <div class="sft-prow-list" data-corporate-list></div>
-                </section>
-
-                <section class="sft-panel sft-ach">
-                  <header class="sft-panel__head">
-                    <h2 class="sft-panel__title">Milestones</h2>
-                    <span class="sft-panel__note" data-ach-note>0 / 0</span>
-                  </header>
-                  <div class="sft-ach__grid" data-achievements></div>
-                </section>
-              </section>
-            </div>
-
-            <div class="sft-toasts" data-toasts aria-live="polite"></div>
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Upgrades</h2>
+                <span class="sft-panel__note">One-time</span>
+              </header>
+              <div class="sft-upgrades" data-upgrades></div>
+            </section>
           </div>
-        </div>
+        </aside>
+
+        <!-- Operate -->
+        <aside
+          class="sft-drawer"
+          data-drawer="operate"
+          id="sft-drawer-operate"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sft-drawer-operate-title"
+          hidden
+        >
+          <header class="sft-drawer__head">
+            <h2 class="sft-drawer__title" id="sft-drawer-operate-title">Operate</h2>
+            <button class="sft-drawer__close" data-drawer-close type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+            </button>
+          </header>
+          <div class="sft-drawer__body">
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Workloads</h2>
+                <span class="sft-panel__note">Capacity split</span>
+              </header>
+              <div class="sft-workloads" data-workloads></div>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Power Strategy</h2>
+                <span class="sft-panel__note" data-power-note>Spot market</span>
+              </header>
+              <div
+                class="sft-pwr"
+                data-power-contracts
+                role="radiogroup"
+                aria-label="Power contract"
+              >
+              </div>
+              <p class="sft-pwr__hint" data-power-hint></p>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Research</h2>
+                <span class="sft-panel__note" data-research-note>0 R&amp;D</span>
+              </header>
+              <p class="sft-research__lede">
+                R&amp;D points accrue from live compute. Spent here for the
+                run; a rebuild clears the lab.
+              </p>
+              <div class="sft-research" data-research-list></div>
+            </section>
+          </div>
+        </aside>
+
+        <!-- Contracts -->
+        <aside
+          class="sft-drawer"
+          data-drawer="contracts"
+          id="sft-drawer-contracts"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sft-drawer-contracts-title"
+          hidden
+        >
+          <header class="sft-drawer__head">
+            <h2 class="sft-drawer__title" id="sft-drawer-contracts-title">Contracts</h2>
+            <button class="sft-drawer__close" data-drawer-close type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+            </button>
+          </header>
+          <div class="sft-drawer__body">
+            <section class="sft-panel sft-contract">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Demand Market</h2>
+                <span class="sft-panel__note" data-contract-note>Demand market</span>
+              </header>
+              <div class="sft-contract__body" data-contract-body></div>
+            </section>
+          </div>
+        </aside>
+
+        <!-- Progress -->
+        <aside
+          class="sft-drawer"
+          data-drawer="progress"
+          id="sft-drawer-progress"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sft-drawer-progress-title"
+          hidden
+        >
+          <header class="sft-drawer__head">
+            <h2 class="sft-drawer__title" id="sft-drawer-progress-title">Progress</h2>
+            <button class="sft-drawer__close" data-drawer-close type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+            </button>
+          </header>
+          <div class="sft-drawer__body">
+            <section class="sft-panel sft-goals">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Standing &amp; Objectives</h2>
+                <span class="sft-panel__note" data-goals-note>0 / 0</span>
+              </header>
+
+              <div class="sft-standing">
+                <div class="sft-standing__top">
+                  <span class="sft-standing__tier" data-standing-tier>Startup</span>
+                  <span class="sft-standing__next" data-standing-next></span>
+                </div>
+                <div class="sft-bar">
+                  <span class="sft-bar__fill" data-standing-bar></span>
+                </div>
+                <p class="sft-standing__perks" data-standing-perks></p>
+              </div>
+
+              <div class="sft-goals__list" data-goals-list></div>
+
+              <button class="sft-endless" data-endless type="button" hidden>
+                Engage Endless
+              </button>
+
+              <div class="sft-ascension is-hidden" data-ascension>
+                <div class="sft-ascension__top">
+                  <span class="sft-ascension__label">Ascension</span>
+                  <span class="sft-ascension__tier" data-ascension-tier></span>
+                </div>
+                <div class="sft-bar">
+                  <span class="sft-bar__fill" data-ascension-bar></span>
+                </div>
+                <p class="sft-ascension__next" data-ascension-next></p>
+              </div>
+            </section>
+
+            <section class="sft-panel">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Statistics</h2>
+                <span class="sft-panel__note">Last 60s</span>
+              </header>
+              <div class="sft-sparks" data-spark-list></div>
+            </section>
+
+            <section class="sft-panel sft-rebuild">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Rebuild</h2>
+                <span class="sft-panel__note">
+                  <span data-stat="credits">0</span> ⬡ prestige
+                </span>
+              </header>
+              <p class="sft-prestige__preview" data-prestige-preview>
+                Earn enough this run to unlock a rebuild.
+              </p>
+              <button
+                class="sft-prestige__go"
+                data-prestige-go
+                type="button"
+                disabled
+              >
+                Decommission &amp; Rebuild
+              </button>
+              <div class="sft-prow-list" data-prestige-list></div>
+            </section>
+
+            <section class="sft-panel sft-corp is-hidden" data-corporate>
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Corporate</h2>
+                <span class="sft-panel__note" data-corporate-note>0 ◈</span>
+              </header>
+              <p class="sft-corp__lede">
+                Influence accrues each rebuild once the studio is established.
+                Spent here on cross-run permanents the credit tree can't grant —
+                and it never resets.
+              </p>
+              <div class="sft-prow-list" data-corporate-list></div>
+            </section>
+
+            <section class="sft-panel sft-ach">
+              <header class="sft-panel__head">
+                <h2 class="sft-panel__title">Milestones</h2>
+                <span class="sft-panel__note" data-ach-note>0 / 0</span>
+              </header>
+              <div class="sft-ach__grid" data-achievements></div>
+            </section>
+          </div>
+        </aside>
+
+        <div class="sft-toasts" data-toasts aria-live="polite"></div>
       </div>
     </div>
   </section>
@@ -549,72 +574,157 @@ const sections: { id: string; label: string; icon: string }[] = [
   const root = document.querySelector<HTMLElement>("[data-sft]");
   if (root) {
     startGame(root);
-    initTabs(root);
+    initDrawers(root);
+    initSysMenu(root);
   }
 
-  /* Accessible tablist: click + arrow-key navigation, roving tabindex.
-     Panels are kept in the DOM (the game patches them every frame) and only
-     toggled visible, so switching sections is instant and loses no state. */
-  function initTabs(root: HTMLElement) {
-    const tabs = Array.from(
+  /* Slide-over drawers. The cockpit is the home screen; each tool button opens
+     its drawer over the cockpit. Panels stay in the DOM (the game patches them
+     every frame), so opening one loses no state and is instant. A tool can be
+     locked by the game (data-locked) — opening it then just replays a nudge. */
+  function initDrawers(root: HTMLElement) {
+    const buttons = Array.from(
       root.querySelectorAll<HTMLButtonElement>("[data-tab]"),
     );
-    const panels = new Map<string, HTMLElement>();
+    const scrim = root.querySelector<HTMLElement>("[data-drawer-scrim]");
+    const drawers = new Map<string, HTMLElement>();
     root
-      .querySelectorAll<HTMLElement>("[data-tabpanel]")
-      .forEach((p) => panels.set(p.dataset.tabpanel!, p));
+      .querySelectorAll<HTMLElement>("[data-drawer]")
+      .forEach((d) => drawers.set(d.dataset.drawer!, d));
 
-    function select(id: string, focus = false) {
-      for (const tab of tabs) {
-        const on = tab.dataset.tab === id;
-        tab.classList.toggle("is-active", on);
-        tab.setAttribute("aria-selected", on ? "true" : "false");
-        tab.tabIndex = on ? 0 : -1;
-        if (on && focus) tab.focus();
-      }
-      for (const [pid, panel] of panels) {
-        const on = pid === id;
-        panel.classList.toggle("is-active", on);
-        panel.hidden = !on;
-      }
+    let openId: string | null = null;
+    let lastTrigger: HTMLButtonElement | null = null;
+
+    const isLocked = (b: HTMLButtonElement) => b.dataset.locked === "1";
+
+    function focusables(panel: HTMLElement) {
+      return Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
     }
 
-    // A section is locked (gated by the game) when the UI sets data-locked.
-    const isLocked = (t: HTMLButtonElement) => t.dataset.locked === "1";
-    // Next unlocked tab from `from` in direction `dir` (wraps; Floor is never
-    // locked, so this always resolves).
-    function step(from: number, dir: number) {
-      let idx = from;
-      for (let k = 0; k < tabs.length; k++) {
-        idx = (idx + dir + tabs.length) % tabs.length;
-        if (!isLocked(tabs[idx])) return idx;
-      }
-      return from;
+    function open(id: string, trigger: HTMLButtonElement) {
+      const panel = drawers.get(id);
+      if (!panel) return;
+      if (openId && openId !== id) close(false);
+      openId = id;
+      lastTrigger = trigger;
+      scrim?.removeAttribute("hidden");
+      panel.hidden = false;
+      // Next frame so the transition runs from the hidden state.
+      requestAnimationFrame(() => {
+        scrim?.classList.add("is-open");
+        panel.classList.add("is-open");
+      });
+      for (const b of buttons)
+        b.setAttribute("aria-expanded", b.dataset.tab === id ? "true" : "false");
+      const close = panel.querySelector<HTMLButtonElement>("[data-drawer-close]");
+      (focusables(panel)[0] ?? close)?.focus();
     }
 
-    tabs.forEach((tab, i) => {
-      tab.addEventListener("click", () => {
-        if (isLocked(tab)) {
-          // Replay a small nudge so the lock reads as "not yet", not "broken".
-          tab.classList.remove("is-denied");
-          void tab.offsetWidth;
-          tab.classList.add("is-denied");
+    function close(restoreFocus = true) {
+      if (!openId) return;
+      const panel = drawers.get(openId);
+      openId = null;
+      scrim?.classList.remove("is-open");
+      panel?.classList.remove("is-open");
+      window.setTimeout(() => {
+        if (!openId) scrim?.setAttribute("hidden", "");
+        if (panel && !panel.classList.contains("is-open")) panel.hidden = true;
+      }, 280);
+      for (const b of buttons) b.setAttribute("aria-expanded", "false");
+      if (restoreFocus) lastTrigger?.focus();
+    }
+
+    buttons.forEach((btn, i) => {
+      btn.addEventListener("click", () => {
+        if (isLocked(btn)) {
+          btn.classList.remove("is-denied");
+          void btn.offsetWidth;
+          btn.classList.add("is-denied");
           return;
         }
-        select(tab.dataset.tab!);
+        if (openId === btn.dataset.tab) close();
+        else open(btn.dataset.tab!, btn);
       });
-      tab.addEventListener("animationend", () => tab.classList.remove("is-denied"));
-      tab.addEventListener("keydown", (e) => {
-        let next = -1;
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") next = step(i, 1);
-        else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = step(i, -1);
-        else if (e.key === "Home") next = step(-1, 1);
-        else if (e.key === "End") next = step(0, -1);
-        if (next >= 0) {
-          e.preventDefault();
-          select(tabs[next].dataset.tab!, true);
+      btn.addEventListener("animationend", () =>
+        btn.classList.remove("is-denied"),
+      );
+      // Arrow-key roving across the tool bar (skips locked tools).
+      btn.addEventListener("keydown", (e) => {
+        let dir = 0;
+        if (e.key === "ArrowRight") dir = 1;
+        else if (e.key === "ArrowLeft") dir = -1;
+        else return;
+        e.preventDefault();
+        let idx = i;
+        for (let k = 0; k < buttons.length; k++) {
+          idx = (idx + dir + buttons.length) % buttons.length;
+          if (!isLocked(buttons[idx])) break;
         }
+        buttons[idx].focus();
       });
+    });
+
+    root.querySelectorAll<HTMLButtonElement>("[data-drawer-close]").forEach((b) =>
+      b.addEventListener("click", () => close()),
+    );
+    scrim?.addEventListener("click", () => close());
+
+    // Esc closes; Tab is trapped inside the open drawer.
+    root.addEventListener("keydown", (e) => {
+      if (!openId) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = drawers.get(openId);
+      if (!panel) return;
+      const f = focusables(panel);
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
+  /* System menu: a small popover for sound + save/export/import/reset. */
+  function initSysMenu(root: HTMLElement) {
+    const toggle = root.querySelector<HTMLButtonElement>("[data-sysmenu-toggle]");
+    const menu = root.querySelector<HTMLElement>("[data-sysmenu]");
+    if (!toggle || !menu) return;
+
+    function setOpen(on: boolean) {
+      menu!.hidden = !on;
+      toggle!.setAttribute("aria-expanded", on ? "true" : "false");
+    }
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(menu.hidden);
+    });
+    // Any choice (or an outside click / Esc) closes the menu.
+    menu.addEventListener("click", () => setOpen(false));
+    document.addEventListener("click", (e) => {
+      if (menu.hidden) return;
+      if (!menu.contains(e.target as Node) && e.target !== toggle) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
     });
   }
 </script>
+</BaseLayout>

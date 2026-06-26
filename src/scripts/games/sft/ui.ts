@@ -265,12 +265,18 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     zones.push({ root: zone, kind: group.kind });
   }
 
-  const heatBar = $("[data-bar-heat]");
-  const heatLabel = $("[data-label-heat]");
-  const powerBar = $("[data-bar-power]");
-  const powerLabel = $("[data-label-power]");
-  const netBar = $("[data-bar-net]");
-  const netLabel = $("[data-label-net]");
+  // Vitals gauges: each cell is name + compact value (data-label) + a bar
+  // (data-bar) + a short status note (data-note). The value/note split keeps
+  // the readout on one line — the old single-string label wrapped and broke.
+  const heatBar = $('[data-bar="heat"]');
+  const heatLabel = $('[data-label="heat"]');
+  const heatNote = root.querySelector<HTMLElement>('[data-note="heat"]');
+  const powerBar = $('[data-bar="power"]');
+  const powerLabel = $('[data-label="power"]');
+  const powerNoteEl = root.querySelector<HTMLElement>('[data-note="power"]');
+  const netBar = $('[data-bar="net"]');
+  const netLabel = $('[data-label="net"]');
+  const netNote = root.querySelector<HTMLElement>('[data-note="net"]');
 
   const overclockBtn = $<HTMLButtonElement>("[data-overclock]");
 
@@ -614,9 +620,9 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     : [];
 
   // --- Maintenance (hardware wear) --------------------------------------
-  const wearBar = root.querySelector<HTMLElement>("[data-bar-wear]");
-  const wearLabel = root.querySelector<HTMLElement>("[data-label-wear]");
-  const wearNote = root.querySelector<HTMLElement>("[data-wear-note]");
+  const wearBar = root.querySelector<HTMLElement>('[data-bar="wear"]');
+  const wearLabel = root.querySelector<HTMLElement>('[data-label="wear"]');
+  const wearNote = root.querySelector<HTMLElement>('[data-note="wear"]');
   const serviceBtn = root.querySelector<HTMLButtonElement>("[data-service]");
   serviceBtn?.addEventListener("click", () => handlers.onServiceHardware());
 
@@ -1140,7 +1146,11 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   function render(s: GameState, d: Derived, now: number) {
     // HUD
     setText(stats.money, money(s.money));
-    setText(stats.rate, "$" + fmt(d.moneyPerSec) + "/s");
+    setText(
+      stats.rate,
+      (d.moneyPerSec < 0 ? "-$" : "$") + fmt(Math.abs(d.moneyPerSec)) + "/s",
+    );
+    setFlag(stats.rate?.parentElement ?? root, "is-neg", d.moneyPerSec < 0);
     setText(stats.compute, rate(d.compute, " FLOP"));
     setText(stats.reputation, `${fmt(s.reputation)} · ${d.repTier.name}`);
     setText(stats.research, fmt(s.research));
@@ -1314,16 +1324,17 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         : `Earn ${money(creditScale(s))} this run to unlock a rebuild.`,
     );
 
-    // Telemetry: heat
+    // Telemetry: heat. The value stays compact (numbers only) so the gauge
+    // cell never wraps; the status word goes in the note line beneath the bar.
     const heatFrac = Math.min(1, d.heatLoad); // 1 == at capacity
     heatBar.style.width = pct(heatFrac);
     const overheating = d.heatThrottle < 1;
     setFlag(heatBar, "is-hot", overheating);
+    setFlag(heatLabel, "is-hot", overheating);
+    setText(heatLabel, `${fmt(d.heatGen)} / ${fmt(d.coolingCap)}`);
     setText(
-      heatLabel,
-      overheating
-        ? `Overheating - output ${pct(d.heatThrottle)}`
-        : `Nominal - ${fmt(d.heatGen)}/${fmt(d.coolingCap)} cooling`,
+      heatNote,
+      overheating ? `Overheating · output ${pct(d.heatThrottle)}` : "Cooling load",
     );
 
     // Telemetry: power
@@ -1331,14 +1342,16 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     powerBar.style.width = pct(powerFrac);
     const browningOut = d.powerThrottle < 1;
     setFlag(powerBar, "is-hot", browningOut);
+    setFlag(powerLabel, "is-hot", browningOut);
     const gridRatio = d.gridMarket / TUNING.basePowerRate;
     const gridWord =
       gridRatio > 1.12 ? "peak" : gridRatio < 0.88 ? "off-peak" : "normal";
+    setText(powerLabel, `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW`);
     setText(
-      powerLabel,
+      powerNoteEl,
       browningOut
-        ? `Over capacity - output ${pct(d.powerThrottle)}`
-        : `${fmt(d.powerDraw)} / ${fmt(d.powerCap)} kW · grid ${gridWord}`,
+        ? `Over capacity · output ${pct(d.powerThrottle)}`
+        : `Grid ${gridWord}`,
     );
 
     // Telemetry: network throughput (same hard-cap behaviour as power)
@@ -1347,11 +1360,11 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     netBar.style.width = pct(netFrac);
     const saturated = d.bandwidthThrottle < 1;
     setFlag(netBar, "is-hot", saturated);
+    setFlag(netLabel, "is-hot", saturated);
+    setText(netLabel, `${fmt(d.bandwidthDraw)} / ${fmt(d.bandwidthCap)} Gb/s`);
     setText(
-      netLabel,
-      saturated
-        ? `Saturated - output ${pct(d.bandwidthThrottle)}`
-        : `${fmt(d.bandwidthDraw)} / ${fmt(d.bandwidthCap)} Gb/s`,
+      netNote,
+      saturated ? `Saturated · output ${pct(d.bandwidthThrottle)}` : "Throughput",
     );
 
     // Data Hall: fill each cabinet from its owned count.
@@ -1657,11 +1670,12 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       wearBar.style.width = pct(w);
       setFlag(wearBar, "is-hot", w >= 0.5);
       const worn = w > 0.02;
+      if (wearLabel) setFlag(wearLabel, "is-hot", w >= 0.5);
+      setText(wearLabel ?? undefined, worn ? `${pct(w)} worn` : "Nominal");
       setText(
-        wearLabel ?? undefined,
-        worn ? `${pct(w)} worn — output ${pct(1 - d.wearPenalty)}` : "Nominal",
+        wearNote ?? undefined,
+        worn ? `Output ${pct(1 - d.wearPenalty)}` : "Hardware health",
       );
-      setText(wearNote ?? undefined, worn ? `${pct(w)} worn` : "Nominal");
       if (serviceBtn) {
         setText(serviceBtn, `Service · ${money(d.serviceCost)}`);
         setDisabled(serviceBtn, w <= 0 || s.money < d.serviceCost);
