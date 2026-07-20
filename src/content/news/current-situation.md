@@ -4,7 +4,7 @@ date: 2026-06-12
 tags: ["Studio", "Modpack"]
 summary: A current status update on us.
 author: Itzz_Fabi
-featured: true
+featured: false
 ---
 
 Hello. As you know, I'm currently working on “Create Unbound.” (More or less.) In fact, not much has happened on the development front. There are several reasons for this.
