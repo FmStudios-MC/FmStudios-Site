@@ -21,6 +21,7 @@ import {
 } from "./config";
 import {
   bulkBuyInfo,
+  bulkSellInfo,
   type BuyMult,
   corporateCost,
   corporateUnlocked,
@@ -43,6 +44,7 @@ const POWER_OPTIONS: { id: PowerContract; name: string; desc: string }[] = [
 
 export interface Handlers {
   onBuyBuilding(id: string, mult: BuyMult): void;
+  onSellBuilding(id: string, mult: BuyMult): void;
   onBuyUpgrade(id: string): void;
   onBuyPrestige(id: string): void;
   onBuyCorporate(id: string): void;
@@ -108,6 +110,7 @@ interface BuildingRow {
   owned: HTMLElement;
   cost: HTMLElement;
   button: HTMLButtonElement;
+  sell: HTMLButtonElement;
   def: (typeof BUILDINGS)[number];
 }
 
@@ -126,11 +129,13 @@ interface PrestigeRow {
 }
 
 interface Cabinet {
-  root: HTMLElement;
+  root: HTMLButtonElement;
   units: HTMLElement[];
   count: HTMLElement;
+  cost: HTMLElement;
   id: string;
   kind: string;
+  def: (typeof BUILDINGS)[number];
 }
 
 export function createUI(root: HTMLElement, handlers: Handlers) {
@@ -226,7 +231,17 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       const def = BUILDING_BY_ID[id];
       if (!def) continue;
 
-      const cab = el("div", `sft-cab sft-cab--${group.kind} sft-cab--${id} is-empty`);
+      // The hall is the control surface, not a diorama: every cabinet is a buy
+      // button for its own hardware. Building where you can see the floor beats
+      // opening a drawer and hunting a list row.
+      const cab = el(
+        "button",
+        `sft-cab sft-cab--${group.kind} sft-cab--${id} is-empty`,
+      );
+      cab.type = "button";
+      cab.addEventListener("click", () =>
+        handlers.onBuyBuilding(id, buyMult),
+      );
       const frame = el("div", "sft-cab__frame");
 
       const unitsWrap = el("div", "sft-cab__units");
@@ -249,10 +264,12 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       const name = el("span", "sft-cab__name", HALL_SHORT[id] ?? def.name);
       const count = el("span", "sft-cab__count", "x0");
       plate.append(name, count);
+      // Price rides on the chassis so the floor is buildable at a glance.
+      const cost = el("span", "sft-cab__cost", money(def.baseCost));
 
-      cab.append(frame, plate);
+      cab.append(frame, plate, cost);
       zoneCabs.appendChild(cab);
-      cabinets.push({ root: cab, units, count, id, kind: group.kind });
+      cabinets.push({ root: cab, units, count, cost, id, kind: group.kind, def });
     }
 
     const label = el(
@@ -359,9 +376,13 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     const list = root.querySelector<HTMLElement>(`[data-list="${cat}"]`);
     if (!list) return;
     BUILDINGS.filter((b) => b.category === cat).forEach((def) => {
-      const rowEl = el("button", "sft-row");
-      rowEl.type = "button";
-      (rowEl as HTMLButtonElement).addEventListener("click", () =>
+      // The row is a wrapper, not a button: it holds the buy control and a
+      // decommission control side by side (a button can't nest a button).
+      const rowEl = el("div", "sft-row");
+
+      const buyBtn = el("button", "sft-row__buy");
+      buyBtn.type = "button";
+      buyBtn.addEventListener("click", () =>
         handlers.onBuyBuilding(def.id, buyMult),
       );
 
@@ -375,14 +396,28 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       const cost = el("span", "sft-row__cost", money(def.baseCost));
       meta.append(owned, cost);
 
-      rowEl.append(main, meta);
+      buyBtn.append(main, meta);
+
+      // Decommission: the way back from a build that outgrew its power budget.
+      const sellBtn = el("button", "sft-row__sell", "−");
+      sellBtn.type = "button";
+      sellBtn.setAttribute("aria-label", `Decommission ${def.name}`);
+      sellBtn.title = `Decommission — refunds ${Math.round(
+        TUNING.sellRefund * 100,
+      )}% of what it cost`;
+      sellBtn.addEventListener("click", () =>
+        handlers.onSellBuilding(def.id, buyMult),
+      );
+
+      rowEl.append(buyBtn, sellBtn);
       list.appendChild(rowEl);
 
       buildingRows.push({
         root: rowEl,
         owned,
         cost,
-        button: rowEl as HTMLButtonElement,
+        button: buyBtn,
+        sell: sellBtn,
         def,
       });
     });
@@ -1139,6 +1174,15 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   function setDisabled(btn: HTMLButtonElement, disabled: boolean) {
     if (btn.disabled !== disabled) btn.disabled = disabled;
   }
+  /** Drive a bar fill from a 0..1 fraction. Scales rather than resizing: these
+      are written every animation frame, and `width` would force a layout pass
+      per bar per frame. Pairs with the transform-based fill rules in the CSS. */
+  function setBar(node: HTMLElement | null | undefined, frac: number) {
+    if (!node) return;
+    const v = Math.max(0, Math.min(1, frac));
+    const next = `scaleX(${v.toFixed(4)})`;
+    if (node.style.transform !== next) node.style.transform = next;
+  }
   function setFlag(node: HTMLElement, cls: string, on: boolean) {
     if (node.classList.contains(cls) !== on) node.classList.toggle(cls, on);
   }
@@ -1176,6 +1220,15 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     // Building rows
     for (const r of buildingRows) {
       const count = s.buildings[r.def.id] ?? 0;
+      // Decommission is offered only for gear that's actually on the floor.
+      setFlag(r.root, "has-owned", count > 0);
+      setDisabled(r.sell, count <= 0);
+      if (count > 0) {
+        const sellInfo = bulkSellInfo(s, r.def, buyMult);
+        r.sell.title = `Decommission ×${sellInfo.count} — refunds ${money(
+          sellInfo.refund,
+        )}`;
+      }
       const unlocked =
         r.def.unlockAt == null || s.lifetimeEarnings >= r.def.unlockAt;
       setFlag(r.root, "is-locked", !unlocked);
@@ -1237,7 +1290,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setText(r.sat, satPct >= 3 ? `−${satPct}% saturated` : "");
         setFlag(r.root, "is-saturated", satPct >= 3);
         const allocPct = pct(w.alloc);
-        r.bar.style.width = allocPct;
+        setBar(r.bar, w.alloc);
         r.thumb.style.left = allocPct;
         setText(r.share, allocPct);
         r.slider.setAttribute("aria-valuenow", String(Math.round(w.alloc * 100)));
@@ -1327,7 +1380,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     // Telemetry: heat. The value stays compact (numbers only) so the gauge
     // cell never wraps; the status word goes in the note line beneath the bar.
     const heatFrac = Math.min(1, d.heatLoad); // 1 == at capacity
-    heatBar.style.width = pct(heatFrac);
+    setBar(heatBar, heatFrac);
     const overheating = d.heatThrottle < 1;
     setFlag(heatBar, "is-hot", overheating);
     setFlag(heatLabel, "is-hot", overheating);
@@ -1339,7 +1392,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
 
     // Telemetry: power
     const powerFrac = d.powerCap > 0 ? Math.min(1, d.powerDraw / d.powerCap) : 0;
-    powerBar.style.width = pct(powerFrac);
+    setBar(powerBar, powerFrac);
     const browningOut = d.powerThrottle < 1;
     setFlag(powerBar, "is-hot", browningOut);
     setFlag(powerLabel, "is-hot", browningOut);
@@ -1357,7 +1410,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     // Telemetry: network throughput (same hard-cap behaviour as power)
     const netFrac =
       d.bandwidthCap > 0 ? Math.min(1, d.bandwidthDraw / d.bandwidthCap) : 0;
-    netBar.style.width = pct(netFrac);
+    setBar(netBar, netFrac);
     const saturated = d.bandwidthThrottle < 1;
     setFlag(netBar, "is-hot", saturated);
     setFlag(netLabel, "is-hot", saturated);
@@ -1371,13 +1424,47 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     const tier =
       d.heatThrottle >= 0.9 ? "ok" : d.heatThrottle >= 0.6 ? "warm" : "hot";
     const zoneTotals: Record<string, number> = {};
+    const zoneVisible: Record<string, boolean> = {};
     for (const cab of cabinets) {
       const count = s.buildings[cab.id] ?? 0;
       zoneTotals[cab.kind] = (zoneTotals[cab.kind] ?? 0) + count;
+
+      // A cabinet you've earned the right to build is shown as a dim ghost
+      // rather than hidden, so the floor doubles as the build menu — the next
+      // thing worth buying is visible on the hero instead of behind a drawer.
+      const unlocked =
+        cab.def.unlockAt == null || s.lifetimeEarnings >= cab.def.unlockAt;
+      zoneVisible[cab.kind] = (zoneVisible[cab.kind] ?? false) || unlocked;
+      setFlag(cab.root, "is-hidden", !unlocked);
+      if (!unlocked) {
+        setDisabled(cab.root, true);
+        continue;
+      }
+
+      const info = bulkBuyInfo(s, cab.def, buyMult);
+      const oneFits =
+        cab.def.space == null || d.spaceUsed + cab.def.space <= d.spaceCap;
+      const afford = oneFits && info.count > 0 && s.money >= info.cost;
+      const unitCost = info.count > 0 ? info.cost : bulkBuyInfo(s, cab.def, 1).cost;
+      setDisabled(cab.root, !afford);
+      setFlag(cab.root, "is-afford", afford);
+      setFlag(cab.root, "is-nospace", !oneFits);
+      setText(
+        cab.cost,
+        !oneFits
+          ? "Floor full"
+          : info.count > 1
+            ? `${money(unitCost)} ·${info.count}`
+            : money(unitCost),
+      );
+      cab.root.setAttribute(
+        "aria-label",
+        `${cab.def.name} — ${count} online, buy for ${money(unitCost)}`,
+      );
+
       const empty = count <= 0;
       setFlag(cab.root, "is-empty", empty);
-      if (empty) continue;
-      const lit = Math.min(cab.units.length, count);
+      const lit = empty ? 0 : Math.min(cab.units.length, count);
       for (let i = 0; i < cab.units.length; i++) {
         setFlag(cab.units[i], "is-on", i < lit);
       }
@@ -1385,9 +1472,9 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       setText(cab.count, "x" + fmt(count));
     }
     const producerCount = zoneTotals.producer ?? 0;
-    // Hide an entire category zone (label included) until it has hardware.
+    // A zone stays hidden only while every cabinet in it is still locked.
     for (const z of zones) {
-      setFlag(z.root, "is-empty", (zoneTotals[z.kind] ?? 0) <= 0);
+      setFlag(z.root, "is-empty", !zoneVisible[z.kind]);
     }
 
     // Hall-wide reactive state, driven by attributes/vars so CSS does the work.
@@ -1483,7 +1570,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         setText(scriptName, sc.name);
         setText(scriptGoal, sc.goal);
         setText(scriptTimer, duration((sc.endsAt - now) / 1000));
-        if (scriptBar) scriptBar.style.width = pct(sc.progress);
+        setBar(scriptBar, sc.progress);
         if (scriptHold) {
           setText(
             scriptHold,
@@ -1528,7 +1615,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           cActiveList.appendChild(r.root);
         }
         setText(r.title, `${ac.tag} · deliver ${fmt(ac.required)} FLOP`);
-        r.fill.style.width = pct(ac.progress);
+        setBar(r.fill, ac.progress);
         setText(
           r.progress,
           `${fmt(ac.delivered)} / ${fmt(ac.required)} FLOP · ${pct(ac.progress)}`,
@@ -1560,9 +1647,21 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         );
         setText(r.reserve, `Reserves ${pct(of.reserve)} of compute while active`);
         setText(r.reward, `Pays ${money(of.reward)} + ${fmt(of.repReward)} rep`);
-        setText(r.risk, `Failure costs ${fmt(of.repPenalty)} reputation`);
+        // Say *why* a job is out of reach, rather than greying the button and
+        // leaving the player guessing.
+        setText(
+          r.risk,
+          of.canAccept
+            ? `Failure costs ${fmt(of.repPenalty)} reputation`
+            : d.contracts.canAccept
+              ? `Needs ${pct(of.reserve)} capacity — only ${pct(
+                  d.contracts.freeReserve,
+                )} uncommitted`
+              : "Job slots full — finish one first",
+        );
+        setFlag(r.root, "is-blocked", !of.canAccept);
         setText(r.expiry, `Withdrawn in ${duration(of.expiresSec)}`);
-        setDisabled(r.accept, !d.contracts.canAccept);
+        setDisabled(r.accept, !of.canAccept);
       }
       for (const [id, r] of offerRows) {
         if (!seenOffer.has(id)) {
@@ -1602,7 +1701,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     } else {
       setText(standingNext ?? undefined, "Top tier");
     }
-    if (standingBar) standingBar.style.width = pct(tierInfo.progress);
+    setBar(standingBar, tierInfo.progress);
     const tierDef = REPUTATION_TIERS[tierInfo.index];
     setText(
       standingPerks ?? undefined,
@@ -1656,10 +1755,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
               (d.ascension + 1) * TUNING.ascensionStep
             ).toFixed(1)})`,
           );
-          if (ascBar) ascBar.style.width = pct(Math.min(1, d.compute / nextTier.compute));
+          setBar(ascBar, d.compute / nextTier.compute);
         } else {
           setText(ascNext ?? undefined, "Maximum ascension reached.");
-          if (ascBar) ascBar.style.width = "100%";
+          setBar(ascBar, 1);
         }
       }
     }
@@ -1667,7 +1766,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     // Maintenance (hardware wear)
     if (wearBar) {
       const w = d.wear;
-      wearBar.style.width = pct(w);
+      setBar(wearBar, w);
       setFlag(wearBar, "is-hot", w >= 0.5);
       const worn = w > 0.02;
       if (wearLabel) setFlag(wearLabel, "is-hot", w >= 0.5);
@@ -1692,7 +1791,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           objectiveProgress ?? undefined,
           d.endlessUnlocked && !s.endless ? "Engage Endless for more" : "All objectives cleared",
         );
-        if (objectiveBar) objectiveBar.style.width = "100%";
+        setBar(objectiveBar, 1);
       } else {
         setFlag(objectiveEl, "is-complete", false);
         setText(objectiveName ?? undefined, next.name);
@@ -1703,10 +1802,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
             `${fmt(m.value)} / ${fmt(m.target)} ${m.unit}`,
           );
           if (objectiveBar)
-            objectiveBar.style.width = pct(m.target > 0 ? Math.min(1, m.value / m.target) : 0);
+            setBar(objectiveBar, m.target > 0 ? m.value / m.target : 0);
         } else {
           setText(objectiveProgress ?? undefined, next.desc);
-          if (objectiveBar) objectiveBar.style.width = "0%";
+          setBar(objectiveBar, 0);
         }
       }
     }

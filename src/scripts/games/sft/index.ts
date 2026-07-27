@@ -21,6 +21,7 @@ import {
   rebalanceRacks,
   reputationTier,
   respondEvent,
+  sellBuildingBulk,
   serviceHardware,
   setAllocation,
   setAllocationShare,
@@ -57,6 +58,17 @@ export function startGame(root: HTMLElement) {
           "good",
         );
         sound.buy();
+        renderNow();
+      }
+    },
+    onSellBuilding: (id, mult) => {
+      const n = sellBuildingBulk(state, id, mult);
+      if (n > 0) {
+        const name = BUILDING_BY_ID[id]?.name ?? id;
+        ui.pushLog(
+          n > 1 ? `− ${name} ×${n} decommissioned` : `− ${name} decommissioned`,
+          "",
+        );
         renderNow();
       }
     },

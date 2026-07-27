@@ -135,6 +135,47 @@ export function buyBuildingBulk(
   return count;
 }
 
+/** What decommissioning `mult` units of `id` returns, and how many that is. */
+export function bulkSellInfo(
+  s: GameState,
+  def: BuildingDef,
+  mult: BuyMult,
+): { count: number; refund: number } {
+  const ownedNow = owned(s, def.id);
+  const growth = effectiveGrowth(s, def);
+  const count = mult === "max" ? ownedNow : Math.min(mult, ownedNow);
+  let refund = 0;
+  // Units come off the top of the cost curve, mirroring bulkBuyInfo: the last
+  // one bought is the first one sold, so a refund always matches what that
+  // specific unit cost.
+  for (let i = 0; i < count; i++) {
+    const unit = Math.ceil(
+      def.baseCost * Math.pow(growth, ownedNow - 1 - i),
+    );
+    refund += Math.floor(unit * TUNING.sellRefund);
+  }
+  return { count, refund };
+}
+
+/** Decommission equipment for a partial refund. The escape hatch from a build
+    that draws more power than it can pay for — without it, a throttled farm
+    with no cash had no legal move left. Refunds are cash only: they never touch
+    run/lifetime earnings, so a buy-sell loop can't farm progression. */
+export function sellBuildingBulk(
+  s: GameState,
+  id: string,
+  mult: BuyMult,
+): number {
+  const def = BUILDING_BY_ID[id];
+  if (!def) return 0;
+  const { count, refund } = bulkSellInfo(s, def, mult);
+  if (count <= 0) return 0;
+  s.buildings[id] = owned(s, id) - count;
+  s.money += refund;
+  invalidateDerive();
+  return count;
+}
+
 /** Whether a prestige node's prerequisite branch nodes are satisfied. */
 export function prestigeUnlocked(s: GameState, id: string): boolean {
   const def = PRESTIGE.find((p) => p.id === id);
@@ -581,24 +622,32 @@ function generateOffer(s: GameState, now: number): ContractOffer | null {
     0.1,
     Math.min(TUNING.contractReserveCap, arch.reserve * (0.85 + r2 * 0.3)),
   );
-  const tierScale = reputationTier(s.reputation).def.contractScale;
-  const required = Math.max(
-    1,
-    d.compute * reserve * durationSec * tierScale * endlessMult(s),
-  );
+  // Ask for a fraction of what the reserved slice actually produces over the
+  // window, so committing the capacity is enough to deliver it.
+  const demand =
+    TUNING.contractTargetMin +
+    r2 * (TUNING.contractTargetMax - TUNING.contractTargetMin);
+  const required = Math.max(1, d.compute * reserve * durationSec * demand);
 
+  // Standing and Endless ride the payout, not the requirement: better
+  // reputation means richer deals rather than ones you can't finish.
+  const tierScale = reputationTier(s.reputation).def.contractScale;
   // Reward beats letting that reserved compute auto-sell, paid as a lump sum;
   // Standing Orders (prestige) sweetens every payout.
   const standing = plevel(s, "standing-orders") > 0 ? 1.25 : 1;
   const bonus = arch.reward * (0.9 + r3 * 0.2);
-  const reward = Math.ceil(required * d.price * bonus * standing);
+  const reward = Math.ceil(
+    required * d.price * bonus * standing * tierScale * endlessMult(s),
+  );
 
   // Reputation is the contract's second currency, weighted by archetype.
   const repReward = Math.max(
     1,
     Math.round((durationSec / 60) * (2 + r4 * 3) * arch.rep),
   );
-  const repPenalty = Math.round(repReward * 1.5);
+  // Missing a deadline should sting, not undo hours of standing. It used to
+  // cost 1.5× what fulfilment paid, so a run of bad luck buried your tier.
+  const repPenalty = Math.round(repReward * 0.6);
 
   return {
     id: "ct-" + s.contractSeed,
@@ -876,14 +925,27 @@ function deriveImpl(s: GameState, now: number): Derived {
     workloadPriceMult *
     standingMult;
 
-  // Operating cost: every kW of draw is billed at the contract grid price
-  // (idea #7); the raw market still drives the peak/off-peak read-out.
+  // Operating cost: billed at the contract grid price (idea #7); the raw
+  // market still drives the peak/off-peak read-out.
   const gridMarket = gridPrice(now);
   const grid = effectiveGridPrice(s, now) * evGridMult;
   // Only the un-reserved compute auto-sells (idea #2); the rest is delivering
   // contracts. Total compute still drives goals, reputation and research.
   const grossPerSec = sellCompute * price;
-  const powerCost = powerDraw * grid;
+
+  // What the floor actually pulls. Two corrections, both of which used to be
+  // missing and together made overheating unsurvivable:
+  //   1. You can't consume more than the grid connection delivers, so draw
+  //      beyond capacity is never billed (powerThrottle already cut output
+  //      for it — charging for it too was double jeopardy).
+  //   2. A throttled machine idles rather than working flat out, so it bills
+  //      the idle floor plus the remainder scaled by real utilisation.
+  const drawnPower = Math.min(powerDraw, powerCap);
+  const utilisation =
+    TUNING.idleDrawFloor +
+    (1 - TUNING.idleDrawFloor) * heatThrottle * bandwidthThrottle;
+  const billedDraw = drawnPower * utilisation;
+  const powerCost = billedDraw * grid;
 
   // Per-workload view for the UI: normalised share + live effective $/FLOP,
   // after demand saturation (idea #1) so the row shows the price you'd actually
@@ -991,6 +1053,8 @@ function deriveImpl(s: GameState, now: number): Derived {
       repPenalty: o.repPenalty,
       durationSec: o.durationSec,
       expiresSec: Math.max(0, (o.expiresAt - now) / 1000),
+      // Capacity is per-offer now: a small job may fit where a big one won't.
+      canAccept: canAcceptContract(s, o),
     }));
 
   return {
@@ -1041,6 +1105,9 @@ function deriveImpl(s: GameState, now: number): Derived {
     contracts: {
       streak: s.contractStreak,
       canAccept: s.contracts.length < maxActiveContracts(s),
+      // How much of the floor is uncommitted, so the UI can explain a refusal
+      // instead of just greying the button out.
+      freeReserve: Math.max(0, TUNING.contractReserveCap - reservedShare(s)),
       active,
       offers,
     },
@@ -1337,12 +1404,29 @@ export function rebalanceRacks(s: GameState, now: number): boolean {
 }
 
 /** Take an offer off the board, starting its delivery clock from `now`. */
-export function acceptContract(s: GameState, now: number, id: string): boolean {
+/** Share of the floor already promised to active contracts. */
+export function reservedShare(s: GameState): number {
+  let sum = 0;
+  for (const c of s.contracts) sum += c.reserve;
+  return sum;
+}
+
+/** Whether there's enough uncommitted capacity left to take this job on.
+    Without this gate, accepting jobs past the reserve cap scaled every active
+    job's delivery down proportionally — so stacking three contracts made all
+    three miss their deadline. Capacity you don't have is now refused up front
+    rather than silently sabotaging the jobs you already took. */
+export function canAcceptContract(s: GameState, o: ContractOffer): boolean {
   if (s.contracts.length >= maxActiveContracts(s)) return false;
+  return reservedShare(s) + o.reserve <= TUNING.contractReserveCap + 1e-9;
+}
+
+export function acceptContract(s: GameState, now: number, id: string): boolean {
   const idx = s.contractOffers.findIndex((o) => o.id === id);
   if (idx < 0) return false;
   const o = s.contractOffers[idx];
   if (now >= o.expiresAt) return false;
+  if (!canAcceptContract(s, o)) return false;
   s.contracts.push({
     id: o.id,
     tag: o.tag,

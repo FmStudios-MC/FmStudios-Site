@@ -473,6 +473,7 @@ export interface Derived {
   contracts: {
     streak: number;
     canAccept: boolean; // false once the active list is at capacity
+    freeReserve: number; // uncommitted share of compute (0..contractReserveCap)
     active: {
       id: string;
       tag: string;
@@ -494,6 +495,7 @@ export interface Derived {
       repPenalty: number;
       durationSec: number;
       expiresSec: number; // seconds until the offer is withdrawn
+      canAccept: boolean; // enough uncommitted capacity to take this one on
     }[];
   };
 }

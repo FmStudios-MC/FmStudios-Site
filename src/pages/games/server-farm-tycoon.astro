@@ -270,10 +270,10 @@ const gauges: { id: string; name: string }[] = [
               <div class="sft-hall__scene">
                 <div class="sft-hall__tray" aria-hidden="true"></div>
                 <div class="sft-hall__floor" aria-hidden="true"></div>
-                <div class="sft-hall__row" data-hall aria-hidden="true"></div>
+                <div class="sft-hall__row" data-hall aria-label="Equipment floor"></div>
                 <p class="sft-hall__empty" data-hall-empty>
-                  The floor is dark. Open <strong>Build</strong> and add a Mini
-                  Rack to bring the first cabinet online.
+                  The floor is dark. Click the <strong>Mini Rack</strong> to
+                  bring your first cabinet online.
                 </p>
               </div>
             </section>
@@ -664,7 +664,7 @@ const gauges: { id: string; name: string }[] = [
           idx = (idx + dir + buttons.length) % buttons.length;
           if (!isLocked(buttons[idx])) break;
         }
-        buttons[idx].focus();
+          buttons[idx].focus();
       });
     });
 
@@ -727,4 +727,3 @@ const gauges: { id: string; name: string }[] = [
     });
   }
 </script>
-</BaseLayout>

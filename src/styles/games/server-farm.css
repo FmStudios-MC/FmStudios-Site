@@ -54,12 +54,27 @@
 }
 
 /* ---- HUD: economy at a glance ------------------------------------- */
+/* Explicit grid, never flex-wrap. The old wrapping row re-flowed the moment a
+   readout grew a digit ($15 -> $248.71B widens the cash by ~110px), which
+   bumped the reads onto a second line and shoved the whole cockpit down 56px.
+   A grid with named areas has a row count fixed per breakpoint, so a number
+   growing can widen a cell but can never add a row. Paired with the `ch`
+   reservations on the numeric values below, the layout holds still all game. */
 .sft-hud {
   position: sticky;
   top: var(--sft-nav-h);
   z-index: calc(var(--z-sticky) - 1);
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  /* Two rows, always. Identity + cash + settings on top; the four reads get a
+     row to themselves below. Cramming all six into one row only ever fit while
+     the numbers were small — at $9.01T the cash grew into the compute readout,
+     and because `ch` reservations depend on which font has loaded, the exact
+     collision point moved between loads. A fixed two-row grid can't collide at
+     any width or any value. */
+  grid-template-areas:
+    "brand money sys"
+    "reads reads reads";
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-s) var(--space-l);
   padding: var(--space-s) var(--space-m);
@@ -67,6 +82,28 @@
   border-radius: var(--radius-l);
   background: color-mix(in oklch, var(--sft-panel) 86%, transparent);
   backdrop-filter: blur(10px);
+}
+.sft-hud__brand {
+  grid-area: brand;
+}
+.sft-hud__money {
+  grid-area: money;
+}
+.sft-hud__reads {
+  grid-area: reads;
+}
+.sft-sys {
+  grid-area: sys;
+}
+
+@media (max-width: 560px) {
+  .sft-hud {
+    grid-template-areas:
+      "brand sys"
+      "money money"
+      "reads reads";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 }
 .sft-hud__brand {
   display: flex;
@@ -102,6 +139,10 @@
   gap: var(--space-s);
   min-width: 0;
 }
+/* `tabular-nums` only equalises digit *shapes* — it does nothing about a value
+   gaining digits. Reserving the width the largest realistic readout needs
+   ($999.99Dc) means the cash box is the same size at $15 as at $248.71B, so
+   the rate beside it never slides. Same trick on every live number below. */
 .sft-hud__cash {
   font-family: var(--font-display);
   font-weight: 600;
@@ -110,6 +151,7 @@
   letter-spacing: -0.02em;
   color: var(--gold-bright);
   font-variant-numeric: tabular-nums;
+  min-width: 6.5ch;
 }
 .sft-hud__rate {
   display: flex;
@@ -121,6 +163,7 @@
   font-size: var(--step-0);
   color: var(--sft-ok);
   font-variant-numeric: tabular-nums;
+  min-width: 11ch;
 }
 .sft-hud__rate.is-neg .sft-hud__rate-val {
   color: var(--sft-hot);
@@ -132,11 +175,21 @@
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+/* Four equal columns across the full row. Sharing the width evenly means each
+   read has room for any value it can ever hold, so none of them can grow into
+   a neighbour however large the numbers get. */
 .sft-hud__reads {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-s) var(--space-l);
-  margin-left: auto;
+  min-width: 0;
+  padding-top: var(--space-2xs);
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 700px) {
+  .sft-hud__reads {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* System menu (sound + data controls) lives behind a gear in the HUD. */
@@ -268,6 +321,13 @@
 .sft-gauge__val.is-hot {
   color: var(--sft-hot);
 }
+/* The name yields before the number does: a gauge reading "1.82M / 2.40M kW"
+   truncates the label rather than pushing the cell wider. */
+.sft-gauge__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .sft-gauge__note {
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -275,9 +335,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.sft-gauge__note:empty {
-  display: none;
+  /* Always occupy one line. `:empty { display: none }` used to collapse the
+     cell, so the whole gauge strip — and everything under it — jumped by a
+     line-height the moment a status note appeared or cleared. */
+  min-height: 1lh;
 }
 .sft-gauge__actions {
   display: flex;
@@ -550,6 +611,9 @@
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+/* The equal-width grid column already fixes each read's footprint, so the value
+   needs no width reservation of its own — it just must never spill out of the
+   cell it was given. */
 .sft-read__val {
   font-family: var(--font-mono);
   font-size: 0.95rem;
@@ -557,6 +621,9 @@
   color: var(--ink);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sft-read.is-warn .sft-read__val {
   color: var(--sft-hot);
@@ -611,11 +678,16 @@
 .sft-bar__fill {
   display: block;
   height: 100%;
-  width: 0;
+  /* Scaled, not resized. The render loop repaints these every animation frame,
+     and animating `width` forced a layout pass per bar per frame; a transform
+     stays on the compositor. Driven by setBar() in ui.ts. */
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
   border-radius: var(--radius-pill);
   background: var(--sft-ok);
   transition:
-    width var(--dur-mid) var(--ease-out-quart),
+    transform var(--dur-mid) var(--ease-out-quart),
     background-color var(--dur-fast) linear;
 }
 .sft-bar__fill.is-hot {
@@ -800,33 +872,81 @@
   gap: clamp(8px, 1.6vw, 18px);
 }
 
+/* A first-run hint, pinned to the bottom of the scene. It used to be a
+   centred overlay across the whole hall — which now sits on top of the ghost
+   cabinets it's telling you to click. */
 .sft-hall__empty {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--space-s);
   z-index: 2;
-  display: grid;
-  place-content: center;
   text-align: center;
-  padding: var(--space-l);
+  padding: 0 var(--space-m);
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--ink-faint);
+  pointer-events: none;
 }
 .sft-hall__empty.is-hidden {
   display: none;
 }
 
 /* ---- Cabinet -------------------------------------------------------- */
+/* Cabinets are buttons: the floor is where you build. */
 .sft-cab {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   width: clamp(58px, 8.5vw, 82px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: inherit;
   animation: sft-cab-in var(--dur-mid) var(--ease-out-expo);
+  transition:
+    transform var(--dur-fast) var(--ease-out-quart),
+    opacity var(--dur-fast) var(--ease-out-quart);
+}
+/* Locked hardware stays out of the hall entirely; `is-empty` now just means
+   "unlocked, none built yet" and renders as a ghost you can click to start. */
+.sft-cab.is-hidden {
+  display: none;
 }
 .sft-cab.is-empty {
-  display: none;
+  opacity: 0.34;
+}
+.sft-cab.is-afford {
+  cursor: pointer;
+}
+.sft-cab.is-afford:hover,
+.sft-cab.is-afford:focus-visible {
+  transform: translateY(-3px);
+}
+.sft-cab.is-afford.is-empty {
+  opacity: 0.6;
+}
+.sft-cab:disabled {
+  cursor: not-allowed;
+}
+/* Price plate under each chassis. */
+.sft-cab__cost {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-align: center;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sft-cab.is-afford .sft-cab__cost {
+  color: var(--gold-bright);
+}
+.sft-cab.is-nospace .sft-cab__cost {
+  color: var(--sft-hot);
 }
 
 .sft-cab__frame {
@@ -1742,12 +1862,22 @@
   flex-direction: column;
 }
 
+/* The row is a wrapper holding two controls: the buy button (which fills it)
+   and a decommission button that only appears for gear you actually own. */
 .sft-row {
   display: flex;
   align-items: center;
+  gap: 2px;
+  width: 100%;
+  border-radius: var(--radius-m);
+}
+.sft-row__buy {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-s);
-  width: 100%;
+  min-width: 0;
   text-align: left;
   padding: var(--space-s);
   border: 0;
@@ -1759,17 +1889,49 @@
 .sft-row + .sft-row {
   margin-top: 2px;
 }
-.sft-row.is-afford {
+.sft-row.is-afford .sft-row__buy {
   cursor: pointer;
 }
-.sft-row.is-afford:hover {
+.sft-row.is-afford .sft-row__buy:hover {
   background: var(--sft-panel-2);
 }
-.sft-row:disabled {
+.sft-row__buy:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 .sft-row.is-locked {
+  opacity: 0.4;
+}
+
+/* Decommission. Deliberately quiet — a recovery tool, not a headline action.
+   Hidden entirely until the row has something to sell. */
+.sft-row__sell {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: none;
+  place-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    border-color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-row.has-owned .sft-row__sell {
+  display: grid;
+}
+.sft-row__sell:hover:not(:disabled) {
+  color: var(--sft-hot);
+  border-color: var(--sft-hot);
+}
+.sft-row__sell:disabled {
+  cursor: not-allowed;
   opacity: 0.4;
 }
 .sft-row__main {
@@ -1976,10 +2138,12 @@
 .sft-wl__fill {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
   border-radius: var(--radius-pill);
   background: var(--gold-sheen);
-  transition: width var(--dur-mid) var(--ease-out-quart);
+  transition: transform var(--dur-mid) var(--ease-out-quart);
 }
 .sft-wl__thumb {
   position: absolute;
@@ -2248,6 +2412,14 @@
   font-family: var(--font-mono);
   font-size: 0.74rem;
   color: var(--sft-hot);
+}
+/* An offer you lack the capacity for reads as unavailable, not as a warning —
+   the risk line is carrying a "why not" message rather than a penalty. */
+.sft-contract__offer.is-blocked {
+  opacity: 0.55;
+}
+.sft-contract__offer.is-blocked .sft-contract__risk {
+  color: var(--ink-faint);
 }
 .sft-contract__expiry,
 .sft-contract__progress {
@@ -2984,6 +3156,7 @@
   font-size: 0.74rem;
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .sft-objective__track {
   height: 4px;
@@ -2994,10 +3167,12 @@
 .sft-objective__fill {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
   border-radius: var(--radius-pill);
   background: var(--gold-sheen);
-  transition: width var(--dur-mid) var(--ease-out-quart);
+  transition: transform var(--dur-mid) var(--ease-out-quart);
 }
 .sft-objective.is-complete .sft-objective__fill {
   background: var(--sft-ok);

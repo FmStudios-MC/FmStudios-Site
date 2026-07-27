@@ -29,7 +29,11 @@ export const TUNING = {
   maxOfflineSec: 8 * 3600, // cap offline catch-up at 8h
   offlineEfficiency: 0.5, // offline runs at 50% of live rate
 
-  heatThrottleFloor: 0.15, // worst-case output fraction when fully overheated
+  // Worst-case output fraction when fully overheated. At 0.15 a cooked floor
+  // earned 30% of its bill and bled out; at 0.3 it lands near break-even, so
+  // overheating stalls your growth (the intended punishment) instead of
+  // draining the cash you need to fix it.
+  heatThrottleFloor: 0.3,
   reputationRate: 0.0004, // reputation gained per sec, scaled by sqrt(compute)
 
   // Credits = floor(sqrt(runEarnings / effective scale)), where the scale
@@ -56,6 +60,17 @@ export const TUNING = {
   gridSwing: 0.35, // ± fraction the price drifts from neutral
   gridCycleMs: 120_000, // one full off-peak -> peak -> off-peak cycle
 
+  // The bill follows what the floor actually *uses*, not what it could use.
+  // Previously draw was billed flat while output was throttled, so overheating
+  // cut revenue to 15% with the bill still at 100% — cash hit zero, and with no
+  // way to shed equipment the run was dead with no way back. Throttled machines
+  // now sip: they bill this floor plus the rest scaled by real utilisation.
+  idleDrawFloor: 0.35,
+
+  // Decommissioning returns this share of what a unit cost. Below 1 so churning
+  // gear is a real loss, but high enough to be the way out of a bad build.
+  sellRefund: 0.5,
+
   // Incidents: a deterministic scheduler fires an event every gap, holds it for
   // its duration, then schedules the next. The window stays quiet until the
   // farm is past its first earnings so beginners aren't punished.
@@ -75,8 +90,13 @@ export const TUNING = {
   contractOfferMaxGapMs: 150_000, // longest stretch between offers
   contractOfferTtlMs: 60_000, // an unaccepted offer is withdrawn after this
   contractDurationsSec: [180, 300, 480], // delivery windows to roll from
-  contractTargetMin: 0.7, // required = compute · window · (min..max)
-  contractTargetMax: 1.35,
+  // Required = (reserved compute · window) · this fraction. Staying under 1.0
+  // means a job you have the capacity for when you accept it is a job you can
+  // finish — growth during the window is slack, not a prerequisite. Standing
+  // and Endless now scale the *reward* instead of the ask; scaling the ask made
+  // climbing reputation actively sabotage your completion rate.
+  contractTargetMin: 0.55,
+  contractTargetMax: 0.9,
   contractRewardBonusMin: 1.4, // reward = required · price · (min..max), so a
   contractRewardBonusMax: 1.95, // fulfilled contract beats letting it auto-sell
   contractBoardSize: 3, // how many offers sit on the board at once
