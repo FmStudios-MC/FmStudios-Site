@@ -160,23 +160,32 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
   const objectiveProgress = root.querySelector<HTMLElement>("[data-objective-progress]");
   const objectiveBar = root.querySelector<HTMLElement>("[data-objective-bar]");
 
-  // --- Progressive section gating (idea #3) -----------------------------
-  // The rail reveals its systems in layers: a section stays dimmed + locked
-  // until the farm earns it, so a new player isn't handed all five at once.
-  // initTabs (in the page script) reads data-locked to refuse selection.
+  // --- Progressive tool gating (idea #3) --------------------------------
+  // Each tool is one system, and a tool stays out of the bar until the farm
+  // earns it — so the bar opens at two buttons and grows to eleven rather than
+  // presenting every system on the first tick. Build is ungated (no entry).
+  // Thresholds read off lifetime/persisted state so a tool never re-locks
+  // under a returning or post-rebuild player.
+  const earnGate = (s: GameState, min: number) => ({
+    unlocked: s.lifetimeEarnings >= min,
+    hint: `Unlocks at ${money(min)} earned`,
+  });
   const SECTION_GATES: Record<
     string,
     (s: GameState, d: Derived) => { unlocked: boolean; hint: string }
   > = {
-    operate: (s) => ({
-      unlocked: s.lifetimeEarnings >= TUNING.operateMinEarnings,
-      hint: `Unlocks at ${money(TUNING.operateMinEarnings)} earned`,
+    upgrades: (s) => ({
+      unlocked: s.upgrades.length > 0 || UPGRADES.some((u) => u.unlock(s)),
+      hint: "Unlocks when the first upgrade comes into reach",
     }),
-    contracts: (s) => ({
-      unlocked: s.lifetimeEarnings >= TUNING.contractMinEarnings,
-      hint: `Unlocks at ${money(TUNING.contractMinEarnings)} earned`,
-    }),
-    progress: (s, d) => ({
+    workloads: (s) => earnGate(s, TUNING.operateMinEarnings),
+    power: (s) => earnGate(s, TUNING.operateMinEarnings),
+    objectives: (s) => earnGate(s, TUNING.operateMinEarnings),
+    research: (s) => earnGate(s, TUNING.contractMinEarnings),
+    contracts: (s) => earnGate(s, TUNING.contractMinEarnings),
+    stats: (s) => earnGate(s, TUNING.contractMinEarnings),
+    milestones: (s) => earnGate(s, TUNING.contractMinEarnings),
+    rebuild: (s, d) => ({
       unlocked:
         s.prestigeCount > 0 ||
         s.goals.length > 0 ||
@@ -184,35 +193,49 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
         s.lifetimeEarnings >= creditScale(s) * TUNING.progressUnlockFraction,
       hint: "Unlocks as your first rebuild comes into reach",
     }),
+    corporate: (s) => ({
+      unlocked: corporateUnlocked(s),
+      hint: `Unlocks after ${TUNING.corporateUnlockRebuilds} rebuilds`,
+    }),
   };
+  // A locked tool is hidden rather than shown greyed with a padlock: eleven
+  // dead buttons on the first tick is exactly the clutter the tool split is
+  // meant to remove. The unlock still announces itself (toast + activity log).
   const navItems = Array.from(
     root.querySelectorAll<HTMLButtonElement>("[data-tab]"),
-  ).map((btn) => {
-    // A padlock that only shows while the section is locked (CSS-gated). Stroke
-    // icon, so it sits in the same visual family as the section icons.
-    const lock = document.createElementNS(SVG_NS, "svg");
-    lock.setAttribute("class", "sft-navitem__lock");
-    lock.setAttribute("viewBox", "0 0 24 24");
-    lock.setAttribute("fill", "none");
-    lock.setAttribute("stroke", "currentColor");
-    lock.setAttribute("stroke-width", "1.7");
-    lock.setAttribute("stroke-linecap", "round");
-    lock.setAttribute("stroke-linejoin", "round");
-    lock.setAttribute("aria-hidden", "true");
-    const r = document.createElementNS(SVG_NS, "rect");
-    r.setAttribute("x", "5");
-    r.setAttribute("y", "11");
-    r.setAttribute("width", "14");
-    r.setAttribute("height", "9");
-    r.setAttribute("rx", "1.6");
-    const p = document.createElementNS(SVG_NS, "path");
-    p.setAttribute("d", "M8 11V7.5a4 4 0 0 1 8 0V11");
-    lock.append(r, p);
-    btn.appendChild(lock);
-    return { id: btn.dataset.tab!, root: btn };
-  });
+  ).map((btn) => ({ id: btn.dataset.tab!, root: btn }));
   const navUnlocked: Record<string, boolean> = {};
   let navFirstRender = true;
+  const actGroups = Array.from(
+    root.querySelectorAll<HTMLElement>("[data-actgroup]"),
+  );
+  const navDots: Record<string, HTMLElement | null> = {};
+  for (const item of navItems) {
+    navDots[item.id] = item.root.querySelector<HTMLElement>("[data-act-dot]");
+  }
+  function setNavDot(id: string, on: boolean) {
+    const dot = navDots[id];
+    if (dot) setFlag(dot, "is-on", on);
+  }
+
+  // The drawers stop above the tool bar so it stays clickable while one is
+  // open. Publish the bar's measured height so the CSS can reserve exactly
+  // that much — it changes when the bar wraps or tools unlock into it.
+  // Written straight to the element rather than through setVar: this runs
+  // during setup, before setVar's cache exists, and it only fires on resize.
+  const actionbar = root.querySelector<HTMLElement>(".sft-actionbar");
+  if (actionbar && "ResizeObserver" in window) {
+    let lastBarH = -1;
+    const publishBarHeight = () => {
+      const h = Math.round(actionbar.getBoundingClientRect().height);
+      if (h > 0 && h !== lastBarH) {
+        lastBarH = h;
+        root.style.setProperty("--sft-bar-h", h + "px");
+      }
+    };
+    new ResizeObserver(publishBarHeight).observe(actionbar);
+    publishBarHeight();
+  }
 
   // --- Data Hall: one cabinet per producer/cooling/power building -------
   // Cabinets are built once (hidden until owned), then only their fill level
@@ -339,9 +362,43 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     }
   }
 
+  // --- Build category rail ----------------------------------------------
+  // The Build drawer shows one equipment category at a time. Stacking all six
+  // meant a 2400px scroll to reach the fans; this keeps every list to a handful
+  // of rows you can read without moving. Rail state is pure view state, so it
+  // lives here rather than in the game state.
+  const catRailBtns = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-cat]"),
+  ).map((btn) => ({ cat: btn.dataset.cat!, root: btn }));
+  const equipGroups = Array.from(
+    root.querySelectorAll<HTMLElement>("[data-equip-group]"),
+  );
+  function showCategory(cat: string) {
+    for (const b of catRailBtns) {
+      const on = b.cat === cat;
+      setFlag(b.root, "is-active", on);
+      b.root.setAttribute("aria-selected", on ? "true" : "false");
+    }
+    for (const g of equipGroups) g.hidden = g.dataset.equipGroup !== cat;
+  }
+  for (const [i, b] of catRailBtns.entries()) {
+    b.root.addEventListener("click", () => showCategory(b.cat));
+    // Arrow-key roving, matching the tool bar's behaviour.
+    b.root.addEventListener("keydown", (e) => {
+      const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const next =
+        catRailBtns[(i + dir + catRailBtns.length) % catRailBtns.length];
+      next.root.focus();
+      showCategory(next.cat);
+    });
+  }
+  if (catRailBtns.length) showCategory(catRailBtns[0].cat);
+
   // --- Bulk-buy multiplier (×1 / ×10 / Max) -----------------------------
-  // A segmented control in the Operations header sets how many units a row
-  // buys per click. The choice also drives the cost shown on each row.
+  // A segmented control in the Build header sets how many units a row buys per
+  // click. The choice also drives the cost shown on each row.
   let buyMult: BuyMult = 1;
   const BUY_MULTS: { id: BuyMult; label: string }[] = [
     { id: 1, label: "×1" },
@@ -399,7 +456,7 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       buyBtn.append(main, meta);
 
       // Decommission: the way back from a build that outgrew its power budget.
-      const sellBtn = el("button", "sft-row__sell", "−");
+      const sellBtn = el("button", "sft-row__sell", "Sell");
       sellBtn.type = "button";
       sellBtn.setAttribute("aria-label", `Decommission ${def.name}`);
       sellBtn.title = `Decommission — refunds ${Math.round(
@@ -1110,13 +1167,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     return { root: rootEl, title, reserve, reward, risk, expiry, accept };
   }
 
-  // --- Milestones (collapsible) ----------------------------------------
+  // --- Milestones -------------------------------------------------------
+  // Its own tool now, so there is nothing to collapse it against.
   const achWrap = root.querySelector<HTMLElement>("[data-achievements]");
   const achNote = root.querySelector<HTMLElement>("[data-ach-note]");
-  const achPanel = achWrap?.closest<HTMLElement>(".sft-ach");
-  achPanel
-    ?.querySelector(".sft-panel__head")
-    ?.addEventListener("click", () => achPanel.classList.toggle("is-collapsed"));
 
   const achChips = achWrap
     ? ACHIEVEMENTS.map((def) => {
@@ -1810,8 +1864,10 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
       }
     }
 
-    // Progressive rail gating (idea #3): lock sections until the farm earns
-    // them; initTabs (page script) reads data-locked to refuse selection.
+    // Progressive tool gating (idea #3): a locked tool is kept out of the bar
+    // entirely (CSS hides .is-locked) so the toolbar only ever shows systems
+    // you can actually use. initDrawers (page script) reads data-locked too, so
+    // a locked tool can't be opened by keyboard either.
     for (const item of navItems) {
       const gate = SECTION_GATES[item.id];
       if (!gate) continue;
@@ -1837,7 +1893,18 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
     }
     navFirstRender = false;
 
+    // A cluster whose tools are all still locked would otherwise leave its
+    // label floating over nothing, so it hides with them.
+    for (const group of actGroups) {
+      setFlag(
+        group,
+        "is-hidden",
+        !group.querySelector(".sft-act:not(.is-locked)"),
+      );
+    }
+
     // Corporate layer (idea #4): a second prestige tree, hidden until unlocked.
+    let corpAfford = false;
     if (corpPanel) {
       const unlockedCorp = corporateUnlocked(s);
       setFlag(corpPanel, "is-hidden", !unlockedCorp);
@@ -1852,8 +1919,51 @@ export function createUI(root: HTMLElement, handlers: Handlers) {
           const afford = !maxed && s.influence >= cost;
           setDisabled(r.button, !afford);
           setFlag(r.root, "is-afford", afford);
+          corpAfford = corpAfford || afford;
         }
       }
+    }
+
+    // Attention dots: a tool wears a dot when there is something actionable
+    // inside it right now. This is what keeps the bar from reading as a row of
+    // identical doors — you can see at a glance where there is something to
+    // spend on, without opening anything. Runs last so it reads the flags the
+    // passes above have already settled this frame.
+    setNavDot(
+      "build",
+      buildingRows.some((r) => r.root.classList.contains("is-afford")),
+    );
+    setNavDot(
+      "upgrades",
+      upgradeCards.some(
+        (u) =>
+          !u.root.classList.contains("is-hidden") &&
+          u.root.classList.contains("is-afford"),
+      ),
+    );
+    setNavDot(
+      "research",
+      researchRows.some((r) => !r.button.disabled),
+    );
+    setNavDot(
+      "contracts",
+      d.contracts.offers.some((o) => o.canAccept),
+    );
+    setNavDot("rebuild", d.pendingCredits > 0);
+    setNavDot("corporate", corpAfford);
+
+    // The Build rail carries the same signal per category, so a full drawer
+    // still tells you which of the six lists has something you can afford.
+    for (const c of catRailBtns) {
+      setFlag(
+        c.root,
+        "has-afford",
+        buildingRows.some(
+          (r) =>
+            r.def.category === c.cat &&
+            r.root.classList.contains("is-afford"),
+        ),
+      );
     }
   }
 

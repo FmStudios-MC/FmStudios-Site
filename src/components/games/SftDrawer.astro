@@ -1,0 +1,58 @@
+---
+/* One Server-Farm Tycoon tool drawer.
+
+   Every drawer holds exactly one system, so the shell is identical across all
+   of them: a title, a one-line statement of what the tool is for, a close
+   button, and a body that the game patches in place. Styling lives in
+   styles/games/server-farm.css alongside the rest of the cockpit. */
+interface Props {
+  id: string;
+  title: string;
+  /** One line under the title: what this tool does. */
+  lede: string;
+  /** Extra class on the body, for tools that need their own layout. */
+  bodyClass?: string;
+}
+
+const { id, title, lede, bodyClass } = Astro.props;
+---
+
+<!-- A side panel, not a modal: the tool bar stays above it and stays live, so
+     you can hop straight from one tool to the next. Hence no aria-modal and no
+     focus trap — Escape and the close button still dismiss it. -->
+<aside
+  class="sft-drawer"
+  data-drawer={id}
+  id={`sft-drawer-${id}`}
+  role="dialog"
+  aria-labelledby={`sft-drawer-${id}-title`}
+  hidden
+>
+  <header class="sft-drawer__head">
+    <div class="sft-drawer__heading">
+      <h2 class="sft-drawer__title" id={`sft-drawer-${id}-title`}>{title}</h2>
+      <p class="sft-drawer__lede">{lede}</p>
+    </div>
+    <button
+      class="sft-drawer__close"
+      data-drawer-close
+      type="button"
+      aria-label="Close"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+      </svg>
+    </button>
+  </header>
+  <div class:list={["sft-drawer__body", bodyClass]}>
+    <slot />
+  </div>
+</aside>

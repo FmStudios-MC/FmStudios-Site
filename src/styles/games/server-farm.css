@@ -373,35 +373,77 @@
 }
 
 /* ---- Tool bar (opens the slide-over drawers) --------------------- */
+/* One button per tool, clustered by how often you reach for it: Floor (build),
+   Operations (the running farm), Company (the ledger). The cluster labels are
+   what make eleven buttons legible — you read a heading, not eleven names.
+   Locked tools are removed from the flow entirely, so the bar starts small. */
 .sft-actionbar {
   position: sticky;
   bottom: var(--space-s);
-  z-index: 2;
+  /* The scrim and the drawer both stop above this bar rather than covering it,
+     so it stays live while a tool is open and hopping between tools is one
+     click. .sft-cockpit is a stacking context, so this only needs to clear the
+     cockpit's own layers. */
+  z-index: 3;
   display: flex;
-  gap: var(--space-2xs);
-  padding: var(--space-2xs);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2xs) var(--space-xs);
+  padding: 5px var(--space-xs) var(--space-2xs);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: color-mix(in oklch, var(--bg-deep) 84%, transparent);
-  backdrop-filter: blur(10px);
+  border-radius: var(--radius-l);
+  background: color-mix(in oklch, var(--bg-deep) 92%, transparent);
+  backdrop-filter: blur(12px);
   box-shadow: 0 16px 40px -22px oklch(0 0 0 / 0.7);
+}
+.sft-actgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+/* Every cluster after the first is fenced off with a hairline, so the groups
+   stay legible even when the bar wraps to two rows. */
+.sft-actgroup + .sft-actgroup {
+  padding-left: var(--space-xs);
+  border-left: 1px solid var(--line);
+}
+.sft-actgroup.is-hidden {
+  display: none;
+}
+.sft-actgroup.is-hidden + .sft-actgroup {
+  padding-left: 0;
+  border-left: 0;
+}
+.sft-actgroup__label {
+  padding: 0 var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-actgroup__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
 }
 .sft-act {
   position: relative;
-  flex: 1 1 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2xs);
-  min-height: 46px;
-  padding: var(--space-2xs) var(--space-s);
+  gap: 5px;
+  min-height: 36px;
+  padding: var(--space-2xs) 9px;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-m);
   background: none;
   color: var(--ink-muted);
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.83rem;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out-quart),
@@ -409,8 +451,8 @@
 }
 .sft-act__icon {
   flex: 0 0 auto;
-  width: 19px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
   opacity: 0.85;
 }
 .sft-act:hover {
@@ -429,40 +471,75 @@
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
+/* A locked tool leaves the bar rather than sitting there greyed out. */
 .sft-act.is-locked {
-  color: var(--ink-faint);
-  cursor: not-allowed;
-}
-.sft-act.is-locked:hover {
-  background: none;
-  color: var(--ink-faint);
-}
-.sft-act.is-locked .sft-act__icon {
-  opacity: 0.4;
-}
-/* The lock glyph (ui.ts appends it as .sft-navitem__lock) is self-contained
-   here so it doesn't depend on the old rail rules. */
-.sft-act .sft-navitem__lock {
   display: none;
-  flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
-  margin: 0 0 0 2px;
-  color: var(--ink-faint);
-}
-.sft-act.is-locked .sft-navitem__lock {
-  display: block;
 }
 .sft-act.is-denied {
   animation: sft-nudge 0.3s var(--ease-out-quart);
 }
+
+/* Attention dot: this tool has something you can act on right now. */
+.sft-act__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity var(--dur-fast) var(--ease-out-quart),
+    transform var(--dur-fast) var(--ease-out-quart);
+}
+.sft-act__dot.is-on {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sft-act__dot {
+    transition: none;
+  }
+}
+
+/* Narrow screens: the category rail wraps to two rows of three rather than
+   squeezing six chips into ellipses ("Produ…", "Netwo…"), and the toasts drop
+   behind the drawer, which goes full-width down here and has nowhere to hide
+   from a bottom-left toast stack. */
 @media (max-width: 560px) {
-  .sft-act .sft-navitem__label {
+  .sft-catrail {
+    flex-wrap: wrap;
+  }
+  .sft-catrail__opt {
+    flex: 1 1 30%;
+  }
+  .sft-toasts {
+    z-index: calc(var(--z-modal) - 1);
+  }
+}
+
+/* Narrow screens: the bar scrolls sideways with its clusters intact rather
+   than collapsing to unlabelled icons — the labels are the whole point. */
+@media (max-width: 720px) {
+  .sft-actionbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-radius: var(--radius-m);
+  }
+  .sft-actionbar::-webkit-scrollbar {
     display: none;
   }
-  .sft-act__icon {
-    width: 22px;
-    height: 22px;
+  .sft-actgroup {
+    flex: 0 0 auto;
+  }
+  .sft-actgroup__items {
+    flex-wrap: nowrap;
+  }
+  .sft-act {
+    font-size: 0.82rem;
   }
 }
 
@@ -471,7 +548,11 @@
    =================================================================== */
 .sft-drawer-scrim {
   position: fixed;
-  inset: 0;
+  /* Stops above the tool bar, like the drawer does. The bar is the one control
+     that has to stay live while a tool is open — with one system per tool,
+     moving between them is the main navigation action, and covering the bar
+     would force a close-then-reopen for every hop. */
+  inset: 0 0 calc(var(--sft-bar-h, 4.5rem) + var(--space-s) * 2) 0;
   z-index: var(--z-modal);
   background: color-mix(in oklch, var(--bg-deep) 58%, transparent);
   backdrop-filter: blur(3px);
@@ -489,10 +570,13 @@
   /* Docked below the site nav: the game lives inside a `.section` whose
      z-index creates a stacking context, so a fixed overlay can't paint over
      the nav. Starting under it keeps the drawer header (title + close) clear
-     of the nav, and the cockpit still dims behind the scrim. */
+     of the nav, and the cockpit still dims behind the scrim.
+     It stops above the tool bar rather than at the viewport floor, so the bar
+     stays visible and clickable and switching tools is a single click.
+     --sft-bar-h is published by ui.ts from the bar's measured height. */
   top: var(--sft-nav-h);
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--sft-bar-h, 4.5rem) + var(--space-s) * 2);
   z-index: calc(var(--z-modal) + 1);
   width: min(560px, 100vw);
   display: flex;
@@ -512,12 +596,18 @@
 }
 .sft-drawer__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-s);
   flex-shrink: 0;
   padding: var(--space-m);
   border-bottom: 1px solid var(--line);
+}
+.sft-drawer__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 .sft-drawer__title {
   font-family: var(--font-display);
@@ -525,6 +615,14 @@
   font-size: var(--step-1);
   letter-spacing: -0.01em;
   color: var(--ink);
+}
+/* One line saying what the tool is for. Cheap to read, and it removes the
+   "what does this drawer even do" beat the umbrella names used to cost. */
+.sft-drawer__lede {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+  text-wrap: pretty;
 }
 .sft-drawer__close {
   display: grid;
@@ -554,20 +652,106 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-m);
+  /* A drawer holds one system, so its parts belong together — they don't need
+     the section-separating gap the stacked panels used to. */
+  gap: var(--space-s);
   padding: var(--space-m);
 }
-/* Inside a drawer the section panels are plain blocks, not nested cards —
-   stripped of their chrome and divided by a hairline instead. */
-.sft-drawer__body .sft-panel {
-  border: 0;
-  border-radius: 0;
-  background: none;
-  padding: 0;
+/* A drawer holds one system, so it needs no section chrome at all — the head
+   already names it. What used to be a stack of panel headers is now a single
+   status line stating the one number that matters for this tool. */
+.sft-drawer__status {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-s);
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px solid var(--line);
 }
-.sft-drawer__body .sft-panel + .sft-panel {
-  border-top: 1px solid var(--line);
-  padding-top: var(--space-m);
+.sft-drawer__status-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sft-drawer__status-val {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+
+/* ---- Build: category rail ----------------------------------------- */
+/* Six categories, one visible at a time. The rail is the whole reason the
+   Build drawer fits on a screen instead of scrolling past 2400px of rows. */
+.sft-drawer__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2xs);
+  position: sticky;
+  top: calc(var(--space-m) * -1);
+  z-index: 1;
+  margin: calc(var(--space-m) * -1) calc(var(--space-m) * -1) 0;
+  padding: var(--space-s) var(--space-m);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.sft-catrail {
+  display: flex;
+  gap: 1px;
+  min-width: 0;
+}
+.sft-catrail__opt {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background-color var(--dur-fast) var(--ease-out-quart);
+}
+.sft-catrail__opt:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+.sft-catrail__opt.is-active {
+  color: var(--bg-deep);
+  background: var(--gold);
+}
+.sft-catrail__opt:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+/* Same signal as the tool bar's dot: this category has something affordable.
+   Positioned rather than inline so it costs the chip no width — all six have
+   to fit on one line or the rail defeats its own purpose. */
+.sft-catrail__dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+}
+.sft-catrail__opt.has-afford .sft-catrail__dot {
+  opacity: 1;
+}
+.sft-catrail__opt.is-active.has-afford .sft-catrail__dot {
+  background: var(--bg-deep);
 }
 
 /* ---- Data controls (.sft-ctl: reused by the system menu) ---------- */
@@ -1853,9 +2037,8 @@
    BUILD: equipment + upgrades
    =================================================================== */
 .sft-equip {
-  display: grid;
-  gap: var(--space-m) var(--space-l);
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  display: flex;
+  flex-direction: column;
 }
 .sft-list {
   display: flex;
@@ -1863,7 +2046,9 @@
 }
 
 /* The row is a wrapper holding two controls: the buy button (which fills it)
-   and a decommission button that only appears for gear you actually own. */
+   and a decommission button that only appears for gear you actually own.
+   Kept deliberately dense — a category has to fit on one screen, so a row is
+   about 60px rather than the 180 it used to spend on padding and leading. */
 .sft-row {
   display: flex;
   align-items: center;
@@ -1879,7 +2064,7 @@
   gap: var(--space-s);
   min-width: 0;
   text-align: left;
-  padding: var(--space-s);
+  padding: 9px var(--space-xs);
   border: 0;
   border-radius: var(--radius-m);
   background: none;
@@ -1887,7 +2072,8 @@
   transition: background-color var(--dur-fast) var(--ease-out-quart);
 }
 .sft-row + .sft-row {
-  margin-top: 2px;
+  margin-top: 1px;
+  border-top: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
 }
 .sft-row.is-afford .sft-row__buy {
   cursor: pointer;
@@ -1904,19 +2090,21 @@
 }
 
 /* Decommission. Deliberately quiet — a recovery tool, not a headline action.
-   Hidden entirely until the row has something to sell. */
+   Hidden entirely until the row has something to sell. Spelled out rather than
+   shown as a bare "−", which read as a stepper next to the owned count. */
 .sft-row__sell {
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
   display: none;
   place-content: center;
+  padding: 6px 9px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-s);
   background: none;
   color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   line-height: 1;
   cursor: pointer;
   transition:
@@ -1937,35 +2125,41 @@
 .sft-row__main {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 .sft-row__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: var(--step-0);
+  font-size: 0.94rem;
+  line-height: 1.25;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
+/* Flavour text stays, but clipped to one line so it can never be the reason a
+   list needs scrolling. */
 .sft-row__desc {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  line-height: 1.35;
   color: var(--ink-faint);
-  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sft-row__meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
   flex-shrink: 0;
   font-family: var(--font-mono);
 }
 .sft-row__owned {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--ink-faint);
 }
 .sft-row__cost {
-  font-size: var(--step-0);
+  font-size: 0.88rem;
   color: var(--ink-muted);
 }
 .sft-row.is-afford .sft-row__cost {
@@ -2282,6 +2476,9 @@
 /* ===================================================================
    Prestige / research rows (shared .sft-prow chrome)
    =================================================================== */
+/* Same density as the equipment rows: the prestige and research trees are the
+   only lists long enough to still need scrolling, so every pixel of leading
+   they don't spend is one less flick of the wheel. */
 .sft-prow {
   display: flex;
   align-items: center;
@@ -2289,14 +2486,15 @@
   gap: var(--space-s);
   width: 100%;
   text-align: left;
-  padding: var(--space-s) var(--space-2xs);
+  padding: 8px var(--space-2xs);
   border: 0;
   border-radius: var(--radius-m);
   background: none;
   color: inherit;
 }
 .sft-prow + .sft-prow {
-  margin-top: 2px;
+  margin-top: 1px;
+  border-top: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
 }
 .sft-prow.is-afford {
   cursor: pointer;
@@ -2318,19 +2516,23 @@
 .sft-prow__main {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 .sft-prow__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: var(--step-0);
+  font-size: 0.92rem;
+  line-height: 1.25;
   color: var(--ink);
 }
 .sft-prow__desc {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
+  line-height: 1.35;
   color: var(--ink-faint);
-  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sft-prow__meta {
   display: flex;
@@ -2674,20 +2876,9 @@
   opacity: 0.6;
 }
 
-/* ---- Milestones (collapsible) -------------------------------------- */
-.sft-ach .sft-panel__head {
-  cursor: pointer;
-}
-.sft-ach .sft-panel__note::after {
-  content: " ▾";
-  color: var(--ink-faint);
-}
-.sft-ach.is-collapsed .sft-panel__note::after {
-  content: " ▸";
-}
-.sft-ach.is-collapsed .sft-ach__grid {
-  display: none;
-}
+/* ---- Milestones ----------------------------------------------------- */
+/* Its own tool now, so the collapse toggle it used to need inside the shared
+   Progress drawer is gone. */
 .sft-ach__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -2888,8 +3079,9 @@
    =================================================================== */
 .sft-toasts {
   position: fixed;
-  bottom: var(--space-m);
-  /* Bottom-left so a burst never collides with the right-docked tool drawer. */
+  /* Bottom-left so a burst never collides with the right-docked tool drawer,
+     and lifted clear of the sticky tool bar it used to stack on top of. */
+  bottom: calc(var(--space-m) + 4.5rem);
   left: var(--space-m);
   z-index: var(--z-toast);
   display: flex;
