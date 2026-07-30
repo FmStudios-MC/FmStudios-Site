@@ -80,15 +80,22 @@ const board: { status: Status; label: string; items: Item[] }[] = [
             <section
               class:list={["lane reveal", `lane--${lane.status}`]}
               style={`--reveal-delay:${laneIndex * 0.08}s`}
-              aria-label={lane.label}
+              aria-labelledby={`lane-${lane.status}`}
             >
               <header class="lane__head">
                 <span class="lane__dot" aria-hidden="true" />
-                <h2 class="lane__label">{lane.label}</h2>
-                <span class="lane__count">{lane.items.length}</span>
+                <h2 class="lane__label" id={`lane-${lane.status}`}>
+                  {lane.label}
+                </h2>
+                <span class="lane__count">
+                  {lane.items.length}
+                  <span class="visually-hidden">
+                    {lane.items.length === 1 ? " item" : " items"}
+                  </span>
+                </span>
               </header>
 
-              <ol class="lane__list">
+              <ol class="lane__list" role="list">
                 {lane.items.map((item) => (
                   <li class="ritem">
                     <div class="ritem__meta">
@@ -188,7 +195,12 @@ const board: { status: Status; label: string; items: Item[] }[] = [
     padding-block: var(--space-m);
     border-bottom: 1px solid var(--line);
     position: relative;
-    transition: padding-left var(--dur-mid) var(--ease-out-expo);
+  }
+
+  /* The content slides, not the box: animating padding reflowed the whole
+     lane on hover, and moving the row itself dragged its rule along with it. */
+  .ritem > * {
+    transition: transform var(--dur-mid) var(--ease-out-expo);
   }
 
   /* A short accent tick keyed to the lane hue, grows on hover */
@@ -207,8 +219,8 @@ const board: { status: Status; label: string; items: Item[] }[] = [
       opacity var(--dur-mid) var(--ease-out-quart);
   }
 
-  .ritem:hover {
-    padding-left: var(--space-s);
+  .ritem:hover > * {
+    transform: translateX(var(--space-s));
   }
 
   .ritem:hover::before {
@@ -277,15 +289,18 @@ const board: { status: Status; label: string; items: Item[] }[] = [
   }
 
   @media (max-width: 560px) {
-    .ritem:hover {
-      padding-left: 0;
+    .ritem:hover > * {
+      transform: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ritem,
+    .ritem > *,
     .ritem::before {
       transition: none;
+    }
+    .ritem:hover > * {
+      transform: none;
     }
   }
 </style>

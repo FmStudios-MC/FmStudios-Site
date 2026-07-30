@@ -1,8 +1,8 @@
 ---
-title: A Update...
+title: An Update...
 date: 2026-07-20
 tags: ["Studio", "Modpack", "Announcement"]
-summary: An Update on whats going on currently.
+summary: An update on what's going on currently.
 author: Itzz_Fabi
 featured: true
 ---

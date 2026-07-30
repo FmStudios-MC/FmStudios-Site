@@ -4,8 +4,8 @@ type: Mods
 status: Released
 version: "1.21.1-26.1.2"
 loader: Vanilla
-tagline: A Resourcepack for the popular Lootr mod.
-summary: A Resourepack with some touches to the textures of the Lootr mod.
+tagline: A resource pack for the popular Lootr mod.
+summary: A resource pack with some touches to the textures of the Lootr mod.
 image: ../../assets/projects/fabis-lootr.png
 accent: "oklch(0.74 0.14 60)"
 featured: true

@@ -29,17 +29,14 @@ const disciplines = [
 
 const principles = [
   {
-    k: "01",
     t: "Craft over volume",
     d: "We would rather ship one pack that feels considered than ten that feel automated.",
   },
   {
-    k: "02",
     t: "Play it ourselves",
     d: "If a release is not fun to play through, it does not ship. We are the first testers.",
   },
   {
-    k: "03",
     t: "Built to last",
     d: "Clean configs, sensible defaults, and updates that respect the people running servers.",
   },
@@ -64,9 +61,10 @@ const principles = [
           apart what worked and rebuilding it better. That instinct never left.
         </p>
         <p>
-          Today the studio spans modpacks, mods, resource packs. With standalone programs on the way. The thread through all of
-          it is the same: deliberate work, made by people who actually play what
-          they build.
+          Today the studio spans modpacks, mods, and resource packs, with
+          standalone programs on the way. The thread through all of it is the
+          same: deliberate work, made by people who actually play what they
+          build.
         </p>
         <p>
           FMI stays small on purpose. It means every decision is intentional,
@@ -74,16 +72,16 @@ const principles = [
           ships just to fill a calendar.
         </p>
       </div>
-      <aside class="intro__mark" aria-hidden="true">
+      <div class="intro__mark" aria-hidden="true">
         <Mark size={200} sheen={true} />
-      </aside>
+      </div>
     </div>
   </section>
 
   <section class="section disciplines">
     <div class="container">
       <h2 class="disciplines__title reveal">What we build</h2>
-      <ul class="disciplines__list">
+      <ul class="disciplines__list" role="list">
         {
           disciplines.map((d, i) => (
             <li class="discipline reveal" style={`--reveal-delay:${i * 0.05}s`}>
@@ -99,20 +97,16 @@ const principles = [
   <section class="section principles">
     <div class="container">
       <h2 class="principles__title reveal">How we work</h2>
-      <div class="principles__grid">
+      <ul class="principles__grid" role="list">
         {
           principles.map((p, i) => (
-            <article
-              class="principle reveal"
-              style={`--reveal-delay:${i * 0.07}s`}
-            >
-              <span class="principle__k">{p.k}</span>
+            <li class="principle reveal" style={`--reveal-delay:${i * 0.07}s`}>
               <h3 class="principle__t">{p.t}</h3>
               <p class="principle__d">{p.d}</p>
-            </article>
+            </li>
           ))
         }
-      </div>
+      </ul>
     </div>
   </section>
 
@@ -146,6 +140,9 @@ const principles = [
     line-height: 1.3;
     letter-spacing: -0.01em;
     color: var(--ink);
+    /* Held to a display measure; the paragraphs under it cap at 60ch and the
+       opener ran wider than both. */
+    max-width: 30ch;
     margin-bottom: var(--space-m);
     text-wrap: balance;
   }
@@ -200,33 +197,31 @@ const principles = [
     max-width: 52ch;
   }
 
+  /* Columns under a rule rather than boxes: the same hairline language as the
+     disciplines list and the roadmap lanes, without a third card treatment
+     and without numbering three items that carry no order. */
   .principles__grid {
+    list-style: none;
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--space-l);
+    gap: var(--space-l) var(--space-xl);
   }
 
   .principle {
-    padding: var(--space-l);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-  }
-
-  .principle__k {
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    color: var(--gold);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--line-strong);
   }
 
   .principle__t {
-    margin-block: var(--space-s) var(--space-2xs);
     font-size: var(--step-1);
+    margin-bottom: var(--space-2xs);
   }
 
   .principle__d {
     color: var(--ink-muted);
     line-height: 1.6;
+    max-width: 34ch;
   }
 
   .about-cta__inner {

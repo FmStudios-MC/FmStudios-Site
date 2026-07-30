@@ -1,0 +1,42 @@
+---
+/* The studio's one arrow. Every "go here" affordance on the site drew its own
+   &rarr; before, which meant the shape, weight, and baseline shifted with
+   whatever font happened to resolve the glyph. This is drawn instead: sized in
+   em so it tracks the label beside it, one stroke weight, one set of caps. */
+interface Props {
+  dir?: "right" | "left";
+  class?: string;
+}
+
+const { dir = "right", class: className = "" } = Astro.props;
+---
+
+<svg
+  class:list={["arrow", { "arrow--left": dir === "left" }, className]}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d="M3.75 12h15"></path>
+  <path d="M12.75 5.75 19 12l-6.25 6.25"></path>
+</svg>
+
+<style>
+  .arrow {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    /* Flexbox centres it on the line box, which sits a touch above the cap
+       band; this drops it onto the label's cap-height midline. */
+    translate: 0 0.03em;
+  }
+
+  .arrow--left {
+    rotate: 180deg;
+  }
+</style>

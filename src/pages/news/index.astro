@@ -2,10 +2,16 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../../components/PageHeader.astro";
+import Arrow from "../../components/Arrow.astro";
 
+// Featured posts carry a "Pinned" badge, so they have to actually pin: they
+// lead the ledger, and the rest fall in newest-first behind them.
 const posts = (await getCollection("news"))
   .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return b.data.date.valueOf() - a.data.date.valueOf();
+  });
 
 // Tags present across all posts, in first-seen (newest-first) order
 const tags: string[] = [];
@@ -38,16 +44,12 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     <div class="container">
       {
         filters.length > 1 && (
-          <div
-            class="filters"
-            role="tablist"
-            aria-label="Filter news by tag"
-          >
+          <div class="filters" role="group" aria-label="Filter news by tag">
             {filters.map((f, i) => (
               <button
-                class:list={["filter", { "is-active": i === 0 }]}
-                role="tab"
-                aria-selected={i === 0 ? "true" : "false"}
+                type="button"
+                class="filter"
+                aria-pressed={i === 0 ? "true" : "false"}
                 data-filter={f}
               >
                 {f}
@@ -57,9 +59,11 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
         )
       }
 
+      <p class="visually-hidden" role="status" data-filter-status></p>
+
       {
         posts.length > 0 ? (
-          <ol class="ledger" data-ledger>
+          <ol class="ledger" role="list" data-ledger>
             {posts.map((post, i) => {
               const tagList = post.data.tags.join(",");
               return (
@@ -82,14 +86,14 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
                       <p class="entry__summary">{post.data.summary}</p>
                       <div class="entry__foot">
                         {post.data.tags.length > 0 && (
-                          <ul class="taglist" aria-label="Tags">
+                          <ul class="taglist" role="list" aria-label="Tags">
                             {post.data.tags.map((t) => (
                               <li class="tag">{t}</li>
                             ))}
                           </ul>
                         )}
                         <span class="entry__cta">
-                          Read <span aria-hidden="true">&rarr;</span>
+                          Read <span class="entry__cta-icon"><Arrow /></span>
                         </span>
                       </div>
                     </div>
@@ -111,31 +115,15 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 </BaseLayout>
 
 <script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
-  const entries = document.querySelectorAll<HTMLElement>("[data-tags]");
-  const empty = document.querySelector<HTMLElement>("[data-empty]");
+  import { initListFilter } from "../../scripts/filter";
 
-  function apply(tag: string) {
-    let shown = 0;
-    entries.forEach((el) => {
-      const tags = (el.dataset.tags || "").split(",").filter(Boolean);
-      const match = tag === "All" || tags.includes(tag);
-      el.hidden = !match;
-      if (match) shown++;
-    });
-    if (empty) empty.hidden = shown !== 0;
-  }
-
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      buttons.forEach((b) => {
-        b.classList.remove("is-active");
-        b.setAttribute("aria-selected", "false");
-      });
-      btn.classList.add("is-active");
-      btn.setAttribute("aria-selected", "true");
-      apply(btn.dataset.filter || "All");
-    });
+  initListFilter({
+    itemAttr: "data-tags",
+    multi: true,
+    announce: (shown, filter) =>
+      filter === "All"
+        ? `Showing all ${shown} posts.`
+        : `Showing ${shown} ${shown === 1 ? "post" : "posts"} tagged ${filter}.`,
   });
 </script>
 
@@ -144,38 +132,12 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     padding-top: 0;
   }
 
-  /* Tag filter row, shared language with /work */
+  /* The filter row closes with a rule and the ledger opens with one, which
+     stacked two hairlines 70px apart with nothing between them. Here the
+     ledger's own rule is the only one. */
   .filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-m);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .filter {
-    padding: 0.55em 1.1em;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--line);
-    color: var(--ink-muted);
-    font-size: var(--step--1);
-    font-weight: 500;
-    transition:
-      color var(--dur-fast) var(--ease-out-quart),
-      border-color var(--dur-fast) var(--ease-out-quart),
-      background-color var(--dur-fast) var(--ease-out-quart);
-  }
-
-  .filter:hover {
-    color: var(--ink);
-    border-color: var(--line-strong);
-  }
-
-  .filter.is-active {
-    color: var(--gold-ink);
-    background: var(--gold);
-    border-color: var(--gold);
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
   /* Dispatch ledger: hairline-separated rows, not a card grid */
@@ -279,34 +241,18 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     margin-top: var(--space-m);
   }
 
-  .taglist {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
-  }
-
-  .tag {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.03em;
-    color: var(--gold);
-    padding: 0.3em 0.7em;
-    border: 1px solid color-mix(in oklch, var(--gold) 32%, var(--line));
-    border-radius: var(--radius-pill);
-  }
-
   .entry__cta {
     font-weight: 600;
     color: var(--ink-muted);
     display: inline-flex;
+    align-items: center;
     gap: 0.4em;
     margin-left: auto;
     transition: color var(--dur-mid) var(--ease-out-quart);
   }
 
-  .entry__cta span {
+  .entry__cta-icon {
+    display: inline-flex;
     transition: transform var(--dur-mid) var(--ease-out-expo);
   }
 
@@ -314,7 +260,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     color: var(--ink);
   }
 
-  .entry__link:hover .entry__cta span {
+  .entry__link:hover .entry__cta-icon {
     transform: translateX(0.3em);
   }
 
@@ -342,8 +288,11 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .entry__cta span {
+    .entry__cta-icon {
       transition: none;
+    }
+    .entry__link:hover .entry__cta-icon {
+      transform: none;
     }
   }
 </style>

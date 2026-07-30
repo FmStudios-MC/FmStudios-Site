@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
+import Arrow from "../../components/Arrow.astro";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("news")).filter((p) => !p.data.draft);
@@ -30,7 +31,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
   <article class="post">
     <div class="container">
       <a href="/news" class="post__back">
-        <span aria-hidden="true">&larr;</span> All news
+        <Arrow dir="left" /> All news
       </a>
     </div>
 
@@ -44,7 +45,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
       <p class="post__summary">{data.summary}</p>
       {
         data.tags.length > 0 && (
-          <ul class="taglist" aria-label="Tags">
+          <ul class="taglist" role="list" aria-label="Tags">
             {data.tags.map((t) => (
               <li class="tag">{t}</li>
             ))}
@@ -68,7 +69,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     }
 
     <div class="container post__body">
-      <div class="post__prose">
+      <div class="prose">
         <Content />
       </div>
     </div>
@@ -90,6 +91,8 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
+    /* Comfortable target without moving the text off the container edge. */
+    padding-block: var(--space-2xs);
     color: var(--ink-muted);
     font-size: var(--step--1);
     transition: color var(--dur-fast) var(--ease-out-quart);
@@ -141,22 +144,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
   }
 
   .taglist {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
     margin-top: var(--space-l);
-  }
-
-  .tag {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.03em;
-    color: var(--gold);
-    padding: 0.3em 0.7em;
-    border: 1px solid color-mix(in oklch, var(--gold) 32%, var(--line));
-    border-radius: var(--radius-pill);
   }
 
   .post__cover {
@@ -171,70 +159,6 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 
   .post__body {
     padding-block: var(--space-xl) var(--space-l);
-  }
-
-  .post__prose {
-    max-width: 68ch;
-  }
-
-  .post__prose :global(p) {
-    color: var(--ink-muted);
-    margin-bottom: var(--space-m);
-    line-height: 1.75;
-  }
-
-  .post__prose :global(h2) {
-    font-size: var(--step-2);
-    margin-top: var(--space-l);
-    margin-bottom: var(--space-s);
-  }
-
-  .post__prose :global(h3) {
-    font-size: var(--step-1);
-    margin-top: var(--space-l);
-    margin-bottom: var(--space-xs);
-  }
-
-  .post__prose :global(a) {
-    color: var(--gold);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    text-decoration-color: color-mix(in oklch, var(--gold) 45%, transparent);
-    transition: text-decoration-color var(--dur-fast) var(--ease-out-quart);
-  }
-
-  .post__prose :global(a:hover) {
-    text-decoration-color: var(--gold);
-  }
-
-  .post__prose :global(ul),
-  .post__prose :global(ol) {
-    color: var(--ink-muted);
-    margin-bottom: var(--space-m);
-    padding-left: 1.2em;
-    line-height: 1.75;
-  }
-
-  .post__prose :global(li) {
-    margin-bottom: var(--space-2xs);
-  }
-
-  .post__prose :global(blockquote) {
-    margin: var(--space-l) 0;
-    padding: var(--space-s) var(--space-m);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-m);
-    background: var(--surface);
-    color: var(--ink);
-    font-style: italic;
-  }
-
-  .post__prose :global(code) {
-    font-family: var(--font-mono);
-    font-size: 0.88em;
-    background: var(--surface-2);
-    padding: 0.15em 0.4em;
-    border-radius: var(--radius-s);
   }
 
   .post__foot {

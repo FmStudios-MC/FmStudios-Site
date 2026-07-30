@@ -61,7 +61,8 @@ const elsewhere = [
   .footer {
     position: relative;
     z-index: var(--z-base);
-    margin-top: var(--space-3xl);
+    /* No margin of its own: the last block's bottom padding is the gap.
+       Stacking both left ~320px of void under every page. */
     border-top: 1px solid var(--line);
     background: linear-gradient(
       to bottom,

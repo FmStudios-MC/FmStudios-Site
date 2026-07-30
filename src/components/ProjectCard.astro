@@ -1,13 +1,16 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import Arrow from "./Arrow.astro";
 
 interface Props {
   project: CollectionEntry<"projects">;
   delay?: number;
+  /** Set on cards that land at or above the fold, so the art is not deferred. */
+  priority?: boolean;
 }
 
-const { project, delay = 0 } = Astro.props;
+const { project, delay = 0, priority = false } = Astro.props;
 const { data } = project;
 const isLive = data.status === "Released";
 const accent = data.accent ?? "var(--gold)";
@@ -21,10 +24,12 @@ const accent = data.accent ?? "var(--gold)";
   <div class="frame__art">
     <Image
       src={data.image}
-      alt={`${data.title} project art`}
+      alt=""
       width={640}
       height={640}
       class="frame__img"
+      loading={priority ? "eager" : "lazy"}
+      fetchpriority={priority ? "high" : "auto"}
     />
     <span
       class:list={["badge", isLive ? "badge--live" : "badge--dev"]}
@@ -42,7 +47,7 @@ const accent = data.accent ?? "var(--gold)";
     <h3 class="frame__title">{data.title}</h3>
     <p class="frame__tagline">{data.tagline}</p>
     <span class="frame__cta">
-      View project <span aria-hidden="true">&rarr;</span>
+      View project <span class="frame__cta-icon"><Arrow /></span>
     </span>
   </div>
 </a>
@@ -172,14 +177,16 @@ const accent = data.accent ?? "var(--gold)";
     font-weight: 600;
     color: var(--ink);
     display: inline-flex;
+    align-items: center;
     gap: 0.4em;
   }
 
-  .frame__cta span {
+  .frame__cta-icon {
+    display: inline-flex;
     transition: transform var(--dur-mid) var(--ease-out-expo);
   }
 
-  .frame:hover .frame__cta span {
+  .frame:hover .frame__cta-icon {
     transform: translateX(0.3em);
   }
 
@@ -188,6 +195,9 @@ const accent = data.accent ?? "var(--gold)";
       transform: none;
     }
     .frame:hover .frame__img {
+      transform: none;
+    }
+    .frame:hover .frame__cta-icon {
       transform: none;
     }
   }

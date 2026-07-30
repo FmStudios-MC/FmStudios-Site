@@ -57,12 +57,35 @@ function initMobileMenu() {
     }
   };
 
-  toggle.addEventListener("click", () => {
-    setOpen(toggle.getAttribute("aria-expanded") !== "true");
-  });
+  const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+
+  toggle.addEventListener("click", () => setOpen(!isOpen()));
   menu.querySelectorAll("a").forEach((a) =>
     a.addEventListener("click", () => setOpen(false)),
   );
+
+  // An open drawer covers the page, so it has to be dismissible without
+  // hunting for the toggle again: Escape, or a tap anywhere outside it.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen()) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+
+  document.addEventListener("pointerdown", (e) => {
+    if (!isOpen()) return;
+    const target = e.target as Node;
+    if (menu.contains(target) || toggle.contains(target)) return;
+    setOpen(false);
+  });
+
+  // Resizing past the breakpoint hides the drawer but left the toggle
+  // reporting expanded, so the next open needed two taps.
+  const desktop = window.matchMedia("(min-width: 721px)");
+  desktop.addEventListener("change", (e) => {
+    if (e.matches && isOpen()) setOpen(false);
+  });
 }
 
 function initReveals() {

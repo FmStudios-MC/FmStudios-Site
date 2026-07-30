@@ -1,4 +1,6 @@
 ---
+import Arrow from "../Arrow.astro";
+
 interface Props {
   href: string;
   title: string;
@@ -23,7 +25,7 @@ const { href, title, tagline, kind, status, live = true, delay = 0 } =
   </div>
   <h3 class="gcard__title">{title}</h3>
   <p class="gcard__tagline">{tagline}</p>
-  <span class="gcard__cta">Play <span aria-hidden="true">&rarr;</span></span>
+  <span class="gcard__cta">Play <span class="gcard__cta-icon"><Arrow /></span></span>
 </a>
 
 <style>
@@ -103,17 +105,22 @@ const { href, title, tagline, kind, status, live = true, delay = 0 } =
     font-weight: 600;
     color: var(--ink);
     display: inline-flex;
+    align-items: center;
     gap: 0.4em;
   }
-  .gcard__cta span {
+  .gcard__cta-icon {
+    display: inline-flex;
     transition: transform var(--dur-mid) var(--ease-out-expo);
   }
-  .gcard:hover .gcard__cta span {
+  .gcard:hover .gcard__cta-icon {
     transform: translateX(0.3em);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .gcard:hover {
+      transform: none;
+    }
+    .gcard:hover .gcard__cta-icon {
       transform: none;
     }
   }
