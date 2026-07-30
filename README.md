@@ -9,7 +9,7 @@ Live at [www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
 
 ## Stack
 
-- Astro 5 (static output, zero JS by default)
+- Astro 7 (static output, zero JS by default), requires Node 22.12 or newer
 - Hand-written CSS design tokens in OKLCH (no Tailwind), see `src/styles/tokens.css`
 - Lenis for smooth scroll, IntersectionObserver for reveals (`src/scripts/motion.ts`)
 - Projects and News modeled as content collections (`src/content.config.ts`)
@@ -24,10 +24,12 @@ Live at [www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
 | `npm run dev` | Start the dev server at http://localhost:4321 |
 | `npm run build` | Build the static site to `dist/` |
 | `npm run preview` | Preview the production build locally |
+| `npm run check` | Type-check the project with `astro check` |
+| `npm test` | Run the Vitest suite |
 | `node shot.mjs [routes...]` | Screenshot routes (desktop + mobile) into `shots/` against a running server; set `BASE` to target a non-default host |
 
-There is no test, lint, or type-check script. `tsconfig.json` extends
-`astro/tsconfigs/strict`; run `npx astro check` for type errors.
+There is no lint script. `tsconfig.json` extends `astro/tsconfigs/strict`, and
+`@types/node` is a dev dependency so the scripts in `tools/` type-check too.
 
 ## Layout
 
