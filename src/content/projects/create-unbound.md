@@ -9,7 +9,7 @@ summary: A new entry in Fabi's Create-Series
 image: ../../assets/projects/create-unbound.png
 accent: "oklch(0.62 0.2 25)"
 featured: true
-order: 1
+order: 2
 links:
   - label: Curseforge
     url: "https://www.curseforge.com/minecraft/modpacks/fmi-create-unbound"

@@ -9,7 +9,7 @@ summary: A resource pack with some touches to the textures of the Lootr mod.
 image: ../../assets/projects/fabis-lootr.png
 accent: "oklch(0.74 0.14 60)"
 featured: true
-order: 2
+order: 3
 links:
   - label: Modrinth
     url: "https://modrinth.com/resourcepack/fabis-lootr"

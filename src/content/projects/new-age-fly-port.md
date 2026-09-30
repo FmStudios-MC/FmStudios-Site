@@ -9,7 +9,7 @@ summary: This is a unofficial port of the popular "Create New Age" mod for 26.2
 image: ../../assets/projects/fabric_logo_2048_scharf.png
 accent: "oklch(0.74 0.14 65)"
 featured: true
-order: 3
+order: 1
 links:
   - label: Modrinth
     url: "https://modrinth.com/mod/create-fly-new-age"
