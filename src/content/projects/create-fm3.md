@@ -9,7 +9,7 @@ summary: A released Create modpack, the third in the F&M line, delivering a refi
 image: ../../assets/projects/create-fm3.png
 accent: "oklch(0.74 0.14 65)"
 featured: true
-order: 5
+order: 6
 links:
   - label: Modrinth
     url: "https://modrinth.com/modpack/create-fm3"
