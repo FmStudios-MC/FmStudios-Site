@@ -1,0 +1,67 @@
+---
+/* Ambient Halloween sky: moon, ground fog, and a few bats. Always rendered,
+   but hidden by CSS unless <html data-season="halloween">, which the inline
+   script in BaseLayout sets only during October. */
+import PixelSprite from "./PixelSprite.astro";
+import {
+  batPalette,
+  batWingsDown,
+  batWingsUp,
+  moon,
+  moonPalette,
+  star,
+  starPalette,
+} from "./sprites";
+
+const bats = [1, 2, 3];
+
+// Fixed scatter (not random per build) so the sky never reshuffles. Kept to
+// the upper half of the viewport, thinning toward the horizon.
+const stars = [
+  [6, 12, 2], [14, 30, 1], [22, 8, 1], [31, 22, 2], [38, 5, 1],
+  [46, 34, 1], [53, 14, 2], [61, 26, 1], [68, 6, 1], [74, 40, 1],
+  [83, 18, 2], [91, 31, 1], [96, 9, 1], [3, 44, 1], [27, 47, 1],
+  [57, 50, 1], [88, 52, 1],
+].map(([x, y, size], i) => ({ x, y, size, delay: (i * 1.37) % 6 }));
+---
+
+<div class="season-layer" aria-hidden="true">
+  <div class="season-layer__stars">
+    {
+      stars.map((s) => (
+        <PixelSprite
+          class={`season-star season-star--${s.size}`}
+          rows={star}
+          palette={starPalette}
+          style={`left:${s.x}%;top:${s.y}%;animation-delay:-${s.delay.toFixed(2)}s`}
+        />
+      ))
+    }
+  </div>
+
+  <PixelSprite class="season-layer__moon" rows={moon} palette={moonPalette} />
+
+  <div class="season-layer__fog">
+    <span></span>
+    <span></span>
+  </div>
+
+  {
+    bats.map((n) => (
+      <div class={`season-bat season-bat--${n}`}>
+        <div class="season-bat__bob">
+          <PixelSprite
+            class="season-bat__frame season-bat__frame--up"
+            rows={batWingsUp}
+            palette={batPalette}
+          />
+          <PixelSprite
+            class="season-bat__frame season-bat__frame--down"
+            rows={batWingsDown}
+            palette={batPalette}
+          />
+        </div>
+      </div>
+    ))
+  }
+</div>

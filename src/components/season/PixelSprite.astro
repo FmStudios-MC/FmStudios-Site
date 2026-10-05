@@ -1,0 +1,40 @@
+---
+/* Blocky sprite drawn from a character grid, so the seasonal art speaks the
+   same pixel language as the games the studio builds for. Each character maps
+   to a class; color lives in CSS so states (lit/unlit) can recolor it. */
+interface Props {
+  rows: string[];
+  palette: Record<string, string>;
+  class?: string;
+  style?: string;
+}
+
+const { rows, palette, class: className = "", style } = Astro.props;
+const width = Math.max(...rows.map((r) => r.length));
+const height = rows.length;
+
+// Runs of the same character on a row merge into one rect, which keeps wide
+// sprites like the hero horizon to a few hundred nodes.
+const cells = rows.flatMap((row, y) => {
+  const runs: { x: number; y: number; w: number; cls: string }[] = [];
+  [...row].forEach((ch, x) => {
+    const cls = palette[ch];
+    if (!cls) return;
+    const last = runs[runs.length - 1];
+    if (last && last.cls === cls && last.x + last.w === x) last.w += 1;
+    else runs.push({ x, y, w: 1, cls });
+  });
+  return runs;
+});
+---
+
+<svg
+  class={className}
+  style={style}
+  viewBox={`0 0 ${width} ${height}`}
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  {cells.map((c) => <rect x={c.x} y={c.y} width={c.w + 0.02} height="1.02" class={c.cls} />)}
+</svg>

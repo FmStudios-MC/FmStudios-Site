@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
+import SeasonLayer from "../components/season/SeasonLayer.astro";
 
 interface Props {
   title?: string;
@@ -52,10 +53,32 @@ const fullTitle =
     <script is:inline>
       // Flip the no-js failsafe before paint so reveals can run.
       document.documentElement.classList.remove("no-js");
+
+      // Seasonal theme. Halloween runs through October on the visitor's own
+      // clock and switches itself off on November 1st. ?season=halloween
+      // previews it any time. Keep the opt-out key in sync with season.ts.
+      (function () {
+        var root = document.documentElement;
+        var now = new Date();
+        var preview = new URLSearchParams(location.search).get("season");
+        if (now.getMonth() !== 9 && preview !== "halloween") return;
+        root.dataset.seasonEligible = "halloween";
+        var optedOut = false;
+        try {
+          optedOut =
+            localStorage.getItem("fmi-season-off") ===
+            "halloween-" + now.getFullYear();
+        } catch (e) {}
+        if (optedOut && preview !== "halloween") return;
+        root.dataset.season = "halloween";
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", "#16101d");
+      })();
     </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    <SeasonLayer />
     <Nav />
     <main id="main">
       <slot />
@@ -64,7 +87,9 @@ const fullTitle =
 
     <script>
       import { initMotion } from "../scripts/motion.ts";
+      import { initSeasonToggle } from "../scripts/season.ts";
       initMotion();
+      initSeasonToggle();
     </script>
   </body>
 </html>

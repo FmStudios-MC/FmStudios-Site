@@ -1,0 +1,514 @@
+/* Halloween season. Everything here is gated on <html data-season="halloween">
+   (or data-season-eligible for the toggle), set before paint by the inline
+   script in BaseLayout during October only. The studio gold turns to carved
+   pumpkin, the warm void turns to violet night, and a pixel moon, fog, and
+   bats drift behind the content. Outside October none of this applies. */
+
+/* Sprite palette. Defined while eligible so the toggle's lantern can show its
+   unlit state after a visitor switches the theme off. */
+:root[data-season-eligible] {
+  --hx-pumpkin: oklch(0.71 0.17 50);
+  --hx-pumpkin-dark: oklch(0.57 0.16 42);
+  --hx-flame: oklch(0.93 0.15 95);
+  --hx-flame-glow: oklch(0.82 0.17 70 / 0.55);
+  --hx-unlit: oklch(0.24 0.03 40);
+  --hx-stem: oklch(0.56 0.1 140);
+  --hx-moon: oklch(0.94 0.035 110);
+  --hx-moon-shade: oklch(0.8 0.05 125);
+  --hx-moon-crater: oklch(0.85 0.045 118);
+  --hx-moon-pit: oklch(0.74 0.05 125);
+  --hx-moon-halo: oklch(0.9 0.07 115 / 0.16);
+  --hx-moon-glow: oklch(0.9 0.08 120 / 0.32);
+  --hx-star: oklch(0.93 0.04 100 / 0.5);
+  --hx-bat: oklch(0.3 0.045 300);
+  --hx-bat-eye: oklch(0.78 0.17 55);
+  --hx-spider: oklch(0.46 0.04 300);
+  --hx-thread: oklch(0.75 0.02 300 / 0.4);
+  --hx-ground: oklch(0.095 0.02 300);
+  --hx-rim: oklch(0.34 0.05 290);
+  --hx-rim-warm: oklch(0.6 0.14 52);
+  --hx-stone: oklch(0.23 0.03 300);
+  --hx-stone-lit: oklch(0.4 0.04 285);
+}
+
+:root[data-season="halloween"] {
+  --bg: oklch(0.14 0.025 300);
+  --bg-deep: oklch(0.1 0.02 300);
+  --surface: oklch(0.19 0.03 300);
+  --surface-2: oklch(0.23 0.034 300);
+  --line: oklch(0.31 0.035 300);
+  --line-strong: oklch(0.5 0.04 300);
+
+  --ink: oklch(0.96 0.014 95);
+  --ink-muted: oklch(0.79 0.025 300);
+  --ink-faint: oklch(0.67 0.03 300);
+
+  /* The gold tokens keep their names so every component recolors at once. */
+  --gold: oklch(0.75 0.165 55);
+  --gold-bright: oklch(0.88 0.14 82);
+  --gold-deep: oklch(0.62 0.18 40);
+  --gold-glow: oklch(0.72 0.17 50 / 0.2);
+  --gold-ink: oklch(0.17 0.03 40);
+}
+
+/* Night sky: cool moonlight from the upper right, ember warmth from below. */
+:root[data-season="halloween"] body::before {
+  background:
+    radial-gradient(70% 60% at 88% -8%, oklch(0.78 0.08 130 / 0.09), transparent 60%),
+    radial-gradient(80% 60% at 0% 0%, oklch(0.36 0.09 300 / 0.35), transparent 60%),
+    radial-gradient(110% 60% at 50% 118%, oklch(0.5 0.15 45 / 0.2), transparent 62%);
+}
+
+/* Component surfaces that hard-code the warm neutral. */
+:root[data-season="halloween"] .nav[data-scrolled] {
+  background: oklch(0.12 0.022 300 / 0.8);
+}
+
+:root[data-season="halloween"] .nav__mobile {
+  background: oklch(0.11 0.02 300 / 0.96);
+}
+
+:root[data-season="halloween"] .badge {
+  background: oklch(0.12 0.022 300 / 0.8);
+}
+
+:root[data-season="halloween"] .discipline:hover {
+  background: oklch(0.19 0.03 300 / 0.45);
+}
+
+:root[data-season="halloween"] .footer {
+  background: linear-gradient(to bottom, transparent, oklch(0.09 0.02 300 / 0.7));
+}
+
+:root[data-season="halloween"] .mark--sheen::after {
+  background: linear-gradient(
+    120deg,
+    transparent 35%,
+    oklch(0.9 0.14 75 / 0.5) 50%,
+    transparent 65%
+  );
+}
+
+/* Show/hide helpers for markup that swaps in-season. */
+.season-only {
+  display: none;
+}
+
+:root[data-season="halloween"] .season-only {
+  display: inline-block;
+}
+
+:root[data-season="halloween"] .season-hide {
+  display: none;
+}
+
+/* Sprite pixels */
+.px-pumpkin { fill: var(--hx-pumpkin); }
+.px-pumpkin-dark { fill: var(--hx-pumpkin-dark); }
+.px-flame { fill: var(--hx-flame); }
+.px-stem { fill: var(--hx-stem); }
+.px-moon { fill: var(--hx-moon); }
+.px-moon-shade { fill: var(--hx-moon-shade); }
+.px-moon-crater { fill: var(--hx-moon-crater); }
+.px-moon-pit { fill: var(--hx-moon-pit); }
+.px-moon-halo { fill: var(--hx-moon-halo); }
+.px-star { fill: var(--hx-star); }
+.px-bat { fill: var(--hx-bat); }
+.px-bat-eye { fill: var(--hx-bat-eye); }
+.px-spider { fill: var(--hx-spider); }
+.px-ground { fill: var(--hx-ground); }
+.px-rim { fill: var(--hx-rim); }
+.px-rim-warm { fill: var(--hx-rim-warm); }
+.px-stone { fill: var(--hx-stone); }
+.px-stone-lit { fill: var(--hx-stone-lit); }
+
+/* Browser surfaces follow the night palette too. */
+:root[data-season="halloween"] {
+  scrollbar-color: var(--hx-pumpkin-dark) var(--bg-deep);
+}
+
+/* ------------------------------------------------------------------ */
+/* Theme toggle (nav)                                                  */
+/* ------------------------------------------------------------------ */
+
+.season-toggle {
+  display: none;
+}
+
+:root[data-season-eligible] .season-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  transition:
+    border-color var(--dur-fast) var(--ease-out-quart),
+    transform var(--dur-fast) var(--ease-out-quart);
+}
+
+.season-toggle:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.season-toggle__lantern {
+  width: 22px;
+  transition: filter var(--dur-mid) var(--ease-out-quart);
+}
+
+.season-toggle__lantern .px-flame {
+  transition: fill var(--dur-mid) var(--ease-out-quart);
+}
+
+.season-toggle[aria-pressed="true"] .season-toggle__lantern {
+  filter: drop-shadow(0 2px 6px var(--hx-flame-glow));
+}
+
+.season-toggle[aria-pressed="false"] .px-flame {
+  fill: var(--hx-unlit);
+}
+
+.season-toggle[aria-pressed="false"] .season-toggle__lantern {
+  filter: saturate(0.55) brightness(0.85);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .season-toggle[aria-pressed="true"] .px-flame {
+    animation: hx-flicker 2.8s steps(1, end) infinite;
+  }
+}
+
+@keyframes hx-flicker {
+  0%, 100% { opacity: 1; }
+  37% { opacity: 0.78; }
+  41% { opacity: 1; }
+  68% { opacity: 0.86; }
+  72% { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Marquee pumpkins (home)                                             */
+/* ------------------------------------------------------------------ */
+
+.marquee__lantern {
+  width: 0.78em;
+  vertical-align: -0.04em;
+  filter: drop-shadow(0 3px 8px var(--hx-flame-glow));
+}
+
+/* ------------------------------------------------------------------ */
+/* Sky layer: moon, fog, bats                                          */
+/* ------------------------------------------------------------------ */
+
+.season-layer {
+  display: none;
+}
+
+:root[data-season="halloween"] .season-layer {
+  display: block;
+}
+
+/* Negative z keeps the whole sky under every line of content, including
+   blocks that are not positioned. */
+.season-layer > * {
+  z-index: -1;
+  pointer-events: none;
+}
+
+.season-layer__moon {
+  position: absolute;
+  top: clamp(4rem, 8vh, 6rem);
+  right: clamp(0.5rem, 6vw, 8rem);
+  width: clamp(150px, 19vw, 280px);
+  filter: drop-shadow(0 12px 48px var(--hx-moon-glow));
+  opacity: 0.92;
+}
+
+.season-layer__stars {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 70vh;
+}
+
+.season-star {
+  position: absolute;
+  width: 6px;
+}
+
+.season-star--2 {
+  width: 9px;
+}
+
+/* On the home hero the moon rises behind the studio mark instead. */
+@media (min-width: 901px) {
+  :root[data-season="halloween"]:has(.hero__mark) .season-layer__moon {
+    display: none;
+  }
+}
+
+:root[data-season="halloween"] .hero__mark {
+  isolation: isolate;
+}
+
+/* The moon rises from the hero mark's slot, offset up and left so its halo
+   clears the right edge of the page. */
+.hero__moon {
+  position: absolute;
+  z-index: -1;
+  width: 420px;
+  max-width: none;
+  top: calc(50% - 238px);
+  left: calc(50% - 246px);
+  filter: drop-shadow(0 16px 60px var(--hx-moon-glow));
+}
+
+/* In season the moon stands alone; the mark keeps its box so the moon stays
+   anchored where it was composed. */
+:root[data-season="halloween"] .hero__mark .mark {
+  visibility: hidden;
+}
+
+/* Hero light: moonlight replaces the gold bloom behind the mark. */
+:root[data-season="halloween"] .hero__glow {
+  background: radial-gradient(circle, oklch(0.86 0.07 118 / 0.12), transparent 62%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Graveyard horizon (home hero)                                       */
+/* ------------------------------------------------------------------ */
+
+.hero__horizon {
+  display: none;
+}
+
+:root[data-season="halloween"] .hero__horizon {
+  --cell: 4px;
+  display: block;
+  position: relative;
+  height: calc(26 * var(--cell));
+  margin-top: calc(-1 * var(--space-xl));
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.hero__horizon svg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: calc(480 * var(--cell));
+  max-width: none;
+  translate: -50% 0;
+}
+
+@media (min-width: 1100px) {
+  :root[data-season="halloween"] .hero__horizon {
+    --cell: 5px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root[data-season="halloween"] .hero__horizon {
+    --cell: 3px;
+  }
+}
+
+/* The marquee becomes the soil the graveyard stands on. */
+:root[data-season="halloween"] .marquee {
+  background: var(--hx-ground);
+  border-top-color: transparent;
+}
+
+/* ------------------------------------------------------------------ */
+/* Spider on the closing rule (home)                                   */
+/* ------------------------------------------------------------------ */
+
+.cta__spider {
+  display: none;
+}
+
+:root[data-season="halloween"] .cta__inner {
+  position: relative;
+}
+
+:root[data-season="halloween"] .cta__spider {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 9%;
+  width: 28px;
+  height: 140px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cta__spider-drop {
+  position: absolute;
+  inset: 0 0 auto;
+  display: block;
+  translate: 0 56px;
+}
+
+/* Thread runs from the spider up past the clip, so it always meets the rule. */
+.cta__spider-drop::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  width: 1px;
+  height: 160px;
+  background: var(--hx-thread);
+}
+
+.cta__spider-drop svg {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  :root[data-season="halloween"] .cta__spider {
+    display: none;
+  }
+}
+
+.season-layer__fog {
+  position: fixed;
+  inset: auto 0 0;
+  height: 48vh;
+  overflow: hidden;
+}
+
+.season-layer__fog span {
+  position: absolute;
+  inset: 0 -40%;
+  background:
+    radial-gradient(38% 55% at 28% 100%, oklch(0.72 0.04 300 / 0.13), transparent 70%),
+    radial-gradient(30% 45% at 70% 100%, oklch(0.74 0.05 150 / 0.08), transparent 70%);
+  filter: blur(12px);
+}
+
+.season-layer__fog span + span {
+  background:
+    radial-gradient(34% 50% at 55% 100%, oklch(0.7 0.05 300 / 0.1), transparent 70%),
+    radial-gradient(26% 40% at 12% 100%, oklch(0.74 0.04 150 / 0.07), transparent 70%);
+}
+
+.season-bat {
+  position: fixed;
+  left: 0;
+  display: none;
+}
+
+.season-bat__bob {
+  display: grid;
+}
+
+.season-bat__frame {
+  grid-area: 1 / 1;
+  width: 100%;
+}
+
+.season-bat--1 { top: 16vh; width: 46px; }
+.season-bat--2 { top: 34vh; width: 32px; }
+.season-bat--3 { top: 9vh; width: 24px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .season-layer__fog span {
+    animation: hx-drift 48s ease-in-out infinite alternate;
+  }
+
+  .season-layer__fog span + span {
+    animation-duration: 66s;
+    animation-direction: alternate-reverse;
+  }
+
+  .season-bat {
+    display: block;
+    transform: translateX(-12vw);
+    animation: hx-fly-right 22s linear 1.5s infinite;
+  }
+
+  .season-bat--2 {
+    animation: hx-fly-left 29s linear 8s infinite;
+  }
+
+  .season-bat--3 {
+    animation: hx-fly-right 37s linear 15s infinite;
+  }
+
+  .season-bat__bob {
+    animation: hx-bob 1.9s ease-in-out infinite alternate;
+  }
+
+  .season-bat--2 .season-bat__bob { animation-duration: 1.4s; }
+  .season-bat--3 .season-bat__bob { animation-duration: 2.3s; }
+
+  .season-bat__frame--up {
+    animation: hx-flap 0.34s steps(1, end) infinite;
+  }
+
+  .season-bat__frame--down {
+    animation: hx-flap 0.34s steps(1, end) infinite reverse;
+  }
+
+  .season-bat--1 .season-bat__frame { animation-duration: 0.3s; }
+  .season-bat--3 .season-bat__frame { animation-duration: 0.26s; }
+
+  .season-star {
+    animation: hx-twinkle 6s steps(1, end) infinite;
+  }
+
+  .hero__horizon .px-flame {
+    animation: hx-flicker 3.4s steps(1, end) infinite;
+  }
+
+  .cta__spider-drop {
+    animation: hx-dangle 11s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+}
+
+/* Stars mostly hold, then dim for a beat: a twinkle, not a blink. */
+@keyframes hx-twinkle {
+  0%, 100% { opacity: 1; }
+  44% { opacity: 0.35; }
+  50% { opacity: 1; }
+  78% { opacity: 0.6; }
+  82% { opacity: 1; }
+}
+
+/* The spider lets itself down, hangs, then climbs back to the rule. */
+@keyframes hx-dangle {
+  0%, 100% { translate: 0 10px; }
+  38%, 62% { translate: 0 96px; }
+  50% { translate: 0 90px; }
+}
+
+/* Each bat crosses in the first stretch of its cycle, then waits off-screen,
+   so the sky is mostly still and a pass reads as an event. */
+@keyframes hx-fly-right {
+  0% { transform: translate(-12vw, 0); }
+  32% { transform: translate(112vw, -6vh); }
+  100% { transform: translate(112vw, -6vh); }
+}
+
+@keyframes hx-fly-left {
+  0% { transform: translate(112vw, 0); }
+  30% { transform: translate(-12vw, 5vh); }
+  100% { transform: translate(-12vw, 5vh); }
+}
+
+@keyframes hx-bob {
+  from { transform: translateY(-10px); }
+  to { transform: translateY(12px); }
+}
+
+@keyframes hx-flap {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes hx-drift {
+  from { transform: translateX(-8%); }
+  to { transform: translateX(8%); }
+}

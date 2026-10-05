@@ -1,0 +1,17 @@
+---
+/* Lets visitors switch the seasonal theme off (and back on). Only shown while
+   a season is eligible; the choice is remembered for this season only. */
+import PixelSprite from "./PixelSprite.astro";
+import { lantern, lanternPalette } from "./sprites";
+---
+
+<button
+  type="button"
+  class="season-toggle"
+  aria-pressed="true"
+  title="Halloween theme"
+  data-season-toggle
+>
+  <span class="visually-hidden">Halloween theme</span>
+  <PixelSprite class="season-toggle__lantern" rows={lantern} palette={lanternPalette} />
+</button>

@@ -1,6 +1,7 @@
 /* FabiMvurice Interactive - global base */
 @import "./fonts.css";
 @import "./tokens.css";
+@import "./seasons/halloween.css";
 
 *,
 *::before,

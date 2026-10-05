@@ -5,6 +5,17 @@ import Mark from "../components/Mark.astro";
 import Button from "../components/Button.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import Arrow from "../components/Arrow.astro";
+import PixelSprite from "../components/season/PixelSprite.astro";
+import {
+  horizon,
+  horizonPalette,
+  lantern,
+  lanternPalette,
+  moon,
+  moonPalette,
+  spider,
+  spiderPalette,
+} from "../components/season/sprites";
 
 const projects = (await getCollection("projects")).sort(
   (a, b) => a.data.order - b.data.order,
@@ -51,8 +62,14 @@ const releasedCount = projects.filter(
       </div>
 
       <div class="hero__mark" aria-hidden="true">
+        <PixelSprite class="season-only hero__moon" rows={moon} palette={moonPalette} />
         <Mark size={156} sheen={true} />
       </div>
+    </div>
+
+    <!-- Halloween: graveyard horizon standing on the marquee -->
+    <div class="hero__horizon" aria-hidden="true">
+      <PixelSprite rows={horizon} palette={horizonPalette} />
     </div>
 
     <!-- Discipline marquee, the studio signature -->
@@ -64,7 +81,14 @@ const releasedCount = projects.filter(
               {disciplines.map((d) => (
                 <span class="marquee__item">
                   {d}
-                  <span class="marquee__sep">/</span>
+                  <span class="marquee__sep">
+                    <span class="season-hide">/</span>
+                    <PixelSprite
+                      class="season-only marquee__lantern"
+                      rows={lantern}
+                      palette={lanternPalette}
+                    />
+                  </span>
                 </span>
               ))}
             </div>
@@ -124,6 +148,11 @@ const releasedCount = projects.filter(
   <!-- Closing CTA -->
   <section class="section cta">
     <div class="container cta__inner">
+      <div class="cta__spider" aria-hidden="true">
+        <span class="cta__spider-drop">
+          <PixelSprite rows={spider} palette={spiderPalette} />
+        </span>
+      </div>
       <h2 class="cta__title reveal">
         Have an idea worth <span class="gold-text">building?</span>
       </h2>

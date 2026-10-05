@@ -1,5 +1,6 @@
 ---
 import Mark from "./Mark.astro";
+import SeasonToggle from "./season/SeasonToggle.astro";
 
 const links = [
   { href: "/work", label: "Work" },
@@ -41,16 +42,19 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
       }
     </nav>
 
-    <button
-      class="nav__toggle"
-      aria-expanded="false"
-      aria-controls="nav-mobile"
-      data-nav-toggle
-    >
-      <span class="visually-hidden">Toggle menu</span>
-      <span class="nav__toggle-bar"></span>
-      <span class="nav__toggle-bar"></span>
-    </button>
+    <div class="nav__end">
+      <SeasonToggle />
+      <button
+        class="nav__toggle"
+        aria-expanded="false"
+        aria-controls="nav-mobile"
+        data-nav-toggle
+      >
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="nav__toggle-bar"></span>
+        <span class="nav__toggle-bar"></span>
+      </button>
+    </div>
   </div>
 
   <div class="nav__mobile" id="nav-mobile" data-nav-mobile hidden>
@@ -125,6 +129,7 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
   }
 
   .nav__links {
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: var(--space-l);
@@ -159,6 +164,20 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
   .nav__link:hover::after,
   .nav__link.is-active::after {
     transform: scaleX(1);
+  }
+
+  .nav__end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  /* Outside a season the desktop end slot is empty; drop it so the link row
+     keeps its flush-right edge. */
+  @media (min-width: 721px) {
+    :global(:root:not([data-season-eligible])) .nav__end {
+      display: none;
+    }
   }
 
   .nav__toggle {
