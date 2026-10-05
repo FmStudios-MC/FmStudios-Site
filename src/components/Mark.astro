@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import logo from "../assets/brand/fmi-logo.webp";
+import halloweenLogo from "../assets/brand/fmi-logo-halloween.webp";
 
 interface Props {
   size?: number;
@@ -19,6 +20,15 @@ const { size = 40, class: className = "", sheen = false } = Astro.props;
     height={size}
     loading="eager"
   />
+  <!-- October variant; CSS swaps it in under <html data-season="halloween">. -->
+  <Image
+    class="mark__season"
+    src={halloweenLogo}
+    alt=""
+    width={size}
+    height={size}
+    loading="lazy"
+  />
 </span>
 
 <style>
@@ -33,6 +43,18 @@ const { size = 40, class: className = "", sheen = false } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+
+  .mark .mark__season {
+    display: none;
+  }
+
+  :global(:root[data-season="halloween"]) .mark img {
+    display: none;
+  }
+
+  :global(:root[data-season="halloween"]) .mark .mark__season {
+    display: block;
   }
 
   /* Sheen sweep across the mark on the hero */

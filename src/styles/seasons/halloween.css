@@ -240,33 +240,18 @@
   width: 9px;
 }
 
-/* On the home hero the moon rises behind the studio mark instead. */
+/* On the home hero the Halloween mark carries its own moon, so the sky's
+   moon steps aside. */
 @media (min-width: 901px) {
   :root[data-season="halloween"]:has(.hero__mark) .season-layer__moon {
     display: none;
   }
 }
 
-:root[data-season="halloween"] .hero__mark {
-  isolation: isolate;
-}
-
-/* The moon rises from the hero mark's slot, offset up and left so its halo
-   clears the right edge of the page. */
-.hero__moon {
-  position: absolute;
-  z-index: -1;
-  width: 420px;
-  max-width: none;
-  top: calc(50% - 238px);
-  left: calc(50% - 246px);
-  filter: drop-shadow(0 16px 60px var(--hx-moon-glow));
-}
-
-/* In season the moon stands alone; the mark keeps its box so the moon stays
-   anchored where it was composed. */
+/* The October mark is a full night scene; give it the pumpkin glow its
+   dripping letters already have. */
 :root[data-season="halloween"] .hero__mark .mark {
-  visibility: hidden;
+  box-shadow: 0 18px 70px oklch(0.7 0.17 55 / 0.28);
 }
 
 /* Hero light: moonlight replaces the gold bloom behind the mark. */

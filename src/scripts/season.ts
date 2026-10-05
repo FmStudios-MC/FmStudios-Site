@@ -3,6 +3,7 @@
 
 export const SEASON_OPTOUT_KEY = "fmi-season-off";
 const THEME_COLOR = { halloween: "#16101d", default: "#1a1712" };
+const FAVICON = { halloween: "/favicon-halloween.webp", default: "/favicon.webp" };
 
 export function initSeasonToggle() {
   const root = document.documentElement;
@@ -13,12 +14,14 @@ export function initSeasonToggle() {
   // Opt-outs are scoped to one season in one year, so next October returns.
   const optOutValue = `${season}-${new Date().getFullYear()}`;
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
 
   const render = () => {
     const on = root.dataset.season === season;
     toggle.setAttribute("aria-pressed", String(on));
     toggle.title = on ? "Halloween theme: on" : "Halloween theme: off";
     meta?.setAttribute("content", on ? THEME_COLOR.halloween : THEME_COLOR.default);
+    icon?.setAttribute("href", on ? FAVICON.halloween : FAVICON.default);
   };
 
   toggle.addEventListener("click", () => {

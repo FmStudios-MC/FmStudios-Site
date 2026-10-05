@@ -73,6 +73,8 @@ const fullTitle =
         root.dataset.season = "halloween";
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute("content", "#16101d");
+        var icon = document.querySelector('link[rel="icon"]');
+        if (icon) icon.setAttribute("href", "/favicon-halloween.webp");
       })();
     </script>
   </head>
