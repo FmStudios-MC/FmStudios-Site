@@ -8,10 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "sim": "tsx tools/sft-balance-sim.ts"
+    "check": "astro check"
   },
   "dependencies": {
     "astro": "^7.1.6",
@@ -22,9 +19,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/node": "^22.20.1",
     "playwright": "^1.60.0",
-    "tsx": "^4.22.4",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.9"
+    "typescript": "^5.9.3"
   },
   "allowScripts": {
     "sharp@0.35.3": true,
