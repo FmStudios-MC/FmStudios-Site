@@ -2,7 +2,7 @@
 title: Create New Age (Fly Port)
 type: Mods
 status: Released
-version: "26.2"
+version: "26.2, 26.1.2, 1.21.11, 1.21.10, 1.21.8"
 loader: Fabric
 tagline: This is a unofficial port of the popular "Create New Age" mod for 26.2
 summary: This is a unofficial port of the popular "Create New Age" mod for 26.2
