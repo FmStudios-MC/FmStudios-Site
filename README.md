@@ -8,11 +8,12 @@ Live at [www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
 
 ## Stack
 
-- Astro 7 (static output, zero JS by default), requires Node 22.12 or newer
-- Hand-written CSS design tokens in OKLCH (no Tailwind), see `src/styles/tokens.css`
+- Astro 7 (static output, zero JS by default), requires Node 22.23.4 or newer
+- Hand-written CSS design tokens built on the logo kit colours (Forge Ink, Brass, Paper; no Tailwind), see `src/styles/tokens.css`
 - Lenis for smooth scroll, IntersectionObserver for reveals (`src/scripts/motion.ts`)
 - Projects and News modeled as content collections (`src/content.config.ts`)
-- Self-hosted fonts: woff2 in `public/fonts/`, `@font-face` in `src/styles/fonts.css`
+- Self-hosted fonts (Chakra Petch, Barlow, JetBrains Mono): woff2 in `public/fonts/`, `@font-face` in `src/styles/fonts.css`
+- Logo kit: SVG masters in `src/assets/brand/`, favicons and web manifest in `public/`
 
 ## Commands
 
@@ -30,7 +31,7 @@ There is no lint script. `tsconfig.json` extends `astro/tsconfigs/strict`.
 ## Layout
 
 - `src/pages/` - routes (home, `/work`, `/work/[id]`, `/news`, `/news/[id]`, `/roadmap`, `/about`, `/contact`)
-- `src/components/` - Nav, Footer, Mark, Button, ProjectCard, PageHeader
+- `src/components/` - Nav, Footer, BrandSymbol, Button, ProjectCard, PageHeader, Arrow
 - `src/layouts/BaseLayout.astro` - shell, font preloads, head
 - `src/styles/` - `tokens.css`, `fonts.css`, `global.css`
 - `src/scripts/` - `motion.ts` (Lenis + reveals)
@@ -44,8 +45,9 @@ There is no lint script. `tsconfig.json` extends `astro/tsconfigs/strict`.
 
 Drop a markdown file in `src/content/projects/` and put its art in
 `src/assets/projects/`. Front matter is typed by `src/content.config.ts`. Set
-`featured: true` to surface a project on the home page; `accent` (OKLCH) tints
-the detail page. `links` is an array of `{ label, url }` rendered as buttons;
+`featured: true` to surface a project on the home page. Released projects whose
+first listed `version` matches `benchVersion` in `src/pages/index.astro` appear
+in the home page "On the bench" strip. `links` is an array of `{ label, url }` rendered as buttons;
 leave it empty until launch.
 
 ### Posting news

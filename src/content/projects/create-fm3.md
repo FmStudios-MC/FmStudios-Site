@@ -7,7 +7,6 @@ loader: NeoForge
 tagline: The third chapter of the studio's signature Create experience.
 summary: A released Create modpack, the third in the F&M line, delivering a refined, contraption-heavy progression for veterans and newcomers alike.
 image: ../../assets/projects/create-fm3.png
-accent: "oklch(0.74 0.14 65)"
 featured: true
 order: 6
 links:

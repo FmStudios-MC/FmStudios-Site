@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import Button from "../components/Button.astro";
-import Mark from "../components/Mark.astro";
+import BrandSymbol from "../components/BrandSymbol.astro";
 
 const disciplines = [
   {
@@ -48,7 +48,6 @@ const principles = [
   description="FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and programs with deliberate care."
 >
   <PageHeader
-    eyebrow="The studio"
     title="A small studio with a high bar."
     lede="FabiMvurice Interactive (FMI) makes things for the games people already love, and treats each release like it deserves a stage."
   />
@@ -73,7 +72,7 @@ const principles = [
         </p>
       </div>
       <div class="intro__mark" aria-hidden="true">
-        <Mark size={200} sheen={true} />
+        <BrandSymbol class="intro__symbol" decorative />
       </div>
     </div>
   </section>
@@ -111,11 +110,13 @@ const principles = [
   </section>
 
   <section class="section about-cta">
-    <div class="container about-cta__inner">
-      <h2 class="reveal">See what that looks like in practice.</h2>
-      <div class="about-cta__actions reveal">
+    <div class="container">
+      <div class="about-cta__inner block reveal">
+      <h2>See what that looks like in practice.</h2>
+      <div class="about-cta__actions">
         <Button href="/work">Browse the work</Button>
         <Button href="/contact" variant="ghost">Work with us</Button>
+      </div>
       </div>
     </div>
   </section>
@@ -135,11 +136,10 @@ const principles = [
 
   .intro__lead {
     font-family: var(--font-display);
-    font-weight: 500;
+    font-weight: 600;
     font-size: var(--step-2);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-    color: var(--ink);
+    line-height: 1.2;
+    color: var(--text);
     /* Held to a display measure; the paragraphs under it cap at 60ch and the
        opener ran wider than both. */
     max-width: 30ch;
@@ -149,7 +149,7 @@ const principles = [
 
   .intro__copy p + p {
     margin-top: var(--space-m);
-    color: var(--ink-muted);
+    color: var(--text-muted);
     max-width: 60ch;
     line-height: 1.7;
   }
@@ -157,6 +157,10 @@ const principles = [
   .intro__mark {
     display: grid;
     place-items: center;
+  }
+
+  .intro__mark :global(.intro__symbol) {
+    width: min(100%, 15rem);
   }
 
   .disciplines__title,
@@ -168,7 +172,7 @@ const principles = [
   .disciplines__list {
     list-style: none;
     padding: 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--line-strong);
   }
 
   .discipline {
@@ -178,21 +182,23 @@ const principles = [
     padding-block: var(--space-m);
     border-bottom: 1px solid var(--line);
     align-items: baseline;
-    transition: background-color var(--dur-fast) var(--ease-out-quart);
+    transition: background-color var(--dur-fast) var(--ease-out);
   }
 
   .discipline:hover {
-    background: oklch(0.2 0.013 72 / 0.4);
+    background: var(--face);
   }
 
   .discipline__name {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 700;
     font-size: var(--step-1);
+    text-transform: uppercase;
+    padding-left: var(--space-xs);
   }
 
   .discipline__body {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     line-height: 1.6;
     max-width: 52ch;
   }
@@ -219,31 +225,29 @@ const principles = [
   }
 
   .principle__d {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     line-height: 1.6;
     max-width: 34ch;
   }
 
   .about-cta__inner {
-    text-align: center;
+    --depth: 34px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-l);
-    padding-block: var(--space-xl);
-    border-top: 1px solid var(--line);
+    padding: clamp(2rem, 5vw, 4rem);
   }
 
   .about-cta__inner h2 {
-    font-size: var(--step-3);
-    max-width: 20ch;
+    font-size: var(--step-4);
+    max-width: 18ch;
   }
 
   .about-cta__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s);
-    justify-content: center;
+    gap: var(--space-s) var(--space-m);
   }
 
   @media (max-width: 860px) {

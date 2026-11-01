@@ -21,7 +21,6 @@ const filters = ["All", ...present];
   description="Projects from FabiMvurice Interactive: Minecraft modpacks, mods, resource packs, Roblox games, and programs."
 >
   <PageHeader
-    eyebrow="The work"
     title="Everything the studio ships."
     lede="Modpacks, mods, resource packs, Roblox games, and standalone programs. Filter by what you are looking for."
   />
@@ -83,8 +82,8 @@ const filters = ["All", ...present];
 
   .work-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--space-l) var(--space-m);
   }
 
   .work-grid__cell[hidden] {
@@ -92,7 +91,7 @@ const filters = ["All", ...present];
   }
 
   .work-empty {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     padding-block: var(--space-2xl);
     text-align: center;
     font-size: var(--step-1);

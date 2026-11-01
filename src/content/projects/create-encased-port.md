@@ -7,7 +7,6 @@ loader: Fabric
 tagline: This is a unofficial port of the "Create Encased" mod for the new 26.2 version
 summary: This is a unofficial port of the "Create Encased" mod for the new 26.2 version
 image: ../../assets/projects/encased_port.png
-accent: "oklch(0.74 0.14 65)"
 featured: true
 order: 1
 links:

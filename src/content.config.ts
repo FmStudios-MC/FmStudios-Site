@@ -1,4 +1,5 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 
 const projects = defineCollection({
@@ -19,13 +20,12 @@ const projects = defineCollection({
       loader: z.string().optional(),
       tagline: z.string(),
       summary: z.string(),
-      image: image(),
-      // Foreground art that sits on a solid colour (logos) vs. should fill the frame
+      // Optional until a project has real art; a marked placeholder shows instead.
+      image: image().optional(),
       links: z
         .array(z.object({ label: z.string(), url: z.string() }))
         .default([]),
       featured: z.boolean().default(false),
-      accent: z.string().optional(),
       order: z.number().default(99),
     }),
 });

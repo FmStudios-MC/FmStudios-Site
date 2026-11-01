@@ -1,7 +1,6 @@
 /* FabiMvurice Interactive - global base */
 @import "./fonts.css";
 @import "./tokens.css";
-@import "./seasons/halloween.css";
 
 *,
 *::before,
@@ -18,6 +17,7 @@ html {
   text-size-adjust: 100%;
   scroll-behavior: smooth;
   color-scheme: dark;
+  scrollbar-color: var(--line-strong) var(--well);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -28,27 +28,16 @@ html {
 
 body {
   background-color: var(--bg);
-  color: var(--ink);
+  color: var(--text);
+  caret-color: var(--brass);
   font-family: var(--font-body);
   font-size: var(--step-0);
-  line-height: 1.65;
+  line-height: 1.6;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   min-height: 100svh;
   overflow-x: hidden;
-}
-
-/* Ambient warm vignette so the void never reads as flat #000 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 80% at 50% -10%, var(--gold-glow), transparent 55%),
-    radial-gradient(100% 60% at 50% 120%, oklch(0.2 0.02 70 / 0.5), transparent 60%);
 }
 
 img,
@@ -85,10 +74,22 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
   text-wrap: balance;
+}
+
+/* The wordmark's squared capitals set the voice: big headings are carved in
+   caps, smaller ones stay in sentence case so they still read fast. */
+h1,
+h2 {
+  text-transform: uppercase;
+}
+
+h3,
+h4 {
+  font-weight: 600;
 }
 
 p {
@@ -96,35 +97,33 @@ p {
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--gold-ink);
+  background: var(--brass);
+  color: var(--on-brass);
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--brass-lit);
   outline-offset: 3px;
-  border-radius: var(--radius-s);
 }
 
 /* Layout helpers */
-.container {
+.container,
+.container-wide {
   width: 100%;
-  max-width: var(--container);
   margin-inline: auto;
   padding-inline: var(--space-m);
+}
+
+.container {
+  max-width: var(--container);
 }
 
 .container-wide {
-  width: 100%;
   max-width: var(--container-wide);
-  margin-inline: auto;
-  padding-inline: var(--space-m);
 }
 
-/* One rhythm unit owns the space between blocks. Sections pad both sides so a
-   lone section breathes, but adjacent sections collapse the seam to a single
-   unit instead of stacking two, and the footer leans on the last section's
-   bottom padding rather than adding a third. */
+/* One rhythm unit owns the space between blocks; adjacent sections collapse
+   the seam to a single unit instead of stacking two. */
 .section {
   position: relative;
   z-index: var(--z-base);
@@ -141,12 +140,11 @@ p {
   top: var(--space-s);
   z-index: var(--z-toast);
   padding: var(--space-2xs) var(--space-s);
-  background: var(--gold);
-  color: var(--gold-ink);
-  border-radius: var(--radius-s);
+  background: var(--brass);
+  color: var(--on-brass);
   font-weight: 600;
   transform: translateY(-200%);
-  transition: transform var(--dur-fast) var(--ease-out-quart);
+  transition: transform var(--dur-fast) var(--ease-out);
 }
 
 .skip-link:focus {
@@ -165,75 +163,158 @@ p {
   border: 0;
 }
 
-/* Lists we strip markers from keep their list semantics via role="list";
-   this restores the padding reset those lists all repeated locally. */
 .list-reset {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* Shared typographic utilities */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
 .lede {
   font-size: var(--step-1);
-  line-height: 1.55;
-  color: var(--ink-muted);
-  max-width: 60ch;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 58ch;
 }
 
-.gold-text {
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* The 30-degree lattice the symbol is drawn on: three line families 60
+   degrees apart with one spacing, so they meet in equilateral triangles. */
+.lattice {
+  background-image:
+    repeating-linear-gradient(150deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step)),
+    repeating-linear-gradient(30deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step)),
+    repeating-linear-gradient(90deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step));
 }
 
-/* Filter pills. Shared by /work and /news so both rows stay one control. */
+/* The block. A readable front face seen from the symbol's corner: the Brass
+   top face above it and the shaded side face to its right, receding at 30
+   degrees. Margins hold the resting faces, so a lift never reflows. */
+.block {
+  --depth: 22px;
+  --d: calc(var(--depth) + var(--lift));
+  --dx: calc(var(--d) * 0.866);
+  --dy: calc(var(--d) * 0.5);
+  --top: var(--brass);
+  position: relative;
+  background: var(--face);
+  margin-top: calc(var(--depth) * 0.5);
+  margin-right: calc(var(--depth) * 0.866);
+  translate: calc(var(--lift) * -0.866) calc(var(--lift) * 0.5);
+}
+
+.block::before,
+.block::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.block::before {
+  left: 0;
+  right: calc(var(--dx) * -1);
+  top: calc(var(--dy) * -1);
+  height: var(--dy);
+  background: var(--top);
+  clip-path: polygon(var(--dx) 0, 100% 0, calc(100% - var(--dx)) 100%, 0 100%);
+}
+
+.block::after {
+  top: calc(var(--dy) * -1);
+  right: calc(var(--dx) * -1);
+  bottom: 0;
+  width: var(--dx);
+  background: var(--side);
+  clip-path: polygon(0 var(--dy), 100% 0, 100% calc(100% - var(--dy)), 0 100%);
+}
+
+/* Signature interaction: a block you can act on rises toward you, its faces
+   deepen and its top catches more light. */
+.block--live {
+  transition: --lift var(--dur-mid) var(--ease-out);
+}
+
+.block--live::before {
+  transition: background-color var(--dur-mid) var(--ease-out);
+}
+
+.block--live:hover,
+.block--live:focus-within {
+  --lift: 12px;
+  --top: var(--brass-lit);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block--live,
+  .block--live::before {
+    transition: none;
+  }
+}
+
+/* Status plates: the state stamped in plain words. Released is lit. */
+.plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.65em 0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  border: 1px solid var(--brass);
+  color: var(--text);
+}
+
+.plate--lit {
+  background: var(--brass);
+  color: var(--on-brass);
+}
+
+/* Data label: mono is used for data and measurement only. */
+.data {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+
+/* Filter toggles, shared by /work and /news. */
 .filters {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2xs);
   margin-bottom: var(--space-l);
-  padding-bottom: var(--space-m);
-  border-bottom: 1px solid var(--line);
 }
 
 .filter {
-  /* Comfortable thumb target; the em padding alone left it at 38px. */
   min-height: 44px;
-  padding: 0.55em 1.1em;
-  border-radius: var(--radius-pill);
+  padding: 0.5em 1.05em;
   border: 1px solid var(--line-strong);
-  color: var(--ink-muted);
+  color: var(--text-muted);
+  font-family: var(--font-display);
   font-size: var(--step--1);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   transition:
-    color var(--dur-fast) var(--ease-out-quart),
-    border-color var(--dur-fast) var(--ease-out-quart),
-    background-color var(--dur-fast) var(--ease-out-quart);
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 
 .filter:hover {
-  color: var(--ink);
-  border-color: var(--gold);
+  color: var(--text);
+  border-color: var(--brass);
 }
 
 .filter[aria-pressed="true"] {
-  color: var(--gold-ink);
-  background: var(--gold);
-  border-color: var(--gold);
+  color: var(--on-brass);
+  background: var(--brass);
+  border-color: var(--brass);
 }
 
-/* Tag pills. Shared by the news ledger and the post header. */
+/* Tags. Shared by the news ledger and the post header. */
 .taglist {
   list-style: none;
   padding: 0;
@@ -245,15 +326,34 @@ p {
 .tag {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.03em;
-  color: var(--gold);
-  padding: 0.3em 0.7em;
-  border: 1px solid color-mix(in oklch, var(--gold) 32%, var(--line));
-  border-radius: var(--radius-pill);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.3em 0.6em;
+  border: 1px solid var(--line-strong);
 }
 
-/* Long-form body copy. One treatment for every rendered markdown surface, so a
-   project write-up and a news post read as the same publication. */
+/* Back link used by both detail pages */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-block: var(--space-2xs);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.back-link:hover {
+  color: var(--brass-lit);
+}
+
+/* Long-form body copy: project write-ups and news posts read as one
+   publication. */
 .prose {
   max-width: 68ch;
 }
@@ -263,11 +363,12 @@ p {
 }
 
 .prose p {
-  color: var(--ink-muted);
+  color: var(--text-muted);
   margin-bottom: var(--space-m);
   line-height: 1.75;
 }
 
+.prose h1,
 .prose h2 {
   font-size: var(--step-2);
   margin-top: var(--space-l);
@@ -281,20 +382,22 @@ p {
 }
 
 .prose a {
-  color: var(--gold);
+  color: var(--text);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
-  text-decoration-color: color-mix(in oklch, var(--gold) 45%, transparent);
-  transition: text-decoration-color var(--dur-fast) var(--ease-out-quart);
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--brass);
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
 }
 
 .prose a:hover {
-  text-decoration-color: var(--gold);
+  text-decoration-color: var(--brass-lit);
+  color: var(--brass-lit);
 }
 
 .prose ul,
 .prose ol {
-  color: var(--ink-muted);
+  color: var(--text-muted);
   margin-bottom: var(--space-m);
   padding-left: 1.2em;
   line-height: 1.75;
@@ -304,34 +407,40 @@ p {
   margin-bottom: var(--space-2xs);
 }
 
-.prose li::marker {
-  color: var(--gold-deep);
+.prose ul {
+  list-style: square;
+}
+
+.prose ul > li::marker {
+  color: var(--brass);
+}
+
+.prose ol > li::marker {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
 }
 
 .prose blockquote {
   margin: var(--space-l) 0;
   padding: var(--space-s) var(--space-m);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-m);
-  background: var(--surface);
-  color: var(--ink);
-  font-style: italic;
+  background: var(--face);
+  border-top: 2px solid var(--brass);
+  color: var(--text);
 }
 
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  background: var(--surface-2);
-  padding: 0.15em 0.4em;
-  border-radius: var(--radius-s);
+  background: var(--face);
+  padding: 0.12em 0.4em;
 }
 
 .prose pre {
   margin-bottom: var(--space-m);
   padding: var(--space-s) var(--space-m);
-  background: var(--surface-2);
+  background: var(--well);
   border: 1px solid var(--line);
-  border-radius: var(--radius-m);
   overflow-x: auto;
 }
 
@@ -347,18 +456,16 @@ p {
 }
 
 .prose strong {
-  color: var(--ink);
+  color: var(--text);
   font-weight: 600;
 }
 
 .prose img {
-  border-radius: var(--radius-m);
   margin-bottom: var(--space-m);
 }
 
 /* Reveal primitive. Content is visible by default; JS arms the hidden state
-   only when it can guarantee an IntersectionObserver will reveal it again.
-   No-JS, no-IO, and reduced-motion all keep content fully visible. */
+   only when it can guarantee an IntersectionObserver will reveal it again. */
 .reveal {
   opacity: 1;
 }
@@ -366,12 +473,11 @@ p {
 @media (prefers-reduced-motion: no-preference) {
   .reveal.reveal--armed {
     opacity: 0;
-    transform: translateY(1.5rem);
+    transform: translateY(1rem);
     transition:
-      opacity var(--dur-slow) var(--ease-out-expo),
-      transform var(--dur-slow) var(--ease-out-expo);
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
     transition-delay: var(--reveal-delay, 0s);
-    will-change: opacity, transform;
   }
 
   .reveal.reveal--armed.is-visible {

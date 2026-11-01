@@ -1,16 +1,14 @@
 ---
 interface Props {
-  eyebrow: string;
   title: string;
   lede?: string;
 }
 
-const { eyebrow, title, lede } = Astro.props;
+const { title, lede } = Astro.props;
 ---
 
-<header class="page-header">
+<header class="page-header lattice">
   <div class="container">
-    <p class="eyebrow">{eyebrow}</p>
     <h1 class="page-header__title">{title}</h1>
     {lede && <p class="page-header__lede lede">{lede}</p>}
   </div>
@@ -21,17 +19,13 @@ const { eyebrow, title, lede } = Astro.props;
     position: relative;
     z-index: var(--z-base);
     padding-block: clamp(3rem, 9vh, 6rem) var(--space-xl);
-  }
-
-  .eyebrow {
-    margin-bottom: var(--space-s);
+    margin-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--line);
   }
 
   .page-header__title {
     font-size: var(--step-5);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    max-width: 16ch;
+    max-width: 18ch;
   }
 
   .page-header__lede {

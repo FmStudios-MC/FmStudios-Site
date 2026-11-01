@@ -82,7 +82,7 @@ function initMobileMenu() {
 
   // Resizing past the breakpoint hides the drawer but left the toggle
   // reporting expanded, so the next open needed two taps.
-  const desktop = window.matchMedia("(min-width: 721px)");
+  const desktop = window.matchMedia("(min-width: 761px)");
   desktop.addEventListener("change", (e) => {
     if (e.matches && isOpen()) setOpen(false);
   });

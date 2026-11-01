@@ -1,6 +1,5 @@
 ---
-import Mark from "./Mark.astro";
-import SeasonToggle from "./season/SeasonToggle.astro";
+import Lockup from "../assets/brand/fm-horizontal-reversed.svg";
 
 const links = [
   { href: "/work", label: "Work" },
@@ -11,65 +10,52 @@ const links = [
 ];
 
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => path === href || path.startsWith(href + "/");
 ---
 
 <header class="nav" data-nav>
   <div class="nav__inner container-wide">
     <a class="nav__brand" href="/" aria-label="FabiMvurice Interactive home">
-      <Mark size={34} />
-      <span class="nav__wordmark">
-        Fabi<span class="nav__wordmark-accent">Mvurice</span>
-        <span class="nav__wordmark-sub">Interactive</span>
-      </span>
+      <Lockup class="nav__lockup" aria-hidden="true" />
     </a>
 
     <nav class="nav__links" aria-label="Primary">
       {
-        links.map((link) => {
-          const active =
-            path === link.href || path.startsWith(link.href + "/");
-          return (
-            <a
-              href={link.href}
-              class:list={["nav__link", { "is-active": active }]}
-              aria-current={active ? "page" : undefined}
-            >
-              {link.label}
-            </a>
-          );
-        })
+        links.map((link) => (
+          <a
+            href={link.href}
+            class:list={["nav__link", { "is-active": isActive(link.href) }]}
+            aria-current={isActive(link.href) ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        ))
       }
     </nav>
 
-    <div class="nav__end">
-      <SeasonToggle />
-      <button
-        class="nav__toggle"
-        aria-expanded="false"
-        aria-controls="nav-mobile"
-        data-nav-toggle
-      >
-        <span class="visually-hidden">Toggle menu</span>
-        <span class="nav__toggle-bar"></span>
-        <span class="nav__toggle-bar"></span>
-      </button>
-    </div>
+    <button
+      class="nav__toggle"
+      aria-expanded="false"
+      aria-controls="nav-mobile"
+      data-nav-toggle
+    >
+      <span class="visually-hidden">Toggle menu</span>
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+    </button>
   </div>
 
   <div class="nav__mobile" id="nav-mobile" data-nav-mobile hidden>
     {
-      links.map((link) => {
-        const active = path === link.href || path.startsWith(link.href + "/");
-        return (
-          <a
-            href={link.href}
-            class:list={["nav__mobile-link", { "is-active": active }]}
-            aria-current={active ? "page" : undefined}
-          >
-            {link.label}
-          </a>
-        );
-      })
+      links.map((link) => (
+        <a
+          href={link.href}
+          class:list={["nav__mobile-link", { "is-active": isActive(link.href) }]}
+          aria-current={isActive(link.href) ? "page" : undefined}
+        >
+          {link.label}
+        </a>
+      ))
     }
   </div>
 </header>
@@ -79,7 +65,15 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    transition: background-color var(--dur-mid) var(--ease-out-quart);
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color var(--dur-mid) var(--ease-out),
+      border-color var(--dur-mid) var(--ease-out);
+  }
+
+  .nav[data-scrolled] {
+    background: var(--well);
+    border-bottom-color: var(--line);
   }
 
   .nav__inner {
@@ -87,48 +81,25 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
-    padding-block: var(--space-s);
-  }
-
-  /* Frosted bar appears once scrolled */
-  .nav[data-scrolled] {
-    background: oklch(0.13 0.009 75 / 0.78);
-    backdrop-filter: blur(14px) saturate(1.3);
-    border-bottom: 1px solid var(--line);
+    padding-block: var(--space-xs);
   }
 
   .nav__brand {
     display: inline-flex;
-    align-items: center;
-    gap: var(--space-2xs);
+    /* Clear space: a quarter of the symbol's height on every side. */
+    padding: 0.4rem 0;
   }
 
-  .nav__wordmark {
-    display: flex;
-    flex-direction: column;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--step-0);
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
-
-  .nav__wordmark-accent {
-    color: var(--gold);
-  }
-
-  .nav__wordmark-sub {
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: 0.62em;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-top: 0.25em;
+  /* Classes passed into a component land on its root, outside this file's
+     scope, so they are reached through :global. */
+  .nav__brand :global(.nav__lockup) {
+    /* The SVG box carries side bearings: 192px keeps the drawn artwork at
+       the kit's 180px minimum. */
+    width: clamp(192px, 15vw, 212px);
+    height: auto;
   }
 
   .nav__links {
-    margin-left: auto;
     display: flex;
     align-items: center;
     gap: var(--space-l);
@@ -136,28 +107,32 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 
   .nav__link {
     position: relative;
-    font-size: var(--step-0);
-    color: var(--ink-muted);
-    padding-block: var(--space-3xs);
-    transition: color var(--dur-fast) var(--ease-out-quart);
+    padding-block: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-out);
   }
 
   .nav__link::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: -2px;
-    height: 2px;
+    bottom: 0;
+    height: 3px;
     width: 100%;
-    background: var(--gold-sheen);
+    background: var(--brass);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform var(--dur-mid) var(--ease-out-expo);
+    transition: transform var(--dur-mid) var(--ease-out);
   }
 
   .nav__link:hover,
   .nav__link.is-active {
-    color: var(--ink);
+    color: var(--text);
   }
 
   .nav__link:hover::after,
@@ -165,27 +140,12 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
     transform: scaleX(1);
   }
 
-  .nav__end {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2xs);
-  }
-
-  /* Outside a season the desktop end slot is empty; drop it so the link row
-     keeps its flush-right edge. */
-  @media (min-width: 721px) {
-    :global(:root:not([data-season-eligible])) .nav__end {
-      display: none;
-    }
-  }
-
   .nav__toggle {
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    /* The bars are 9px tall together; the button carries the thumb target. */
+    gap: 6px;
     min-width: 44px;
     min-height: 44px;
     margin-right: calc(var(--space-2xs) * -1);
@@ -194,26 +154,29 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
   .nav__toggle-bar {
     width: 24px;
     height: 2px;
-    background: var(--ink);
-    border-radius: 2px;
-    transition: transform var(--dur-fast) var(--ease-out-quart),
-      opacity var(--dur-fast) var(--ease-out-quart);
+    background: var(--text);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-bar {
+    background: var(--brass-lit);
   }
 
   .nav__toggle[aria-expanded="true"] .nav__toggle-bar:first-child {
-    transform: translateY(7px) rotate(45deg);
+    transform: translateY(4px) rotate(45deg);
   }
 
   .nav__toggle[aria-expanded="true"] .nav__toggle-bar:last-child {
-    transform: translateY(-7px) rotate(-45deg);
+    transform: translateY(-4px) rotate(-45deg);
   }
 
   .nav__mobile {
     display: none;
     flex-direction: column;
-    padding: var(--space-s) var(--space-m) var(--space-l);
-    background: oklch(0.12 0.009 75 / 0.96);
-    backdrop-filter: blur(14px);
+    padding: var(--space-2xs) var(--space-m) var(--space-l);
+    background: var(--well);
     border-bottom: 1px solid var(--line);
   }
 
@@ -222,33 +185,30 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
   }
 
   .nav__mobile-link {
-    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
     font-family: var(--font-display);
     font-size: var(--step-2);
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
     padding-block: var(--space-xs);
     border-bottom: 1px solid var(--line);
-    color: var(--ink-muted);
+    color: var(--text-muted);
   }
 
-  /* The desktop row marks the current page; the drawer has to say it too. */
   .nav__mobile-link.is-active {
-    color: var(--ink);
+    color: var(--text);
   }
 
   .nav__mobile-link.is-active::before {
     content: "";
-    position: absolute;
-    left: calc(var(--space-s) * -1);
-    top: 50%;
-    width: 3px;
-    height: 1.1em;
-    border-radius: var(--radius-pill);
-    background: var(--gold);
-    transform: translateY(-50%);
+    width: 0.55em;
+    height: 0.55em;
+    background: var(--brass);
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 760px) {
     .nav__links {
       display: none;
     }

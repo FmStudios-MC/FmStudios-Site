@@ -1,52 +1,58 @@
-/* FabiMvurice Interactive - design tokens (see DESIGN.md) */
+/* FabiMvurice Interactive - design tokens (see DESIGN.md)
+   The palette is the logo kit's: Forge Ink, Brass, Paper. Brass is the only
+   light on the page: a block's lit top face, the active state, the F and M. */
+
+/* How far a live block has risen toward the viewer; registered so it can
+   animate. */
+@property --lift {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
 
 :root {
-  /* Color - OKLCH, dark is the only mode */
-  --bg: oklch(0.15 0.01 75);
-  --bg-deep: oklch(0.11 0.008 75);
-  --surface: oklch(0.2 0.013 72);
-  --surface-2: oklch(0.24 0.014 72);
-  /* --line draws decorative hairlines; --line-strong draws control boundaries
-     and clears the 3:1 non-text contrast floor on --bg and --surface. */
-  --line: oklch(0.32 0.012 72);
-  --line-strong: oklch(0.5 0.014 72);
+  /* Brand anchors (logo kit, 2026-10-27) */
+  --forge-ink: #1d2030;
+  --brass: #c98516;
+  --paper: #f6f1e7;
 
-  --ink: oklch(0.96 0.006 85);
-  --ink-muted: oklch(0.76 0.012 80);
-  /* Floored so faint text still clears 4.5:1 on --surface and --surface-2,
-     not just on the page background. */
-  --ink-faint: oklch(0.63 0.012 78);
+  /* Ink ground */
+  --bg: var(--forge-ink);
+  --well: #13151f; /* sunk areas: footer, art wells */
+  --face: #252940; /* a block's front face */
+  --side: #0a0b11; /* a block's shaded side face, kept distinct from --bg */
+  --line: #343956; /* decorative hairlines */
+  --line-strong: #6e7496; /* control boundaries, clears 3:1 on ink and face */
+  --lattice: rgb(246 241 231 / 0.055);
 
-  --gold: oklch(0.8 0.13 80);
-  --gold-bright: oklch(0.9 0.095 92);
-  --gold-deep: oklch(0.66 0.125 62);
-  --gold-glow: oklch(0.8 0.13 80 / 0.18);
-  --gold-ink: oklch(0.18 0.02 70); /* dark text on gold fills */
+  /* Text on ink */
+  --text: var(--paper);
+  --text-muted: #bdb9c6;
+  --text-faint: #9a9db2; /* >= 4.5:1 on --face */
 
-  --status-live: oklch(0.78 0.13 150);
-  --status-dev: oklch(0.82 0.13 85);
+  /* Brass */
+  --brass-lit: #e3a33a; /* hovered top face, brass text on ink */
+  --brass-deep: #9a6410; /* the pressed / bottom face of brass buttons */
+  --brass-ink: #7e540e; /* brass-coloured small text on paper (5.9:1) */
+  --on-brass: var(--forge-ink);
 
-  /* Metallic gold gradient (logo sheen) */
-  --gold-sheen: linear-gradient(
-    165deg,
-    var(--gold-bright) 0%,
-    var(--gold) 42%,
-    var(--gold-deep) 100%
-  );
+  /* Paper slab */
+  --paper-text: var(--forge-ink);
+  --paper-muted: #4a4e64;
 
   /* Typography */
-  --font-display: "Clash Display", "Clash Display Placeholder", sans-serif;
-  --font-body: "General Sans", "General Sans Placeholder", system-ui, sans-serif;
+  --font-display: "Chakra Petch", "Bahnschrift", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  /* Fluid type scale, ratio ~1.3 */
+  /* Fluid type scale */
   --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.92rem);
-  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.13rem);
+  --step-0: clamp(1.02rem, 0.98rem + 0.2vw, 1.15rem);
   --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.5rem);
   --step-2: clamp(1.56rem, 1.42rem + 0.7vw, 2rem);
   --step-3: clamp(1.95rem, 1.7rem + 1.25vw, 2.66rem);
-  --step-4: clamp(2.44rem, 2rem + 2.2vw, 3.55rem);
-  --step-5: clamp(3rem, 2.2rem + 4vw, 5.5rem);
+  --step-4: clamp(2.3rem, 1.9rem + 2.2vw, 3.5rem);
+  --step-5: clamp(2.6rem, 1.8rem + 4.2vw, 5.4rem);
 
   /* Fluid spacing scale */
   --space-3xs: clamp(0.25rem, 0.24rem + 0.05vw, 0.31rem);
@@ -57,27 +63,19 @@
   --space-l: clamp(2rem, 1.85rem + 0.75vw, 2.5rem);
   --space-xl: clamp(3rem, 2.6rem + 2vw, 4.5rem);
   --space-2xl: clamp(4.5rem, 3.7rem + 4vw, 7.5rem);
-  --space-3xl: clamp(6rem, 4.7rem + 6.5vw, 11rem);
 
-  /* Structure */
+  /* Structure: square corners everywhere, like the block */
   --container: 1200px;
-  --container-wide: 1440px;
-  --radius-s: 0.4rem;
-  --radius-m: 0.75rem;
-  --radius-l: 1.25rem;
-  --radius-pill: 999px;
+  --container-wide: 1400px;
+  --lattice-step: 44px;
 
-  /* Motion */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --dur-fast: 0.18s;
-  --dur-mid: 0.4s;
+  /* Motion: short and mechanical */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 0.16s;
+  --dur-mid: 0.32s;
   --dur-slow: 0.7s;
 
-  /* Z-index scale */
   --z-base: 1;
   --z-sticky: 100;
-  --z-overlay: 200;
-  --z-modal: 300;
   --z-toast: 400;
 }

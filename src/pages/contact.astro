@@ -19,14 +19,13 @@ const channels = [
   description="Reach FabiMvurice Interactive on Discord about a collaboration, commission, or a question on a release."
 >
   <PageHeader
-    eyebrow="Get in touch"
     title="The studio lives on Discord."
     lede="A modpack collaboration, a commission, a bug on a release, or just a question. Join the server and you reach the people building the work directly."
   />
 
   <section class="section contact">
     <div class="container contact__grid">
-      <div class="discord">
+      <div class="discord block">
         <span class="discord__glyph" aria-hidden="true">
           <svg viewBox="0 0 127.14 96.36" role="presentation">
             <path
@@ -90,27 +89,17 @@ const channels = [
   }
 
   .discord {
-    position: relative;
+    --depth: 34px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-m);
     padding: clamp(1.75rem, 4vw, 3rem);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    background:
-      radial-gradient(
-        120% 100% at 0% 0%,
-        var(--gold-glow),
-        transparent 60%
-      ),
-      var(--surface);
-    overflow: hidden;
   }
 
   .discord__glyph {
     display: inline-flex;
-    color: var(--gold);
+    color: var(--text);
   }
 
   .discord__glyph svg {
@@ -119,12 +108,11 @@ const channels = [
   }
 
   .discord__title {
-    font-size: var(--step-2);
-    line-height: 1.1;
+    font-size: var(--step-3);
   }
 
   .discord__copy {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     font-size: var(--step-0);
     line-height: 1.6;
     max-width: 52ch;
@@ -136,20 +124,21 @@ const channels = [
 
   .discord__note {
     margin-top: var(--space-xs);
-    color: var(--ink-faint);
+    color: var(--text-faint);
     font-size: var(--step--1);
     line-height: 1.5;
   }
 
   .contact__aside-title {
     font-size: var(--step-1);
+    color: var(--text);
     margin-bottom: var(--space-m);
   }
 
   .channels {
     list-style: none;
     padding: 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--line-strong);
   }
 
   .channel {
@@ -163,7 +152,7 @@ const channels = [
     padding-block: var(--space-s);
     /* Nudged with transform, not padding: animating the box reflowed the
        whole list on every hover. */
-    transition: transform var(--dur-mid) var(--ease-out-expo);
+    transition: transform var(--dur-mid) var(--ease-out);
   }
 
   .channel__link:hover {
@@ -175,7 +164,7 @@ const channels = [
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--text-faint);
   }
 
   .channel__value {
@@ -183,11 +172,11 @@ const channels = [
     align-items: center;
     gap: 0.4em;
     font-size: var(--step-0);
-    color: var(--ink);
+    color: var(--text);
   }
 
   .channel__link:hover .channel__value {
-    color: var(--gold);
+    color: var(--brass-lit);
   }
 
   @media (prefers-reduced-motion: reduce) {

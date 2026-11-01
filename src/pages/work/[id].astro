@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
 import Arrow from "../../components/Arrow.astro";
+import ArtPlaceholder from "../../components/ArtPlaceholder.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -17,38 +18,32 @@ const { project } = Astro.props;
 const { data } = project;
 const { Content } = await render(project);
 const isLive = data.status === "Released";
-const accent = data.accent ?? "var(--gold)";
 
 const meta = [
   { label: "Type", value: data.type },
   { label: "Status", value: data.status },
-  data.version ? { label: "Version", value: data.version } : null,
+  data.version ? { label: "Minecraft", value: data.version } : null,
   data.loader ? { label: "Loader", value: data.loader } : null,
 ].filter(Boolean) as { label: string; value: string }[];
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
-  <article class="detail" style={`--accent:${accent}`}>
-    <div class="container">
-      <a href="/work" class="detail__back">
-        <Arrow dir="left" /> All work
-      </a>
-    </div>
+  <article class="detail">
+    <header class="detail__hero lattice">
+      <div class="container">
+        <a href="/work" class="back-link">
+          <Arrow dir="left" /> All work
+        </a>
+      </div>
 
-    <header class="detail__hero">
       <div class="container detail__hero-inner">
         <div class="detail__intro">
-          <div class="detail__tags">
-            <span class="detail__type">{data.type}</span>
-            <span
-              class:list={["chip", isLive ? "chip--live" : "chip--dev"]}
-            >
-              <span class="chip__dot" aria-hidden="true"></span>
-              {data.status}
-            </span>
-          </div>
           <h1 class="detail__title">{data.title}</h1>
           <p class="detail__tagline">{data.tagline}</p>
+          <div class="detail__tags">
+            <span class:list={["plate", { "plate--lit": isLive }]}>{data.status}</span>
+            <span class="data">{data.type}</span>
+          </div>
 
           {
             data.links.length > 0 ? (
@@ -73,14 +68,21 @@ const meta = [
           }
         </div>
 
-        <div class="detail__art">
-          <Image
-            src={data.image}
-            alt={`${data.title} project art`}
-            width={720}
-            height={720}
-            class="detail__img"
-          />
+        <div class="detail__art block">
+          {
+            data.image ? (
+              <Image
+                src={data.image}
+                alt={`${data.title} project art`}
+                width={720}
+                height={720}
+                class="detail__img"
+                loading="eager"
+              />
+            ) : (
+              <ArtPlaceholder title={data.title} />
+            )
+          }
         </div>
       </div>
     </header>
@@ -113,200 +115,119 @@ const meta = [
   .detail {
     position: relative;
     z-index: var(--z-base);
-    padding-top: var(--space-l);
-  }
-
-  .detail__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    /* Comfortable target without moving the text off the container edge. */
-    padding-block: var(--space-2xs);
-    color: var(--ink-muted);
-    font-size: var(--step--1);
-    transition: color var(--dur-fast) var(--ease-out-quart);
-  }
-
-  .detail__back:hover {
-    color: var(--gold);
   }
 
   .detail__hero {
-    position: relative;
-    padding-block: var(--space-xl) var(--space-2xl);
-    overflow: hidden;
+    padding-block: var(--space-m) var(--space-2xl);
+    border-bottom: 1px solid var(--line);
   }
 
   .detail__hero-inner {
-    position: relative;
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     align-items: center;
     gap: var(--space-2xl);
+    padding-top: var(--space-xl);
   }
 
   .detail__tags {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-s);
-    margin-bottom: var(--space-m);
-  }
-
-  .detail__type {
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    letter-spacing: 0.04em;
-    color: var(--gold);
-  }
-
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45em;
-    padding: 0.3em 0.7em;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    border: 1px solid var(--line);
-    color: var(--ink);
-  }
-
-  .chip__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-  }
-
-  .chip--live .chip__dot {
-    background: var(--status-live);
-    box-shadow: 0 0 10px var(--status-live);
-  }
-
-  .chip--dev .chip__dot {
-    background: var(--status-dev);
-    box-shadow: 0 0 10px var(--status-dev);
+    margin-top: var(--space-m);
   }
 
   .detail__title {
     font-size: var(--step-5);
-    line-height: 1;
-    letter-spacing: -0.03em;
+    line-height: 0.98;
   }
 
   .detail__tagline {
     margin-top: var(--space-m);
     font-size: var(--step-1);
-    color: var(--ink-muted);
+    color: var(--text-muted);
     max-width: 40ch;
   }
 
   .detail__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s);
+    gap: var(--space-s) var(--space-m);
     margin-top: var(--space-l);
   }
 
   .detail__nolinks {
     margin-top: var(--space-l);
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    color: var(--ink-faint);
+    color: var(--text-muted);
     padding: var(--space-s) var(--space-m);
     border: 1px dashed var(--line-strong);
-    border-radius: var(--radius-m);
-    max-width: fit-content;
+    max-width: 52ch;
   }
 
+  /* The project's art on the front face of a large block */
   .detail__art {
-    position: relative;
+    --depth: 44px;
     display: grid;
     place-items: center;
     aspect-ratio: 1;
-    border-radius: var(--radius-l);
-    background:
-      radial-gradient(
-        80% 80% at 50% 35%,
-        color-mix(in oklch, var(--accent) 30%, transparent),
-        transparent 70%
-      ),
-      var(--surface);
-    border: 1px solid var(--line);
-    padding: var(--space-xl);
-  }
-
-  /* Accent halo, centered on the logo and bleeding out from behind the card */
-  .detail__art::before {
-    content: "";
-    position: absolute;
-    inset: -20%;
-    z-index: -1;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      color-mix(in oklch, var(--accent) 22%, transparent),
-      transparent 60%
-    );
-    filter: blur(45px);
-    pointer-events: none;
+    padding: var(--space-l);
+    background: var(--well);
   }
 
   .detail__img {
-    width: min(82%, 380px);
+    width: min(94%, 520px);
     height: auto;
     object-fit: contain;
-    filter: drop-shadow(0 24px 40px oklch(0 0 0 / 0.5));
   }
 
   .detail__body {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 250px minmax(0, 1fr);
     gap: var(--space-2xl);
-    /* The meta rail sets the row height, so a short write-up already leaves
-       air below it; the block does not need a second helping of its own. */
-    padding-block: var(--space-l);
-    border-top: 1px solid var(--line);
+    padding-block: var(--space-xl) var(--space-l);
   }
 
+  /* Spec plate: the facts a player checks before downloading */
   .detail__meta {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-s);
     align-self: start;
     position: sticky;
-    top: var(--space-xl);
+    top: 7rem;
+    border: 1px solid var(--line-strong);
+    border-top: 3px solid var(--brass);
   }
 
   .detail__meta-row {
     display: flex;
     flex-direction: column;
     gap: 0.2em;
-    padding-bottom: var(--space-s);
-    border-bottom: 1px solid var(--line);
+    padding: var(--space-xs) var(--space-s);
+  }
+
+  .detail__meta-row + .detail__meta-row {
+    border-top: 1px solid var(--line);
   }
 
   .detail__meta dt {
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--text-faint);
   }
 
   .detail__meta dd {
-    font-size: var(--step-0);
-    color: var(--ink);
+    font-weight: 500;
+    color: var(--text);
+    overflow-wrap: anywhere;
   }
 
-  /* Body copy inherits the shared .prose treatment; the summary is the one
-     element this page styles differently, as its display-weight opener. */
   .detail__summary {
     font-family: var(--font-display);
-    font-weight: 500;
+    font-weight: 600;
     font-size: var(--step-2);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-    color: var(--ink);
+    line-height: 1.2;
+    color: var(--text);
     margin-bottom: var(--space-l);
   }
 
@@ -320,8 +241,10 @@ const meta = [
       gap: var(--space-xl);
     }
     .detail__art {
+      --depth: 26px;
       order: -1;
-      max-width: 360px;
+      max-width: 320px;
+      padding: var(--space-l);
     }
     .detail__body {
       grid-template-columns: 1fr;
@@ -329,13 +252,11 @@ const meta = [
     }
     .detail__meta {
       position: static;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: var(--space-l);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
     }
-    .detail__meta-row {
-      border-bottom: none;
-      padding-bottom: 0;
+    .detail__meta-row + .detail__meta-row {
+      border-top: none;
     }
   }
 </style>

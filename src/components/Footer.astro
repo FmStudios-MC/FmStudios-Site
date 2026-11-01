@@ -1,5 +1,5 @@
 ---
-import Mark from "./Mark.astro";
+import Stacked from "../assets/brand/fm-stacked-reversed.svg";
 
 const year = new Date().getFullYear();
 
@@ -15,6 +15,7 @@ const elsewhere = [
   { href: "https://www.curseforge.com/members/fabimvurice_interactive/projects", label: "CurseForge" },
   { href: "https://modrinth.com/user/Itzz_Fabi", label: "Modrinth" },
   { href: "https://www.roblox.com/users/373830429/profile", label: "Roblox" },
+  { href: "https://discord.gg/x9jsed8qyR", label: "Discord" },
 ];
 ---
 
@@ -22,20 +23,20 @@ const elsewhere = [
   <div class="footer__inner container-wide">
     <div class="footer__brand">
       <a href="/" class="footer__mark" aria-label="FabiMvurice Interactive home">
-        <Mark size={48} />
+        <Stacked class="footer__lockup" aria-hidden="true" />
       </a>
       <p class="footer__line">
         FabiMvurice Interactive. Two dudes loving Minecraft.
       </p>
     </div>
 
-    <nav class="footer__col" aria-label="Explore">
-      <h2 class="footer__heading">Explore</h2>
+    <nav class="footer__col" aria-labelledby="footer-explore">
+      <h2 class="footer__heading" id="footer-explore">Explore</h2>
       {explore.map((l) => <a href={l.href} class="footer__link">{l.label}</a>)}
     </nav>
 
-    <nav class="footer__col" aria-label="Elsewhere">
-      <h2 class="footer__heading">Elsewhere</h2>
+    <nav class="footer__col" aria-labelledby="footer-elsewhere">
+      <h2 class="footer__heading" id="footer-elsewhere">Elsewhere</h2>
       {
         elsewhere.map((l) => (
           <a
@@ -53,7 +54,7 @@ const elsewhere = [
 
   <div class="footer__base container-wide">
     <span>&copy; {year} Itzz_Fabi</span>
-    <span class="footer__mono">Built with deliberate craft</span>
+    <span>Built with deliberate craft</span>
   </div>
 </footer>
 
@@ -61,55 +62,56 @@ const elsewhere = [
   .footer {
     position: relative;
     z-index: var(--z-base);
-    /* No margin of its own: the last block's bottom padding is the gap.
-       Stacking both left ~320px of void under every page. */
+    background: var(--well);
     border-top: 1px solid var(--line);
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      oklch(0.1 0.008 75 / 0.6)
-    );
   }
 
   .footer__inner {
     display: grid;
     grid-template-columns: 1.6fr 1fr 1fr;
     gap: var(--space-xl);
-    padding-block: var(--space-2xl) var(--space-xl);
+    padding-block: var(--space-xl);
+  }
+
+  /* Stacked lockup minimum is 110px wide. */
+  .footer__mark :global(.footer__lockup) {
+    width: 132px;
+    height: auto;
+  }
+
+  .footer__mark {
+    display: inline-flex;
   }
 
   .footer__line {
     margin-top: var(--space-s);
-    color: var(--ink-muted);
+    color: var(--text-muted);
     font-size: var(--step--1);
     max-width: 38ch;
-    line-height: 1.6;
   }
 
   .footer__heading {
-    font-family: var(--font-mono);
     font-size: var(--step--1);
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--gold);
+    letter-spacing: 0.1em;
+    color: var(--text);
     margin-bottom: var(--space-s);
   }
 
   .footer__col {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-2xs);
   }
 
   .footer__link {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     width: fit-content;
-    transition: color var(--dur-fast) var(--ease-out-quart);
+    padding-block: 0.15rem;
+    transition: color var(--dur-fast) var(--ease-out);
   }
 
   .footer__link:hover {
-    color: var(--gold);
+    color: var(--text);
   }
 
   .footer__base {
@@ -118,13 +120,8 @@ const elsewhere = [
     gap: var(--space-m);
     padding-block: var(--space-m);
     border-top: 1px solid var(--line);
-    color: var(--ink-faint);
+    color: var(--text-faint);
     font-size: var(--step--1);
-  }
-
-  .footer__mono {
-    font-family: var(--font-mono);
-    letter-spacing: 0.04em;
   }
 
   @media (max-width: 720px) {
