@@ -46,7 +46,7 @@ const board: { status: Status; label: string; items: Item[] }[] = [
     label: "Released",
     items: [
       {
-        title: "FMI site rework",
+        title: "Neolqua site rework",
         kind: "Studio",
         when: "Shipped",
         summary: "Our main page for news, info, and sharing the work as it happens.",
@@ -68,7 +68,7 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
 
 <BaseLayout
   title="Roadmap"
-  description="What FabiMvurice Interactive is planning, building, and has already shipped, on one board."
+  description="What Neolqua Studios is planning, building, and has already shipped, on one board."
 >
   <PageHeader
     title="Where the studio is headed."
@@ -77,7 +77,7 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
 
   <section class="section roadmap">
     <div class="container-wide">
-      <ol class="track list-reset" role="list">
+      <ol class="pool water list-reset" role="list">
         {
           lanes.map((lane, laneIndex) => (
             <li
@@ -85,36 +85,32 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
               style={`--reveal-delay:${laneIndex * 0.08}s`}
               aria-labelledby={`lane-${lane.status}`}
             >
-              <header class="lane__head">
-                {lane.status === "in-progress" && (
-                  <span class="now">
-                    <span class="now__mark" aria-hidden="true" />
-                    Now
-                  </span>
-                )}
-                <h2 class="lane__label" id={`lane-${lane.status}`}>
-                  {lane.label}
-                </h2>
-                <span class="lane__count data">
-                  {lane.items.length}
-                  <span class="visually-hidden">
+              {laneIndex > 0 && <div class="lane-line" aria-hidden="true" />}
+              <div class="lane__row">
+                <header class="lane__head">
+                  <h2 class="lane__label" id={`lane-${lane.status}`}>
+                    {lane.label}
+                  </h2>
+                  <span class="lane__count">
+                    {lane.items.length}
                     {lane.items.length === 1 ? " item" : " items"}
                   </span>
-                </span>
-              </header>
+                  {lane.status === "in-progress" && <span class="now">Now</span>}
+                </header>
 
-              <ol class="lane__list list-reset" role="list">
-                {lane.items.map((item) => (
-                  <li class="ritem">
-                    <h3 class="ritem__title">{item.title}</h3>
-                    <p class="ritem__summary">{item.summary}</p>
-                    <div class="ritem__meta">
-                      <span class="ritem__kind">{item.kind}</span>
-                      <span class="data">{item.when}</span>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+                <ol class="lane__list list-reset" role="list">
+                  {lane.items.map((item) => (
+                    <li class="ritem">
+                      <h3 class="ritem__title">{item.title}</h3>
+                      <p class="ritem__summary">{item.summary}</p>
+                      <div class="ritem__meta">
+                        <span class="ritem__kind">{item.kind}</span>
+                        <span class="ritem__when">{item.when}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </li>
           ))
         }
@@ -139,76 +135,70 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
     padding-top: 0;
   }
 
-  /* One unbroken line runs under every lane head, past to future. The
-     released stretch is lit brass; the line ahead is plain. */
-  .track {
+  /* The board is a pool: one lane per stage, past to future, split by painted
+     lane lines. Each lane says how many items it holds. */
+  .pool {
+    border-radius: var(--drop);
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .lane-line {
+    margin-block: var(--space-l);
+  }
+
+  .lane__row {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .lane {
-    --rail: var(--line-strong);
-    padding-right: var(--space-l);
-  }
-
-  .lane--released {
-    --rail: var(--brass);
+    grid-template-columns: minmax(10rem, 0.3fr) minmax(0, 1fr);
+    gap: var(--space-m) var(--space-l);
+    align-items: start;
   }
 
   .lane__head {
-    position: relative;
     display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding-top: var(--space-l);
-    padding-bottom: var(--space-s);
-    margin-right: calc(var(--space-l) * -1);
-    border-top: 3px solid var(--rail);
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-xs);
   }
 
   .lane__label {
-    font-size: var(--step-1);
-    letter-spacing: 0.04em;
-  }
-
-  .lane--planned .lane__label {
-    color: var(--text-muted);
+    flex-basis: 100%;
+    font-size: var(--step-3);
   }
 
   .lane__count {
-    margin-right: var(--space-l);
-    margin-left: auto;
+    font-weight: 500;
   }
 
-  /* The one marker on the line: where the studio is today */
+  /* The one marker on the board: where the studio is today. */
   .now {
-    position: absolute;
-    left: 0;
-    top: -0.85rem;
-    translate: -50% -100%;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--brass-lit);
+    padding: 0.3em 0.85em;
+    border-radius: var(--drop-pill);
+    background: var(--abyss);
+    color: var(--neo-aqua);
+    font-weight: 600;
+    font-size: var(--step--1);
   }
 
-  .now__mark {
-    order: 2;
-    width: 0.9rem;
-    height: 0.9rem;
-    background: var(--brass);
-    rotate: 45deg;
-    translate: 0 0.95rem;
+  .lane__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-s);
   }
 
+  /* Items float in their lane as coping tiles. */
+  /* One tile footprint for every item, whatever its copy. */
   .ritem {
-    padding-block: var(--space-m);
-    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    min-height: 14.5rem;
+    padding: var(--space-m);
+    background: var(--coping);
+    border-radius: var(--drop-s);
+    color: var(--text);
+  }
+
+  .lane--planned .ritem {
+    background: rgb(255 255 255 / 0.72);
   }
 
   .ritem__meta {
@@ -216,15 +206,19 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
     align-items: baseline;
     justify-content: space-between;
     gap: var(--space-s);
-    margin-top: var(--space-xs);
+    margin-top: auto;
+    padding-top: var(--space-s);
+    font-size: var(--step--1);
   }
 
   .ritem__kind {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--link);
+  }
+
+  .ritem__when {
+    font-weight: 500;
+    color: var(--text-faint);
   }
 
   .ritem__title {
@@ -244,9 +238,7 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
-    margin-top: var(--space-2xl);
-    padding-top: var(--space-l);
-    border-top: 1px solid var(--line);
+    margin-top: var(--space-xl);
   }
 
   .roadmap__note {
@@ -257,41 +249,12 @@ const lanes = timeline.map((s) => board.find((l) => l.status === s)!);
   .roadmap__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s) var(--space-m);
+    gap: var(--space-s);
   }
 
-  /* Phones: the line turns and runs down the left edge */
-  @media (max-width: 820px) {
-    .track {
-      grid-template-columns: 1fr;
-      padding-left: var(--space-m);
-    }
-    .lane {
-      padding-right: 0;
-      padding-left: var(--space-m);
-      border-left: 3px solid var(--rail);
-      padding-bottom: var(--space-l);
-    }
-    .lane__head {
-      margin-right: 0;
-      border-top: none;
-      padding-top: 0;
-    }
-    .lane__count {
-      margin-right: 0;
-    }
-    .now {
-      position: static;
-      translate: none;
-      flex-direction: row;
-      order: -1;
-    }
-    .now__mark {
-      order: 0;
-      translate: none;
-      position: absolute;
-      left: calc(var(--space-m) * -1 - 1.5px - 0.45rem);
-      top: 0.4rem;
+  @media (max-width: 760px) {
+    .lane__row {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

@@ -1,0 +1,36 @@
+---
+/* A depth marking: the newest Minecraft version painted big, as a pool marks
+   "1.2 M" on its coping, with the full list underneath when there is one. */
+interface Props {
+  version: string;
+  class?: string;
+}
+
+const { version, class: className = "" } = Astro.props;
+const all = version.split(",").map((v) => v.trim()).filter(Boolean);
+const [lead, ...rest] = all;
+---
+
+<div class:list={["depth-mark", className]}>
+  <span class="depth">
+    <span class="depth__unit">MC</span>
+    <span class="depth__figure">{lead}</span>
+  </span>
+  {rest.length > 0 && <span class="data depth-mark__rest">also {rest.join(", ")}</span>}
+</div>
+
+<style>
+  .depth-mark {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    min-width: 0;
+  }
+
+  .depth-mark__rest {
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    color: inherit;
+    opacity: 0.85;
+  }
+</style>

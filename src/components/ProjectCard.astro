@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import Arrow from "./Arrow.astro";
 import ArtPlaceholder from "./ArtPlaceholder.astro";
+import Depth from "./Depth.astro";
 
 interface Props {
   project: CollectionEntry<"projects">;
@@ -18,10 +19,11 @@ const isLive = data.status === "Released";
 
 <a
   href={`/work/${project.id}`}
-  class="pblock block block--live reveal"
+  class="pcard reveal"
   style={`--reveal-delay:${delay}s`}
 >
-  <div class="pblock__art lattice">
+  <div class="pcard__art">
+    <div class="pcard__pool water" aria-hidden="true"></div>
     {
       data.image ? (
         <Image
@@ -29,7 +31,7 @@ const isLive = data.status === "Released";
           alt=""
           width={480}
           height={480}
-          class="pblock__img"
+          class="pcard__img"
           loading={priority ? "eager" : "lazy"}
           fetchpriority={priority ? "high" : "auto"}
         />
@@ -39,50 +41,84 @@ const isLive = data.status === "Released";
     }
   </div>
 
-  <div class="pblock__body">
-    <h3 class="pblock__title">{data.title}</h3>
-    <p class="pblock__tagline">{data.tagline}</p>
-    <div class="pblock__meta">
+  <div class="pcard__body">
+    <h3 class="pcard__title">{data.title}</h3>
+    <p class="pcard__tagline">{data.tagline}</p>
+    <div class="pcard__meta">
       <span class:list={["plate", { "plate--lit": isLive }]}>{data.status}</span>
-      <span class="data">{[data.type, data.loader].filter(Boolean).join(" / ")}</span>
+      <span class="pcard__kind">{[data.type, data.loader].filter(Boolean).join(" · ")}</span>
     </div>
-    {data.version && <p class="data pblock__version">MC {data.version}</p>}
-    <div class="pblock__foot">
-      <span class="pblock__cta">
-        View project <span class="pblock__cta-icon"><Arrow /></span>
-      </span>
-    </div>
+    {data.version && <Depth version={data.version} class="pcard__depth" />}
+    <span class="pcard__cta">
+      View project <span class="pcard__cta-icon"><Arrow /></span>
+    </span>
   </div>
 </a>
 
 <style>
-  .pblock {
+  /* A coping slab with its own little pool. */
+  .pcard {
     display: flex;
     flex-direction: column;
-    height: calc(100% - var(--depth) * 0.5);
+    height: 100%;
+    background: var(--coping);
+    border: 1px solid var(--edge);
+    border-bottom-width: 4px;
+    border-radius: var(--drop);
+    overflow: hidden;
+    transition: border-color var(--dur-fast) var(--ease-out);
   }
 
-  .pblock__art {
+  .pcard:hover,
+  .pcard:focus-visible {
+    border-color: var(--lagoon);
+  }
+
+  /* The art well: tiled wall above, water below. The water line rises when
+     the card is pointed at, and the art floats up with it. */
+  .pcard__art {
+    position: relative;
     display: grid;
     place-items: center;
     aspect-ratio: 16 / 11;
     padding: var(--space-m);
-    background-color: var(--well);
+    background-color: var(--tile);
+    background-image:
+      linear-gradient(var(--grout) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grout) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
     overflow: hidden;
+    border-radius: calc(var(--r) - 1px) 0 0 0;
   }
 
-  .pblock__img {
-    width: min(70%, 260px);
+  .pcard__pool {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 62%;
+    background-size: 24px 24px;
+    transition: height var(--dur-slow) var(--ease-water);
+  }
+
+  .pcard:hover .pcard__pool,
+  .pcard:focus-visible .pcard__pool {
+    height: 100%;
+  }
+
+  .pcard__img {
+    position: relative;
+    width: min(64%, 240px);
     height: auto;
     object-fit: contain;
-    transition: scale var(--dur-slow) var(--ease-out);
+    transition: translate var(--dur-slow) var(--ease-water);
   }
 
-  .pblock:hover .pblock__img {
-    scale: 1.05;
+  .pcard:hover .pcard__img,
+  .pcard:focus-visible .pcard__img {
+    translate: 0 -6%;
   }
 
-  .pblock__body {
+  .pcard__body {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -90,7 +126,17 @@ const isLive = data.status === "Released";
     padding: var(--space-m);
   }
 
-  .pblock__meta {
+  .pcard__title {
+    font-size: var(--step-2);
+    line-height: 1.08;
+  }
+
+  .pcard__tagline {
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .pcard__meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -98,63 +144,56 @@ const isLive = data.status === "Released";
     margin-top: var(--space-2xs);
   }
 
-  .pblock__title {
-    font-size: var(--step-2);
-    line-height: 1.05;
+  .pcard__kind {
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--text-faint);
   }
 
-  .pblock__tagline {
-    color: var(--text-muted);
-    line-height: 1.5;
+  /* Every tile in a row shares one footprint; the version marking and the
+     link sit on its foot so the spare water stays above them. */
+  .pcard :global(.pcard__depth) {
+    margin-top: auto;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--line);
+    color: var(--text-faint);
   }
 
-  .pblock__foot {
+  .pcard__cta {
     margin-top: auto;
     padding-top: var(--space-s);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-s);
-  }
-
-  /* The full version list: it is what players check before downloading. */
-  .pblock__version {
-    overflow-wrap: anywhere;
-  }
-
-  .pblock__cta {
-    flex-shrink: 0;
-    margin-left: auto;
+    align-self: flex-end;
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--step--1);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text);
+    transition: color var(--dur-fast) var(--ease-out);
   }
 
-  .pblock__cta-icon {
+  .pcard :global(.pcard__depth) + .pcard__cta {
+    margin-top: 0;
+  }
+
+  .pcard__cta-icon {
     display: inline-flex;
     transition: transform var(--dur-mid) var(--ease-out);
   }
 
-  .pblock:hover .pblock__cta-icon {
+  .pcard:hover .pcard__cta {
+    color: var(--link);
+  }
+
+  .pcard:hover .pcard__cta-icon {
     transform: translateX(0.25em);
   }
 
-  .pblock:hover .pblock__cta {
-    color: var(--brass-lit);
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .pblock:hover .pblock__img {
-      scale: none;
-    }
-    .pblock:hover .pblock__cta-icon {
-      transform: none;
+    .pcard__pool,
+    .pcard__img,
+    .pcard__cta-icon {
+      transition: none;
     }
   }
 </style>

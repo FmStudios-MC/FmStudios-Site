@@ -23,13 +23,7 @@ const target = external ? "_blank" : undefined;
 
 <a
   href={href}
-  class:list={[
-    "btn",
-    `btn--${variant}`,
-    { "btn--small": size === "small" },
-    { "block block--live": variant === "primary" },
-    className,
-  ]}
+  class:list={["btn", `btn--${variant}`, { "btn--small": size === "small" }, className]}
   rel={rel}
   target={target}
 >
@@ -38,75 +32,71 @@ const target = external ? "_blank" : undefined;
 </a>
 
 <style>
+  /* A pool sign you press: the drop's silhouette, three round corners and
+     the top-right one square. Painted Abyss works on tile and on water. */
   .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.6em;
     min-height: 48px;
-    padding: 0.8em 1.3em 0.75em;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--step--1);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    padding: 0.75em 1.35em 0.75em 1.5em;
+    border-radius: var(--drop-pill);
+    font-weight: 600;
+    font-size: var(--step-0);
     line-height: 1;
+    white-space: nowrap;
     transition:
       color var(--dur-fast) var(--ease-out),
-      border-color var(--dur-fast) var(--ease-out);
+      background-color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      scale var(--dur-fast) var(--ease-out);
   }
 
   .btn--small {
-    min-height: 40px;
-    padding: 0.6em 0.95em 0.55em;
-    font-size: 0.78rem;
-  }
-
-  .btn--small.btn--primary {
-    --depth: 6px;
+    min-height: 44px;
+    padding: 0.6em 1em 0.6em 1.15em;
+    font-size: var(--step--1);
   }
 
   .btn__arrow {
     display: inline-flex;
-    font-size: 1.15em;
+    font-size: 1.1em;
     transition: transform var(--dur-mid) var(--ease-out);
   }
 
   .btn:hover .btn__arrow {
-    transform: translateX(0.2em);
+    transform: translateX(0.22em);
   }
 
-  /* Primary is a small brass block: lit top, deep side, and it presses in. */
+  .btn:active {
+    scale: 0.97;
+  }
+
   .btn--primary {
-    --depth: 8px;
-    --side: var(--brass-deep);
-    --top: #edc06e;
-    background: var(--brass);
-    color: var(--on-brass);
+    background: var(--abyss);
+    color: var(--coping);
   }
 
-  .btn--primary:hover,
-  .btn--primary:focus-visible {
-    --lift: 4px;
-    --top: #f6d596;
-  }
-
-  .btn--primary:active {
-    --lift: -8px;
+  .btn--primary:hover {
+    color: var(--neo-aqua);
   }
 
   .btn--ghost {
-    border: 1px solid var(--line-strong);
-    color: var(--text);
+    border: 1.5px solid var(--abyss);
+    color: var(--abyss);
   }
 
   .btn--ghost:hover {
-    border-color: var(--brass);
-    color: var(--brass-lit);
+    background: var(--abyss);
+    color: var(--coping);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .btn:hover .btn__arrow {
       transform: none;
+    }
+    .btn:active {
+      scale: none;
     }
   }
 </style>

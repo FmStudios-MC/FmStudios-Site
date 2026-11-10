@@ -1,5 +1,5 @@
 ---
-import Lockup from "../assets/brand/fm-horizontal-reversed.svg";
+import Lockup from "../assets/brand/neolqua-horizontal-colour.svg";
 
 const links = [
   { href: "/work", label: "Work" },
@@ -15,7 +15,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
 
 <header class="nav" data-nav>
   <div class="nav__inner container-wide">
-    <a class="nav__brand" href="/" aria-label="FabiMvurice Interactive home">
+    <a class="nav__brand" href="/" aria-label="Neolqua Studios home">
       <Lockup class="nav__lockup" aria-hidden="true" />
     </a>
 
@@ -61,6 +61,8 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
 </header>
 
 <style>
+  /* The deck: the nav stands on tile and turns to a white coping strip once
+     the page scrolls under it. */
   .nav {
     position: sticky;
     top: 0;
@@ -72,8 +74,8 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
   }
 
   .nav[data-scrolled] {
-    background: var(--well);
-    border-bottom-color: var(--line);
+    background: var(--coping);
+    border-bottom-color: var(--edge);
   }
 
   .nav__inner {
@@ -81,50 +83,46 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
     align-items: center;
     justify-content: space-between;
     gap: var(--space-m);
-    padding-block: var(--space-xs);
+    padding-block: var(--space-2xs);
   }
 
+  /* Clear space: a quarter of the drop's height on every side. */
   .nav__brand {
     display: inline-flex;
-    /* Clear space: a quarter of the symbol's height on every side. */
-    padding: 0.4rem 0;
+    padding-block: 0.6rem;
   }
 
-  /* Classes passed into a component land on its root, outside this file's
-     scope, so they are reached through :global. */
   .nav__brand :global(.nav__lockup) {
-    /* The SVG box carries side bearings: 192px keeps the drawn artwork at
-       the kit's 180px minimum. */
-    width: clamp(192px, 15vw, 212px);
+    /* Kit minimum for the horizontal lockup is 120px wide. */
+    width: clamp(150px, 13vw, 184px);
     height: auto;
   }
 
   .nav__links {
     display: flex;
     align-items: center;
-    gap: var(--space-l);
+    gap: clamp(1rem, 2.4vw, 2.25rem);
   }
 
   .nav__link {
     position: relative;
-    padding-block: 0.6rem;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--step--1);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    padding-block: 0.7rem;
+    font-weight: 500;
+    font-size: var(--step-0);
     color: var(--text-muted);
     transition: color var(--dur-fast) var(--ease-out);
   }
 
+  /* A short painted lane line under the page you are on. */
   .nav__link::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: 0;
-    height: 3px;
+    bottom: 0.2rem;
+    height: 4px;
     width: 100%;
-    background: var(--brass);
+    border-radius: 2px;
+    background: var(--lagoon);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform var(--dur-mid) var(--ease-out);
@@ -153,31 +151,26 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
 
   .nav__toggle-bar {
     width: 24px;
-    height: 2px;
-    background: var(--text);
-    transition:
-      transform var(--dur-fast) var(--ease-out),
-      background-color var(--dur-fast) var(--ease-out);
-  }
-
-  .nav__toggle[aria-expanded="true"] .nav__toggle-bar {
-    background: var(--brass-lit);
+    height: 3px;
+    border-radius: 2px;
+    background: var(--abyss);
+    transition: transform var(--dur-fast) var(--ease-out);
   }
 
   .nav__toggle[aria-expanded="true"] .nav__toggle-bar:first-child {
-    transform: translateY(4px) rotate(45deg);
+    transform: translateY(4.5px) rotate(45deg);
   }
 
   .nav__toggle[aria-expanded="true"] .nav__toggle-bar:last-child {
-    transform: translateY(-4px) rotate(-45deg);
+    transform: translateY(-4.5px) rotate(-45deg);
   }
 
   .nav__mobile {
     display: none;
     flex-direction: column;
     padding: var(--space-2xs) var(--space-m) var(--space-l);
-    background: var(--well);
-    border-bottom: 1px solid var(--line);
+    background: var(--coping);
+    border-bottom: 1px solid var(--edge);
   }
 
   .nav__mobile[data-open] {
@@ -188,10 +181,8 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    font-family: var(--font-display);
     font-size: var(--step-2);
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 600;
     padding-block: var(--space-xs);
     border-bottom: 1px solid var(--line);
     color: var(--text-muted);
@@ -203,9 +194,10 @@ const isActive = (href: string) => path === href || path.startsWith(href + "/");
 
   .nav__mobile-link.is-active::before {
     content: "";
-    width: 0.55em;
-    height: 0.55em;
-    background: var(--brass);
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 999px 0 999px 999px;
+    background: var(--lagoon);
   }
 
   @media (max-width: 760px) {

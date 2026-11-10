@@ -16,7 +16,7 @@ const channels = [
 
 <BaseLayout
   title="Contact"
-  description="Reach FabiMvurice Interactive on Discord about a collaboration, commission, or a question on a release."
+  description="Reach Neolqua Studios on Discord about a collaboration, commission, or a question on a release."
 >
   <PageHeader
     title="The studio lives on Discord."
@@ -25,7 +25,7 @@ const channels = [
 
   <section class="section contact">
     <div class="container contact__grid">
-      <div class="discord block">
+      <div class="discord water">
         <span class="discord__glyph" aria-hidden="true">
           <svg viewBox="0 0 127.14 96.36" role="presentation">
             <path
@@ -88,8 +88,9 @@ const channels = [
     align-items: start;
   }
 
+  /* The Discord is the pool you jump into. */
   .discord {
-    --depth: 34px;
+    border-radius: var(--drop);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -99,7 +100,7 @@ const channels = [
 
   .discord__glyph {
     display: inline-flex;
-    color: var(--text);
+    color: var(--coping);
   }
 
   .discord__glyph svg {
@@ -112,7 +113,6 @@ const channels = [
   }
 
   .discord__copy {
-    color: var(--text-muted);
     font-size: var(--step-0);
     line-height: 1.6;
     max-width: 52ch;
@@ -124,7 +124,7 @@ const channels = [
 
   .discord__note {
     margin-top: var(--space-xs);
-    color: var(--text-faint);
+    font-weight: 500;
     font-size: var(--step--1);
     line-height: 1.5;
   }
@@ -138,7 +138,7 @@ const channels = [
   .channels {
     list-style: none;
     padding: 0;
-    border-top: 1px solid var(--line-strong);
+    border-top: 8px solid var(--abyss);
   }
 
   .channel {
@@ -160,10 +160,8 @@ const channels = [
   }
 
   .channel__label {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: var(--step--1);
+    font-weight: 500;
     color: var(--text-faint);
   }
 
@@ -171,12 +169,13 @@ const channels = [
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    font-size: var(--step-0);
+    font-size: var(--step-1);
+    font-weight: 600;
     color: var(--text);
   }
 
   .channel__link:hover .channel__value {
-    color: var(--brass-lit);
+    color: var(--link);
   }
 
   @media (prefers-reduced-motion: reduce) {

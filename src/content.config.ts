@@ -42,7 +42,7 @@ const news = defineCollection({
       summary: z.string(),
       // Optional cover art, rendered through Astro <Image> when present
       image: image().optional(),
-      author: z.string().default("FabiMvurice Interactive"),
+      author: z.string().default("Neolqua Studios"),
       featured: z.boolean().default(false),
       // Kept out of the build until ready
       draft: z.boolean().default(false),

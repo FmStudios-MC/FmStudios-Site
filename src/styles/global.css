@@ -1,4 +1,4 @@
-/* FabiMvurice Interactive - global base */
+/* Neolqua Studios - global base */
 @import "./fonts.css";
 @import "./tokens.css";
 
@@ -16,8 +16,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
-  color-scheme: dark;
-  scrollbar-color: var(--line-strong) var(--well);
+  color-scheme: light;
+  scrollbar-color: var(--lagoon) var(--tile);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -26,11 +26,17 @@ html {
   }
 }
 
+/* The deck: glazed tile with a quiet grout grid. */
 body {
-  background-color: var(--bg);
+  background-color: var(--tile);
+  background-image:
+    linear-gradient(var(--grout) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grout) 1px, transparent 1px);
+  background-size: var(--tile-size) var(--tile-size);
+  background-position: center top;
   color: var(--text);
-  caret-color: var(--brass);
-  font-family: var(--font-body);
+  caret-color: var(--lagoon);
+  font-family: var(--font-sans);
   font-size: var(--step-0);
   line-height: 1.6;
   font-weight: 400;
@@ -73,23 +79,17 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.01em;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   text-wrap: balance;
-}
-
-/* The wordmark's squared capitals set the voice: big headings are carved in
-   caps, smaller ones stay in sentence case so they still read fast. */
-h1,
-h2 {
-  text-transform: uppercase;
 }
 
 h3,
 h4 {
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 p {
@@ -97,12 +97,12 @@ p {
 }
 
 ::selection {
-  background: var(--brass);
-  color: var(--on-brass);
+  background: var(--neo-aqua);
+  color: var(--abyss);
 }
 
 :focus-visible {
-  outline: 2px solid var(--brass-lit);
+  outline: 3px solid var(--abyss);
   outline-offset: 3px;
 }
 
@@ -122,7 +122,7 @@ p {
   max-width: var(--container-wide);
 }
 
-/* One rhythm unit owns the space between blocks; adjacent sections collapse
+/* One rhythm unit owns the space between sections; adjacent sections collapse
    the seam to a single unit instead of stacking two. */
 .section {
   position: relative;
@@ -140,8 +140,9 @@ p {
   top: var(--space-s);
   z-index: var(--z-toast);
   padding: var(--space-2xs) var(--space-s);
-  background: var(--brass);
-  color: var(--on-brass);
+  background: var(--abyss);
+  color: var(--coping);
+  border-radius: var(--drop-s);
   font-weight: 600;
   transform: translateY(-200%);
   transition: transform var(--dur-fast) var(--ease-out);
@@ -173,105 +174,139 @@ p {
   font-size: var(--step-1);
   line-height: 1.5;
   color: var(--text-muted);
-  max-width: 58ch;
+  max-width: 56ch;
 }
 
-/* The 30-degree lattice the symbol is drawn on: three line families 60
-   degrees apart with one spacing, so they meet in equilateral triangles. */
-.lattice {
-  background-image:
-    repeating-linear-gradient(150deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step)),
-    repeating-linear-gradient(30deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step)),
-    repeating-linear-gradient(90deg, var(--lattice) 0 1px, transparent 1px var(--lattice-step));
-}
-
-/* The block. A readable front face seen from the symbol's corner: the Brass
-   top face above it and the shaded side face to its right, receding at 30
-   degrees. Margins hold the resting faces, so a lift never reflows. */
-.block {
-  --depth: 22px;
-  --d: calc(var(--depth) + var(--lift));
-  --dx: calc(var(--d) * 0.866);
-  --dy: calc(var(--d) * 0.5);
-  --top: var(--brass);
+/* Water. A Lagoon field over the pool floor's tile grid, with caustic light
+   drifting across it. Content inside sits above both layers. */
+.water {
+  --floor: var(--water-floor);
   position: relative;
-  background: var(--face);
-  margin-top: calc(var(--depth) * 0.5);
-  margin-right: calc(var(--depth) * 0.866);
-  translate: calc(var(--lift) * -0.866) calc(var(--lift) * 0.5);
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--water);
+  background-image:
+    linear-gradient(var(--floor) 2px, transparent 2px),
+    linear-gradient(90deg, var(--floor) 2px, transparent 2px);
+  background-size: var(--tile-size) var(--tile-size);
+  color: var(--on-water);
 }
 
-.block::before,
-.block::after {
+.water::before,
+.water::after {
   content: "";
   position: absolute;
+  inset: -360px;
+  z-index: -1;
   pointer-events: none;
+  background: url("/water/caustics.svg") 0 0 / 360px 360px;
 }
 
-.block::before {
-  left: 0;
-  right: calc(var(--dx) * -1);
-  top: calc(var(--dy) * -1);
-  height: var(--dy);
-  background: var(--top);
-  clip-path: polygon(var(--dx) 0, 100% 0, calc(100% - var(--dx)) 100%, 0 100%);
+.water::before {
+  opacity: 0.6;
 }
 
-.block::after {
-  top: calc(var(--dy) * -1);
-  right: calc(var(--dx) * -1);
-  bottom: 0;
-  width: var(--dx);
-  background: var(--side);
-  clip-path: polygon(0 var(--dy), 100% 0, 100% calc(100% - var(--dy)), 0 100%);
+/* A second, larger and fainter sheet moving the other way makes the light
+   shimmer instead of sliding. */
+.water::after {
+  opacity: 0.3;
+  background-size: 540px 540px;
 }
 
-/* Signature interaction: a block you can act on rises toward you, its faces
-   deepen and its top catches more light. */
-.block--live {
-  transition: --lift var(--dur-mid) var(--ease-out);
-}
-
-.block--live::before {
-  transition: background-color var(--dur-mid) var(--ease-out);
-}
-
-.block--live:hover,
-.block--live:focus-within {
-  --lift: 12px;
-  --top: var(--brass-lit);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .block--live,
-  .block--live::before {
-    transition: none;
+@media (prefers-reduced-motion: no-preference) {
+  .water::before {
+    animation: drift 38s linear infinite;
+  }
+  .water::after {
+    animation: drift-back 61s linear infinite;
   }
 }
 
-/* Status plates: the state stamped in plain words. Released is lit. */
-.plate {
+@keyframes drift {
+  to {
+    transform: translate(360px, 360px);
+  }
+}
+
+@keyframes drift-back {
+  to {
+    transform: translate(-540px, 540px);
+  }
+}
+
+/* Lane line: the painted Abyss stripe on a pool floor, with the T at its end. */
+.lane-line {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--abyss);
+}
+
+.lane-line::before,
+.lane-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 40px;
+  translate: 0 -50%;
+  border-radius: 4px;
+  background: var(--abyss);
+}
+
+.lane-line::after {
+  left: auto;
+  right: 0;
+}
+
+/* Depth marking: version data painted on the coping, big figure, small unit. */
+.depth {
   display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.35em 0.65em 0.3em;
+  align-items: baseline;
+  gap: 0.3em;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text);
+}
+
+.depth__figure {
+  font-size: var(--step-2);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.depth__unit {
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* Status, painted plainly. Released is filled with water. */
+.plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.38em 0.8em 0.36em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   line-height: 1.2;
   white-space: nowrap;
-  border: 1px solid var(--brass);
-  color: var(--text);
+  border: 1.5px solid currentColor;
+  border-radius: var(--drop-pill);
+  color: var(--text-muted);
 }
 
 .plate--lit {
-  background: var(--brass);
-  color: var(--on-brass);
+  background: var(--abyss);
+  border-color: var(--abyss);
+  color: var(--neo-aqua);
 }
 
-/* Data label: mono is used for data and measurement only. */
+/* Data label: mono is used for version data only. */
 .data {
   font-family: var(--font-mono);
   font-size: var(--step--1);
@@ -289,14 +324,13 @@ p {
 
 .filter {
   min-height: 44px;
-  padding: 0.5em 1.05em;
-  border: 1px solid var(--line-strong);
+  padding: 0.5em 1.15em;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--drop-pill);
+  background: var(--coping);
   color: var(--text-muted);
-  font-family: var(--font-display);
   font-size: var(--step--1);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   transition:
     color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
@@ -305,13 +339,13 @@ p {
 
 .filter:hover {
   color: var(--text);
-  border-color: var(--brass);
+  border-color: var(--lagoon);
 }
 
 .filter[aria-pressed="true"] {
-  color: var(--on-brass);
-  background: var(--brass);
-  border-color: var(--brass);
+  color: var(--abyss);
+  background: var(--lagoon);
+  border-color: var(--lagoon);
 }
 
 /* Tags. Shared by the news ledger and the post header. */
@@ -324,13 +358,12 @@ p {
 }
 
 .tag {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--text-muted);
-  padding: 0.3em 0.6em;
+  padding: 0.25em 0.75em;
   border: 1px solid var(--line-strong);
+  border-radius: var(--drop-pill);
 }
 
 /* Back link used by both detail pages */
@@ -338,22 +371,18 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  padding-block: var(--space-2xs);
-  color: var(--text-muted);
-  font-family: var(--font-display);
+  min-height: 44px;
+  color: var(--text);
   font-weight: 600;
   font-size: var(--step--1);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   transition: color var(--dur-fast) var(--ease-out);
 }
 
 .back-link:hover {
-  color: var(--brass-lit);
+  color: var(--link);
 }
 
-/* Long-form body copy: project write-ups and news posts read as one
-   publication. */
+/* Long-form body copy: project write-ups and news posts. */
 .prose {
   max-width: 68ch;
 }
@@ -382,17 +411,16 @@ p {
 }
 
 .prose a {
-  color: var(--text);
+  color: var(--link);
+  font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 0.22em;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--brass);
-  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+  text-decoration-thickness: 1.5px;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .prose a:hover {
-  text-decoration-color: var(--brass-lit);
-  color: var(--brass-lit);
+  color: var(--abyss);
 }
 
 .prose ul,
@@ -407,12 +435,8 @@ p {
   margin-bottom: var(--space-2xs);
 }
 
-.prose ul {
-  list-style: square;
-}
-
 .prose ul > li::marker {
-  color: var(--brass);
+  color: var(--lagoon);
 }
 
 .prose ol > li::marker {
@@ -424,35 +448,39 @@ p {
 .prose blockquote {
   margin: var(--space-l) 0;
   padding: var(--space-s) var(--space-m);
-  background: var(--face);
-  border-top: 2px solid var(--brass);
+  background: var(--coping);
+  border-radius: var(--drop-s);
   color: var(--text);
 }
 
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  background: var(--face);
-  padding: 0.12em 0.4em;
+  background: var(--coping);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
 }
 
 .prose pre {
   margin-bottom: var(--space-m);
   padding: var(--space-s) var(--space-m);
-  background: var(--well);
-  border: 1px solid var(--line);
+  background: var(--deep);
+  color: var(--deep-text);
+  border-radius: var(--drop-s);
   overflow-x: auto;
 }
 
 .prose pre code {
   background: none;
+  border: 0;
   padding: 0;
 }
 
 .prose hr {
   margin-block: var(--space-l);
   border: 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--line-strong);
 }
 
 .prose strong {
@@ -462,6 +490,7 @@ p {
 
 .prose img {
   margin-bottom: var(--space-m);
+  border-radius: var(--drop-s);
 }
 
 /* Reveal primitive. Content is visible by default; JS arms the hidden state

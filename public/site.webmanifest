@@ -1,9 +1,6 @@
 {
-  "name": "FabiMvurice Interactive",
-  "short_name": "FabiMvurice",
-  "theme_color": "#1D2030",
-  "background_color": "#1D2030",
-  "display": "standalone",
+  "name": "Neolqua Studios",
+  "short_name": "Neolqua",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -13,13 +10,11 @@
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "theme_color": "#0B1622",
+  "background_color": "#0B1622",
+  "display": "standalone"
 }

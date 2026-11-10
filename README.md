@@ -1,6 +1,6 @@
-# FabiMvurice Interactive (FMI) Site
+# Neolqua Studios Site
 
-The official website for FabiMvurice Interactive, a studio building Minecraft
+The official website for Neolqua Studios (formerly FabiMvurice Interactive), a studio building Minecraft
 modpacks, mods, resource packs, Roblox games, and programs. It is a static,
 content-driven portfolio built with Astro.
 
@@ -9,10 +9,10 @@ Live at [www.fabimvurice-interactive.de](https://www.fabimvurice-interactive.de)
 ## Stack
 
 - Astro 7 (static output, zero JS by default), requires Node 22.23.4 or newer
-- Hand-written CSS design tokens built on the logo kit colours (Forge Ink, Brass, Paper; no Tailwind), see `src/styles/tokens.css`
+- Hand-written CSS design tokens built on the Neolqua logo kit colours (Abyss, Lagoon, Neo Aqua; no Tailwind), see `src/styles/tokens.css`
 - Lenis for smooth scroll, IntersectionObserver for reveals (`src/scripts/motion.ts`)
 - Projects and News modeled as content collections (`src/content.config.ts`)
-- Self-hosted fonts (Chakra Petch, Barlow, JetBrains Mono): woff2 in `public/fonts/`, `@font-face` in `src/styles/fonts.css`
+- Self-hosted fonts (Rubik, JetBrains Mono): woff2 in `public/fonts/`, `@font-face` in `src/styles/fonts.css`
 - Logo kit: SVG masters in `src/assets/brand/`, favicons and web manifest in `public/`
 
 ## Commands

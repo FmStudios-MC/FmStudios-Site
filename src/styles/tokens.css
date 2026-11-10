@@ -1,58 +1,52 @@
-/* FabiMvurice Interactive - design tokens (see DESIGN.md)
-   The palette is the logo kit's: Forge Ink, Brass, Paper. Brass is the only
-   light on the page: a block's lit top face, the active state, the F and M. */
-
-/* How far a live block has risen toward the viewer; registered so it can
-   animate. */
-@property --lift {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 0px;
-}
+/* Neolqua Studios - design tokens (see DESIGN.md)
+   The Lido: a tiled pool. Glazed tile is the ground, Lagoon water owns whole
+   regions, Abyss is the painted lettering and the deep end. The logo kit
+   supplies the three anchors; everything else is mixed from them. */
 
 :root {
-  /* Brand anchors (logo kit, 2026-10-27) */
-  --forge-ink: #1d2030;
-  --brass: #c98516;
-  --paper: #f6f1e7;
+  /* Brand anchors (logo kit, 2026-11) */
+  --abyss: #0b1622;
+  --lagoon: #00a3a8;
+  --neo-aqua: #2ee6d6;
 
-  /* Ink ground */
-  --bg: var(--forge-ink);
-  --well: #13151f; /* sunk areas: footer, art wells */
-  --face: #252940; /* a block's front face */
-  --side: #0a0b11; /* a block's shaded side face, kept distinct from --bg */
-  --line: #343956; /* decorative hairlines */
-  --line-strong: #6e7496; /* control boundaries, clears 3:1 on ink and face */
-  --lattice: rgb(246 241 231 / 0.055);
+  /* Tile deck */
+  --tile: #eef3f4; /* glazed tile ground */
+  --grout: #dbe5e8; /* the deck's grout grid */
+  --coping: #ffffff; /* coping slabs: cards, panels */
+  --edge: #c9d7db; /* a coping slab's bullnose edge */
+  --line: #d3dfe2; /* hairlines on tile */
+  --line-strong: #7f939c; /* control boundaries, >= 3:1 on tile */
 
-  /* Text on ink */
-  --text: var(--paper);
-  --text-muted: #bdb9c6;
-  --text-faint: #9a9db2; /* >= 4.5:1 on --face */
+  /* Lettering on tile */
+  --text: var(--abyss);
+  --text-muted: #34444f; /* 9.3:1 on tile */
+  --text-faint: #5d6b75; /* 5.0:1 on tile */
+  --link: #00727a; /* Lagoon deepened for small text on tile (5.1:1) */
 
-  /* Brass */
-  --brass-lit: #e3a33a; /* hovered top face, brass text on ink */
-  --brass-deep: #9a6410; /* the pressed / bottom face of brass buttons */
-  --brass-ink: #7e540e; /* brass-coloured small text on paper (5.9:1) */
-  --on-brass: var(--forge-ink);
+  /* Water */
+  --water: var(--lagoon);
+  --water-floor: #0a959a; /* the pool floor's grout seen through the water */
+  --water-deep: #008a8f; /* shaded water, pressed states */
+  --on-water: var(--abyss); /* 5.9:1 on Lagoon; white only for graphics */
 
-  /* Paper slab */
-  --paper-text: var(--forge-ink);
-  --paper-muted: #4a4e64;
+  /* Deep end (footer, dark panels) */
+  --deep: var(--abyss);
+  --deep-line: #22323f;
+  --deep-text: #e6f2f3;
+  --deep-muted: #9fb3bb;
 
-  /* Typography */
-  --font-display: "Chakra Petch", "Bahnschrift", "Arial Narrow", sans-serif;
-  --font-body: "Barlow", system-ui, sans-serif;
+  /* Typography: one family; mono only for painted version data */
+  --font-sans: "Rubik", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
   /* Fluid type scale */
   --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.92rem);
-  --step-0: clamp(1.02rem, 0.98rem + 0.2vw, 1.15rem);
-  --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.5rem);
-  --step-2: clamp(1.56rem, 1.42rem + 0.7vw, 2rem);
-  --step-3: clamp(1.95rem, 1.7rem + 1.25vw, 2.66rem);
-  --step-4: clamp(2.3rem, 1.9rem + 2.2vw, 3.5rem);
-  --step-5: clamp(2.6rem, 1.8rem + 4.2vw, 5.4rem);
+  --step-0: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.38rem + 0.6vw, 1.9rem);
+  --step-3: clamp(1.9rem, 1.65rem + 1.2vw, 2.6rem);
+  --step-4: clamp(2.25rem, 1.85rem + 2vw, 3.4rem);
+  --step-5: clamp(2.6rem, 1.8rem + 4vw, 5.2rem);
 
   /* Fluid spacing scale */
   --space-3xs: clamp(0.25rem, 0.24rem + 0.05vw, 0.31rem);
@@ -64,16 +58,23 @@
   --space-xl: clamp(3rem, 2.6rem + 2vw, 4.5rem);
   --space-2xl: clamp(4.5rem, 3.7rem + 4vw, 7.5rem);
 
-  /* Structure: square corners everywhere, like the block */
+  /* Structure */
   --container: 1200px;
   --container-wide: 1400px;
-  --lattice-step: 44px;
+  --tile-size: 48px; /* one tile: the deck and the pool floor share it */
+  /* The drop's corner: three round, the top-right square. */
+  --r: 28px;
+  --r-s: 16px;
+  --drop: var(--r) 0 var(--r) var(--r);
+  --drop-s: var(--r-s) 0 var(--r-s) var(--r-s);
+  --drop-pill: 999px 0 999px 999px;
 
-  /* Motion: short and mechanical */
+  /* Motion: slow and liquid */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-fast: 0.16s;
-  --dur-mid: 0.32s;
-  --dur-slow: 0.7s;
+  --ease-water: cubic-bezier(0.45, 0, 0.25, 1);
+  --dur-fast: 0.18s;
+  --dur-mid: 0.45s;
+  --dur-slow: 0.8s;
 
   --z-base: 1;
   --z-sticky: 100;

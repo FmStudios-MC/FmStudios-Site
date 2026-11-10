@@ -1,5 +1,5 @@
 ---
-import Stacked from "../assets/brand/fm-stacked-reversed.svg";
+import Stacked from "../assets/brand/neolqua-stacked-reversed.svg";
 
 const year = new Date().getFullYear();
 
@@ -22,11 +22,11 @@ const elsewhere = [
 <footer class="footer">
   <div class="footer__inner container-wide">
     <div class="footer__brand">
-      <a href="/" class="footer__mark" aria-label="FabiMvurice Interactive home">
+      <a href="/" class="footer__mark" aria-label="Neolqua Studios home">
         <Stacked class="footer__lockup" aria-hidden="true" />
       </a>
       <p class="footer__line">
-        FabiMvurice Interactive. Two dudes loving Minecraft.
+        Neolqua Studios. Two dudes loving Minecraft.
       </p>
     </div>
 
@@ -59,11 +59,12 @@ const elsewhere = [
 </footer>
 
 <style>
+  /* The deep end. */
   .footer {
     position: relative;
     z-index: var(--z-base);
-    background: var(--well);
-    border-top: 1px solid var(--line);
+    background: var(--deep);
+    color: var(--deep-text);
   }
 
   .footer__inner {
@@ -73,9 +74,9 @@ const elsewhere = [
     padding-block: var(--space-xl);
   }
 
-  /* Stacked lockup minimum is 110px wide. */
+  /* Stacked lockup minimum is 64px wide. */
   .footer__mark :global(.footer__lockup) {
-    width: 132px;
+    width: 156px;
     height: auto;
   }
 
@@ -84,16 +85,17 @@ const elsewhere = [
   }
 
   .footer__line {
-    margin-top: var(--space-s);
-    color: var(--text-muted);
+    margin-top: var(--space-m);
+    color: var(--deep-muted);
     font-size: var(--step--1);
     max-width: 38ch;
   }
 
   .footer__heading {
     font-size: var(--step--1);
-    letter-spacing: 0.1em;
-    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--neo-aqua);
     margin-bottom: var(--space-s);
   }
 
@@ -104,14 +106,18 @@ const elsewhere = [
   }
 
   .footer__link {
-    color: var(--text-muted);
+    color: var(--deep-text);
     width: fit-content;
     padding-block: 0.15rem;
     transition: color var(--dur-fast) var(--ease-out);
   }
 
   .footer__link:hover {
-    color: var(--text);
+    color: var(--neo-aqua);
+  }
+
+  .footer :global(:focus-visible) {
+    outline-color: var(--neo-aqua);
   }
 
   .footer__base {
@@ -119,8 +125,8 @@ const elsewhere = [
     justify-content: space-between;
     gap: var(--space-m);
     padding-block: var(--space-m);
-    border-top: 1px solid var(--line);
-    color: var(--text-faint);
+    border-top: 1px solid var(--deep-line);
+    color: var(--deep-muted);
     font-size: var(--step--1);
   }
 

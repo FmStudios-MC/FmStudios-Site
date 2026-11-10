@@ -2,9 +2,10 @@
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import BrandSymbol from "../components/BrandSymbol.astro";
+import Symbol from "../assets/brand/neolqua-symbol-white.svg";
 import Button from "../components/Button.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import Depth from "../components/Depth.astro";
 import Arrow from "../components/Arrow.astro";
 
 const projects = (await getCollection("projects")).sort(
@@ -30,78 +31,83 @@ const releasedCount = projects.filter(
 ---
 
 <BaseLayout>
-  <section class="hero lattice">
-    <div class="hero__inner container-wide">
-      <div class="hero__copy">
-        <h1 class="hero__title">
-          We build worlds inside the games you already love.
-        </h1>
+  <section class="hero container-wide" aria-labelledby="hero-title">
+    <div class="pool water">
+      <div class="pool__top">
+        <div class="pool__copy">
+          <h1 class="pool__title" id="hero-title">
+            We build worlds inside the games you already love.
+          </h1>
 
-        <p class="hero__lede lede">
-          FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods,
-          and resource packs, Roblox games, and standalone programs. Built with
-          deliberate care, made to be played.
-        </p>
+          <p class="pool__lede">
+            Neolqua Studios is a studio crafting Minecraft modpacks, mods, and
+            resource packs, Roblox games, and standalone programs. Built with
+            deliberate care, made to be played.
+          </p>
 
-        <div class="hero__actions">
-          <Button href="/work">Explore the work</Button>
-          <Button href="/contact" variant="ghost">Start a conversation</Button>
-        </div>
-      </div>
-
-      <div class="hero__mark">
-        <BrandSymbol class="hero__symbol" assemble decorative />
-      </div>
-    </div>
-
-    {
-      bench.length > 0 && (
-        <div class="bench container-wide" aria-labelledby="bench-title">
-          <div class="bench__head">
-            <h2 class="bench__title" id="bench-title">On the bench</h2>
-            <p class="bench__sub">Create Fly ports for Minecraft {benchVersion}</p>
+          <div class="pool__actions">
+            <Button href="/work">Explore the work</Button>
+            <Button href="/contact" variant="ghost">Start a conversation</Button>
           </div>
-
-          <ul class="bench__list list-reset" role="list">
-            {bench.map((p) => (
-              <li class="bench__item block">
-                <div class="bench__art">
-                  {p.data.image && (
-                    <Image
-                      src={p.data.image}
-                      alt=""
-                      width={160}
-                      height={160}
-                      loading="eager"
-                    />
-                  )}
-                </div>
-                <div class="bench__body">
-                  <h3 class="bench__name">
-                    <a href={`/work/${p.id}`}>{p.data.title}</a>
-                  </h3>
-                  <p class="data">
-                    {p.data.loader} / MC {p.data.version}
-                  </p>
-                  <div class="bench__links">
-                    {p.data.links.map((link, i) => (
-                      <Button
-                        href={link.url}
-                        external
-                        size="small"
-                        variant={i === 0 ? "primary" : "ghost"}
-                      >
-                        {link.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
         </div>
-      )
-    }
+
+        <div class="pool__float" aria-hidden="true">
+          <span class="ripple"></span>
+          <span class="ripple ripple--late"></span>
+          <Symbol class="pool__symbol" />
+        </div>
+      </div>
+
+      {
+        bench.length > 0 && (
+          <div class="bench" aria-labelledby="bench-title">
+            <div class="lane-line bench__rule" aria-hidden="true" />
+            <div class="bench__head">
+              <h2 class="bench__title" id="bench-title">On the bench</h2>
+              <p class="bench__sub">Create Fly ports for Minecraft {benchVersion}</p>
+            </div>
+
+            <ul class="bench__list list-reset" role="list">
+              {bench.map((p) => (
+                <li class="lane">
+                  <span class="lane__t" aria-hidden="true" />
+                  <div class="lane__art">
+                    {p.data.image && (
+                      <Image
+                        src={p.data.image}
+                        alt=""
+                        width={160}
+                        height={160}
+                        loading="eager"
+                      />
+                    )}
+                  </div>
+                  <div class="lane__body">
+                    <h3 class="lane__name">
+                      <a href={`/work/${p.id}`}>{p.data.title}</a>
+                    </h3>
+                    <p class="lane__loader">{p.data.loader}</p>
+                    {p.data.version && <Depth version={p.data.version} class="lane__depth" />}
+                    <div class="lane__links">
+                      {p.data.links.map((link, i) => (
+                        <Button
+                          href={link.url}
+                          external
+                          size="small"
+                          variant={i === 0 ? "primary" : "ghost"}
+                        >
+                          {link.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
   </section>
 
   <section class="section work-preview" aria-labelledby="work-title">
@@ -125,32 +131,42 @@ const releasedCount = projects.filter(
     </div>
   </section>
 
-  <section class="slab" aria-labelledby="studio-title">
-    <div class="container slab__inner">
-      <div class="slab__copy">
-      <h2 class="visually-hidden" id="studio-title">The studio</h2>
-      <p class="slab__body reveal">
-        We are just two dudes loving Minecraft. Maurice is just the mascot and
-        Itzz_Fabi makes all the stuff. We started in 2023.
-      </p>
-      <ul class="slab__facts list-reset reveal" role="list">
-        <li><strong class="data">{releasedCount}</strong> released projects</li>
-        <li><strong class="data">{disciplineCount}</strong> disciplines</li>
-        <li><strong class="data">{benchVersion}</strong> current target</li>
-      </ul>
-      <div class="reveal">
-        <Button href="/about" variant="ghost">More about FMI</Button>
+  <section class="section studio" aria-labelledby="studio-title">
+    <div class="container-wide">
+      <div class="studio__slab">
+        <h2 class="visually-hidden" id="studio-title">The studio</h2>
+        <p class="studio__body reveal">
+          We are just two dudes loving Minecraft. Maurice is just the mascot and
+          Itzz_Fabi makes all the stuff. We started in 2023.
+        </p>
+        <div class="reveal">
+          <Button href="/about" variant="ghost">More about Neolqua</Button>
+        </div>
+
+        <ul class="marks list-reset reveal" role="list">
+          <li class="mark">
+            <span class="mark__figure">{releasedCount}</span>
+            <span class="mark__label">released projects</span>
+          </li>
+          <li class="mark">
+            <span class="mark__figure">{disciplineCount}</span>
+            <span class="mark__label">disciplines</span>
+          </li>
+          <li class="mark">
+            <span class="mark__figure">{benchVersion}</span>
+            <span class="mark__label">current target</span>
+          </li>
+        </ul>
       </div>
-      </div>
-      <BrandSymbol class="slab__symbol" tone="color" decorative />
+      <div class="studio__edge water" aria-hidden="true"></div>
     </div>
   </section>
 
   <section class="section cta">
-    <div class="container">
-      <div class="cta__block block reveal">
+    <div class="container-wide">
+      <div class="cta__pool water reveal">
         <h2 class="cta__title">Have an idea worth building?</h2>
-        <p class="cta__text lede">
+        <p class="cta__text">
           Whether it is a modpack collaboration, a commission, or a question
           about a release, the studio is open.
         </p>
@@ -161,116 +177,242 @@ const releasedCount = projects.filter(
 </BaseLayout>
 
 <style>
-  /* Hero: an Ink slab on the symbol's own lattice */
+  /* Hero: one pool fills the width, drop corners and all. */
   .hero {
     position: relative;
     z-index: var(--z-base);
-    border-bottom: 1px solid var(--line);
+    padding-block: var(--space-2xs) 0;
   }
 
-  .hero__inner {
+  .pool {
+    border-radius: var(--drop);
+    padding: clamp(1.75rem, 4vw, 3.5rem) clamp(1.5rem, 4.5vw, 4rem)
+      clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .pool__top {
     display: grid;
-    grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     align-items: center;
     gap: var(--space-l);
-    padding-block: clamp(1rem, 3vh, 2.5rem) var(--space-m);
   }
 
-  .hero__title {
+  .pool__title {
     font-size: min(var(--step-5), 5rem);
+    font-weight: 800;
     line-height: 0.98;
-    max-width: 14ch;
+    letter-spacing: -0.035em;
+    max-width: 13ch;
   }
 
-  .hero__lede {
+  .pool__lede {
     margin-top: var(--space-m);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    max-width: 50ch;
   }
 
-  .hero__actions {
+  .pool__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-s) var(--space-m);
-    margin-top: var(--space-m);
+    gap: var(--space-s);
+    margin-top: var(--space-l);
   }
 
-  .hero__mark {
+  /* The drop floats in the water, cropped by nothing. */
+  .pool__float {
+    position: relative;
     display: grid;
     place-items: center;
   }
 
-  /* Monumental: the symbol is the hero, not a badge beside it. */
-  .hero__mark :global(.hero__symbol) {
-    width: min(100%, 34rem);
+  .pool__float :global(.pool__symbol) {
+    position: relative;
+    width: min(100%, 26rem);
   }
 
-  /* On the bench: the live downloads, still inside the first viewport */
+  .ripple {
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    width: min(100%, 26rem);
+    aspect-ratio: 1;
+    border: 2px solid rgb(255 255 255 / 0.55);
+    border-radius: 50%;
+    translate: -50% -50%;
+    scale: 1.12;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pool__float :global(.pool__symbol) {
+      animation: bob 1.6s var(--ease-water) both;
+    }
+    .ripple {
+      animation: ripple 2.4s var(--ease-out) 0.5s both;
+    }
+    .ripple--late {
+      animation-delay: 0.95s;
+    }
+  }
+
+  @keyframes bob {
+    0% {
+      translate: 0 2.5rem;
+      opacity: 0;
+    }
+    45% {
+      translate: 0 -0.6rem;
+      opacity: 1;
+    }
+    75% {
+      translate: 0 0.25rem;
+    }
+    100% {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes ripple {
+    from {
+      scale: 0.7;
+      opacity: 0.9;
+    }
+    to {
+      scale: 1.35;
+      opacity: 0;
+    }
+  }
+
+  /* On the bench: two lanes across the pool's shallow edge. */
   .bench {
     display: grid;
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 2fr);
-    align-items: center;
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 2fr);
+    align-items: start;
     gap: var(--space-m) var(--space-l);
-    padding-block: var(--space-s) var(--space-l);
+    margin-top: var(--space-l);
+  }
+
+  .bench__rule {
+    grid-column: 1 / -1;
+    margin-bottom: var(--space-s);
   }
 
   .bench__title {
-    font-size: var(--step-1);
-    color: var(--text);
+    font-size: var(--step-2);
   }
 
   .bench__sub {
     margin-top: var(--space-3xs);
-    color: var(--text-muted);
+    font-weight: 500;
   }
 
   .bench__list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-m);
   }
 
-  .bench__item {
+  .lane {
     display: flex;
     align-items: flex-start;
     gap: var(--space-s);
-    padding: var(--space-s);
+    padding-inline: var(--space-m);
   }
 
-  .bench__art {
+  /* The painted stripe between lanes, T at the top. */
+  .lane + .lane {
+    position: relative;
+  }
+
+  .lane + .lane::before,
+  .lane + .lane::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    border-radius: 4px;
+    background: var(--abyss);
+  }
+
+  .lane + .lane::after {
+    bottom: auto;
+    left: -20px;
+    width: 40px;
+    height: 8px;
+  }
+
+  .lane:first-child {
+    padding-left: 0;
+  }
+
+  /* The stripe's T at its far end. */
+  .lane__t {
+    display: none;
+  }
+
+  .lane + .lane .lane__t {
+    display: block;
+    position: absolute;
+    left: -20px;
+    bottom: 0;
+    width: 40px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--abyss);
+  }
+
+  .lane__art {
     flex-shrink: 0;
-    width: 4.5rem;
+    width: 4.75rem;
     aspect-ratio: 1;
     display: grid;
     place-items: center;
-    background: var(--well);
+    background: var(--coping);
+    border-radius: var(--drop-s);
   }
 
-  .bench__art img {
-    width: 82%;
+  .lane__art img {
+    width: 78%;
   }
 
-  .bench__body {
+  .lane__body {
     min-width: 0;
   }
 
-  .bench__name {
-    font-size: var(--step-0);
-    line-height: 1.15;
+  .lane__name {
+    font-size: var(--step-1);
+    line-height: 1.12;
   }
 
-  .bench__name a:hover {
-    color: var(--brass-lit);
+  .lane__name a {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 2px;
+    transition: text-decoration-color var(--dur-fast) var(--ease-out);
   }
 
-  /* The full version list, wrapped: players read it before downloading. */
-  .bench__body .data {
-    overflow-wrap: anywhere;
+  .lane__name a:hover {
+    text-decoration-color: currentColor;
   }
 
-  .bench__links {
+  .lane__loader {
+    font-size: var(--step--1);
+    font-weight: 500;
+    margin-top: 0.2em;
+  }
+
+  .lane :global(.lane__depth) {
+    margin-top: var(--space-xs);
+  }
+
+  .lane__links {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs) var(--space-s);
-    margin-top: var(--space-xs);
+    gap: var(--space-2xs);
+    margin-top: var(--space-s);
   }
 
   /* Section heading */
@@ -293,128 +435,160 @@ const releasedCount = projects.filter(
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--step--1);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--text);
     transition: color var(--dur-fast) var(--ease-out);
   }
 
   .section-head__link:hover {
-    color: var(--brass-lit);
+    color: var(--link);
   }
 
   .work-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    gap: var(--space-l) var(--space-m);
+    grid-auto-rows: 1fr;
+    gap: var(--space-m);
   }
 
-  /* The one lit slab: Paper, Ink lettering */
-  .slab {
-    position: relative;
-    z-index: var(--z-base);
-    background: var(--paper);
-    color: var(--paper-text);
-    padding-block: var(--space-2xl);
-  }
-
-  .slab__inner {
+  /* The studio: a white coping slab with its facts painted on the edge like
+     depth markings, and the water just beyond it. */
+  .studio__slab {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-xl);
+    align-items: end;
+    gap: var(--space-l) var(--space-xl);
+    padding: clamp(2rem, 5vw, 4.5rem) clamp(1.5rem, 5vw, 4.5rem);
+    background: var(--coping);
+    border: 1px solid var(--edge);
+    border-bottom: 0;
+    border-radius: var(--r) 0 0 0;
   }
 
-  .slab__inner :global(.slab__symbol) {
-    width: clamp(10rem, 20vw, 17rem);
-  }
-
-  .slab__body {
-    font-family: var(--font-display);
+  .studio__body {
     font-weight: 600;
     font-size: var(--step-3);
-    line-height: 1.15;
-    max-width: 26ch;
-    text-wrap: balance;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    max-width: 24ch;
   }
 
-  .slab__facts {
+  .marks {
+    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs) var(--space-l);
-    margin-block: var(--space-l);
-    color: var(--paper-muted);
+    gap: var(--space-m) clamp(2rem, 6vw, 6rem);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--line);
   }
 
-  .slab__facts strong {
-    font-size: var(--step-0);
-    color: var(--paper-text);
+  .mark {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6em;
+  }
+
+  .mark__figure {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: var(--step-4);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .mark__label {
     font-weight: 500;
+    color: var(--text-muted);
   }
 
-  .slab :global(.btn--ghost) {
-    border-color: var(--paper-text);
-    color: var(--paper-text);
+  .studio__edge {
+    height: clamp(2.5rem, 6vw, 4rem);
+    border-radius: 0 0 var(--r) var(--r);
   }
 
-  .slab :global(.btn--ghost:hover) {
-    border-color: var(--brass-ink);
-    color: var(--brass-ink);
-  }
-
-  .slab :global(:focus-visible) {
-    outline-color: var(--paper-text);
-  }
-
-  /* Closing call: one big block */
-  .cta {
-    padding-top: var(--space-2xl);
-  }
-
-  .cta__block {
-    --depth: 34px;
+  /* Closing call: one more stretch of water. */
+  .cta__pool {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-m);
-    padding: clamp(2rem, 5vw, 4rem);
+    padding: clamp(2rem, 6vw, 5rem);
+    border-radius: var(--drop);
   }
 
   .cta__title {
     font-size: var(--step-4);
-    max-width: 18ch;
+    max-width: 16ch;
   }
 
-  @media (max-width: 960px) {
-    .hero__inner {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .hero__mark {
-      order: -1;
-      justify-items: start;
-    }
-    .hero__mark :global(.hero__symbol) {
-      width: clamp(7rem, 28vw, 11rem);
-    }
-    /* minmax(0, ...) lets the long version line truncate instead of
-       widening the column past the viewport. */
+  .cta__text {
+    font-size: var(--step-1);
+    line-height: 1.5;
+    max-width: 48ch;
+  }
+
+  @media (max-width: 1100px) {
     .bench {
       grid-template-columns: minmax(0, 1fr);
     }
-    .slab__inner {
-      grid-template-columns: 1fr;
-    }
-    .slab__inner :global(.slab__symbol) {
-      display: none;
+    .bench__rule {
+      margin-bottom: var(--space-2xs);
     }
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 900px) {
+    .pool__top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pool__float {
+      order: -1;
+      justify-items: start;
+    }
+    .pool__float :global(.pool__symbol),
+    .ripple {
+      width: clamp(6rem, 24vw, 9rem);
+    }
+    .ripple {
+      left: clamp(3rem, 12vw, 4.5rem);
+    }
+    .studio__slab {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  @media (max-width: 680px) {
     .bench__list {
       grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-l);
+    }
+    .lane {
+      padding-inline: 0;
+    }
+    .lane + .lane {
+      padding-top: var(--space-l);
+    }
+    .lane + .lane::before {
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: auto;
+      width: auto;
+      height: 8px;
+    }
+    .lane + .lane::after {
+      left: 0;
+      top: -16px;
+      width: 8px;
+      height: 40px;
+    }
+    .lane + .lane .lane__t {
+      left: auto;
+      right: 0;
+      bottom: auto;
+      top: -16px;
+      width: 8px;
+      height: 40px;
     }
     .section-head {
       flex-direction: column;

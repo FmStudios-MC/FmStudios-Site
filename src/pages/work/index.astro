@@ -18,7 +18,7 @@ const filters = ["All", ...present];
 
 <BaseLayout
   title="Work"
-  description="Projects from FabiMvurice Interactive: Minecraft modpacks, mods, resource packs, Roblox games, and programs."
+  description="Projects from Neolqua Studios: Minecraft modpacks, mods, resource packs, Roblox games, and programs."
 >
   <PageHeader
     title="Everything the studio ships."
@@ -83,7 +83,8 @@ const filters = ["All", ...present];
   .work-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-    gap: var(--space-l) var(--space-m);
+    grid-auto-rows: 1fr;
+    gap: var(--space-m);
   }
 
   .work-grid__cell[hidden] {

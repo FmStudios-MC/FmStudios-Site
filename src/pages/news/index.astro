@@ -32,7 +32,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 
 <BaseLayout
   title="News"
-  description="Release notes, devlogs, and studio updates from FabiMvurice Interactive."
+  description="Release notes, devlogs, and studio updates from Neolqua Studios."
 >
   <PageHeader
     title="From the studio."
@@ -155,15 +155,16 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     padding-block: var(--space-l);
   }
 
-  /* The lit edge: a brass top face slides across the row you point at */
+  /* A painted lane line slides across the row you point at */
   .entry__link::before {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    top: -1px;
-    height: 3px;
-    background: var(--brass);
+    top: -2px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--lagoon);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform var(--dur-mid) var(--ease-out);
@@ -182,7 +183,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
   }
 
   .entry__rail time {
-    font-family: var(--font-mono);
+    font-weight: 500;
     font-size: var(--step--1);
     font-variant-numeric: tabular-nums;
     color: var(--text-faint);
@@ -190,12 +191,11 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
 
   .entry__title {
     font-size: var(--step-3);
-    text-transform: none;
     transition: color var(--dur-fast) var(--ease-out);
   }
 
   .entry__link:hover .entry__title {
-    color: var(--brass-lit);
+    color: var(--link);
   }
 
   .entry--lead .entry__title {
@@ -225,11 +225,8 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
     align-items: center;
     gap: 0.4em;
     margin-left: auto;
-    font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--step--1);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text);
   }
 
@@ -243,7 +240,7 @@ const fmtISO = (d: Date) => d.toISOString().slice(0, 10);
   }
 
   .entry__link:hover .entry__cta {
-    color: var(--brass-lit);
+    color: var(--link);
   }
 
   .news-empty {

@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHeader from "../components/PageHeader.astro";
 import Button from "../components/Button.astro";
-import BrandSymbol from "../components/BrandSymbol.astro";
+import Symbol from "../assets/brand/neolqua-symbol-white.svg";
 
 const disciplines = [
   {
@@ -45,11 +45,11 @@ const principles = [
 
 <BaseLayout
   title="About"
-  description="FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and programs with deliberate care."
+  description="Neolqua Studios is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and programs with deliberate care."
 >
   <PageHeader
     title="A small studio with a high bar."
-    lede="FabiMvurice Interactive (FMI) makes things for the games people already love, and treats each release like it deserves a stage."
+    lede="Neolqua Studios makes things for the games people already love, and treats each release like it deserves a stage."
   />
 
   <section class="section intro">
@@ -66,13 +66,13 @@ const principles = [
           build.
         </p>
         <p>
-          FMI stays small on purpose. It means every decision is intentional,
+          Neolqua stays small on purpose. It means every decision is intentional,
           every release carries the studio's name with confidence, and nothing
           ships just to fill a calendar.
         </p>
       </div>
-      <div class="intro__mark" aria-hidden="true">
-        <BrandSymbol class="intro__symbol" decorative />
+      <div class="intro__mark water" aria-hidden="true">
+        <Symbol class="intro__symbol" />
       </div>
     </div>
   </section>
@@ -111,7 +111,7 @@ const principles = [
 
   <section class="section about-cta">
     <div class="container">
-      <div class="about-cta__inner block reveal">
+      <div class="about-cta__inner water reveal">
       <h2>See what that looks like in practice.</h2>
       <div class="about-cta__actions">
         <Button href="/work">Browse the work</Button>
@@ -135,8 +135,8 @@ const principles = [
   }
 
   .intro__lead {
-    font-family: var(--font-display);
     font-weight: 600;
+    letter-spacing: -0.02em;
     font-size: var(--step-2);
     line-height: 1.2;
     color: var(--text);
@@ -154,13 +154,17 @@ const principles = [
     line-height: 1.7;
   }
 
+  /* The drop in its own small pool. */
   .intro__mark {
     display: grid;
     place-items: center;
+    aspect-ratio: 1;
+    padding: var(--space-l);
+    border-radius: var(--drop);
   }
 
   .intro__mark :global(.intro__symbol) {
-    width: min(100%, 15rem);
+    width: min(70%, 13rem);
   }
 
   .disciplines__title,
@@ -172,7 +176,7 @@ const principles = [
   .disciplines__list {
     list-style: none;
     padding: 0;
-    border-top: 1px solid var(--line-strong);
+    border-top: 8px solid var(--abyss);
   }
 
   .discipline {
@@ -186,14 +190,12 @@ const principles = [
   }
 
   .discipline:hover {
-    background: var(--face);
+    background: var(--coping);
   }
 
   .discipline__name {
-    font-family: var(--font-display);
     font-weight: 700;
     font-size: var(--step-1);
-    text-transform: uppercase;
     padding-left: var(--space-xs);
   }
 
@@ -216,7 +218,7 @@ const principles = [
 
   .principle {
     padding-top: var(--space-s);
-    border-top: 1px solid var(--line-strong);
+    border-top: 8px solid var(--abyss);
   }
 
   .principle__t {
@@ -231,7 +233,7 @@ const principles = [
   }
 
   .about-cta__inner {
-    --depth: 34px;
+    border-radius: var(--drop);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -256,7 +258,7 @@ const principles = [
     }
     .intro__mark {
       order: -1;
-      justify-items: start;
+      width: min(100%, 14rem);
     }
   }
 

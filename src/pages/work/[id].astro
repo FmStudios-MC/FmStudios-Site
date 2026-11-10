@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
 import Arrow from "../../components/Arrow.astro";
 import ArtPlaceholder from "../../components/ArtPlaceholder.astro";
+import Depth from "../../components/Depth.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -29,7 +30,7 @@ const meta = [
 
 <BaseLayout title={data.title} description={data.summary}>
   <article class="detail">
-    <header class="detail__hero lattice">
+    <header class="detail__hero">
       <div class="container">
         <a href="/work" class="back-link">
           <Arrow dir="left" /> All work
@@ -40,9 +41,10 @@ const meta = [
         <div class="detail__intro">
           <h1 class="detail__title">{data.title}</h1>
           <p class="detail__tagline">{data.tagline}</p>
+          {data.version && <Depth version={data.version} class="detail__depth" />}
           <div class="detail__tags">
             <span class:list={["plate", { "plate--lit": isLive }]}>{data.status}</span>
-            <span class="data">{data.type}</span>
+            <span class="detail__kind">{[data.type, data.loader].filter(Boolean).join(" · ")}</span>
           </div>
 
           {
@@ -68,7 +70,7 @@ const meta = [
           }
         </div>
 
-        <div class="detail__art block">
+        <div class="detail__art water">
           {
             data.image ? (
               <Image
@@ -100,7 +102,7 @@ const meta = [
       </dl>
 
       <div class="prose detail__prose">
-        <p class="detail__summary">{data.summary}</p>
+        {data.summary !== data.tagline && <p class="detail__summary">{data.summary}</p>}
         <Content />
       </div>
     </div>
@@ -118,8 +120,7 @@ const meta = [
   }
 
   .detail__hero {
-    padding-block: var(--space-m) var(--space-2xl);
-    border-bottom: 1px solid var(--line);
+    padding-block: var(--space-2xs) var(--space-xl);
   }
 
   .detail__hero-inner {
@@ -127,7 +128,7 @@ const meta = [
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     align-items: center;
     gap: var(--space-2xl);
-    padding-top: var(--space-xl);
+    padding-top: var(--space-l);
   }
 
   .detail__tags {
@@ -141,6 +142,22 @@ const meta = [
   .detail__title {
     font-size: var(--step-5);
     line-height: 0.98;
+  }
+
+  .detail__kind {
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--text-faint);
+  }
+
+  .detail__intro :global(.detail__depth) {
+    margin-top: var(--space-m);
+    color: var(--text-faint);
+  }
+
+  .detail__intro :global(.detail__depth .depth__figure) {
+    font-size: var(--step-4);
+    color: var(--text);
   }
 
   .detail__tagline {
@@ -161,22 +178,24 @@ const meta = [
     margin-top: var(--space-l);
     color: var(--text-muted);
     padding: var(--space-s) var(--space-m);
-    border: 1px dashed var(--line-strong);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--drop-s);
+    background: var(--coping);
     max-width: 52ch;
   }
 
-  /* The project's art on the front face of a large block */
+  /* The project's art floating in its own pool */
   .detail__art {
-    --depth: 44px;
     display: grid;
     place-items: center;
     aspect-ratio: 1;
     padding: var(--space-l);
-    background: var(--well);
+    border-radius: var(--drop);
   }
 
   .detail__img {
-    width: min(94%, 520px);
+    position: relative;
+    width: min(84%, 480px);
     height: auto;
     object-fit: contain;
   }
@@ -188,13 +207,16 @@ const meta = [
     padding-block: var(--space-xl) var(--space-l);
   }
 
-  /* Spec plate: the facts a player checks before downloading */
+  /* Spec plate: the facts a player checks before downloading, on a coping
+     slab with the same bullnose edge as the project tiles. */
   .detail__meta {
     align-self: start;
     position: sticky;
     top: 7rem;
-    border: 1px solid var(--line-strong);
-    border-top: 3px solid var(--brass);
+    background: var(--coping);
+    border: 1px solid var(--edge);
+    border-bottom-width: 4px;
+    border-radius: var(--drop-s);
   }
 
   .detail__meta-row {
@@ -209,22 +231,19 @@ const meta = [
   }
 
   .detail__meta dt {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: var(--step--1);
+    font-weight: 500;
     color: var(--text-faint);
   }
 
   .detail__meta dd {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text);
     overflow-wrap: anywhere;
   }
 
   .detail__summary {
-    font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 500;
     font-size: var(--step-2);
     line-height: 1.2;
     color: var(--text);
@@ -241,7 +260,6 @@ const meta = [
       gap: var(--space-xl);
     }
     .detail__art {
-      --depth: 26px;
       order: -1;
       max-width: 320px;
       padding: var(--space-l);

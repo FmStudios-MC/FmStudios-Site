@@ -8,15 +8,13 @@ interface Props {
   description?: string;
 }
 
+const studio = "Neolqua Studios";
 const {
-  title = "FabiMvurice Interactive",
-  description = "FabiMvurice Interactive is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and standalone programs.",
+  title = studio,
+  description = "Neolqua Studios is a studio crafting Minecraft modpacks, mods, resource packs, Roblox games, and standalone programs.",
 } = Astro.props;
 
-const fullTitle =
-  title === "FabiMvurice Interactive"
-    ? title
-    : `${title} - FabiMvurice Interactive`;
+const fullTitle = title === studio ? title : `${title} - ${studio}`;
 
 const ogImage = new URL("/og-image.png", Astro.site).href;
 ---
@@ -29,10 +27,11 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#1D2030" />
+    <meta name="theme-color" content="#0B1622" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={studio} />
     <meta property="og:image" content={ogImage} />
 
     <!-- Logo kit web set -->
@@ -41,17 +40,9 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Preload the faces used above the fold; the rest load via @font-face -->
     <link
       rel="preload"
-      href="/fonts/chakra-petch-700.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/barlow-400.woff2"
+      href="/fonts/rubik-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
